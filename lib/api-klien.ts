@@ -1,6 +1,6 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
 import type { BodyJawaban } from './skema-api';
-import type { Format, SesiUntukSiswa, SoalUntukSiswa } from './tipe';
+import type { Format, HasilGuru, SesiBaru, SesiGuru, SesiUntukSiswa, SoalUntukSiswa } from './tipe';
 
 export const PESAN_GAGAL_KONEKSI = 'Koneksi terputus. Periksa internet, lalu coba lagi.';
 const PESAN_GAGAL_UMUM = 'Terjadi kesalahan. Coba lagi sebentar.';
@@ -24,7 +24,9 @@ async function minta<T>(url: string, init?: RequestInit): Promise<T> {
       cache: 'no-store',
       headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
     });
-  } catch {
+  } catch (err) {
+    // Pembatalan lewat AbortController (usePolling) bukan gangguan koneksi.
+    if (init?.signal?.aborted) throw err;
     throw new ErrorApi(0, PESAN_GAGAL_KONEKSI);
   }
 
@@ -53,4 +55,22 @@ export function kirimFormat(siswaId: string, format: Format): Promise<{ ok: true
 
 export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
+}
+
+// ===== Guru =====
+
+export function ambilDaftarSesi(signal?: AbortSignal): Promise<SesiGuru[]> {
+  return minta('/api/guru/sesi', { signal });
+}
+
+export function bukaSesi(): Promise<SesiBaru> {
+  return minta('/api/guru/sesi', { method: 'POST', body: JSON.stringify({}) });
+}
+
+export function tutupSesi(sesiId: string): Promise<{ ok: true }> {
+  return minta('/api/guru/sesi/tutup', { method: 'POST', body: JSON.stringify({ sesiId }) });
+}
+
+export function ambilHasil(sesiId: string, signal?: AbortSignal): Promise<HasilGuru> {
+  return minta(`/api/guru/hasil?sesi=${encodeURIComponent(sesiId)}`, { signal });
 }

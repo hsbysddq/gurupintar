@@ -101,6 +101,7 @@ guru-pintar/
 │   ├── pengelompokan.ts
 │   ├── kode-kelas.ts
 │   ├── soal-tersulit.ts
+│   ├── ringkasan-hasil.ts          # kelompokkan hasil siswa + status materi untuk /api/guru/hasil
 │   ├── pendampingan.ts
 │   ├── validasi-materi.ts          # skema zod isi materi + pemeriksaan tambahan
 │   ├── skema-api.ts                # skema zod untuk body/query setiap endpoint

@@ -36,6 +36,61 @@ export interface SesiUntukSiswa {
   siswa: SiswaRingkas[];
 }
 
+// ===== Respons API untuk guru (architecture.md bagian 6 dan 6.1) =====
+
+/** GET /api/guru/sesi */
+export interface SesiGuru {
+  id: string;
+  kodeKelas: string;
+  status: StatusSesi;
+  dibuatPada: string;
+  jumlahMenjawab: number;
+}
+
+/** POST /api/guru/sesi */
+export interface SesiBaru {
+  id: string;
+  kodeKelas: string;
+}
+
+export interface SiswaHasil {
+  siswaId: string;
+  nama: string;
+  skor: number;
+  total: number;
+}
+
+export interface SoalTersulit {
+  nomor: number;
+  teks: string;
+  persenSalah: number;
+  miskonsepsi: string | null;
+}
+
+export type StatusMateriSesi = 'belum-ada' | 'draf' | 'dibagikan' | 'campuran';
+
+export interface RingkasanMateri {
+  statusMateri: StatusMateriSesi;
+  /** Kelompok berisi siswa tetapi belum punya materi (AC-5.7). */
+  kelompokTanpaMateri: Kelompok[];
+}
+
+/** GET /api/guru/hasil */
+export interface HasilGuru extends RingkasanMateri {
+  sesi: {
+    id: string;
+    kodeKelas: string;
+    status: StatusSesi;
+    namaKelas: string;
+    namaTopik: string;
+    dibuatPada: string;
+  };
+  jumlahSiswa: number;
+  jumlahMenjawab: number;
+  kelompok: Record<Kelompok, SiswaHasil[]>;
+  soalTersulit: SoalTersulit | null;
+}
+
 /** GET /api/soal, tanpa kunci dan miskonsepsi */
 export interface SoalUntukSiswa {
   id: string;

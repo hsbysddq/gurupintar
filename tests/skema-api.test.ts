@@ -3,6 +3,8 @@ import {
   normalisasiKode,
   skemaBodyFormat,
   skemaBodyJawaban,
+  skemaBodyTutupSesi,
+  skemaQueryHasil,
   skemaQuerySesi,
   skemaQuerySoal,
 } from '@/lib/skema-api';
@@ -75,5 +77,25 @@ describe('skemaBodyJawaban', () => {
     const body = { ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: 'B', benar: true }] };
     const hasil = skemaBodyJawaban.parse(body);
     expect(hasil.jawaban[0]).toEqual({ soalId: SOAL_ID, pilihan: 'B' });
+  });
+});
+
+describe('skemaBodyTutupSesi', () => {
+  it('menerima sesiId uuid', () => {
+    expect(skemaBodyTutupSesi.safeParse({ sesiId: SESI_ID }).success).toBe(true);
+  });
+
+  it.each([{}, { sesiId: 'bukan-uuid' }, undefined])('menolak body tidak valid: %j', (body) => {
+    expect(skemaBodyTutupSesi.safeParse(body).success).toBe(false);
+  });
+});
+
+describe('skemaQueryHasil', () => {
+  it('menerima sesi uuid', () => {
+    expect(skemaQueryHasil.parse({ sesi: SESI_ID })).toEqual({ sesi: SESI_ID });
+  });
+
+  it('menolak sesi kosong', () => {
+    expect(skemaQueryHasil.safeParse({ sesi: '' }).success).toBe(false);
   });
 });

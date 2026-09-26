@@ -306,8 +306,8 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 - **Perilaku:** judul dengan `BadgeKelompok`, daftar nama urut abjad dengan chip skor `4/5` (`rounded-kecil`). Jika kosong: "Tidak ada siswa."
 
 ### 4.10 `KartuSoalTersulit`
-- **Props:** `{ data: { nomor: number; teks: string; persenSalah: number; miskonsepsi: string | null } | null }`
-- **Isi:** ikon `Lightbulb`, judul "Soal paling banyak salah: Nomor {n}", teks soal, "{p}% siswa menjawab salah", lalu miskonsepsi. Jika `null`: "Belum ada jawaban masuk."
+- **Props:** `{ data: { nomor: number; teks: string; persenSalah: number; miskonsepsi: string | null } | null; jumlahMenjawab: number }`
+- **Isi:** ikon `Lightbulb`, judul "Soal paling banyak salah: Nomor {n}", teks soal, "{p}% siswa menjawab salah", lalu miskonsepsi. Jika `null`: "Belum ada jawaban masuk." Jika `null` tetapi `jumlahMenjawab > 0` (ada hasil siswa tanpa data jawaban per soal, misalnya kuis riwayat): "Rincian jawaban per soal tidak tersedia untuk kuis ini."
 
 ### 4.11 `PilihanFormat`
 - **Props:** `{ nilai: Format | null; onPilih: (f: Format) => void }`

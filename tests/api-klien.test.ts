@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ambilSesi, ErrorApi, kirimJawaban, PESAN_GAGAL_KONEKSI } from '@/lib/api-klien';
+import {
+  ambilHasil,
+  ambilSesi,
+  bukaSesi,
+  ErrorApi,
+  kirimJawaban,
+  PESAN_GAGAL_KONEKSI,
+  tutupSesi,
+} from '@/lib/api-klien';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -58,5 +66,32 @@ describe('api-klien', () => {
     expect(init?.method).toBe('POST');
     expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
     expect(JSON.parse(init?.body as string)).toEqual(body);
+  });
+
+  it('melempar ulang error pembatalan tanpa mengubahnya menjadi ErrorApi', async () => {
+    const pengendali = new AbortController();
+    stubFetch(async () => {
+      pengendali.abort();
+      throw new DOMException('Aborted', 'AbortError');
+    });
+    await expect(ambilHasil('s1', pengendali.signal)).rejects.toMatchObject({ name: 'AbortError' });
+  });
+
+  it('ambilHasil meneruskan signal dan meng-encode id sesi', async () => {
+    const palsu = stubFetch(async () => Response.json({}));
+    const pengendali = new AbortController();
+    await ambilHasil('a b', pengendali.signal);
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/hasil?sesi=a%20b');
+    expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
+  });
+
+  it('bukaSesi dan tutupSesi mengirim POST dengan body JSON', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    await bukaSesi();
+    await tutupSesi('s1');
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/sesi');
+    expect(palsu.mock.calls[0][1]?.body).toBe('{}');
+    expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi/tutup');
+    expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({ sesiId: 's1' });
   });
 });

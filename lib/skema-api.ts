@@ -33,5 +33,15 @@ export const skemaBodyJawaban = z.object({
     .min(1),
 });
 
+// POST /api/guru/sesi/tutup
+export const skemaBodyTutupSesi = z.object({
+  sesiId: z.uuid(),
+});
+
+// GET /api/guru/hasil?sesi=
+export const skemaQueryHasil = z.object({
+  sesi: z.uuid(),
+});
+
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
