@@ -16,3 +16,30 @@ export interface PilihanSoal {
   kode: KodePilihan;
   teks: string;
 }
+
+// ===== Respons API untuk siswa (architecture.md bagian 6), tanpa data rahasia =====
+
+export interface SiswaRingkas {
+  id: string;
+  nama: string;
+}
+
+/** GET /api/sesi */
+export interface SesiUntukSiswa {
+  sesi: {
+    id: string;
+    kodeKelas: string;
+    status: StatusSesi;
+    namaKelas: string;
+    namaTopik: string;
+  };
+  siswa: SiswaRingkas[];
+}
+
+/** GET /api/soal, tanpa kunci dan miskonsepsi */
+export interface SoalUntukSiswa {
+  id: string;
+  nomor: number;
+  teks: string;
+  pilihan: PilihanSoal[];
+}

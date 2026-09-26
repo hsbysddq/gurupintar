@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bacaBodyJson,
   PESAN_ERROR_UMUM,
   PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
@@ -25,6 +26,18 @@ describe('responsError', () => {
     const res = responsError('Kode kelas tidak ditemukan.', 404);
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'Kode kelas tidak ditemukan.' });
+  });
+});
+
+describe('bacaBodyJson', () => {
+  it('mengembalikan objek dari body JSON', async () => {
+    const req = new Request('http://x', { method: 'POST', body: '{"a":1}' });
+    expect(await bacaBodyJson(req)).toEqual({ a: 1 });
+  });
+
+  it.each(['bukan json', ''])('mengembalikan undefined untuk body "%s"', async (body) => {
+    const req = new Request('http://x', { method: 'POST', body });
+    expect(await bacaBodyJson(req)).toBeUndefined();
   });
 });
 

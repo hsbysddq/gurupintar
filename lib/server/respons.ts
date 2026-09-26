@@ -3,6 +3,16 @@ import 'server-only';
 export const PESAN_SESI_TIDAK_ADA = 'Sesi kuis tidak ditemukan.';
 export const PESAN_SESI_DITUTUP = 'Kuis ini sudah ditutup.';
 export const PESAN_ERROR_UMUM = 'Terjadi kesalahan di server. Coba lagi sebentar.';
+export const PESAN_INPUT_TIDAK_VALID = 'Data yang dikirim tidak valid.';
+
+/** Membaca body JSON; mengembalikan `undefined` jika body kosong atau bukan JSON. */
+export async function bacaBodyJson(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return undefined;
+  }
+}
 
 export function responsOk<T>(data: T, status = 200): Response {
   return Response.json(data, { status });
