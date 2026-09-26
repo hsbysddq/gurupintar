@@ -117,7 +117,7 @@ guru-pintar/
 │   ├── schema.sql
 │   └── seed.sql
 ├── tests/                          # *.test.ts untuk semua modul di lib/ yang berisi logika
-├── vitest.config.ts
+├── vitest.config.mts               # .mts karena proyek CommonJS (menghindari peringatan Vite)
 ├── CLAUDE.md
 ├── PRD.md, architecture.md, design.md, agenda.md
 └── .env.example

@@ -89,7 +89,7 @@ Kita mengerjakan Fase 1 di @agenda.md. Buat rencana untuk:
 1. Memasang paket sesuai architecture.md bagian 2 (tidak ada paket lain).
 2. Membuat supabase/schema.sql persis sesuai architecture.md bagian 4.
 3. Membuat supabase/seed.sql sesuai architecture.md bagian 5 dan PRD.md bagian 8 (32 siswa, 5 soal, 4 sesi, riwayat hasil).
-4. Membuat lib/konstanta.ts, lib/tipe.ts, lib/server/supabase.ts, lib/server/respons.ts, .env.example, vitest.config.ts, script "test": "vitest run".
+4. Membuat lib/konstanta.ts, lib/tipe.ts, lib/server/supabase.ts, lib/server/respons.ts, .env.example, vitest.config.mts, script "test": "vitest run".
 5. Memasang token desain di app/globals.css dan font Plus Jakarta Sans di app/layout.tsx.
 6. Membuat komponen LatarPastel, KartuKaca, Tombol, dan halaman beranda "/" dengan dua pilihan: "Saya guru" dan "Saya siswa".
 7. Membuat tests/konstanta.test.ts yang memastikan KARAKTER_KODE tidak memuat I, O, 0, dan 1.
