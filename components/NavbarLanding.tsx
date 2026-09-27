@@ -8,7 +8,7 @@ const TAUTAN: { href: string; label: string }[] = [
 ];
 
 /**
- * Navbar kapsul kaca untuk landing page (design.md 4.19). Server Component tanpa JavaScript:
+ * Navbar kapsul kaca untuk landing page (design.md 4.18). Server Component tanpa JavaScript:
  * di bawah 768px tautan tengah disembunyikan, tanpa menu hamburger. Padding kapsul 16px di kiri dan
  * kanan, sehingga ikon logo dan tepi tombol sama jauhnya dari tepi kapsul.
  */

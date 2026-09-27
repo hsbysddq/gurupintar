@@ -1,11 +1,11 @@
-import { PetaTitikKelas } from "@/components/PetaTitikKelas";
+import { DonutKelompok } from "@/components/DonutKelompok";
 
-// Sama dengan sesi demo RIW004 (PRD 8.5).
-const JUMLAH_DEMO = { belum: 16, setengah: 12, sudah: 10, belumMenjawab: 2 };
+// Sama dengan sesi demo RIW004 (PRD 8.5): 38 siswa menjawab.
+const JUMLAH_DEMO = { belum: 16, setengah: 12, sudah: 10 };
 
 /**
- * Pratinjau produk di hero landing page (design.md 4.20): jendela dasbor tiruan berisi peta titik kelas
- * dan ringkasan jumlah per kelompok. Grid di PetaTitikKelas sudah punya role="img" dan aria-label.
+ * Pratinjau produk di hero landing page (design.md 4.19): jendela dasbor tiruan berisi DonutKelompok
+ * dengan data tetap. DonutKelompok sudah punya role="img", aria-label, legenda teks, dan tanpa animasi.
  */
 export function PratinjauDasbor() {
   return (
@@ -27,8 +27,8 @@ export function PratinjauDasbor() {
           </span>
           <span className="text-[13px] leading-normal font-semibold text-tinta-lembut">Peta kelas · Kelas 7A</span>
         </div>
-        <div className="p-5 sm:p-6">
-          <PetaTitikKelas jumlah={JUMLAH_DEMO} />
+        <div className="flex justify-center px-6 py-8 sm:px-8 sm:py-10">
+          <DonutKelompok jumlah={JUMLAH_DEMO} />
         </div>
       </div>
     </div>
