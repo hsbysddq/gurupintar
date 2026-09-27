@@ -120,3 +120,26 @@ export type MateriSiswa =
   | { status: 'belum-mengerjakan' }
   | { status: 'disiapkan' }
   | { status: 'tersedia'; namaTopik: string; isi: IsiMateri };
+
+// ===== Perlu pendampingan (architecture.md bagian 6, hanya untuk guru) =====
+
+export interface SiswaPerluPendampingan {
+  siswaId: string;
+  nama: string;
+  alasan: string[];
+  saran: string[];
+  trenSkor: number[];
+}
+
+export interface SiswaKemajuan {
+  siswaId: string;
+  nama: string;
+  dari: Kelompok;
+  ke: Kelompok;
+}
+
+/** GET /api/guru/pendampingan */
+export interface DataPendampingan {
+  perluPendampingan: SiswaPerluPendampingan[];
+  kemajuan: SiswaKemajuan[];
+}

@@ -1,6 +1,7 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
 import type { BodyBuatMateri, BodyJawaban } from './skema-api';
 import type {
+  DataPendampingan,
   Format,
   HasilGuru,
   IsiMateri,
@@ -103,4 +104,8 @@ export function ubahMateri(id: string, versi: number, isi: IsiMateri): Promise<{
 
 export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagikan: number }> {
   return minta('/api/guru/materi/bagikan', { method: 'POST', body: JSON.stringify({ sesiId }) });
+}
+
+export function ambilPendampingan(signal?: AbortSignal): Promise<DataPendampingan> {
+  return minta('/api/guru/pendampingan', { signal });
 }

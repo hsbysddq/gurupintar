@@ -3,6 +3,7 @@ import {
   ambilHasil,
   ambilMateriGuru,
   ambilMateriSiswa,
+  ambilPendampingan,
   ambilSesi,
   bagikanMateri,
   bukaSesi,
@@ -118,5 +119,14 @@ describe('api-klien', () => {
       ['/api/guru/materi/bagikan', 'POST', JSON.stringify({ sesiId: 's1' })],
       ['/api/materi?sesi=s1&siswa=a%20b', undefined, undefined],
     ]);
+  });
+
+  it('ambilPendampingan memanggil GET /api/guru/pendampingan dengan signal', async () => {
+    const palsu = stubFetch(async () => Response.json({ perluPendampingan: [], kemajuan: [] }));
+    const pengendali = new AbortController();
+    await expect(ambilPendampingan(pengendali.signal)).resolves.toEqual({ perluPendampingan: [], kemajuan: [] });
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/pendampingan');
+    expect(palsu.mock.calls[0][1]?.method).toBeUndefined();
+    expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
   });
 });

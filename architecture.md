@@ -535,7 +535,7 @@ export function hitungPendampingan(input: {
 Aturan (implementasi PRD AC-8.2 s.d. AC-8.5):
 
 1. **Abaikan sesi tanpa jawaban sama sekali** (agar kuis yang dibuka lalu ditutup tanpa jawaban tidak membuat semua siswa dianggap tidak mengerjakan).
-2. Urutkan sesi tersisa berdasarkan `dibuatPada`, ambil 3 terakhir.
+2. Urutkan sesi tersisa berdasarkan `dibuatPada`, ambil 3 terakhir. Jendela 3 sesi ini dihitung **per siswa** dari sesi `selesai` ditambah sesi `aktif` yang sudah dijawab siswa itu, sehingga sesi aktif tidak menggeser jendela siswa yang belum menjawab (PRD AC-8.2).
 3. Untuk tiap siswa, "sesi yang diikuti" = sesi selesai tempat siswa punya hasil + sesi aktif tempat siswa sudah menjawab.
 4. Belum paham 3x: 3 sesi terakhir yang diikuti semuanya `belum`.
 5. Tidak mengerjakan: siswa tidak punya hasil di 2 sesi terakhir yang berstatus `selesai`.
@@ -585,6 +585,7 @@ Pemeriksaan tambahan di `periksaIsiMateri` setelah lolos skema:
 - `max_tokens: 2000`. Satu panggilan per kelompok target; panggilan dijalankan paralel dengan `Promise.all`.
 - **Batas waktu total** (PRD bagian 9): seluruh pembuatan materi dalam satu `POST /api/guru/materi` dibatasi `BATAS_WAKTU_AI_MS` sejak pembuatan dimulai, **bukan** per panggilan. Satu `AbortController` dengan tenggat bersama; setiap panggilan menerima `signal` tersebut dan `timeout` = sisa waktu. Jika satu kelompok gagal, panggilan kelompok lain ikut dibatalkan.
 - Ambil teks dari blok `content` bertipe `text`, hapus pagar kode (```` ```json ```` dan ```` ``` ````), `JSON.parse`, lalu `periksaIsiMateri`.
+- Setelah lolos `periksaIsiMateri`, urutan empat pilihan tiap soal latihan diacak di server dengan `acakPilihanLatihan` (`lib/validasi-materi.ts`) dan `kunci` disesuaikan, agar posisi jawaban benar tidak bisa ditebak. Materi cadangan tidak diacak.
 - Jika parsing atau validasi gagal: coba **satu kali lagi** dengan menambahkan alasan kegagalan ke pesan pengguna. Percobaan ulang (dari SDK maupun karena format tidak valid) hanya dilakukan selama waktu masih tersisa. Jika masih gagal atau waktu habis → lempar error → API `502`, sehingga guru bisa memilih "Gunakan materi cadangan".
 - Route `app/api/guru/materi/route.ts` mengekspor `maxDuration = 70` (detik), sedikit di atas batas 60 detik, agar platform tidak memutus sebelum API sempat membalas `502`.
 
