@@ -94,7 +94,8 @@ guru-pintar/
 │           └── pendampingan/route.ts   # GET
 ├── components/                     # daftar di design.md bagian 4
 ├── hooks/
-│   └── use-polling.ts
+│   ├── use-polling.ts
+│   └── use-buat-materi.ts          # status & aksi POST /api/guru/materi (dipakai /guru/hasil dan /guru/materi)
 ├── lib/
 │   ├── konstanta.ts                # ID kelas & topik demo, batas kelompok, interval polling
 │   ├── tipe.ts                     # tipe bersama (Kelompok, Format, dsb.)
@@ -103,6 +104,7 @@ guru-pintar/
 │   ├── soal-tersulit.ts
 │   ├── ringkasan-hasil.ts          # kelompokkan hasil siswa + status materi untuk /api/guru/hasil
 │   ├── pendampingan.ts
+│   ├── rencana-materi.ts           # kelompok target (7.3) + miskonsepsi per kelompok untuk pesan AI
 │   ├── validasi-materi.ts          # skema zod isi materi + pemeriksaan tambahan
 │   ├── skema-api.ts                # skema zod untuk body/query setiap endpoint
 │   ├── api-klien.ts                # fungsi fetch untuk komponen (browser)
@@ -578,11 +580,13 @@ Pemeriksaan tambahan di `periksaIsiMateri` setelah lolos skema:
 ### 9.1 Pemanggilan
 
 - File: `lib/server/materi-ai.ts` (diawali `import 'server-only'`).
-- Klien: `new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: BATAS_WAKTU_AI_MS, maxRetries: 1 })`.
+- Klien: `new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 1 })`.
 - Model: `process.env.ANTHROPIC_MODEL`. Jika kosong, lempar error konfigurasi yang jelas; jangan menulis nama model di kode.
 - `max_tokens: 2000`. Satu panggilan per kelompok target; panggilan dijalankan paralel dengan `Promise.all`.
+- **Batas waktu total** (PRD bagian 9): seluruh pembuatan materi dalam satu `POST /api/guru/materi` dibatasi `BATAS_WAKTU_AI_MS` sejak pembuatan dimulai, **bukan** per panggilan. Satu `AbortController` dengan tenggat bersama; setiap panggilan menerima `signal` tersebut dan `timeout` = sisa waktu. Jika satu kelompok gagal, panggilan kelompok lain ikut dibatalkan.
 - Ambil teks dari blok `content` bertipe `text`, hapus pagar kode (```` ```json ```` dan ```` ``` ````), `JSON.parse`, lalu `periksaIsiMateri`.
-- Jika parsing atau validasi gagal: coba **satu kali lagi** dengan menambahkan alasan kegagalan ke pesan pengguna. Jika masih gagal → lempar error → API `502`.
+- Jika parsing atau validasi gagal: coba **satu kali lagi** dengan menambahkan alasan kegagalan ke pesan pengguna. Percobaan ulang (dari SDK maupun karena format tidak valid) hanya dilakukan selama waktu masih tersisa. Jika masih gagal atau waktu habis → lempar error → API `502`, sehingga guru bisa memilih "Gunakan materi cadangan".
+- Route `app/api/guru/materi/route.ts` mengekspor `maxDuration = 70` (detik), sedikit di atas batas 60 detik, agar platform tidak memutus sebelum API sempat membalas `502`.
 
 ### 9.2 Data yang boleh dan tidak boleh dikirim ke AI
 
@@ -602,6 +606,7 @@ Aturan keluaran:
    "ide_video": {"judul": string, "deskripsi": string, "kata_kunci_pencarian": string},
    "latihan": [{"soal": string, "pilihan": [string, string, string, string], "kunci": "A"|"B"|"C"|"D", "pembahasan": string}]}
 - "latihan" berisi tepat 3 soal. Setiap soal punya tepat satu jawaban benar, empat pilihan yang berbeda, dan "kunci" menunjuk pilihan yang benar (A = pilihan pertama).
+- Di "pembahasan", jangan menyebut huruf pilihan (A, B, C, D); sebut nilai jawabannya.
 
 Aturan isi:
 - Bahasa Indonesia yang sederhana, ramah, dan menyemangati untuk anak usia 12–13 tahun. Hindari pujian berlebihan.
@@ -645,7 +650,7 @@ Tujuan materi:
 
 - `lib/server/*` diawali `import 'server-only'`.
 - Tidak ada `NEXT_PUBLIC_` pada variabel rahasia.
-- Respons API untuk siswa tidak pernah memuat `kunci`, `miskonsepsi`, atau `kelompok`.
+- Respons API untuk siswa tidak pernah memuat `kunci` soal kuis, `miskonsepsi`, atau `kelompok`.
 - Semua input divalidasi `zod`; ID harus berformat UUID.
 - Error tak terduga dicatat di log server tanpa data siswa, dan dikembalikan ke pengguna sebagai `500` "Terjadi kesalahan. Coba lagi."
 

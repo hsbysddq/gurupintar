@@ -10,7 +10,7 @@ Kerjakan hanya fase yang sedang aktif. Jika ada yang tidak jelas, tanyakan.
 # Aturan
 - IMPORTANT: SUPABASE_SERVICE_ROLE_KEY dan ANTHROPIC_API_KEY hanya di lib/server/* dan app/api/*.
 - Browser tidak pernah mengakses Supabase langsung; semua lewat app/api.
-- Jangan kirim kunci jawaban, miskonsepsi, atau nama kelompok ke browser siswa.
+- Jangan kirim kunci jawaban kuis, miskonsepsi, atau nama kelompok ke browser siswa.
 - Jangan menambah paket di luar architecture.md bagian 2 tanpa bertanya.
 - API route tanpa segmen dinamis; gunakan query string.
 - Warna hanya dari token design.md; tidak ada hex di className.

@@ -1,4 +1,7 @@
 // Tipe bersama untuk browser dan server. Nilai string mengikuti constraint di supabase/schema.sql.
+import type { IsiMateri } from './validasi-materi';
+
+export type { IsiMateri };
 
 export type Kelompok = 'sudah' | 'setengah' | 'belum';
 
@@ -98,3 +101,22 @@ export interface SoalUntukSiswa {
   teks: string;
   pilihan: PilihanSoal[];
 }
+
+// ===== Materi (architecture.md bagian 6) =====
+
+/** GET/POST /api/guru/materi */
+export interface MateriGuru {
+  id: string;
+  kelompok: Kelompok;
+  isi: IsiMateri;
+  status: StatusMateri;
+  sumber: SumberMateri;
+  versi: number;
+  jumlahSiswa: number;
+}
+
+/** GET /api/materi, tanpa kelompok dan sumber (D-2) */
+export type MateriSiswa =
+  | { status: 'belum-mengerjakan' }
+  | { status: 'disiapkan' }
+  | { status: 'tersedia'; namaTopik: string; isi: IsiMateri };

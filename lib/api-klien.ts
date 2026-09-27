@@ -1,6 +1,16 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
-import type { BodyJawaban } from './skema-api';
-import type { Format, HasilGuru, SesiBaru, SesiGuru, SesiUntukSiswa, SoalUntukSiswa } from './tipe';
+import type { BodyBuatMateri, BodyJawaban } from './skema-api';
+import type {
+  Format,
+  HasilGuru,
+  IsiMateri,
+  MateriGuru,
+  MateriSiswa,
+  SesiBaru,
+  SesiGuru,
+  SesiUntukSiswa,
+  SoalUntukSiswa,
+} from './tipe';
 
 export const PESAN_GAGAL_KONEKSI = 'Koneksi terputus. Periksa internet, lalu coba lagi.';
 const PESAN_GAGAL_UMUM = 'Terjadi kesalahan. Coba lagi sebentar.';
@@ -57,6 +67,10 @@ export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
 }
 
+export function ambilMateriSiswa(sesiId: string, siswaId: string, signal?: AbortSignal): Promise<MateriSiswa> {
+  return minta(`/api/materi?sesi=${encodeURIComponent(sesiId)}&siswa=${encodeURIComponent(siswaId)}`, { signal });
+}
+
 // ===== Guru =====
 
 export function ambilDaftarSesi(signal?: AbortSignal): Promise<SesiGuru[]> {
@@ -73,4 +87,20 @@ export function tutupSesi(sesiId: string): Promise<{ ok: true }> {
 
 export function ambilHasil(sesiId: string, signal?: AbortSignal): Promise<HasilGuru> {
   return minta(`/api/guru/hasil?sesi=${encodeURIComponent(sesiId)}`, { signal });
+}
+
+export function ambilMateriGuru(sesiId: string, signal?: AbortSignal): Promise<MateriGuru[]> {
+  return minta(`/api/guru/materi?sesi=${encodeURIComponent(sesiId)}`, { signal });
+}
+
+export function buatMateri(body: BodyBuatMateri): Promise<MateriGuru[]> {
+  return minta('/api/guru/materi', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ubahMateri(id: string, versi: number, isi: IsiMateri): Promise<{ ok: true; versi: number }> {
+  return minta('/api/guru/materi', { method: 'PATCH', body: JSON.stringify({ id, versi, isi }) });
+}
+
+export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagikan: number }> {
+  return minta('/api/guru/materi/bagikan', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }

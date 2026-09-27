@@ -341,6 +341,11 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 - **Props:** `{ jenis: 'memuat' | 'kosong' | 'gagal'; judul: string; pesan?: string; aksi?: { label: string; onClick: () => void } }`
 - **Perilaku:** `memuat` → kerangka abu-abu berdenyut halus (tanpa spinner besar); `gagal` → pesan jelas apa yang terjadi + tombol aksi; `role="status"` dan `aria-live="polite"`.
 
+### 4.17 `GagalBuatMateri`
+- **Props:** `{ onCobaLagi: () => void; onGunakanCadangan: () => void; onBatal?: () => void; sibuk?: boolean }`
+- **Isi:** pesan "Materi belum berhasil dibuat." (PRD AC-6.3) dan dua tombol: "Coba lagi" (varian sekunder) dan "Gunakan materi cadangan" (varian utama). Jika `onBatal` diisi, tampil tombol teks "Batal".
+- **Perilaku:** `role="alert"`; semua tombol nonaktif saat `sibuk` agar tidak ditekan dua kali. Dipakai di `/guru/hasil` dan `/guru/materi`; selama komponen ini tampil, tombol utama halaman disembunyikan (satu aksi utama per layar).
+
 ---
 
 ## 5. Aturan Penulisan Komponen (Frontend)

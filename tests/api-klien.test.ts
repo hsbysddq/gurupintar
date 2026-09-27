@@ -1,13 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ambilHasil,
+  ambilMateriGuru,
+  ambilMateriSiswa,
   ambilSesi,
+  bagikanMateri,
   bukaSesi,
+  buatMateri,
   ErrorApi,
   kirimJawaban,
   PESAN_GAGAL_KONEKSI,
   tutupSesi,
+  ubahMateri,
 } from '@/lib/api-klien';
+import type { IsiMateri } from '@/lib/tipe';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -93,5 +99,24 @@ describe('api-klien', () => {
     expect(palsu.mock.calls[0][1]?.body).toBe('{}');
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi/tutup');
     expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({ sesiId: 's1' });
+  });
+
+  it('fungsi materi memakai URL, metode, dan body yang benar', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    const isi = { judul: 'Judul' } as IsiMateri;
+    await ambilMateriGuru('s 1');
+    await buatMateri({ sesiId: 's1', ganti: true });
+    await ubahMateri('m1', 3, isi);
+    await bagikanMateri('s1');
+    await ambilMateriSiswa('s1', 'a b');
+
+    const panggilan = palsu.mock.calls.map(([url, init]) => [url, init?.method, init?.body]);
+    expect(panggilan).toEqual([
+      ['/api/guru/materi?sesi=s%201', undefined, undefined],
+      ['/api/guru/materi', 'POST', JSON.stringify({ sesiId: 's1', ganti: true })],
+      ['/api/guru/materi', 'PATCH', JSON.stringify({ id: 'm1', versi: 3, isi })],
+      ['/api/guru/materi/bagikan', 'POST', JSON.stringify({ sesiId: 's1' })],
+      ['/api/materi?sesi=s1&siswa=a%20b', undefined, undefined],
+    ]);
   });
 });

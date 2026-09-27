@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   normalisasiKode,
+  skemaBodyBagikanMateri,
+  skemaBodyBuatMateri,
   skemaBodyFormat,
   skemaBodyJawaban,
   skemaBodyTutupSesi,
+  skemaBodyUbahMateri,
   skemaQueryHasil,
+  skemaQueryMateriGuru,
+  skemaQueryMateriSiswa,
   skemaQuerySesi,
   skemaQuerySoal,
 } from '@/lib/skema-api';
@@ -97,5 +102,52 @@ describe('skemaQueryHasil', () => {
 
   it('menolak sesi kosong', () => {
     expect(skemaQueryHasil.safeParse({ sesi: '' }).success).toBe(false);
+  });
+});
+
+describe('skemaQueryMateriGuru', () => {
+  it('menerima sesi uuid dan menolak yang lain', () => {
+    expect(skemaQueryMateriGuru.safeParse({ sesi: SESI_ID }).success).toBe(true);
+    expect(skemaQueryMateriGuru.safeParse({ sesi: 'x' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyBuatMateri', () => {
+  it('menerima body minimal', () => {
+    expect(skemaBodyBuatMateri.parse({ sesiId: SESI_ID })).toEqual({ sesiId: SESI_ID });
+  });
+
+  it('menerima gunakanCadangan dan ganti', () => {
+    expect(skemaBodyBuatMateri.safeParse({ sesiId: SESI_ID, gunakanCadangan: true, ganti: true }).success).toBe(true);
+  });
+
+  it('menolak ganti yang bukan boolean', () => {
+    expect(skemaBodyBuatMateri.safeParse({ sesiId: SESI_ID, ganti: 'ya' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyUbahMateri', () => {
+  const MATERI_ID = '00000000-0000-4000-8000-000000000401';
+
+  it('menerima id, versi, dan isi apa pun (diperiksa terpisah)', () => {
+    expect(skemaBodyUbahMateri.safeParse({ id: MATERI_ID, versi: 2, isi: { judul: 'x' } }).success).toBe(true);
+  });
+
+  it.each([0, -1, 1.5, '2'])('menolak versi tidak valid: %j', (versi) => {
+    expect(skemaBodyUbahMateri.safeParse({ id: MATERI_ID, versi, isi: {} }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyBagikanMateri', () => {
+  it('menerima sesiId uuid dan menolak yang lain', () => {
+    expect(skemaBodyBagikanMateri.safeParse({ sesiId: SESI_ID }).success).toBe(true);
+    expect(skemaBodyBagikanMateri.safeParse({}).success).toBe(false);
+  });
+});
+
+describe('skemaQueryMateriSiswa', () => {
+  it('membutuhkan sesi dan siswa uuid', () => {
+    expect(skemaQueryMateriSiswa.safeParse({ sesi: SESI_ID, siswa: SISWA_ID }).success).toBe(true);
+    expect(skemaQueryMateriSiswa.safeParse({ sesi: SESI_ID, siswa: '' }).success).toBe(false);
   });
 });

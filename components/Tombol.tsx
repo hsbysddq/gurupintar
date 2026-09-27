@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Loader2, type LucideIcon } from "lucide-react";
 
 interface TombolProps {
@@ -11,6 +12,8 @@ interface TombolProps {
   type?: "button" | "submit";
   disabled?: boolean;
   onClick?: () => void;
+  /** Jika diisi, dirender sebagai `<Link>` karena navigasi memakai tautan (design.md 5.8). */
+  href?: string;
   children: ReactNode;
 }
 
@@ -29,6 +32,7 @@ export function Tombol({
   type = "button",
   disabled = false,
   onClick,
+  href,
   children,
 }: TombolProps) {
   const nonaktif = disabled || memuat;
@@ -39,6 +43,15 @@ export function Tombol({
     ukuran === "besar" ? "h-13" : "h-12",
     lebarPenuh ? "w-full" : "",
   ].join(" ");
+
+  if (href) {
+    return (
+      <Link href={href} className={kelas}>
+        {Ikon && <Ikon aria-hidden="true" className="size-5" />}
+        {children}
+      </Link>
+    );
+  }
 
   return (
     <button type={type} className={kelas} disabled={nonaktif} aria-busy={memuat || undefined} onClick={onClick}>

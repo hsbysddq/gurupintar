@@ -3,11 +3,14 @@
 import { Suspense, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { BookOpen, Sparkles, UserPlus } from "lucide-react";
+import { GagalBuatMateri } from "@/components/GagalBuatMateri";
+import { KartuKaca } from "@/components/KartuKaca";
 import { KartuSoalTersulit } from "@/components/KartuSoalTersulit";
 import { PetaKelas } from "@/components/PetaKelas";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
+import { useBuatMateri } from "@/hooks/use-buat-materi";
 import { usePolling } from "@/hooks/use-polling";
 import { ambilHasil } from "@/lib/api-klien";
 import { INTERVAL_POLLING_GURU_MS } from "@/lib/konstanta";
@@ -33,6 +36,9 @@ function HasilKuis() {
   const sesiId = useSearchParams().get("sesi");
   const ambil = useCallback((signal: AbortSignal) => ambilHasil(sesiId ?? "", signal), [sesiId]);
   const { data, galat, memuat, muatUlang } = usePolling(sesiId ? ambil : null, INTERVAL_POLLING_GURU_MS);
+  const halamanMateri = `/guru/materi?sesi=${encodeURIComponent(sesiId ?? "")}`;
+  const keHalamanMateri = useCallback(() => router.push(halamanMateri), [router, halamanMateri]);
+  const pembuat = useBuatMateri(sesiId, keHalamanMateri);
 
   if (!sesiId) {
     return (
@@ -57,6 +63,8 @@ function HasilKuis() {
   }
 
   const belumAdaJawaban = data.jumlahMenjawab === 0;
+  const materiAda = data.statusMateri !== "belum-ada";
+  const { keadaan, menyusun } = pembuat;
 
   return (
     <div className="flex flex-col gap-6">
@@ -83,11 +91,49 @@ function HasilKuis() {
 
       <KartuSoalTersulit data={data.soalTersulit} jumlahMenjawab={data.jumlahMenjawab} />
 
+      {/* AC-5.7: siswa baru menjawab setelah materi dibuat. */}
+      {materiAda && data.kelompokTanpaMateri.length > 0 && keadaan.status !== "gagal-ai" && (
+        <KartuKaca varian="pekat" className="flex flex-wrap items-center justify-between gap-3 p-4">
+          <p role="status" className="inline-flex items-center gap-2 font-semibold">
+            <UserPlus aria-hidden="true" className="size-5 text-primer" />
+            Ada siswa yang belum mendapat materi
+          </p>
+          <Tombol varian="sekunder" memuat={menyusun} onClick={() => void pembuat.buat()}>
+            Buat materi yang kurang
+          </Tombol>
+        </KartuKaca>
+      )}
+
       <div className="flex flex-col items-start gap-3">
-        {/* Fungsi pembuatan materi dikerjakan di Fase 4. */}
-        <Tombol varian="utama" ikon={Sparkles} disabled={belumAdaJawaban}>
-          Buat Materi Lanjutan dengan AI
-        </Tombol>
+        {keadaan.status === "gagal-ai" ? (
+          <GagalBuatMateri
+            sibuk={menyusun}
+            onCobaLagi={pembuat.cobaLagi}
+            onGunakanCadangan={pembuat.gunakanCadangan}
+            onBatal={pembuat.batal}
+          />
+        ) : materiAda ? (
+          <Tombol varian="utama" ikon={BookOpen} href={halamanMateri}>
+            Lihat materi lanjutan
+          </Tombol>
+        ) : (
+          <Tombol varian="utama" ikon={Sparkles} memuat={menyusun} disabled={belumAdaJawaban} onClick={() => void pembuat.buat()}>
+            Buat Materi Lanjutan dengan AI
+          </Tombol>
+        )}
+        <div aria-live="polite">
+          {menyusun && (
+            <p className="inline-flex items-center gap-2 font-semibold">
+              <Sparkles aria-hidden="true" className="size-5 text-ai" />
+              Menyusun materi untuk kelompok…
+            </p>
+          )}
+          {keadaan.status === "ditolak" && (
+            <p role="alert" className="font-medium text-belum-teks">
+              {keadaan.pesan}
+            </p>
+          )}
+        </div>
         {belumAdaJawaban && (
           <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
             Tombol aktif setelah ada siswa yang menjawab.
