@@ -1,4 +1,4 @@
-import { Lightbulb, Sparkles } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import { PetaTitikKelas } from "@/components/PetaTitikKelas";
 
 // Sama dengan sesi demo RIW004 (PRD 8.5): 38 menjawab, soal 5 salah 28 dari 38 (74%).
@@ -9,12 +9,11 @@ const KELAS_KARTU_MELAYANG =
 
 /**
  * Pratinjau produk di hero landing page (design.md 4.20): jendela dasbor tiruan berisi peta kelas,
- * dengan dua kartu melayang yang menumpuk di tepinya mulai 640px dan ditaruh di bawah jendela di HP.
+ * dengan satu kartu melayang yang menumpuk di tepi kiri bawahnya mulai 640px dan ditaruh di bawah jendela di HP.
  */
 export function PratinjauDasbor() {
   return (
     <figure className="relative isolate mx-auto w-full max-w-md">
-
       {/* Latar dekoratif: gumpalan pastel dan pola titik yang memudar ke tepi. */}
       <div aria-hidden="true" className="pointer-events-none absolute -inset-10 -z-10">
         <div className="pola-titik absolute inset-0 [mask-image:radial-gradient(closest-side,black,transparent)]" />
@@ -38,11 +37,8 @@ export function PratinjauDasbor() {
           </div>
         </div>
 
-        <p className={`${KELAS_KARTU_MELAYANG} sm:-top-6 sm:-right-8`}>
-          <Sparkles aria-hidden="true" className="mt-px size-4 shrink-0 text-ai" />
-          Materi AI siap untuk 3 kelompok
-        </p>
-        <p className={`${KELAS_KARTU_MELAYANG} sm:-bottom-8 sm:-left-8`}>
+        {/* Kiri bawah: menjembatani jendela dengan kolom teks hero di desktop. */}
+        <p className={`${KELAS_KARTU_MELAYANG} sm:-bottom-7 sm:-left-6`}>
           <Lightbulb aria-hidden="true" className="mt-px size-4 shrink-0 text-setengah-teks" />
           <span>
             Soal paling banyak salah: Nomor 5 · <span className="text-belum-teks">74% salah</span>

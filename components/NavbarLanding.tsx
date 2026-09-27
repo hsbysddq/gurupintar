@@ -5,8 +5,6 @@ import { Tombol } from "@/components/Tombol";
 const TAUTAN: { href: string; label: string }[] = [
   { href: "#masalah", label: "Masalah" },
   { href: "#cara-kerja", label: "Cara kerja" },
-  { href: "#fitur", label: "Fitur" },
-  { href: "#prinsip", label: "Prinsip" },
 ];
 
 /**
