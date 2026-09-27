@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { miskonsepsiPerKelompok, tentukanTargetMateri } from '@/lib/rencana-materi';
 import { skemaBodyBuatMateri, skemaBodyUbahMateri, skemaQueryMateriGuru } from '@/lib/skema-api';
+import { cadanganTersedia } from '@/lib/soal-guru';
 import { periksaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
 import { buatMateriSemua } from '@/lib/server/materi-ai';
 import { ambilMateriCadangan } from '@/lib/server/materi-cadangan';
@@ -22,6 +23,7 @@ export const maxDuration = 70;
 const PESAN_SEDANG_DIBUAT = 'Materi sedang dibuat. Tunggu sebentar.';
 const PESAN_GAGAL_DIBUAT = 'Materi belum berhasil dibuat.';
 const PESAN_MATERI_BERUBAH = 'Materi sudah berubah. Muat ulang untuk melihat versi terbaru.';
+const PESAN_CADANGAN_TIDAK_ADA = 'Materi cadangan hanya tersedia untuk topik Pecahan Senilai.';
 
 const URUTAN_KELOMPOK: Kelompok[] = ['belum', 'setengah', 'sudah'];
 
@@ -82,6 +84,8 @@ export async function POST(request: Request) {
     const db = ambilSupabase();
     const sesi = await cariSesi(db, sesiId);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
+    // Diperiksa sebelum kunci materi diambil (PRD F-10).
+    if (gunakanCadangan && !cadanganTersedia(sesi.topik_id)) return responsError(PESAN_CADANGAN_TIDAK_ADA, 400);
 
     const awal = await bacaMateriSesi(db, sesiId);
     const rencanaAwal = tentukanTargetMateri({ jumlahPerKelompok: awal.jumlahPerKelompok, materi: awal.barisMateri, ganti });

@@ -159,7 +159,7 @@ Contoh pemakaian: `className="kaca p-6"`, `className="bg-primer text-white round
 
 Latar semua halaman: `LatarPastel` (warna `latar` + blob pastel di sudut).
 
-**Sidebar guru** (urutan tetap): Dashboard (`/guru`), Perlu Pendampingan (`/guru/pendampingan`). Menu aktif: pill `bg-primer` teks putih. Di bawah menu: nama kelas "Kelas 7A" dan nama guru "Bu Rina".
+**Sidebar guru** (urutan tetap): Dashboard (`/guru`), Ubah Modul (`/guru/modul`), Perlu Pendampingan (`/guru/pendampingan`). Menu aktif: pill `bg-primer` teks putih. Di bawah menu: nama kelas "Kelas 7A" dan nama guru "Bu Rina".
 
 ### 3.2 Guru: Dashboard (`/guru`)
 
@@ -255,6 +255,28 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 | ≥ 1280px | Sidebar penuh, tiga kolom kelompok sejajar |
 | 768–1279px | Sidebar hanya ikon (72px), kolom kelompok tetap tiga jika muat, jika tidak dua |
 | < 768px | Halaman guru: sidebar menjadi bar atas, kolom bertumpuk. Halaman siswa: satu kolom |
+
+### 3.8 Guru: Ubah Modul (`/guru/modul`)
+
+```text
+┌──────────┬────────────────────────────────────────────────────────┐
+│ SIDEBAR  │ Ubah modul                                             │
+│          │ Tempelkan teks modul matematika kelas 7, lalu ubah …   │
+│          │ ┌────────────────────────────────────────────────────┐ │
+│          │ │ Teks modul                                         │ │
+│          │ │ [ textarea                                       ] │ │
+│          │ │ Jangan tempelkan nama siswa…    1234 / 8000 karakter│ │
+│          │ │ [ Ubah jadi 4 bentuk belajar ]                     │ │
+│          │ └────────────────────────────────────────────────────┘ │
+│          │ Pratinjau                                              │
+│          │ Hasil ini tidak disimpan. Periksa isinya sebelum …     │
+│          │ TabMateriSiswa: Video | Audio | Bacaan | Latihan       │
+└──────────┴────────────────────────────────────────────────────────┘
+```
+
+- Satu aksi utama: "Ubah jadi 4 bentuk belajar" (varian utama, ikon `Sparkles`). Tombol nonaktif jika panjang teks di luar 200–8000 karakter; penghitung memakai `aria-live="polite"` dan berwarna `belum-teks` saat di luar batas.
+- Saat memproses: `StatusHalaman` jenis `memuat`. Saat gagal: `StatusHalaman` jenis `gagal` dengan aksi "Coba lagi" (bukan `GagalBuatMateri`, karena tidak ada materi cadangan untuk modul).
+- Pratinjau memakai `TabMateriSiswa` dengan `formatAwal = null` (tab Bacaan terbuka lebih dulu), dipasang ulang setiap hasil baru.
 
 ---
 

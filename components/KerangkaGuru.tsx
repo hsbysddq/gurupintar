@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, HeartHandshake, LayoutDashboard, type LucideIcon } from "lucide-react";
+import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, type LucideIcon } from "lucide-react";
 
 type KerangkaGuruProps = {
   children: ReactNode;
@@ -16,7 +16,13 @@ const MENU: Menu[] = [
     href: "/guru",
     label: "Dashboard",
     ikon: LayoutDashboard,
-    aktif: (path) => !path.startsWith("/guru/pendampingan"),
+    aktif: (path) => !path.startsWith("/guru/pendampingan") && !path.startsWith("/guru/modul"),
+  },
+  {
+    href: "/guru/modul",
+    label: "Ubah Modul",
+    ikon: FileText,
+    aktif: (path) => path.startsWith("/guru/modul"),
   },
   {
     href: "/guru/pendampingan",

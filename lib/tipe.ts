@@ -50,6 +50,12 @@ export interface SesiGuru {
   jumlahMenjawab: number;
 }
 
+/** GET /api/guru/topik: hanya topik dengan tepat 5 soal */
+export interface TopikRingkas {
+  id: string;
+  nama: string;
+}
+
 /** POST /api/guru/sesi */
 export interface SesiBaru {
   id: string;
@@ -87,6 +93,8 @@ export interface HasilGuru extends RingkasanMateri {
     namaKelas: string;
     namaTopik: string;
     dibuatPada: string;
+    /** Materi cadangan hanya ada untuk topik demo (PRD F-10). */
+    cadanganTersedia: boolean;
   };
   jumlahSiswa: number;
   jumlahMenjawab: number;

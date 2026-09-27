@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { kelompokkanHasil, ringkasMateri } from '@/lib/ringkasan-hasil';
 import { skemaQueryHasil } from '@/lib/skema-api';
+import { cadanganTersedia } from '@/lib/soal-guru';
 import { cariSoalTersulit } from '@/lib/soal-tersulit';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest) {
         namaKelas: kelas.data!.nama,
         namaTopik: topik.data!.nama,
         dibuatPada: sesi.dibuat_pada,
+        cadanganTersedia: cadanganTersedia(sesi.topik_id),
       },
       jumlahSiswa: siswa.data!.length,
       jumlahMenjawab: hasil.data!.length,

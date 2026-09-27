@@ -110,6 +110,7 @@ Keputusan ini final. **Jangan diubah tanpa persetujuan tim.**
 | F-6 | Materi lanjutan AI: buat, tinjau, ubah, bagikan | Wajib |
 | F-7 | Siswa melihat "Materi untukmu" | Wajib |
 | F-8 | Perlu Pendampingan + Mengalami Kemajuan (data simulasi) | Tambahan, setelah F-1 s.d. F-7 selesai |
+| F-9 | Ubah Modul: teks modul menjadi pratinjau 4 bentuk belajar | Tambahan, setelah F-1 s.d. F-8 selesai |
 
 ### 6.2 Tidak dibangun
 
@@ -230,6 +231,17 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 - AC-8.5: Bagian "Mengalami Kemajuan": siswa yang sebelumnya Belum Paham dan pada sesi terakhir yang diikutinya naik ke Setengah atau Sudah Paham.
 - AC-8.6: Dengan data demo di bagian 8.5, hasilnya **tepat**: Budi Santoso, Sari Wulandari, Rizky Pratama di daftar; Dimas Saputra di Mengalami Kemajuan; tidak ada siswa lain.
 
+### F-9 Ubah Modul (guru, tambahan)
+
+**US-9:** Sebagai guru, saya ingin menempelkan teks modul matematika yang sudah saya punya dan melihatnya diubah menjadi video, audio, bacaan, dan latihan, agar saya mendapat gambaran materi dalam beberapa bentuk belajar.
+
+- AC-9.1: Menu "Ubah Modul" di sidebar guru membuka `/guru/modul`.
+- AC-9.2: Halaman berisi kotak teks untuk menempelkan teks modul matematika kelas 7, penghitung karakter, dan tombol "Ubah jadi 4 bentuk belajar". Tombol hanya aktif jika panjang teks (tanpa spasi di awal dan akhir) 200–8000 karakter. Tidak ada unggah file.
+- AC-9.3: Setelah berhasil, tampil pratinjau dengan tab Video, Audio, Bacaan, Latihan yang sama dengan halaman "Materi untukmu" (F-7), beserta label "Hasil ini tidak disimpan."
+- AC-9.4: Hasil memakai aturan dan pemeriksaan yang sama dengan F-6 (format, larangan label kelompok, posisi jawaban latihan diacak) dan selesai dalam 60 detik.
+- AC-9.5: Jika gagal → "Materi belum berhasil dibuat." dengan tombol "Coba lagi". Tidak ada materi cadangan untuk fitur ini.
+- AC-9.6: Hasil tidak disimpan ke database dan tidak dibagikan ke siswa. Teks bantuan mengingatkan guru agar tidak menempelkan nama siswa atau data pribadi.
+
 ---
 
 ## 8. Konten Demo
@@ -328,6 +340,7 @@ Nilai ini sudah dipakai sebagai **nilai bawaan**. Ubah sebelum fase terkait di `
 | --- | --- | --- |
 | Materi AI tidak akurat atau formatnya salah | Bagian utama demo gagal | Validasi format, coba ulang, materi cadangan, tinjauan guru |
 | Halaman guru bisa dibuka siapa saja | Data kelas terlihat orang lain | Diterima untuk demo; login masuk rencana pengembangan |
+| Siapa pun yang tahu URL bisa memanggil `/api/guru/modul` | Saldo API AI terpakai orang lain | Diterima untuk demo tanpa pembatas; dibatasi oleh saldo prabayar Anthropic |
 | Internet tempat acara tidak stabil | Demo terhenti | Hotspot cadangan dan video demo |
 | Pengelompokan merugikan siswa berkemampuan rendah | Kesenjangan melebar | Keputusan D-2, D-3, D-4 |
 | Cakupan membengkak | Fase tidak selesai | Bagian 6.2 dan aturan di `agenda.md` |

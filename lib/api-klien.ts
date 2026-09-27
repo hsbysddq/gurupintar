@@ -106,6 +106,10 @@ export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagik
   return minta('/api/guru/materi/bagikan', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }
 
+export function ubahModul(teks: string): Promise<{ isi: IsiMateri }> {
+  return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks }) });
+}
+
 export function ambilPendampingan(signal?: AbortSignal): Promise<DataPendampingan> {
   return minta('/api/guru/pendampingan', { signal });
 }
