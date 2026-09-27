@@ -306,7 +306,7 @@ Ketentuan wajib:
 
 1. Mulai dengan `truncate materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, siswa, kelas restart identity cascade;`
 2. Kelas memakai `KELAS_DEMO_ID`, topik memakai `TOPIK_DEMO_ID` (bagian 3.1).
-3. 32 siswa dari PRD 8.2, dimasukkan dengan `unnest(array[...])`.
+3. 40 siswa dari PRD 8.2, dimasukkan dengan `unnest(array[...])`.
 4. 5 soal dari PRD 8.3. Contoh format satu baris:
 
 ```sql
@@ -325,9 +325,10 @@ insert into soal (topik_id, nomor, teks, pilihan, kunci, miskonsepsi) values
 | `00000000-0000-4000-8000-000000000101` | `RIW001` | selesai | `2026-09-07 08:00+07` |
 | `00000000-0000-4000-8000-000000000102` | `RIW002` | selesai | `2026-09-14 08:00+07` |
 | `00000000-0000-4000-8000-000000000103` | `RIW003` | selesai | `2026-09-21 08:00+07` |
+| `00000000-0000-4000-8000-000000000104` | `RIW004` | selesai | `2026-09-26 08:00+07` |
 | `00000000-0000-4000-8000-000000000100` | `A7K2P` | aktif | `now()` |
 
-6. Riwayat `hasil_siswa` sesuai PRD 8.5, dibuat dengan satu `insert ... select` agar tidak perlu 90+ baris manual:
+6. Riwayat `hasil_siswa` RIW001–RIW003 sesuai PRD 8.5 (94 baris), dibuat dengan satu `insert ... select` agar tidak perlu 90+ baris manual. 8 siswa baru dikecualikan karena tidak punya riwayat di sesi ini:
 
 ```sql
 insert into hasil_siswa (sesi_id, siswa_id, skor, total, kelompok, dikirim_pada)
@@ -346,10 +347,21 @@ cross join lateral (select case sw.nama
   when 'Rizky Pratama'  then (array[5,4,3])[s.urut]
   when 'Dimas Saputra'  then (array[1,2,4])[s.urut]
   else (array[5,4,5])[s.urut] end as skor) as v
-where sw.kelas_id = '00000000-0000-4000-8000-000000000001' and v.skor is not null;
+where sw.kelas_id = '00000000-0000-4000-8000-000000000001' and v.skor is not null
+  and sw.nama <> all (array[
+    'Hana Pertiwi', 'Jihan Amalia', 'Kevin Prasetyo', 'Mira Handayani',
+    'Gilang Ramadhan', 'Ilham Kurniawan', 'Lestari Wulan', 'Naufal Rizki'
+  ]);
 ```
 
-7. Tabel `jawaban` dan `materi` tidak diisi.
+7. `hasil_siswa` RIW004 sesuai tabel Sesi 4 di PRD 8.5 (38 baris; Sari Wulandari dan Dimas Saputra tidak menjawab), `dikirim_pada` `2026-09-26 08:30+07`. Dibuat dengan satu `insert ... select` dari daftar `(skor, array[nama])` yang di-`unnest` lalu di-join ke `siswa` berdasarkan nama. Kelompok memakai rumus `case` yang sama dengan butir 6.
+8. `jawaban` RIW004 (38 × 5 = 190 baris) diturunkan dari `hasil_siswa` RIW004 dengan satu `insert ... select` agar selalu konsisten dengan skor:
+   - `benar` = `array_position(array[1,2,4,3,5], soal.nomor) <= skor`.
+   - `pilihan` = `soal.kunci` bila benar; bila salah `(array['A','A','B','A','A'])[soal.nomor]`.
+   - `dibuat_pada` = `dikirim_pada` hasilnya.
+9. Tabel `materi` tidak diisi.
+
+Jumlah baris setelah seed: `kelas` 1, `topik` 1, `siswa` 40, `soal` 5, `sesi_kuis` 5, `hasil_siswa` 132, `jawaban` 190, `materi` 0.
 
 ---
 

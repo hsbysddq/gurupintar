@@ -11,7 +11,7 @@ insert into topik (id, nama, capaian_pembelajaran) values
 ('00000000-0000-4000-8000-000000000002', 'Pecahan Senilai',
  'Peserta didik dapat menentukan dan membandingkan pecahan senilai.');
 
--- ===== Siswa (PRD 8.2, 32 nama) =====
+-- ===== Siswa (PRD 8.2, 40 nama) =====
 
 insert into siswa (kelas_id, nama)
 select '00000000-0000-4000-8000-000000000001', nama
@@ -23,7 +23,9 @@ from unnest(array[
   'Rizky Pratama', 'Salsa Nabila', 'Sari Wulandari', 'Taufik Hidayat',
   'Umi Kalsum', 'Vina Oktaviani', 'Wahyu Setiawan', 'Yoga Aditya',
   'Zahra Aulia', 'Bayu Firmansyah', 'Dewi Kurnia', 'Farhan Maulana',
-  'Laras Ningrum', 'Nadia Safitri', 'Reza Kurniawan', 'Tiara Anjani'
+  'Laras Ningrum', 'Nadia Safitri', 'Reza Kurniawan', 'Tiara Anjani',
+  'Hana Pertiwi', 'Jihan Amalia', 'Kevin Prasetyo', 'Mira Handayani',
+  'Gilang Ramadhan', 'Ilham Kurniawan', 'Lestari Wulan', 'Naufal Rizki'
 ]) as nama;
 
 -- ===== Soal (PRD 8.3) =====
@@ -64,11 +66,13 @@ insert into sesi_kuis (id, kelas_id, topik_id, kode_kelas, status, dibuat_pada) 
  '00000000-0000-4000-8000-000000000002', 'RIW002', 'selesai', '2026-09-14 08:00+07'),
 ('00000000-0000-4000-8000-000000000103', '00000000-0000-4000-8000-000000000001',
  '00000000-0000-4000-8000-000000000002', 'RIW003', 'selesai', '2026-09-21 08:00+07'),
+('00000000-0000-4000-8000-000000000104', '00000000-0000-4000-8000-000000000001',
+ '00000000-0000-4000-8000-000000000002', 'RIW004', 'selesai', '2026-09-26 08:00+07'),
 ('00000000-0000-4000-8000-000000000100', '00000000-0000-4000-8000-000000000001',
  '00000000-0000-4000-8000-000000000002', 'A7K2P', 'aktif', now());
 
--- ===== Riwayat hasil (PRD 8.5), 94 baris =====
--- Budi 1,2,1 · Sari 3,-,- · Rizky 5,4,3 · Dimas 1,2,4 · 28 siswa lain 5,4,5.
+-- ===== Riwayat hasil RIW001–RIW003 (PRD 8.5), 94 baris =====
+-- Budi 1,2,1 · Sari 3,-,- · Rizky 5,4,3 · Dimas 1,2,4 · 28 siswa lain 5,4,5 · 8 siswa baru tanpa riwayat.
 -- Kelompok mengikuti PRD A-2: 5/5 sudah; >= 60% (skor >= 3) setengah; < 60% belum.
 
 insert into hasil_siswa (sesi_id, siswa_id, skor, total, kelompok, dikirim_pada)
@@ -87,6 +91,42 @@ cross join lateral (select case sw.nama
   when 'Rizky Pratama'  then (array[5,4,3])[s.urut]
   when 'Dimas Saputra'  then (array[1,2,4])[s.urut]
   else (array[5,4,5])[s.urut] end as skor) as v
-where sw.kelas_id = '00000000-0000-4000-8000-000000000001' and v.skor is not null;
+where sw.kelas_id = '00000000-0000-4000-8000-000000000001' and v.skor is not null
+  and sw.nama <> all (array[
+    'Hana Pertiwi', 'Jihan Amalia', 'Kevin Prasetyo', 'Mira Handayani',
+    'Gilang Ramadhan', 'Ilham Kurniawan', 'Lestari Wulan', 'Naufal Rizki'
+  ]);
 
--- Tabel jawaban dan materi sengaja tidak diisi.
+-- ===== Hasil RIW004 (PRD 8.5), 38 baris =====
+-- Sari Wulandari dan Dimas Saputra sengaja tidak menjawab.
+
+insert into hasil_siswa (sesi_id, siswa_id, skor, total, kelompok, dikirim_pada)
+select '00000000-0000-4000-8000-000000000104', sw.id, g.skor, 5,
+       case when g.skor = 5 then 'sudah' when g.skor >= 3 then 'setengah' else 'belum' end,
+       '2026-09-26 08:30+07'
+from (values
+  (5, array['Andi Saputra', 'Citra Lestari', 'Gita Permata', 'Intan Maharani', 'Kartika Sari',
+            'Maya Anggraini', 'Salsa Nabila', 'Zahra Aulia', 'Hana Pertiwi', 'Jihan Amalia']),
+  (4, array['Eka Putri', 'Fajar Nugroho', 'Lukman Hakim', 'Putri Ayu', 'Vina Oktaviani', 'Laras Ningrum']),
+  (3, array['Hendra Wijaya', 'Nanda Pratiwi', 'Taufik Hidayat', 'Dewi Kurnia', 'Nadia Safitri', 'Kevin Prasetyo']),
+  (2, array['Rizky Pratama', 'Joko Prasetyo', 'Oki Ramadhan', 'Umi Kalsum', 'Reza Kurniawan', 'Mira Handayani']),
+  (1, array['Budi Santoso', 'Wahyu Setiawan', 'Yoga Aditya', 'Bayu Firmansyah', 'Farhan Maulana', 'Gilang Ramadhan']),
+  (0, array['Tiara Anjani', 'Ilham Kurniawan', 'Lestari Wulan', 'Naufal Rizki'])
+) as g(skor, daftar)
+cross join unnest(g.daftar) as n(nama)
+join siswa sw on sw.nama = n.nama and sw.kelas_id = '00000000-0000-4000-8000-000000000001';
+
+-- ===== Jawaban RIW004 (PRD 8.5), 190 baris =====
+-- Benar = s soal pertama dari urutan [1, 2, 4, 3, 5] (s = skor).
+-- Salah memakai pilihan tetap: soal 1 A, 2 A, 3 B, 4 A, 5 A.
+
+insert into jawaban (sesi_id, siswa_id, soal_id, pilihan, benar, dibuat_pada)
+select h.sesi_id, h.siswa_id, so.id,
+       case when b.benar then so.kunci else (array['A','A','B','A','A'])[so.nomor] end,
+       b.benar, h.dikirim_pada
+from hasil_siswa h
+join soal so on so.topik_id = '00000000-0000-4000-8000-000000000002'
+cross join lateral (select array_position(array[1,2,4,3,5], so.nomor) <= h.skor as benar) as b
+where h.sesi_id = '00000000-0000-4000-8000-000000000104';
+
+-- Tabel materi sengaja tidak diisi.

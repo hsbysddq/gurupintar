@@ -241,9 +241,11 @@ Gunakan data **tetap**, bukan acak, agar demo selalu sama. Implementasinya di `a
 - Kelas: `Kelas 7A`, mapel `Matematika`, guru `Bu Rina`.
 - Topik: `Pecahan Senilai`, capaian pembelajaran: `Peserta didik dapat menentukan dan membandingkan pecahan senilai.`
 
-### 8.2 Siswa (32 nama)
+### 8.2 Siswa (40 nama)
 
-Andi Saputra, Budi Santoso, Citra Lestari, Dimas Saputra, Eka Putri, Fajar Nugroho, Gita Permata, Hendra Wijaya, Intan Maharani, Joko Prasetyo, Kartika Sari, Lukman Hakim, Maya Anggraini, Nanda Pratiwi, Oki Ramadhan, Putri Ayu, Rizky Pratama, Salsa Nabila, Sari Wulandari, Taufik Hidayat, Umi Kalsum, Vina Oktaviani, Wahyu Setiawan, Yoga Aditya, Zahra Aulia, Bayu Firmansyah, Dewi Kurnia, Farhan Maulana, Laras Ningrum, Nadia Safitri, Reza Kurniawan, Tiara Anjani.
+Andi Saputra, Budi Santoso, Citra Lestari, Dimas Saputra, Eka Putri, Fajar Nugroho, Gita Permata, Hendra Wijaya, Intan Maharani, Joko Prasetyo, Kartika Sari, Lukman Hakim, Maya Anggraini, Nanda Pratiwi, Oki Ramadhan, Putri Ayu, Rizky Pratama, Salsa Nabila, Sari Wulandari, Taufik Hidayat, Umi Kalsum, Vina Oktaviani, Wahyu Setiawan, Yoga Aditya, Zahra Aulia, Bayu Firmansyah, Dewi Kurnia, Farhan Maulana, Laras Ningrum, Nadia Safitri, Reza Kurniawan, Tiara Anjani, Hana Pertiwi, Jihan Amalia, Kevin Prasetyo, Mira Handayani, Gilang Ramadhan, Ilham Kurniawan, Lestari Wulan, Naufal Rizki.
+
+8 nama terakhir (Hana Pertiwi s.d. Naufal Rizki) adalah siswa baru yang tidak punya hasil di `RIW001`–`RIW003`.
 
 ### 8.3 Soal (topik Pecahan Senilai)
 
@@ -259,20 +261,36 @@ Gunakan **persis**. Jangan membuat soal sendiri.
 
 ### 8.4 Sesi kuis
 
-- 3 sesi riwayat yang sudah ditutup: 7, 14, dan 21 September 2026, kode `RIW001`, `RIW002`, `RIW003`.
+- 4 sesi riwayat yang sudah ditutup: 7, 14, 21, dan 26 September 2026, kode `RIW001`, `RIW002`, `RIW003`, `RIW004`. Hanya `RIW004` yang juga memiliki jawaban per soal.
 - 1 sesi demo aktif: kode `A7K2P`, belum ada jawaban.
 
 ### 8.5 Riwayat hasil (untuk F-8)
 
 Semua skor dari total 5.
 
-| Siswa | Sesi 1 | Sesi 2 | Sesi 3 | Tujuan |
-| --- | --- | --- | --- | --- |
-| Budi Santoso | 1 | 2 | 1 | Memicu "Belum paham 3x berturut-turut" |
-| Sari Wulandari | 3 | tidak menjawab | tidak menjawab | Memicu "Tidak mengerjakan 2 cek terakhir" |
-| Rizky Pratama | 5 | 4 | 3 | Memicu "Skor menurun 3 kali berturut-turut" |
-| Dimas Saputra | 1 | 2 | 4 | Muncul di "Mengalami Kemajuan" |
-| 28 siswa lain | 5 | 4 | 5 | Tidak memicu aturan apa pun |
+| Siswa | Sesi 1 | Sesi 2 | Sesi 3 | Sesi 4 | Tujuan |
+| --- | --- | --- | --- | --- | --- |
+| Budi Santoso | 1 | 2 | 1 | 1 | Memicu "Belum paham 3x berturut-turut" |
+| Sari Wulandari | 3 | tidak menjawab | tidak menjawab | tidak menjawab | Memicu "Tidak mengerjakan 2 cek terakhir" |
+| Rizky Pratama | 5 | 4 | 3 | 2 | Memicu "Skor menurun 3 kali berturut-turut" |
+| Dimas Saputra | 1 | 2 | 4 | tidak menjawab | Muncul di "Mengalami Kemajuan" |
+| 28 siswa lain | 5 | 4 | 5 | lihat tabel Sesi 4 | Tidak memicu aturan apa pun |
+| 8 siswa baru | tidak ada | tidak ada | tidak ada | lihat tabel Sesi 4 | Tidak memicu aturan apa pun |
+
+Sari Wulandari dan Dimas Saputra sengaja tidak menjawab Sesi 4. Dimas hanya melewatkan 1 dari 2 cek terakhir, sehingga tetap hanya muncul di "Mengalami Kemajuan" (belum paham di Sesi 2 → setengah paham di Sesi 3).
+
+**Sesi 4 (`RIW004`), 38 siswa menjawab:**
+
+| Skor | Siswa |
+| --- | --- |
+| 5 | Andi Saputra, Citra Lestari, Gita Permata, Intan Maharani, Kartika Sari, Maya Anggraini, Salsa Nabila, Zahra Aulia, Hana Pertiwi, Jihan Amalia |
+| 4 | Eka Putri, Fajar Nugroho, Lukman Hakim, Putri Ayu, Vina Oktaviani, Laras Ningrum |
+| 3 | Hendra Wijaya, Nanda Pratiwi, Taufik Hidayat, Dewi Kurnia, Nadia Safitri, Kevin Prasetyo |
+| 2 | Rizky Pratama, Joko Prasetyo, Oki Ramadhan, Umi Kalsum, Reza Kurniawan, Mira Handayani |
+| 1 | Budi Santoso, Wahyu Setiawan, Yoga Aditya, Bayu Firmansyah, Farhan Maulana, Gilang Ramadhan |
+| 0 | Tiara Anjani, Ilham Kurniawan, Lestari Wulan, Naufal Rizki |
+
+Jawaban per soal di Sesi 4 (tetap, bukan acak): soal yang dijawab benar adalah s soal pertama dari urutan [1, 2, 4, 3, 5], dengan s = skor. Soal lainnya dijawab salah dengan pilihan tetap: soal 1 → A, soal 2 → A, soal 3 → B, soal 4 → A, soal 5 → A.
 
 ---
 
