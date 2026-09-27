@@ -357,6 +357,16 @@ Sebelum `git add .`, pastikan `git status` tidak menampilkan `.env.local`.
 
 ---
 
+### Fitur tambahan setelah Fase 5
+
+Dikerjakan setelah F-1 s.d. F-8 selesai. Masing-masing punya rencana dan verifikasi (lint, build, test) sendiri.
+
+- **Ubah Modul (PRD F-9):** guru menempelkan teks modul matematika kelas 7 di `/guru/modul` dan melihat pratinjaunya dalam empat bentuk belajar, agar guru bisa memakai modul yang sudah dimilikinya tanpa menyusun materi dari awal.
+- **Buat Soal (PRD F-10):** guru membuat topik baru berisi 5 soal di `/guru/soal` lalu memilihnya saat membuka kuis, agar Guru Pintar tidak terbatas pada topik demo Pecahan Senilai.
+- **Landing page (`design.md` 3.10):** halaman `/` menjelaskan masalah, cara kerja, fitur, dan prinsip Guru Pintar dengan peta 40 titik sebagai visual utama, agar juri dan guru memahami produk sebelum mencobanya.
+
+---
+
 ### Fase 6: Penyempurnaan, Deploy & Persiapan Demo
 
 **Tujuan:** aplikasi stabil untuk demo, semua keadaan layar tertangani, dan tim siap presentasi.

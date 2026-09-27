@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Loader2, type LucideIcon } from "lucide-react";
 
 interface TombolProps {
-  varian: "utama" | "sekunder" | "teks";
+  /** `terang` = aksi utama di atas latar `primer` (pita penutup landing page, design.md 4.3). */
+  varian: "utama" | "sekunder" | "teks" | "terang";
   /** `besar` = 52px untuk halaman siswa (design.md 4.3). */
   ukuran?: "standar" | "besar";
   ikon?: LucideIcon;
@@ -21,6 +22,7 @@ const KELAS_VARIAN: Record<TombolProps["varian"], string> = {
   utama: "px-6 rounded-tombol bg-primer text-white hover:bg-primer-hover",
   sekunder: "kaca px-6 rounded-tombol text-primer hover:bg-primer-lembut",
   teks: "px-2 text-primer hover:underline",
+  terang: "px-6 rounded-tombol bg-white text-primer hover:bg-primer-lembut",
 };
 
 export function Tombol({

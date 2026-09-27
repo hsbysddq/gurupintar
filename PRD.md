@@ -111,12 +111,13 @@ Keputusan ini final. **Jangan diubah tanpa persetujuan tim.**
 | F-7 | Siswa melihat "Materi untukmu" | Wajib |
 | F-8 | Perlu Pendampingan + Mengalami Kemajuan (data simulasi) | Tambahan, setelah F-1 s.d. F-7 selesai |
 | F-9 | Ubah Modul: teks modul menjadi pratinjau 4 bentuk belajar | Tambahan, setelah F-1 s.d. F-8 selesai |
+| F-10 | Buat Soal: guru membuat topik baru berisi 5 soal dan memakainya untuk kuis | Tambahan, setelah F-1 s.d. F-8 selesai |
 
 ### 6.2 Tidak dibangun
 
 - Login, akun, atau autentikasi.
-- Banyak kelas, banyak guru, atau banyak mata pelajaran (hanya 1 kelas dan 1 topik contoh).
-- Halaman guru untuk membuat atau mengedit soal (soal berasal dari data awal).
+- Banyak kelas, banyak guru, atau banyak mata pelajaran (hanya 1 kelas; 1 topik contoh bawaan, topik lain dibuat guru lewat F-10).
+- Mengedit atau menghapus topik dan soal yang sudah disimpan (F-10 hanya membuat topik baru).
 - Aplikasi Android/iOS, mode tanpa internet, input jawaban dari kertas.
 - Pembuatan video atau file audio oleh AI.
 - Integrasi Google Classroom, Platform Merdeka Mengajar, atau sistem sekolah.
@@ -192,8 +193,8 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 
 - AC-6.1: Materi hanya dibuat untuk kelompok yang memiliki minimal 1 siswa.
 - AC-6.2: Selama proses tampil "Menyusun materi untuk kelompok…" dan tombol tidak bisa ditekan dua kali. Jika guru lain (atau tab lain) sedang membuat materi untuk sesi yang sama, tampil "Materi sedang dibuat. Tunggu sebentar."
-- AC-6.3: Jika pembuatan gagal → "Materi belum berhasil dibuat." dengan tombol "Coba lagi" dan "Gunakan materi cadangan".
-- AC-6.4: "Gunakan materi cadangan" memuat materi yang ditulis manual oleh tim.
+- AC-6.3: Jika pembuatan gagal → "Materi belum berhasil dibuat." dengan tombol "Coba lagi" dan "Gunakan materi cadangan". Untuk topik buatan guru (F-10) hanya tombol "Coba lagi" yang tampil.
+- AC-6.4: "Gunakan materi cadangan" memuat materi yang ditulis manual oleh tim. Materi cadangan hanya tersedia untuk topik demo Pecahan Senilai.
 - AC-6.5: Halaman `/guru/materi?sesi=` menampilkan kartu Penguatan Konsep (Belum Paham), Latihan Terarah (Setengah Paham), Tantangan (Sudah Paham), masing-masing dengan jumlah siswa dan label sumber ("Dibuat AI" atau "Materi cadangan").
 - AC-6.6: Guru dapat mengubah ringkasan bacaan, naskah audio, dan setiap soal latihan, lalu menyimpan.
 - AC-6.7: Jika materi sudah diubah di tab lain sejak halaman dibuka, penyimpanan ditolak dengan pesan "Materi sudah berubah. Muat ulang untuk melihat versi terbaru."
@@ -242,6 +243,18 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 - AC-9.5: Jika gagal → "Materi belum berhasil dibuat." dengan tombol "Coba lagi". Tidak ada materi cadangan untuk fitur ini.
 - AC-9.6: Hasil tidak disimpan ke database dan tidak dibagikan ke siswa. Teks bantuan mengingatkan guru agar tidak menempelkan nama siswa atau data pribadi.
 
+### F-10 Buat Soal (guru, tambahan)
+
+**US-10:** Sebagai guru, saya ingin membuat topik sendiri berisi 5 soal pilihan ganda, lalu membuka kuis dengan topik itu.
+
+- AC-10.1: Menu "Buat Soal" di sidebar guru membuka `/guru/soal`. Teks bantuan: khusus soal matematika SMP kelas 7.
+- AC-10.2: Form berisi nama topik (3–80 karakter), capaian pembelajaran (10–300 karakter), dan tepat 5 soal. Tiap soal: teks soal (5–300 karakter), 4 pilihan A–D (wajib diisi, maksimal 100 karakter, tidak boleh sama satu sama lain tanpa memperhatikan spasi berlebih dan huruf besar-kecil), satu kunci jawaban, dan kesalahan pemahaman opsional untuk tiap pilihan salah (maksimal 200 karakter).
+- AC-10.3: Isian yang salah ditandai di kolomnya dengan pesan bahasa Indonesia, dan fokus berpindah ke kolom salah yang pertama. Setelah tersimpan tampil "Topik "{nama}" tersimpan." dan form dikosongkan.
+- AC-10.4: Topik dan 5 soalnya tersimpan di tabel yang sudah ada. Jika soal gagal disimpan, topik yang baru dibuat dihapus lagi.
+- AC-10.5: Di Dashboard ada pilihan "Topik kuis" sebelum "Buka kuis baru", dengan bawaan Pecahan Senilai. Hanya topik yang punya tepat 5 soal yang tampil. Jika daftar topik gagal dimuat, kuis dibuka dengan Pecahan Senilai.
+- AC-10.6: Alur kuis siswa, dasbor hasil, dan materi AI berjalan sama untuk topik buatan guru. Materi cadangan hanya untuk Pecahan Senilai (AC-6.3, AC-6.4).
+- AC-10.7: Topik dan soal yang sudah disimpan tidak bisa diubah atau dihapus.
+
 ---
 
 ## 8. Konten Demo
@@ -261,7 +274,7 @@ Andi Saputra, Budi Santoso, Citra Lestari, Dimas Saputra, Eka Putri, Fajar Nugro
 
 ### 8.3 Soal (topik Pecahan Senilai)
 
-Gunakan **persis**. Jangan membuat soal sendiri.
+Gunakan **persis** untuk data demo. Jangan membuat soal sendiri. Soal topik lain hanya berasal dari guru lewat F-10.
 
 | No | Soal | Pilihan | Kunci | Kesalahan pemahaman pada pilihan salah |
 | --- | --- | --- | --- | --- |

@@ -20,7 +20,7 @@
 2. **Satu aksi utama per layar.** Hanya ada satu tombol varian `utama` di setiap layar.
 3. **Mendukung, bukan menghakimi.** Warna dan kata-kata tidak membuat siswa terkesan gagal. Siswa tidak pernah melihat label kelompoknya.
 4. **Cantik tapi terbaca.** Efek kaca tidak boleh mengurangi kontras teks. Jika teks samar, naikkan opasitas kartu, jangan mencerahkan teks.
-5. **Satu elemen yang diingat.** Keberanian visual dihabiskan di **peta kelas** (donut + tiga kolom kelompok) di halaman hasil. Elemen lain tenang dan rapi.
+5. **Satu elemen yang diingat.** Keberanian visual dihabiskan di **peta kelas** (donut + tiga kolom kelompok) di halaman hasil. Elemen lain tenang dan rapi. Di landing page (`/`), perannya diambil **peta 40 titik** (`PetaTitikKelas`) di hero.
 6. **Ringan di HP.** Tampilan siswa satu kolom, tombol besar, tanpa gambar besar.
 
 ---
@@ -135,6 +135,17 @@ body {
   outline-offset: 2px;
 }
 
+/* Di atas latar primer (pita penutup landing page), garis fokus primer tidak terlihat. */
+[data-latar="primer"] :focus-visible {
+  outline-color: var(--color-white);
+}
+
+/* Pola titik halus untuk latar hero landing page (bagian 3.10). */
+@utility pola-titik {
+  background-image: radial-gradient(color-mix(in srgb, var(--color-tinta) 12%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -155,18 +166,19 @@ Contoh pemakaian: `className="kaca p-6"`, `className="bg-primer text-white round
 | --- | --- | --- |
 | `KerangkaGuru` | Semua `/guru/*` | Sidebar kaca 248px di kiri + area konten dengan padding 32px, lebar konten maksimal 1200px, rata kiri |
 | `KerangkaSiswa` | Semua `/siswa/*` | Satu kolom, lebar maksimal 430px, di tengah, padding samping 16px, tombol aksi utama menempel di bawah layar |
-| Halaman `/` | Beranda | Dua kartu pilihan di tengah layar: "Saya guru" dan "Saya siswa" |
+| Halaman `/` | Landing page | Hero dengan peta 40 titik, lalu masalah, cara kerja, fitur, prinsip, dan penutup (bagian 3.10). Tanpa sidebar |
 
 Latar semua halaman: `LatarPastel` (warna `latar` + blob pastel di sudut).
 
-**Sidebar guru** (urutan tetap): Dashboard (`/guru`), Ubah Modul (`/guru/modul`), Perlu Pendampingan (`/guru/pendampingan`). Menu aktif: pill `bg-primer` teks putih. Di bawah menu: nama kelas "Kelas 7A" dan nama guru "Bu Rina".
+**Sidebar guru** (urutan tetap): Dashboard (`/guru`, juga aktif di `/guru/hasil` dan `/guru/materi`), Buat Soal (`/guru/soal`), Ubah Modul (`/guru/modul`), Perlu Pendampingan (`/guru/pendampingan`). Menu aktif: pill `bg-primer` teks putih. Di bawah menu: nama kelas "Kelas 7A" dan nama guru "Bu Rina".
 
 ### 3.2 Guru: Dashboard (`/guru`)
 
 ```text
 ┌──────────┬────────────────────────────────────────────────────┐
 │ SIDEBAR  │ Kelas 7A                                           │
-│          │ Matematika, Bu Rina           [ Buka kuis baru ]   │
+│          │ Matematika, Bu Rina   Topik kuis                   │
+│          │               [Pecahan Senilai ▾][Buka kuis baru]  │
 │          │ ┌──────────────────────────────────────────────┐   │
 │          │ │ PanelKodeKelas (muncul setelah kuis dibuka)  │   │
 │          │ │  A7K2P (besar)     [QR]    [Lihat hasil]     │   │
@@ -278,6 +290,75 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 - Saat memproses: `StatusHalaman` jenis `memuat`. Saat gagal: `StatusHalaman` jenis `gagal` dengan aksi "Coba lagi" (bukan `GagalBuatMateri`, karena tidak ada materi cadangan untuk modul).
 - Pratinjau memakai `TabMateriSiswa` dengan `formatAwal = null` (tab Bacaan terbuka lebih dulu), dipasang ulang setiap hasil baru.
 
+### 3.9 Guru: Buat Soal (`/guru/soal`)
+
+```text
+┌──────────┬────────────────────────────────────────────────────────┐
+│ SIDEBAR  │ Buat soal                                              │
+│          │ Khusus soal matematika SMP kelas 7. …                  │
+│          │ ┌────────────────────────────────────────────────────┐ │
+│          │ │ Nama topik [                                     ] │ │
+│          │ │ Capaian pembelajaran [                           ] │ │
+│          │ └────────────────────────────────────────────────────┘ │
+│          │ ┌─ Soal 1 ───────────────────────────────────────────┐ │
+│          │ │ Teks soal [                                      ] │ │
+│          │ │ Pilihan A [        ]   Pilihan B [        ]        │ │
+│          │ │ Pilihan C [        ]   Pilihan D [        ]        │ │
+│          │ │ Kunci jawaban  [A] [B] [C] [D]                     │ │
+│          │ │ Jika memilih … (selain kunci) [        ] opsional  │ │
+│          │ └────────────────────────────────────────────────────┘ │
+│          │ … Soal 2 s.d. Soal 5                                   │
+│          │ [ Simpan topik dan soal ]                              │
+└──────────┴────────────────────────────────────────────────────────┘
+```
+
+- Satu aksi utama di bawah: "Simpan topik dan soal" (varian utama, ikon `Save`). Tidak ada tombol ubah atau hapus.
+- Tiap soal adalah `fieldset` dengan `legend` "Soal n". Kunci jawaban berupa empat tombol radio A–D (minimal 48×48px); yang terpilih `bg-primer` teks putih, fokus keyboard tampak sebagai outline `primer`.
+- Kolom kesalahan pemahaman ("Jika memilih B", dan seterusnya) hanya tampil untuk pilihan yang bukan kunci.
+- Validasi saat menyimpan memakai skema yang sama dengan server (`skemaBodyTopikBaru` + `pesanGalatTopik`): pesan per kolom berwarna `belum-teks` di bawah kolomnya (`aria-invalid`, `aria-describedby`), ringkasan `role="alert"` "Ada isian yang belum sesuai. Periksa kolom yang ditandai.", dan fokus pindah ke kolom salah yang pertama.
+- Setelah tersimpan: "Topik "{nama}" tersimpan. Pilih topik ini saat membuka kuis baru di Dashboard." (warna `sudah-teks`) dan form dikosongkan.
+- Halaman ini tidak memakai komponen khusus; kolom isian memakai gaya yang sama dengan mode edit `KartuMateriGuru`.
+- Di Dashboard (3.2), `<select>` berlabel "Topik kuis" berada di samping "Buka kuis baru", dengan bawaan Pecahan Senilai. Jika daftar topik gagal dimuat, tampil keterangan kecil "Daftar topik belum berhasil dimuat. Kuis baru memakai topik Pecahan Senilai."
+
+### 3.10 Landing page (`/`)
+
+```text
+┌───────────────────────────────────────────────────────────────────┐
+│ ( Guru Pintar    Masalah  Cara kerja  Fitur  Prinsip  Gabung kuis │
+│                                        [Coba sebagai guru] )      │
+│ (Untuk guru SMP · Kurikulum Merdeka)       ┌ Materi AI siap … ┐   │
+│ Tahu siapa yang tertinggal          ┌─────────────────────┐       │
+│ HARI INI, bukan saat ulangan.       │ ●●● Peta kelas · 7A │       │
+│ Cek pemahaman kilat … bantuan AI …  │ ● ● ● ● ● ● ● ●     │       │
+│ [ Coba sebagai guru ] [Gabung kuis] │ … 40 titik          │       │
+│ (✓ Kuis 5 soal) (✓ Tanpa instal) …  │ 16 Belum · 12 · 10  │       │
+│                                ┌ Soal paling banyak salah … ┐     │
+│ #masalah   [40 siswa] [80 menit] [2 menit per anak]               │
+│ #cara-kerja   (1)──────────(2)──────────(3)                       │
+│ #fitur   ┌ Peta kelas ┐┌ Materi AI 4 bentuk ┐                     │
+│          │   2×2      │├ Soal ┐┌ Pendamping ┤                     │
+│          └────────────┘├ Ubah Modul ┐┌ Buat soal ┐                │
+│ #prinsip   4 butir dalam satu kartu, 2 kolom                      │
+│ ▓ Coba satu siklus dalam lima menit          [ Coba sebagai guru ]│
+│ Prototipe hackathon. Guru Pintar.                 Kembali ke atas │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+- Server Component, tanpa data dari database dan tanpa gambar. Lebar konten maksimal 1200px, jarak antarbagian 96px, tanpa sidebar. Isi `<main>` diberi `overflow-x-clip` agar kartu melayang dan gumpalan dekoratif tidak membuat scroll horizontal di 360px.
+- **Navbar:** `NavbarLanding` (4.19), hanya di halaman ini (bukan di `layout.tsx`). Setiap bagian yang dituju punya `id` dan `scroll-mt-28` agar judulnya tidak tertutup navbar. Tanpa smooth scroll.
+- **Satu tombol utama per layar:** hero memakai `utama` "Coba sebagai guru" dan `sekunder` "Gabung kuis sebagai siswa"; navbar hanya `sekunder` dan `teks`. Pita penutup memakai varian `terang` (4.3) sebagai aksi utama layar itu.
+- **Hero:** dua kolom di ≥1024px, bertumpuk di bawahnya. Pill "Untuk guru SMP · Kurikulum Merdeka", H1 dengan "hari ini" berwarna `primer`, subjudul, dua tombol, lalu tiga chip kaca dengan ikon centang `sudah-teks` ("Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"). Kolom kanan: `PratinjauDasbor` (4.20) dengan keterangan "Satu kelas, 40 siswa, terpetakan dalam hitungan menit."
+- **Pengecualian tipografi (hanya di landing page):** H1 36px di HP dan 56px/1.05 di ≥1024px, `font-extrabold`, `tracking-tight`. Judul bagian 28px (32px di ≥768px). Angka di bagian masalah 40px (48px di ≥768px).
+- **#masalah:** tiga kartu kaca berisi angka besar dan satuan (40 siswa, 80 menit, 2 menit per anak) dengan keterangan singkat, lalu satu kalimat tentang zona buta sebelum ulangan.
+- **#cara-kerja:** tiga langkah dengan lingkaran nomor `bg-primer` teks putih. Di ≥768px ada garis penghubung `bg-primer/20` di belakang lingkaran (`aria-hidden`); di HP langkah bertumpuk tanpa garis.
+- **#fitur (bento):** ≥1024px empat kolom: Peta kelas 2×2, Materi AI 4 bentuk 2×1, Soal paling banyak salah 1×1, Perlu Pendampingan 1×1, Ubah Modul 2×1, Buat soal sendiri 2×1. 768–1023px dua kolom (Peta kelas dan Materi AI selebar penuh). Di bawahnya satu kolom. Kotak peta kelas berisi bilah bertumpuk 16/12/10 (`grow-[n]`, `role="img"` dengan `aria-label`); kotak materi AI berisi empat ubin Video, Audio, Bacaan, Latihan.
+- **#prinsip:** empat butir dalam satu kartu kaca, dua kolom di ≥768px.
+- **Penutup:** pita `bg-primer text-white rounded-kartu` dengan `data-latar="primer"` (garis fokus menjadi putih, bagian 2.4), tagline, satu kalimat, dan `Tombol varian="terang"`. Footer: teks kecil dan tautan "Kembali ke atas" (`#atas`).
+- **Kontras:** teks kecil di atas `primer-lembut` memakai `primer-hover` (±5.3:1), bukan `primer` (±3.9:1). Putih di atas `primer` dan `primer` di atas putih ±4.5:1. "hari ini" berwarna `primer` lolos karena teks besar (≥3:1). Warna `ai` hanya untuk ikon, tidak untuk teks kecil.
+- **Data contoh:** komposisi 16/12/10/2 dan "Nomor 5 · 74% salah" sama dengan sesi demo `RIW004` (PRD 8.5). Angka 40 siswa, 80 menit (2 JP), dan 2 menit per anak adalah ilustrasi.
+- Teks prinsip mengikuti PRD D-1, D-2, D-5, dan `architecture.md` 9.2. Ubah Modul disebut khusus modul matematika kelas 7 (PRD F-9).
+- Tanpa animasi masuk dan tanpa efek melayang bergerak; hanya transisi hover bawaan, yang dimatikan oleh `prefers-reduced-motion`.
+
 ---
 
 ## 4. Komponen Spesifik (Instruksi untuk AI)
@@ -295,8 +376,8 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 - **Jangan:** menumpuk kartu kaca di dalam kartu kaca.
 
 ### 4.3 `Tombol`
-- **Props:** `{ varian: 'utama' | 'sekunder' | 'teks'; ikon?: LucideIcon; memuat?: boolean; lebarPenuh?: boolean; type?: 'button' | 'submit'; disabled?: boolean; onClick?: () => void; children: ReactNode }`
-- **Tampilan:** `utama` = `bg-primer text-white hover:bg-primer-hover`, tinggi 48px (siswa 52px); `sekunder` = kaca + teks `primer`; `teks` = tanpa latar, teks `primer`, garis bawah saat hover.
+- **Props:** `{ varian: 'utama' | 'sekunder' | 'teks' | 'terang'; ikon?: LucideIcon; memuat?: boolean; lebarPenuh?: boolean; type?: 'button' | 'submit'; disabled?: boolean; onClick?: () => void; href?: string; children: ReactNode }`. Jika `href` diisi, dirender sebagai `<Link>`.
+- **Tampilan:** `utama` = `bg-primer text-white hover:bg-primer-hover`, tinggi 48px (siswa 52px); `sekunder` = kaca + teks `primer`; `teks` = tanpa latar, teks `primer`, garis bawah saat hover; `terang` = `bg-white text-primer hover:bg-primer-lembut`, hanya di atas latar `primer` (pita penutup landing page) dan berperan sebagai aksi utama layar itu.
 - **Perilaku:** saat `memuat`, tampil ikon putar kecil + teks tetap, tombol `disabled` dan `aria-busy="true"`.
 - **Jangan:** simbol panah di teks tombol; lebih dari satu `utama` per layar; teks "Submit" atau "OK".
 
@@ -364,9 +445,29 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 - **Perilaku:** `memuat` → kerangka abu-abu berdenyut halus (tanpa spinner besar); `gagal` → pesan jelas apa yang terjadi + tombol aksi; `role="status"` dan `aria-live="polite"`.
 
 ### 4.17 `GagalBuatMateri`
-- **Props:** `{ onCobaLagi: () => void; onGunakanCadangan: () => void; onBatal?: () => void; sibuk?: boolean }`
+- **Props:** `{ onCobaLagi: () => void; onGunakanCadangan?: () => void; onBatal?: () => void; sibuk?: boolean }`
+- **Tanpa cadangan (PRD F-10):** materi cadangan hanya ada untuk topik demo. Jika `onGunakanCadangan` tidak diisi, tombol "Gunakan materi cadangan" tidak tampil, teks penjelas menjadi "Coba sekali lagi dalam beberapa saat.", dan "Coba lagi" menjadi varian utama. `/guru/hasil` dan `/guru/materi` mengisinya hanya jika `cadanganTersedia`.
 - **Isi:** pesan "Materi belum berhasil dibuat." (PRD AC-6.3) dan dua tombol: "Coba lagi" (varian sekunder) dan "Gunakan materi cadangan" (varian utama). Jika `onBatal` diisi, tampil tombol teks "Batal".
 - **Perilaku:** `role="alert"`; semua tombol nonaktif saat `sibuk` agar tidak ditekan dua kali. Dipakai di `/guru/hasil` dan `/guru/materi`; selama komponen ini tampil, tombol utama halaman disembunyikan (satu aksi utama per layar).
+
+### 4.18 `PetaTitikKelas` (elemen yang diingat di landing page)
+- **Props:** `{ jumlah: { belum: number; setengah: number; sudah: number; belumMenjawab: number } }`. Server Component.
+- **Isi:** **tanpa** kartu pembungkus (pemanggil yang menaruhnya di kartu, agar tidak ada kaca di dalam kaca). Grid 8 kolom, satu titik bulat per siswa, urut Belum, Setengah, Sudah, lalu belum menjawab. Warna `bg-belum`, `bg-setengah`, `bg-sudah`, dan `bg-tinta/15` untuk yang belum menjawab. Di bawahnya ringkasan satu baris "16 Belum · 12 Setengah · 10 Sudah · 2 belum menjawab" dengan titik warna kecil.
+- **Aksesibilitas:** grid `role="img"` dengan `aria-label` berisi komposisi, misalnya "Peta 40 siswa: 16 belum paham, 12 setengah paham, 10 sudah paham, 2 belum menjawab."; titik dan ringkasan `aria-hidden`.
+- **Jangan:** animasi, nama siswa, atau dipakai di halaman siswa.
+
+### 4.19 `NavbarLanding`
+- **Tujuan:** navigasi landing page. Server Component tanpa JavaScript; hanya dipakai di `/`.
+- **Tampilan:** `<header>` `sticky top-3 z-20` dengan jarak tepi `mx-3` (`mx-6` di ≥768px); `<nav aria-label="Navigasi utama">` berbentuk kapsul `kaca rounded-full`, tinggi 64px, lebar maksimal 1200px.
+- **Isi:** kiri ikon `GraduationCap` + "Guru Pintar" ke `/` (`aria-label` "Guru Pintar, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah tautan anchor Masalah, Cara kerja, Fitur, Prinsip ke `#masalah`, `#cara-kerja`, `#fitur`, `#prinsip` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`.
+- **Jangan:** tombol varian `utama`, menu hamburger, atau skrip.
+
+### 4.20 `PratinjauDasbor`
+- **Tujuan:** pratinjau produk di hero landing page. Server Component tanpa props; data contoh sama dengan sesi demo `RIW004`.
+- **Isi:** `<figure>` (`relative isolate`, lebar maksimal 448px). Jendela `kaca-pekat` dengan bilah atas (tiga titik 10px `bg-belum`, `bg-setengah`, `bg-sudah` yang `aria-hidden`, dan judul "Peta kelas · Kelas 7A") lalu `PetaTitikKelas`. Dua kartu kecil `kaca-pekat`: "Materi AI siap untuk 3 kelompok" (ikon `Sparkles` warna `ai`) di kanan atas dan "Soal paling banyak salah: Nomor 5 · 74% salah" (ikon `Lightbulb`, "74% salah" warna `belum-teks`) di kiri bawah. `figcaption` "Satu kelas, 40 siswa, terpetakan dalam hitungan menit." (dengan awalan `sr-only` "Contoh tampilan dasbor kelas demo.").
+- **Perilaku:** mulai 640px kartu kecil menumpuk di tepi jendela (`absolute`); di bawahnya ditaruh berurutan di bawah jendela agar tidak ada scroll horizontal. Teks kartu dapat dibaca pembaca layar; ikon `aria-hidden`.
+- **Latar:** di belakang jendela (`-z-10`, `aria-hidden`), tiga gumpalan blob (`opacity-60`–`80`, `blur-3xl`) dan lapisan `pola-titik` yang memudar ke tepi dengan `mask-image`. Tidak berada di belakang teks judul hero.
+- **Jangan:** animasi melayang, gambar, atau data nyata siswa.
 
 ---
 

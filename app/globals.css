@@ -50,6 +50,12 @@
   box-shadow: var(--shadow-kaca);
 }
 
+/* Pola titik halus untuk latar hero landing page (design.md 3.10). */
+@utility pola-titik {
+  background-image: radial-gradient(color-mix(in srgb, var(--color-tinta) 12%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 body {
   background-color: var(--color-latar);
   color: var(--color-tinta);
@@ -58,6 +64,11 @@ body {
 :focus-visible {
   outline: 3px solid var(--color-primer);
   outline-offset: 2px;
+}
+
+/* Di atas latar primer (pita penutup landing page), garis fokus primer tidak terlihat. */
+[data-latar="primer"] :focus-visible {
+  outline-color: var(--color-white);
 }
 
 @media (prefers-reduced-motion: reduce) {

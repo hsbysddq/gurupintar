@@ -66,7 +66,7 @@ guru-pintar/
 ├── app/
 │   ├── layout.tsx                  # font, metadata, <LatarPastel/>
 │   ├── globals.css                 # token desain (design.md bagian 2)
-│   ├── page.tsx                    # pilihan "Saya guru" / "Saya siswa"
+│   ├── page.tsx                    # landing page (design.md 3.10)
 │   ├── siswa/
 │   │   ├── page.tsx                # F-1 gabung kelas
 │   │   ├── format/page.tsx         # F-2
@@ -79,7 +79,8 @@ guru-pintar/
 │   │   ├── hasil/page.tsx          # F-5  (?sesi=)
 │   │   ├── materi/page.tsx         # F-6  (?sesi=)
 │   │   ├── pendampingan/page.tsx   # F-8
-│   │   └── modul/page.tsx          # F-9 (pratinjau, tidak disimpan)
+│   │   ├── modul/page.tsx          # F-9 (pratinjau, tidak disimpan)
+│   │   └── soal/page.tsx           # F-10 buat topik + 5 soal
 │   └── api/
 │       ├── sesi/route.ts           # GET
 │       ├── soal/route.ts           # GET
@@ -93,7 +94,8 @@ guru-pintar/
 │           ├── materi/route.ts     # GET, POST, PATCH
 │           ├── materi/bagikan/route.ts # POST
 │           ├── pendampingan/route.ts   # GET
-│           └── modul/route.ts      # POST
+│           ├── modul/route.ts      # POST
+│           └── topik/route.ts      # GET, POST (F-10)
 ├── components/                     # daftar di design.md bagian 4
 ├── hooks/
 │   ├── use-polling.ts
@@ -108,6 +110,7 @@ guru-pintar/
 │   ├── pendampingan.ts
 │   ├── rencana-materi.ts           # kelompok target (7.3) + miskonsepsi per kelompok untuk pesan AI
 │   ├── validasi-materi.ts          # skema zod isi materi + pemeriksaan tambahan
+│   ├── soal-guru.ts                # F-10: form soal → baris tabel soal, daftar topik, cadangan
 │   ├── skema-api.ts                # skema zod untuk body/query setiap endpoint
 │   ├── api-klien.ts                # fungsi fetch untuk komponen (browser)
 │   ├── sesi-lokal.ts               # satu-satunya file yang boleh memakai localStorage
@@ -137,6 +140,9 @@ export const BATAS_SETENGAH = 0.6;          // PRD A-2
 export const INTERVAL_POLLING_GURU_MS = 3000;
 export const INTERVAL_POLLING_SISWA_MS = 5000;
 export const BATAS_WAKTU_AI_MS = 60000;
+export const JUMLAH_SOAL_TOPIK = 5;         // PRD F-3, F-10
+export const PANJANG_MODUL_MIN = 200;       // PRD F-9
+export const PANJANG_MODUL_MAKS = 8000;
 export const KARAKTER_KODE = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const PANJANG_KODE = 5;
 ```
@@ -384,21 +390,23 @@ Aturan umum:
 | `POST /api/jawaban` | `{ sesiId, siswaId, jawaban: [{soalId, pilihan}] }` | `{ ok: true }` | `400` jawaban tidak lengkap · `403` siswa bukan anggota kelas · `404` · `409` "Kuis ini sudah ditutup." |
 | `GET /api/materi?sesi=&siswa=` | id sesi, id siswa | `{ status: 'belum-mengerjakan' }` · `{ status: 'disiapkan' }` · `{ status: 'tersedia', namaTopik, isi }` | `404` |
 | `GET /api/guru/sesi` | | `[{ id, kodeKelas, status, dibuatPada, jumlahMenjawab }]` terbaru di atas | |
-| `POST /api/guru/sesi` | `{}` | `{ id, kodeKelas }` | `500` jika 5 kali percobaan kode bentrok |
+| `POST /api/guru/sesi` | `{ topikId? }`; tanpa `topikId` → `TOPIK_DEMO_ID` | `{ id, kodeKelas }` | `400` `topikId` bukan UUID · `404` "Topik tidak ditemukan." · `400` "Topik harus punya tepat 5 soal." · `500` jika 5 kali percobaan kode bentrok |
 | `POST /api/guru/sesi/tutup` | `{ sesiId }` | `{ ok: true }` | `404` |
 | `GET /api/guru/hasil?sesi=` | id sesi | lihat 6.1 | `404` |
 | `GET /api/guru/materi?sesi=` | id sesi | `[{ id, kelompok, isi, status, sumber, versi, jumlahSiswa }]` | `404` |
-| `POST /api/guru/materi` | `{ sesiId, gunakanCadangan?: boolean, ganti?: boolean }` | sama dengan GET | `400` belum ada jawaban · `409` "Materi sedang dibuat. Tunggu sebentar." · `409` "Materi yang sudah dibagikan tidak bisa dibuat ulang." · `502` "Materi belum berhasil dibuat." |
+| `POST /api/guru/materi` | `{ sesiId, gunakanCadangan?: boolean, ganti?: boolean }` | sama dengan GET | `400` belum ada jawaban · `400` "Materi cadangan hanya tersedia untuk topik Pecahan Senilai." (`gunakanCadangan` untuk topik selain `TOPIK_DEMO_ID`, diperiksa sebelum kunci diambil) · `409` "Materi sedang dibuat. Tunggu sebentar." · `409` "Materi yang sudah dibagikan tidak bisa dibuat ulang." · `502` "Materi belum berhasil dibuat." |
 | `PATCH /api/guru/materi` | `{ id, versi, isi }` | `{ ok: true, versi }` | `400` isi tidak valid · `409` "Materi sudah berubah. Muat ulang untuk melihat versi terbaru." |
 | `POST /api/guru/materi/bagikan` | `{ sesiId }` | `{ ok: true, jumlahDibagikan }` | `404` |
 | `GET /api/guru/pendampingan` | | `{ perluPendampingan: [{siswaId, nama, alasan: string[], saran: string[], trenSkor: number[]}], kemajuan: [{siswaId, nama, dari, ke}] }` | |
+| `GET /api/guru/topik` | | `[{ id, nama }]`: hanya topik dengan tepat 5 soal, topik demo di atas lalu urut nama (`susunDaftarTopik`) | |
+| `POST /api/guru/topik` | `{ nama, capaianPembelajaran, soal: [{ teks, pilihan: [4 string], kunci, miskonsepsi: [4 string] }] }` (tepat 5 soal, `skemaBodyTopikBaru`) | `201 { id, nama }` | `400` "Isian topik atau soal belum sesuai. Periksa lagi form." · `500` jika soal gagal disimpan (topik yang baru dibuat dihapus lagi) |
 | `POST /api/guru/modul` | `{ teks }`, 200–8000 karakter setelah `trim` | `{ isi: IsiMateri }`; hanya pratinjau, tidak menyentuh database | `400` "Teks modul harus 200–8000 karakter." · `502` "Materi belum berhasil dibuat." |
 
 ### 6.1 Respons `GET /api/guru/hasil`
 
 ```ts
 {
-  sesi: { id: string; kodeKelas: string; status: 'aktif' | 'selesai'; namaKelas: string; namaTopik: string; dibuatPada: string };
+  sesi: { id: string; kodeKelas: string; status: 'aktif' | 'selesai'; namaKelas: string; namaTopik: string; dibuatPada: string; cadanganTersedia: boolean };
   jumlahSiswa: number;
   jumlahMenjawab: number;
   kelompok: Record<'sudah' | 'setengah' | 'belum', { siswaId: string; nama: string; skor: number; total: number }[]>;
@@ -587,6 +595,24 @@ Pemeriksaan tambahan di `periksaIsiMateri` setelah lolos skema:
 - Empat pilihan tiap soal latihan harus berbeda satu sama lain.
 - Tidak boleh ada frasa `belum paham`, `setengah paham`, `sudah paham`, atau kata `kelompok` di teks mana pun (PRD D-2).
 - Tidak boleh ada notasi LaTeX (`\frac`, `$`).
+
+### 8.6 `soal-guru.ts` (PRD F-10)
+
+```ts
+export function keBarisSoal(topikId: string, daftar: SoalBaru[]): BarisSoalBaru[];
+export function samakanTeksPilihan(teks: string): string;
+export function pesanGalatTopik(hasil: SafeParseResult): Record<string, string>;
+export function susunDaftarTopik(daftar: { id: string; nama: string; jumlahSoal: number }[]): { id: string; nama: string }[];
+export function cadanganTersedia(topikId: string): boolean;
+```
+
+- `keBarisSoal`: `nomor` 1–5 mengikuti urutan form, `pilihan` menjadi `[{kode:'A',teks}, …]`, teks di-`trim`, `miskonsepsi` menjadi `{ "B": "…" }` **tanpa** kunci dan tanpa string kosong (termasuk jika kunci diganti setelah miskonsepsi ditulis).
+- `samakanTeksPilihan`: bentuk pembanding pilihan kembar (trim, spasi dirapikan, huruf kecil). Dipakai `skemaBodyTopikBaru` di `skema-api.ts`, yang juga dipakai form di browser.
+- `pesanGalatTopik`: pesan bahasa Indonesia per kolom form, dikunci dengan jalur seperti `soal.1.pilihan.2`.
+- `susunDaftarTopik`: hanya topik dengan tepat `JUMLAH_SOAL_TOPIK` soal, sehingga topik yang soalnya gagal tersimpan (dan gagal dihapus lagi) tidak pernah bisa dipilih.
+- `cadanganTersedia`: `topikId === TOPIK_DEMO_ID`. Dipakai `POST /api/guru/materi` (tolak `400`) dan `GET /api/guru/hasil` (menyembunyikan tombol cadangan di `/guru/hasil` dan `/guru/materi`).
+
+**Menyimpan topik (`POST /api/guru/topik`):** `insert` topik lalu satu `insert` untuk 5 baris `keBarisSoal`. Jika insert soal gagal, topik yang baru dibuat dihapus (`delete … eq('id')`) dan API membalas `500`. `schema.sql` tidak berubah.
 
 ---
 
