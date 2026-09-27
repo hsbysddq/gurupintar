@@ -1,5 +1,5 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
-import type { BodyBuatMateri, BodyJawaban } from './skema-api';
+import type { BodyBuatMateri, BodyJawaban, BodyTopikBaru } from './skema-api';
 import type {
   DataPendampingan,
   Format,
@@ -11,6 +11,7 @@ import type {
   SesiGuru,
   SesiUntukSiswa,
   SoalUntukSiswa,
+  TopikRingkas,
 } from './tipe';
 
 export const PESAN_GAGAL_KONEKSI = 'Koneksi terputus. Periksa internet, lalu coba lagi.';
@@ -78,8 +79,17 @@ export function ambilDaftarSesi(signal?: AbortSignal): Promise<SesiGuru[]> {
   return minta('/api/guru/sesi', { signal });
 }
 
-export function bukaSesi(): Promise<SesiBaru> {
-  return minta('/api/guru/sesi', { method: 'POST', body: JSON.stringify({}) });
+/** Tanpa `topikId`, server memakai topik demo (PRD F-10). */
+export function bukaSesi(topikId?: string): Promise<SesiBaru> {
+  return minta('/api/guru/sesi', { method: 'POST', body: JSON.stringify({ topikId }) });
+}
+
+export function ambilDaftarTopik(): Promise<TopikRingkas[]> {
+  return minta('/api/guru/topik');
+}
+
+export function simpanTopik(body: BodyTopikBaru): Promise<TopikRingkas> {
+  return minta('/api/guru/topik', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function tutupSesi(sesiId: string): Promise<{ ok: true }> {

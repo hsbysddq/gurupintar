@@ -4,8 +4,10 @@ import {
   ambilMateriGuru,
   ambilMateriSiswa,
   ambilPendampingan,
+  ambilDaftarTopik,
   ambilSesi,
   bagikanMateri,
+  simpanTopik,
   bukaSesi,
   buatMateri,
   ErrorApi,
@@ -128,5 +130,26 @@ describe('api-klien', () => {
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/pendampingan');
     expect(palsu.mock.calls[0][1]?.method).toBeUndefined();
     expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
+  });
+});
+
+describe('fungsi topik (PRD F-10)', () => {
+  it('bukaSesi dengan topikId mengirimnya di body', async () => {
+    const palsu = stubFetch(async () => Response.json({ id: 's1', kodeKelas: 'ABCDE' }));
+    await bukaSesi('t1');
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/sesi');
+    expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({ topikId: 't1' });
+  });
+
+  it('ambilDaftarTopik memakai GET dan simpanTopik memakai POST dengan body', async () => {
+    const palsu = stubFetch(async () => Response.json([]));
+    await ambilDaftarTopik();
+    const body = { nama: 'Topik', capaianPembelajaran: 'Capaian uji', soal: [] };
+    await simpanTopik(body);
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/topik');
+    expect(palsu.mock.calls[0][1]?.method).toBeUndefined();
+    expect(palsu.mock.calls[1][0]).toBe('/api/guru/topik');
+    expect(palsu.mock.calls[1][1]?.method).toBe('POST');
+    expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual(body);
   });
 });
