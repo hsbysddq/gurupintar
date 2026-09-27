@@ -332,7 +332,6 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 │ Cek pemahaman kilat … bantuan AI …  │ ● ● ● ● ● ● ● ●     │       │
 │ [ Coba sebagai guru ] [Gabung kuis] │ … 40 titik          │       │
 │ (✓ Kuis 5 soal) (✓ Tanpa instal) …  │ 16 Belum · 12 · 10  │       │
-│                                ┌ Soal paling banyak salah … ┐     │
 │ #masalah   [40 siswa] [80 menit] [2 menit per anak]               │
 │ #cara-kerja   (1)──────────(2)──────────(3)                       │
 │ #fitur   ┌ Peta kelas ┐┌ Materi AI 4 bentuk ┐                     │
@@ -347,7 +346,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 - Server Component, tanpa data dari database dan tanpa gambar. Lebar konten maksimal 1200px, jarak antarbagian 96px, tanpa sidebar. Isi `<main>` diberi `overflow-x-clip` agar kartu melayang dan gumpalan dekoratif tidak membuat scroll horizontal di 360px.
 - **Navbar:** `NavbarLanding` (4.19), hanya di halaman ini (bukan di `layout.tsx`). Navbar hanya menautkan `#masalah` dan `#cara-kerja`; `#fitur` dan `#prinsip` tetap ada di halaman tanpa tautan navbar. Setiap bagian ber-`id` diberi `scroll-mt-28` agar judulnya tidak tertutup navbar saat dituju. Tanpa smooth scroll.
 - **Satu tombol utama per layar:** hero memakai `utama` "Coba sebagai guru" dan `sekunder` "Gabung kuis sebagai siswa"; navbar hanya `sekunder` dan `teks`. Pita penutup memakai varian `terang` (4.3) sebagai aksi utama layar itu.
-- **Hero:** dua kolom di ≥1024px, bertumpuk di bawahnya. Pill "Untuk guru SMP · Kurikulum Merdeka", H1 dengan "hari ini" berwarna `primer`, subjudul, dua tombol, lalu tiga chip kaca dengan ikon centang `sudah-teks` ("Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"). Kolom kanan: `PratinjauDasbor` (4.20) dengan keterangan "Satu kelas, 40 siswa, terpetakan dalam hitungan menit."
+- **Hero:** dua kolom di ≥1024px, bertumpuk di bawahnya. Pill "Untuk guru SMP · Kurikulum Merdeka", H1 dengan "hari ini" berwarna `primer`, subjudul, dua tombol, lalu tiga chip kaca dengan ikon centang `sudah-teks` ("Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"). Kolom kanan: `PratinjauDasbor` (4.20), hanya jendela dasbor dengan peta titik dan ringkasan jumlah per kelompok, tanpa kartu melayang dan tanpa teks keterangan.
 - **Pengecualian tipografi (hanya di landing page):** H1 36px di HP dan 56px/1.05 di ≥1024px, `font-extrabold`, `tracking-tight`. Judul bagian 28px (32px di ≥768px). Angka di bagian masalah 40px (48px di ≥768px).
 - **#masalah:** tiga kartu kaca berisi angka besar dan satuan (40 siswa, 80 menit, 2 menit per anak) dengan keterangan singkat, lalu satu kalimat tentang zona buta sebelum ulangan.
 - **#cara-kerja:** tiga langkah dengan lingkaran nomor `bg-primer` teks putih. Di ≥768px ada garis penghubung `bg-primer/20` di belakang lingkaran (`aria-hidden`); di HP langkah bertumpuk tanpa garis.
@@ -355,7 +354,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 - **#prinsip:** empat butir dalam satu kartu kaca, dua kolom di ≥768px.
 - **Penutup:** pita `bg-primer text-white rounded-kartu` dengan `data-latar="primer"` (garis fokus menjadi putih, bagian 2.4), tagline, satu kalimat, dan `Tombol varian="terang"`. Footer: teks kecil dan tautan "Kembali ke atas" (`#atas`).
 - **Kontras:** teks kecil di atas `primer-lembut` memakai `primer-hover` (±5.3:1), bukan `primer` (±3.9:1). Putih di atas `primer` dan `primer` di atas putih ±4.5:1. "hari ini" berwarna `primer` lolos karena teks besar (≥3:1). Warna `ai` hanya untuk ikon, tidak untuk teks kecil.
-- **Data contoh:** komposisi 16/12/10/2 dan "Nomor 5 · 74% salah" sama dengan sesi demo `RIW004` (PRD 8.5). Angka 40 siswa, 80 menit (2 JP), dan 2 menit per anak adalah ilustrasi.
+- **Data contoh:** komposisi peta 16/12/10/2 sama dengan sesi demo `RIW004` (PRD 8.5). Angka 40 siswa, 80 menit (2 JP), dan 2 menit per anak adalah ilustrasi.
 - Teks prinsip mengikuti PRD D-1, D-2, D-5, dan `architecture.md` 9.2. Ubah Modul disebut khusus modul matematika kelas 7 (PRD F-9).
 - Tanpa animasi masuk dan tanpa efek melayang bergerak; hanya transisi hover bawaan, yang dimatikan oleh `prefers-reduced-motion`.
 
@@ -458,14 +457,14 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 
 ### 4.19 `NavbarLanding`
 - **Tujuan:** navigasi landing page. Server Component tanpa JavaScript; hanya dipakai di `/`.
-- **Tampilan:** `<header>` `sticky top-3 z-20` dengan jarak tepi `mx-3` (`mx-6` di ≥768px); `<nav aria-label="Navigasi utama">` berbentuk kapsul `kaca rounded-full`, tinggi 64px, lebar maksimal 1200px.
-- **Isi:** kiri ikon `GraduationCap` + "Guru Pintar" ke `/` (`aria-label` "Guru Pintar, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`.
+- **Tampilan:** `<header>` `sticky top-3 z-20` dengan jarak tepi `mx-3` (`mx-6` di ≥768px); `<nav aria-label="Navigasi utama">` berbentuk kapsul `kaca rounded-full`, tinggi 64px, lebar maksimal 1200px, padding `px-4` (16px) yang sama di kiri dan kanan: ikon logo (tanpa padding sendiri) dan tepi tombol sekunder sama jauhnya dari tepi kapsul.
+- **Isi:** kiri ikon `GraduationCap` + "Guru Pintar" ke `/` (`aria-label` "Guru Pintar, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`, dengan `gap-2`: teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), setara dengan padding tepi kapsul.
 - **Jangan:** tombol varian `utama`, menu hamburger, atau skrip.
 
 ### 4.20 `PratinjauDasbor`
 - **Tujuan:** pratinjau produk di hero landing page. Server Component tanpa props; data contoh sama dengan sesi demo `RIW004`.
-- **Isi:** `<figure>` (`relative isolate`, lebar maksimal 448px). Jendela `kaca-pekat` dengan bilah atas (tiga titik 10px `bg-belum`, `bg-setengah`, `bg-sudah` yang `aria-hidden`, dan judul "Peta kelas · Kelas 7A") lalu `PetaTitikKelas`. Satu kartu kecil `kaca-pekat` di kiri bawah: "Soal paling banyak salah: Nomor 5 · 74% salah" (ikon `Lightbulb`, "74% salah" warna `belum-teks`), yang menjembatani jendela dengan kolom teks hero. `figcaption` "Satu kelas, 40 siswa, terpetakan dalam hitungan menit." (dengan awalan `sr-only` "Contoh tampilan dasbor kelas demo.").
-- **Perilaku:** mulai 640px kartu kecil menumpuk di tepi kiri bawah jendela (`absolute`, `-bottom-7 -left-6`); di bawah 640px ditaruh di bawah jendela agar tidak ada scroll horizontal. Teks kartu dapat dibaca pembaca layar; ikon `aria-hidden`.
+- **Isi:** `<div>` (`relative isolate`, lebar maksimal 448px) berisi satu jendela `kaca-pekat`: bilah atas (tiga titik 10px `bg-belum`, `bg-setengah`, `bg-sudah` yang `aria-hidden`, dan judul "Peta kelas · Kelas 7A") lalu `PetaTitikKelas` (grid titik + ringkasan jumlah per kelompok). Tanpa kartu melayang dan tanpa teks keterangan.
+- **Aksesibilitas:** isi peta dibacakan lewat `role="img"` dan `aria-label` pada grid `PetaTitikKelas` (4.18).
 - **Latar:** di belakang jendela (`-z-10`, `aria-hidden`), tiga gumpalan blob (`opacity-60`–`80`, `blur-3xl`) dan lapisan `pola-titik` yang memudar ke tepi dengan `mask-image`. Tidak berada di belakang teks judul hero.
 - **Jangan:** animasi melayang, gambar, atau data nyata siswa.
 

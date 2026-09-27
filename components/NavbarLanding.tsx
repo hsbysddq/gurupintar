@@ -9,14 +9,15 @@ const TAUTAN: { href: string; label: string }[] = [
 
 /**
  * Navbar kapsul kaca untuk landing page (design.md 4.19). Server Component tanpa JavaScript:
- * di bawah 768px tautan tengah disembunyikan, tanpa menu hamburger.
+ * di bawah 768px tautan tengah disembunyikan, tanpa menu hamburger. Padding kapsul 16px di kiri dan
+ * kanan, sehingga ikon logo dan tepi tombol sama jauhnya dari tepi kapsul.
  */
 export function NavbarLanding() {
   return (
     <header className="sticky top-3 z-20 mx-3 md:mx-6">
       <nav
         aria-label="Navigasi utama"
-        className="kaca mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 rounded-full py-2 pr-2 pl-4 md:pl-5"
+        className="kaca mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 rounded-full px-4"
       >
         <Link href="/" aria-label="Guru Pintar, ke beranda" className="flex min-h-12 items-center gap-2 rounded-full font-bold">
           <GraduationCap aria-hidden="true" className="size-6 shrink-0 text-primer" />
@@ -38,8 +39,9 @@ export function NavbarLanding() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-1">
-          <span className="max-sm:hidden">
+        {/* Teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), sama dengan padding tepi kapsul. */}
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:flex">
             <Tombol varian="teks" href="/siswa">
               Gabung kuis
             </Tombol>
