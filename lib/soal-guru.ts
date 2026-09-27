@@ -46,6 +46,37 @@ export function keBarisSoal(topikId: string, daftar: SoalBaru[]): BarisSoalBaru[
   });
 }
 
+type HasilValidasi =
+  | { success: true }
+  | { success: false; error: { issues: { path: PropertyKey[]; code: string; message: string }[] } };
+
+/**
+ * Pesan per kolom form Buat Soal dari hasil `skemaBodyTopikBaru.safeParse`, dikunci dengan jalur
+ * seperti "soal.1.pilihan.2". Satu pesan (yang pertama) per kolom.
+ */
+export function pesanGalatTopik(hasil: HasilValidasi): Record<string, string> {
+  if (hasil.success) return {};
+  const pesan: Record<string, string> = {};
+  for (const isu of hasil.error.issues) {
+    const jalur = isu.path.map(String).join('.');
+    if (!(jalur in pesan)) pesan[jalur] = pesanUntukKolom(isu.path.map(String), isu.code, isu.message);
+  }
+  return pesan;
+}
+
+function pesanUntukKolom(jalur: string[], code: string, message: string): string {
+  const [akar, , kolom] = jalur;
+  if (akar === 'nama') return 'Nama topik harus 3–80 karakter.';
+  if (akar === 'capaianPembelajaran') return 'Capaian pembelajaran harus 10–300 karakter.';
+  if (akar === 'soal' && jalur.length === 1) return `Harus ada tepat ${JUMLAH_SOAL_TOPIK} soal.`;
+  if (kolom === 'teks') return 'Teks soal harus 5–300 karakter.';
+  // Pesan pilihan kembar ditulis sendiri di skema (bahasa Indonesia).
+  if (kolom === 'pilihan') return code === 'custom' ? message : 'Pilihan harus diisi, maksimal 100 karakter.';
+  if (kolom === 'kunci') return 'Pilih kunci jawaban.';
+  if (kolom === 'miskonsepsi') return 'Miskonsepsi maksimal 200 karakter.';
+  return 'Isian belum sesuai.';
+}
+
 /**
  * Daftar topik untuk pilihan di Dashboard: hanya topik yang bisa dipakai kuis (tepat 5 soal), sehingga
  * topik yang soalnya gagal tersimpan tidak pernah muncul. Topik demo di atas, lalu urut nama.
