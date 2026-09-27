@@ -109,7 +109,7 @@ function HasilKuis() {
           <GagalBuatMateri
             sibuk={menyusun}
             onCobaLagi={pembuat.cobaLagi}
-            onGunakanCadangan={pembuat.gunakanCadangan}
+            onGunakanCadangan={data.sesi.cadanganTersedia ? pembuat.gunakanCadangan : undefined}
             onBatal={pembuat.batal}
           />
         ) : materiAda ? (

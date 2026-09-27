@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
@@ -8,8 +8,9 @@ import { PanelKodeKelas } from "@/components/PanelKodeKelas";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
 import { usePolling } from "@/hooks/use-polling";
-import { ambilDaftarSesi, bukaSesi, ErrorApi, tutupSesi } from "@/lib/api-klien";
-import { INTERVAL_POLLING_GURU_MS } from "@/lib/konstanta";
+import { ambilDaftarSesi, ambilDaftarTopik, bukaSesi, ErrorApi, tutupSesi } from "@/lib/api-klien";
+import { INTERVAL_POLLING_GURU_MS, TOPIK_DEMO_ID } from "@/lib/konstanta";
+import type { TopikRingkas } from "@/lib/tipe";
 
 const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", {
   weekday: "long",
@@ -28,6 +29,25 @@ export default function HalamanDashboardGuru() {
   const [membuka, setMembuka] = useState(false);
   const [menutup, setMenutup] = useState(false);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
+  const idPilihTopik = useId();
+  // PRD F-10: bawaan topik demo; jika daftar gagal dimuat, kuis tetap bisa dibuka dengan topik demo.
+  const [daftarTopik, setDaftarTopik] = useState<TopikRingkas[] | null>(null);
+  const [galatTopik, setGalatTopik] = useState(false);
+  const [topikId, setTopikId] = useState(TOPIK_DEMO_ID);
+
+  useEffect(() => {
+    let batal = false;
+    ambilDaftarTopik()
+      .then((daftar) => {
+        if (!batal) setDaftarTopik(daftar);
+      })
+      .catch(() => {
+        if (!batal) setGalatTopik(true);
+      });
+    return () => {
+      batal = true;
+    };
+  }, []);
 
   const sesiAktif = daftar?.find((s) => s.status === "aktif");
 
@@ -35,7 +55,7 @@ export default function HalamanDashboardGuru() {
     setMembuka(true);
     setGalatAksi(null);
     try {
-      await bukaSesi();
+      await bukaSesi(topikId);
       muatUlang();
     } catch (err) {
       setGalatAksi(pesanGalat(err));
@@ -64,10 +84,40 @@ export default function HalamanDashboardGuru() {
           <h1 className="text-[28px] leading-tight font-bold">Kelas 7A</h1>
           <p className="text-tinta-lembut">Matematika, Bu Rina</p>
         </div>
-        <Tombol varian="utama" ikon={Plus} memuat={membuka} onClick={bukaKuisBaru}>
-          Buka kuis baru
-        </Tombol>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-col gap-1">
+            <label htmlFor={idPilihTopik} className="text-[13px] leading-normal font-medium text-tinta-lembut">
+              Topik kuis
+            </label>
+            <select
+              id={idPilihTopik}
+              value={topikId}
+              disabled={!daftarTopik || membuka}
+              onChange={(e) => setTopikId(e.target.value)}
+              className="h-12 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta disabled:opacity-60"
+            >
+              {daftarTopik ? (
+                daftarTopik.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.nama}
+                  </option>
+                ))
+              ) : (
+                <option value={TOPIK_DEMO_ID}>{galatTopik ? "Pecahan Senilai" : "Memuat topik…"}</option>
+              )}
+            </select>
+          </div>
+          <Tombol varian="utama" ikon={Plus} memuat={membuka} onClick={bukaKuisBaru}>
+            Buka kuis baru
+          </Tombol>
+        </div>
       </header>
+
+      {galatTopik && (
+        <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
+          Daftar topik belum berhasil dimuat. Kuis baru memakai topik Pecahan Senilai.
+        </p>
+      )}
 
       {galatAksi && (
         <p role="alert" className="font-medium text-belum-teks">

@@ -4,7 +4,8 @@ import { Tombol } from "@/components/Tombol";
 
 type GagalBuatMateriProps = {
   onCobaLagi: () => void;
-  onGunakanCadangan: () => void;
+  /** Tidak diisi jika topik sesi tidak punya materi cadangan (PRD F-10); tombolnya disembunyikan. */
+  onGunakanCadangan?: () => void;
   onBatal?: () => void;
   sibuk?: boolean;
 };
@@ -17,16 +18,28 @@ export function GagalBuatMateri({ onCobaLagi, onGunakanCadangan, onBatal, sibuk 
         <CircleAlert aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-belum-teks" />
         <div className="flex flex-col gap-1">
           <p className="text-xl leading-snug font-semibold">Materi belum berhasil dibuat.</p>
-          <p className="text-tinta-lembut">Coba sekali lagi, atau pakai materi cadangan yang sudah disiapkan tim.</p>
+          <p className="text-tinta-lembut">
+            {onGunakanCadangan
+              ? "Coba sekali lagi, atau pakai materi cadangan yang sudah disiapkan tim."
+              : "Coba sekali lagi dalam beberapa saat."}
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Tombol varian="sekunder" disabled={sibuk} onClick={onCobaLagi}>
+        {/* Tanpa cadangan, "Coba lagi" menjadi satu-satunya aksi utama. */}
+        <Tombol
+          varian={onGunakanCadangan ? "sekunder" : "utama"}
+          disabled={onGunakanCadangan ? sibuk : false}
+          memuat={onGunakanCadangan ? false : sibuk}
+          onClick={onCobaLagi}
+        >
           Coba lagi
         </Tombol>
-        <Tombol varian="utama" memuat={sibuk} onClick={onGunakanCadangan}>
-          Gunakan materi cadangan
-        </Tombol>
+        {onGunakanCadangan && (
+          <Tombol varian="utama" memuat={sibuk} onClick={onGunakanCadangan}>
+            Gunakan materi cadangan
+          </Tombol>
+        )}
         {onBatal && (
           <Tombol varian="teks" disabled={sibuk} onClick={onBatal}>
             Batal

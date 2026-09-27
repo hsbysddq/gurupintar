@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, type LucideIcon } from "lucide-react";
+import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, ListChecks, type LucideIcon } from "lucide-react";
 
 type KerangkaGuruProps = {
   children: ReactNode;
@@ -16,7 +16,14 @@ const MENU: Menu[] = [
     href: "/guru",
     label: "Dashboard",
     ikon: LayoutDashboard,
-    aktif: (path) => !path.startsWith("/guru/pendampingan") && !path.startsWith("/guru/modul"),
+    // Daftar positif agar menu baru tidak ikut membuat Dashboard aktif.
+    aktif: (path) => path === "/guru" || path.startsWith("/guru/hasil") || path.startsWith("/guru/materi"),
+  },
+  {
+    href: "/guru/soal",
+    label: "Buat Soal",
+    ikon: ListChecks,
+    aktif: (path) => path.startsWith("/guru/soal"),
   },
   {
     href: "/guru/modul",

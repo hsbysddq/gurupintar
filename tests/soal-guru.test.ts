@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { TOPIK_DEMO_ID } from '@/lib/konstanta';
-import { cadanganTersedia, keBarisSoal, samakanTeksPilihan, susunDaftarTopik, type SoalBaru } from '@/lib/soal-guru';
+import { skemaBodyTopikBaru } from '@/lib/skema-api';
+import {
+  cadanganTersedia,
+  keBarisSoal,
+  pesanGalatTopik,
+  samakanTeksPilihan,
+  susunDaftarTopik,
+  type SoalBaru,
+} from '@/lib/soal-guru';
 
 const TOPIK_ID = '00000000-0000-4000-8000-000000000999';
 
@@ -82,6 +90,44 @@ describe('susunDaftarTopik', () => {
       { id: 'b', nama: 'bangun datar' },
       { id: 'z', nama: 'Zat dan Pecahan' },
     ]);
+  });
+});
+
+describe('pesanGalatTopik', () => {
+  const isian = () => ({
+    nama: 'Pecahan Biasa',
+    capaianPembelajaran: 'Peserta didik dapat membandingkan pecahan.',
+    soal: [1, 2, 3, 4, 5].map(() => ({
+      teks: 'Pecahan yang senilai dengan 1/3 adalah …',
+      pilihan: ['2/6', '1/6', '3/6', '2/3'],
+      kunci: 'A',
+      miskonsepsi: ['', '', '', ''],
+    })),
+  });
+
+  it('isian valid → tidak ada pesan', () => {
+    expect(pesanGalatTopik(skemaBodyTopikBaru.safeParse(isian()))).toEqual({});
+  });
+
+  it('memetakan setiap kolom yang salah ke pesan bahasa Indonesia, satu pesan per kolom', () => {
+    const b = isian();
+    b.nama = 'ab';
+    b.capaianPembelajaran = 'pendek';
+    b.soal[0].teks = 'abc';
+    b.soal[1].pilihan[2] = '';
+    b.soal[2].pilihan[3] = '2/6';
+    b.soal[3].kunci = '';
+    b.soal[4].miskonsepsi[1] = 'a'.repeat(201);
+
+    expect(pesanGalatTopik(skemaBodyTopikBaru.safeParse(b))).toEqual({
+      nama: 'Nama topik harus 3–80 karakter.',
+      capaianPembelajaran: 'Capaian pembelajaran harus 10–300 karakter.',
+      'soal.0.teks': 'Teks soal harus 5–300 karakter.',
+      'soal.1.pilihan.2': 'Pilihan harus diisi, maksimal 100 karakter.',
+      'soal.2.pilihan.3': 'Pilihan tidak boleh sama dengan pilihan lain.',
+      'soal.3.kunci': 'Pilih kunci jawaban.',
+      'soal.4.miskonsepsi.1': 'Miskonsepsi maksimal 200 karakter.',
+    });
   });
 });
 

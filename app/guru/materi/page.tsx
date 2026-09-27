@@ -9,7 +9,7 @@ import { KartuMateriGuru } from "@/components/KartuMateriGuru";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
 import { useBuatMateri } from "@/hooks/use-buat-materi";
-import { ambilMateriGuru, bagikanMateri, ubahMateri } from "@/lib/api-klien";
+import { ambilHasil, ambilMateriGuru, bagikanMateri, ubahMateri } from "@/lib/api-klien";
 import type { IsiMateri, MateriGuru } from "@/lib/tipe";
 
 type Muatan = { status: "memuat" } | { status: "gagal"; pesan: string } | { status: "siap"; materi: MateriGuru[] };
@@ -32,6 +32,23 @@ function MateriLanjutan() {
   const [muatan, setMuatan] = useState<Muatan>({ status: "memuat" });
   const [konfirmasiGanti, setKonfirmasiGanti] = useState(false);
   const [pembagian, setPembagian] = useState<Pembagian>({ status: "diam" });
+  // Tombol cadangan hanya untuk topik demo (PRD F-10). Jika gagal dibaca, tombol disembunyikan; API tetap menolak.
+  const [cadanganTersedia, setCadanganTersedia] = useState(false);
+
+  useEffect(() => {
+    if (!sesiId) return;
+    let batal = false;
+    ambilHasil(sesiId)
+      .then((h) => {
+        if (!batal) setCadanganTersedia(h.sesi.cadanganTersedia);
+      })
+      .catch(() => {
+        if (!batal) setCadanganTersedia(false);
+      });
+    return () => {
+      batal = true;
+    };
+  }, [sesiId]);
 
   useEffect(() => {
     if (!sesiId) return;
@@ -136,7 +153,7 @@ function MateriLanjutan() {
     <GagalBuatMateri
       sibuk={menyusun}
       onCobaLagi={pembuat.cobaLagi}
-      onGunakanCadangan={pembuat.gunakanCadangan}
+      onGunakanCadangan={cadanganTersedia ? pembuat.gunakanCadangan : undefined}
       onBatal={materi.length > 0 ? pembuat.batal : undefined}
     />
   );
