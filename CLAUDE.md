@@ -8,9 +8,12 @@ Kerjakan hanya fase yang sedang aktif. Jika ada yang tidak jelas, tanyakan.
 - npm run dev | npm run lint | npm run build | npm test
 
 # Aturan
-- IMPORTANT: SUPABASE_SERVICE_ROLE_KEY dan ANTHROPIC_API_KEY hanya di lib/server/* dan app/api/*.
-- Browser tidak pernah mengakses Supabase langsung; semua lewat app/api.
-- Jangan kirim kunci jawaban kuis, miskonsepsi, atau nama kelompok ke browser siswa.
+- IMPORTANT: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, dan KODE_UNDANGAN_GURU hanya di lib/server/* dan app/api/*.
+- Browser tidak pernah mengakses Supabase langsung; semua data lewat app/api. Supabase Auth hanya lewat app/api/auth/* dan lib/server/auth.ts.
+- Peran pengguna hanya dari app_metadata + tabel pengguna di server; jangan pernah menerima peran dari body/query browser.
+- Setiap API guru wajib memeriksa kepemilikan kelas/sesi/materi; setiap API siswa wajib memeriksa keanggotaan kelas.
+- Identitas siswa di API diambil dari sesi login, bukan dari siswaId di body/query.
+- Jangan kirim kunci jawaban kuis, miskonsepsi, nama kelompok, atau daftar siswa sekelas ke browser siswa.
 - Jangan menambah paket di luar architecture.md bagian 2 tanpa bertanya.
 - API route tanpa segmen dinamis; gunakan query string.
 - Warna hanya dari token design.md; tidak ada hex di className.

@@ -1,37 +1,33 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Hourglass } from "lucide-react";
-import { KartuKaca } from "@/components/KartuKaca";
-import { KerangkaSiswa } from "@/components/KerangkaSiswa";
-import { StatusHalaman } from "@/components/StatusHalaman";
-import { TabMateriSiswa } from "@/components/TabMateriSiswa";
-import { Tombol } from "@/components/Tombol";
-import { useIdentitasSiswa } from "@/hooks/use-identitas-siswa";
-import { usePolling } from "@/hooks/use-polling";
-import { ambilMateriSiswa } from "@/lib/api-klien";
-import { INTERVAL_POLLING_SISWA_MS } from "@/lib/konstanta";
+import { useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Hourglass } from 'lucide-react';
+import { KartuKaca } from '@/components/KartuKaca';
+import { KerangkaSiswa } from '@/components/KerangkaSiswa';
+import { StatusHalaman } from '@/components/StatusHalaman';
+import { TabMateriSiswa } from '@/components/TabMateriSiswa';
+import { Tombol } from '@/components/Tombol';
+import { useSesiAktif } from '@/hooks/use-sesi-aktif';
+import { usePolling } from '@/hooks/use-polling';
+import { ambilMateriSiswa } from '@/lib/api-klien';
+import { INTERVAL_POLLING_SISWA_MS } from '@/lib/konstanta';
 
 // PRD F-7. Tidak ada label kelompok di halaman ini (D-2).
 export default function HalamanMateriSiswa() {
   const router = useRouter();
-  const identitas = useIdentitasSiswa();
-  const sesiId = identitas?.sesiId;
-  const siswaId = identitas?.siswaId;
+  const sesi = useSesiAktif();
+  const sesiId = sesi?.sesiId;
 
   useEffect(() => {
-    if (identitas === null) router.replace("/siswa");
-  }, [identitas, router]);
+    if (sesi === null) router.replace('/siswa');
+  }, [sesi, router]);
 
   // Polling terus berjalan agar materi muncul otomatis setelah dibagikan (AC-7.1).
-  const ambil = useCallback(
-    (signal: AbortSignal) => ambilMateriSiswa(sesiId ?? "", siswaId ?? "", signal),
-    [sesiId, siswaId],
-  );
-  const { data, galat, memuat, muatUlang } = usePolling(sesiId && siswaId ? ambil : null, INTERVAL_POLLING_SISWA_MS);
+  const ambil = useCallback((signal: AbortSignal) => ambilMateriSiswa(sesiId ?? '', signal), [sesiId]);
+  const { data, galat, memuat, muatUlang } = usePolling(sesiId ? ambil : null, INTERVAL_POLLING_SISWA_MS);
 
-  if (!identitas || memuat) {
+  if (!sesi || memuat) {
     return (
       <KerangkaSiswa>
         <StatusHalaman jenis="memuat" judul="Memuat materimu" />
@@ -45,14 +41,14 @@ export default function HalamanMateriSiswa() {
         <StatusHalaman
           jenis="gagal"
           judul="Materi belum berhasil dimuat"
-          pesan={galat ?? "Periksa koneksi, lalu coba lagi."}
-          aksi={{ label: "Coba lagi", onClick: muatUlang }}
+          pesan={galat ?? 'Periksa koneksi, lalu coba lagi.'}
+          aksi={{ label: 'Coba lagi', onClick: muatUlang }}
         />
       </KerangkaSiswa>
     );
   }
 
-  if (data.status === "belum-mengerjakan") {
+  if (data.status === 'belum-mengerjakan') {
     return (
       <KerangkaSiswa aksi={<Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa/kuis">Kerjakan kuis</Tombol>}>
         <KartuKaca as="section" className="flex flex-col gap-2 p-6">
@@ -63,7 +59,7 @@ export default function HalamanMateriSiswa() {
     );
   }
 
-  if (data.status === "disiapkan") {
+  if (data.status === 'disiapkan') {
     return (
       <KerangkaSiswa>
         <KartuKaca as="section" className="flex flex-col items-center gap-4 p-8 text-center">
@@ -80,7 +76,7 @@ export default function HalamanMateriSiswa() {
   return (
     <KerangkaSiswa>
       <h1 className="text-[28px] leading-tight font-bold">Materi untukmu: {data.namaTopik}</h1>
-      <TabMateriSiswa isi={data.isi} formatAwal={identitas.format} />
+      <TabMateriSiswa isi={data.isi} formatAwal={sesi.format} />
     </KerangkaSiswa>
   );
 }

@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guru Pintar
 
-## Getting Started
+Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP, guru melihat peta pemahaman kelas secara langsung, lalu membagikan materi lanjutan per kelompok.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + TypeScript + Tailwind CSS
+- Supabase (PostgreSQL + Auth)
+- Anthropic API untuk materi lanjutan (dengan materi cadangan)
+- Vitest untuk unit test
+
+## Setup
+
+1. Pasang dependensi.
+
+   ```bash
+   npm install
+   ```
+
+2. Buat proyek Supabase, lalu salin `.env.example` menjadi `.env.local` dan isi:
+
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   SUPABASE_SERVICE_ROLE_KEY=
+   ANTHROPIC_API_KEY=
+   ANTHROPIC_MODEL=
+   KODE_UNDANGAN_GURU=
+   ```
+
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` adalah kunci anon/publishable dari Supabase.
+   - `SUPABASE_SERVICE_ROLE_KEY` dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
+   - `KODE_UNDANGAN_GURU` wajib untuk pendaftaran guru. Jika kosong, pendaftaran guru ditutup.
+
+3. Jalankan `supabase/schema.sql`, lalu `supabase/seed.sql` di SQL Editor Supabase.
+   `schema.sql` bersifat destruktif dan hanya untuk menyiapkan/reset database demo.
+
+4. Jalankan aplikasi.
+
+   ```bash
+   npm run dev
+   ```
+
+## Akun demo
+
+| Peran | Email | Kata sandi |
+| --- | --- | --- |
+| Guru | `guru@demo.gurupintar.id` | `GuruPintar123!` |
+| Siswa 1–40 | `siswa1@demo.gurupintar.id` … `siswa40@demo.gurupintar.id` | `SiswaPintar123!` |
+
+Kode undangan kelas demo: `KEL7A`. Kode sesi kuis aktif: `A7K2P`.
+
+## Alur utama
+
+1. Guru masuk di `/masuk`, lalu membuka kuis di `/guru`.
+2. Siswa masuk di `/masuk` (atau mendaftar di `/daftar/siswa`), memasukkan kode sesi, memilih format belajar, dan menjawab.
+3. Dasbor guru memperbarui peta kelas setiap 3 detik.
+4. Guru membuat/meninjau materi AI per kelompok, lalu membagikannya.
+5. Siswa melihat materi di `/siswa/materi` tanpa pernah melihat label kelompok.
+
+## Keamanan
+
+- Guru dan siswa memakai akun Supabase Auth dengan peran di `app_metadata` (tidak bisa diubah dari browser).
+- Sesi disimpan di cookie dan diverifikasi di server (`getUser()`), bukan hanya di proxy.
+- Setiap API guru memeriksa kepemilikan kelas/sesi/materi; setiap API siswa memeriksa keanggotaan kelas.
+- Kunci jawaban, miskonsepsi, label kelompok, dan daftar siswa sekelas tidak pernah dikirim ke browser siswa.
+- Detail arsitektur dan batasan ada di `architecture.md` bagian 12.
+
+## Perintah
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # server pengembangan
+npm run lint    # ESLint
+npm run build   # build produksi + cek tipe
+npm test        # unit test vitest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Struktur singkat
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+app/            halaman dan API route
+components/     komponen UI
+hooks/          use-polling, use-buat-materi, use-sesi-aktif
+lib/            logika murni + klien API browser
+lib/server/     Supabase service role, Auth, AI, materi cadangan
+supabase/       schema.sql dan seed.sql
+tests/          unit test vitest
+proxy.ts        penyegaran sesi Next.js 16
+```

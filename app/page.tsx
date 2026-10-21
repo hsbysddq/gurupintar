@@ -124,11 +124,11 @@ export default function Beranda() {
               dan diperiksa guru.
             </p>
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <Tombol varian="utama" href="/guru">
-                Coba sebagai guru
+              <Tombol varian="utama" href="/masuk">
+                Masuk sebagai guru
               </Tombol>
-              <Tombol varian="sekunder" href="/siswa">
-                Gabung kuis sebagai siswa
+              <Tombol varian="sekunder" href="/masuk">
+                Masuk sebagai siswa
               </Tombol>
             </div>
             <ul className="flex flex-wrap gap-2">
@@ -301,10 +301,10 @@ export default function Beranda() {
             <h2 id="judul-penutup" className="text-[28px] leading-tight font-bold tracking-tight md:text-[32px]">
               Coba satu siklus dalam lima menit
             </h2>
-            <p className="max-w-prose text-base">Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Tanpa login.</p>
+            <p className="max-w-prose text-base">Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Akun guru dan siswa terpisah.</p>
           </div>
-          <Tombol varian="terang" href="/guru">
-            Coba sebagai guru
+          <Tombol varian="terang" href="/masuk">
+            Mulai sekarang
           </Tombol>
         </section>
       </main>

@@ -3,7 +3,12 @@ import {
   normalisasiKode,
   skemaBodyBagikanMateri,
   skemaBodyBukaSesi,
+  skemaBodyBuatKelas,
   skemaBodyBuatMateri,
+  skemaBodyDaftarGuru,
+  skemaBodyDaftarSiswa,
+  skemaBodyGabungSesi,
+  skemaBodyMasuk,
   skemaBodyTopikBaru,
   skemaBodyFormat,
   skemaBodyJawaban,
@@ -11,6 +16,7 @@ import {
   skemaBodyUbahMateri,
   skemaBodyUbahModul,
   skemaQueryHasil,
+  skemaQueryKelasOpsional,
   skemaQueryMateriGuru,
   skemaQueryMateriSiswa,
   skemaQuerySesi,
@@ -57,16 +63,20 @@ describe('skemaQuerySoal', () => {
 
 describe('skemaBodyFormat', () => {
   it.each(['video', 'audio', 'bacaan', 'latihan'])('menerima format %s', (format) => {
-    expect(skemaBodyFormat.safeParse({ siswaId: SISWA_ID, format }).success).toBe(true);
+    expect(skemaBodyFormat.safeParse({ sesiId: SESI_ID, format }).success).toBe(true);
   });
 
   it('menolak format lain', () => {
-    expect(skemaBodyFormat.safeParse({ siswaId: SISWA_ID, format: 'visual' }).success).toBe(false);
+    expect(skemaBodyFormat.safeParse({ sesiId: SESI_ID, format: 'visual' }).success).toBe(false);
+  });
+
+  it('menolak tanpa sesiId karena identitas siswa berasal dari sesi login', () => {
+    expect(skemaBodyFormat.safeParse({ siswaId: SISWA_ID, format: 'audio' }).success).toBe(false);
   });
 });
 
 describe('skemaBodyJawaban', () => {
-  const valid = { sesiId: SESI_ID, siswaId: SISWA_ID, jawaban: [{ soalId: SOAL_ID, pilihan: 'B' }] };
+  const valid = { sesiId: SESI_ID, jawaban: [{ soalId: SOAL_ID, pilihan: 'B' }] };
 
   it('menerima body yang valid', () => {
     expect(skemaBodyJawaban.safeParse(valid).success).toBe(true);
@@ -81,10 +91,10 @@ describe('skemaBodyJawaban', () => {
     expect(skemaBodyJawaban.safeParse(body).success).toBe(false);
   });
 
-  it('tidak meneruskan field tambahan seperti benar dari browser', () => {
-    const body = { ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: 'B', benar: true }] };
+  it('tidak meneruskan field tambahan seperti siswaId atau benar dari browser', () => {
+    const body = { ...valid, siswaId: SISWA_ID, jawaban: [{ soalId: SOAL_ID, pilihan: 'B', benar: true }] };
     const hasil = skemaBodyJawaban.parse(body);
-    expect(hasil.jawaban[0]).toEqual({ soalId: SOAL_ID, pilihan: 'B' });
+    expect(hasil).toEqual(valid);
   });
 });
 
@@ -149,9 +159,10 @@ describe('skemaBodyBagikanMateri', () => {
 });
 
 describe('skemaQueryMateriSiswa', () => {
-  it('membutuhkan sesi dan siswa uuid', () => {
-    expect(skemaQueryMateriSiswa.safeParse({ sesi: SESI_ID, siswa: SISWA_ID }).success).toBe(true);
-    expect(skemaQueryMateriSiswa.safeParse({ sesi: SESI_ID, siswa: '' }).success).toBe(false);
+  it('membutuhkan sesi uuid dan mengabaikan siswa dari query', () => {
+    expect(skemaQueryMateriSiswa.safeParse({ sesi: SESI_ID }).success).toBe(true);
+    expect(skemaQueryMateriSiswa.parse({ sesi: SESI_ID, siswa: SISWA_ID })).toEqual({ sesi: SESI_ID });
+    expect(skemaQueryMateriSiswa.safeParse({ sesi: '' }).success).toBe(false);
   });
 });
 
@@ -270,13 +281,70 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
   });
 });
 
-describe('skemaBodyBukaSesi', () => {
-  it('menerima tanpa topikId (bawaan topik demo) dan dengan uuid', () => {
-    expect(skemaBodyBukaSesi.safeParse({}).success).toBe(true);
-    expect(skemaBodyBukaSesi.safeParse({ topikId: SESI_ID }).success).toBe(true);
+describe('skema kelas', () => {
+  it('menerima nama dan mapel yang wajar', () => {
+    expect(skemaBodyBuatKelas.safeParse({ nama: 'Kelas 7A', mapel: 'Matematika' }).success).toBe(true);
   });
 
-  it('menolak topikId yang bukan uuid', () => {
+  it('menolak nama atau mapel terlalu pendek', () => {
+    expect(skemaBodyBuatKelas.safeParse({ nama: '7A', mapel: 'Matematika' }).success).toBe(false);
+    expect(skemaBodyBuatKelas.safeParse({ nama: 'Kelas 7A', mapel: 'MT' }).success).toBe(false);
+  });
+
+  it('query kelas boleh kosong tetapi harus uuid jika diisi', () => {
+    expect(skemaQueryKelasOpsional.safeParse({}).success).toBe(true);
+    expect(skemaQueryKelasOpsional.safeParse({ kelas: SESI_ID }).success).toBe(true);
+    expect(skemaQueryKelasOpsional.safeParse({ kelas: '7a' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyBukaSesi', () => {
+  it('menerima tanpa id (bawaan kelas pertama dan topik demo) dan dengan uuid', () => {
+    expect(skemaBodyBukaSesi.safeParse({}).success).toBe(true);
+    expect(skemaBodyBukaSesi.safeParse({ topikId: SESI_ID }).success).toBe(true);
+    expect(skemaBodyBukaSesi.safeParse({ kelasId: SESI_ID }).success).toBe(true);
+  });
+
+  it('menolak id yang bukan uuid', () => {
     expect(skemaBodyBukaSesi.safeParse({ topikId: 'pecahan' }).success).toBe(false);
+    expect(skemaBodyBukaSesi.safeParse({ kelasId: '7a' }).success).toBe(false);
+  });
+});
+
+describe('skema autentikasi', () => {
+  const valid = { nama: 'Budi Santoso', email: 'Budi@Example.com ', password: 'rahasia123' };
+
+  it('menormalkan email saat masuk dan daftar', () => {
+    expect(skemaBodyMasuk.parse({ email: ' Budi@Example.com ', password: 'x' })).toEqual({
+      email: 'budi@example.com',
+      password: 'x',
+    });
+    expect(skemaBodyDaftarSiswa.parse(valid).email).toBe('budi@example.com');
+  });
+
+  it('menolak kata sandi kurang dari 8 karakter saat mendaftar', () => {
+    expect(skemaBodyDaftarSiswa.safeParse({ ...valid, password: 'pendek' }).success).toBe(false);
+    expect(skemaBodyDaftarGuru.safeParse({ ...valid, kodeUndangan: 'ABC123' }).success).toBe(true);
+  });
+
+  it('menolak email tidak valid', () => {
+    expect(skemaBodyDaftarSiswa.safeParse({ ...valid, email: 'bukan-email' }).success).toBe(false);
+    expect(skemaBodyMasuk.safeParse({ email: 'bukan-email', password: 'x' }).success).toBe(false);
+  });
+
+  it('kode kelas opsional: string kosong menjadi undefined, kode dinormalkan', () => {
+    expect(skemaBodyDaftarSiswa.parse({ ...valid, kodeKelas: '' }).kodeKelas).toBeUndefined();
+    expect(skemaBodyDaftarSiswa.parse({ ...valid, kodeKelas: 'kel 7a' }).kodeKelas).toBe('KEL7A');
+    expect(skemaBodyDaftarSiswa.safeParse({ ...valid, kodeKelas: 'XYZ' }).success).toBe(false);
+  });
+
+  it('kode undangan guru wajib diisi', () => {
+    expect(skemaBodyDaftarGuru.safeParse({ ...valid, kodeUndangan: '' }).success).toBe(false);
+    expect(skemaBodyDaftarGuru.safeParse({ ...valid }).success).toBe(false);
+  });
+
+  it('skemaBodyGabungSesi menormalkan kode dan menolak kode pendek', () => {
+    expect(skemaBodyGabungSesi.parse({ kode: 'a7 k2p' })).toEqual({ kode: 'A7K2P' });
+    expect(skemaBodyGabungSesi.safeParse({ kode: 'A7' }).success).toBe(false);
   });
 });

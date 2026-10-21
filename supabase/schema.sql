@@ -1,24 +1,40 @@
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, siswa, kelas cascade;
+drop table if exists materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
 
+-- ===== Akun dan peran =====
+-- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
+create table pengguna (
+  id uuid primary key references auth.users(id) on delete cascade,
+  nama text not null,
+  peran text not null check (peran in ('guru','siswa')),
+  dibuat_pada timestamptz not null default now()
+);
+
+-- ===== Kelas milik guru =====
 create table kelas (
   id uuid primary key default gen_random_uuid(),
+  guru_id uuid not null references pengguna(id) on delete cascade,
   nama text not null,
   mapel text not null,
-  nama_guru text not null
+  kode_undangan text not null unique check (kode_undangan ~ '^[A-Z0-9]{5,6}$'),
+  dibuat_pada timestamptz not null default now()
 );
+create index kelas_guru on kelas (guru_id);
 
-create table siswa (
-  id uuid primary key default gen_random_uuid(),
+-- ===== Keanggotaan siswa di kelas (banyak-ke-banyak) =====
+create table keanggotaan_kelas (
   kelas_id uuid not null references kelas(id) on delete cascade,
-  nama text not null,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
   preferensi_format text check (preferensi_format in ('video','audio','bacaan','latihan')),
-  unique (kelas_id, nama)
+  gabung_pada timestamptz not null default now(),
+  primary key (kelas_id, siswa_id)
 );
+create index keanggotaan_siswa on keanggotaan_kelas (siswa_id);
 
 create table topik (
   id uuid primary key default gen_random_uuid(),
+  dibuat_oleh uuid references pengguna(id) on delete set null,
   nama text not null,
   capaian_pembelajaran text not null
 );
@@ -48,7 +64,7 @@ create index sesi_kuis_kelas_waktu on sesi_kuis (kelas_id, dibuat_pada desc);
 create table jawaban (
   id uuid primary key default gen_random_uuid(),
   sesi_id uuid not null references sesi_kuis(id) on delete cascade,
-  siswa_id uuid not null references siswa(id) on delete cascade,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
   soal_id uuid not null references soal(id) on delete cascade,
   pilihan text not null check (pilihan in ('A','B','C','D')),
   benar boolean not null,
@@ -58,7 +74,7 @@ create table jawaban (
 
 create table hasil_siswa (
   sesi_id uuid not null references sesi_kuis(id) on delete cascade,
-  siswa_id uuid not null references siswa(id) on delete cascade,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
   skor int not null check (skor >= 0),
   total int not null check (total > 0),
   kelompok text not null check (kelompok in ('sudah','setengah','belum')),
@@ -79,8 +95,9 @@ create table materi (
   unique (sesi_id, kelompok)
 );
 
+alter table pengguna enable row level security;
 alter table kelas enable row level security;
-alter table siswa enable row level security;
+alter table keanggotaan_kelas enable row level security;
 alter table topik enable row level security;
 alter table soal enable row level security;
 alter table sesi_kuis enable row level security;
@@ -88,6 +105,7 @@ alter table jawaban enable row level security;
 alter table hasil_siswa enable row level security;
 alter table materi enable row level security;
 -- Sengaja TANPA policy: hanya service role (server) yang bisa mengakses (AD-3).
+-- Otorisasi per pengguna dilakukan di API route setelah sesi Supabase diverifikasi.
 
 -- ===== Fungsi atomik (AD-5) =====
 

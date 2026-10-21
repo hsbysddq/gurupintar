@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { CircleCheck } from "lucide-react";
-import { KartuKaca } from "@/components/KartuKaca";
-import { KerangkaSiswa } from "@/components/KerangkaSiswa";
-import { StatusHalaman } from "@/components/StatusHalaman";
-import { Tombol } from "@/components/Tombol";
-import { useIdentitasSiswa } from "@/hooks/use-identitas-siswa";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { CircleCheck } from 'lucide-react';
+import { KartuKaca } from '@/components/KartuKaca';
+import { KerangkaSiswa } from '@/components/KerangkaSiswa';
+import { StatusHalaman } from '@/components/StatusHalaman';
+import { Tombol } from '@/components/Tombol';
+import { useSesiAktif } from '@/hooks/use-sesi-aktif';
 
 // AC-3.6: tanpa nilai dan tanpa kelompok.
 export default function HalamanSelesai() {
   const router = useRouter();
-  const identitas = useIdentitasSiswa();
+  const sesi = useSesiAktif();
 
   useEffect(() => {
-    if (identitas === null) router.replace("/siswa");
-  }, [identitas, router]);
+    if (sesi === null) router.replace('/siswa');
+  }, [sesi, router]);
 
-  if (!identitas) {
+  if (!sesi) {
     return (
       <KerangkaSiswa>
         <StatusHalaman jenis="memuat" judul="Memuat halaman" />

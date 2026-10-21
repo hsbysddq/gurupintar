@@ -1,5 +1,6 @@
 import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN } from '@/lib/konstanta';
 import { skemaBodyUbahModul } from '@/lib/skema-api';
+import { wajibPeranApi } from '@/lib/server/auth';
 import { buatMateriDariModul, ErrorMateriAi } from '@/lib/server/materi-ai';
 import { bacaBodyJson, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
 
@@ -11,6 +12,9 @@ const PESAN_GAGAL_DIBUAT = 'Materi belum berhasil dibuat.';
 
 // POST /api/guru/modul (PRD F-9). Hanya pratinjau: tidak ada yang disimpan ke database.
 export async function POST(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaBodyUbahModul.safeParse(await bacaBodyJson(request));
   if (!input.success) return responsError(PESAN_PANJANG_MODUL, 400);
 

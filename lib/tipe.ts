@@ -3,6 +3,15 @@ import type { IsiMateri } from './validasi-materi';
 
 export type { IsiMateri };
 
+export type Peran = 'guru' | 'siswa';
+
+export interface Profil {
+  id: string;
+  nama: string;
+  email: string;
+  peran: Peran;
+}
+
 export type Kelompok = 'sudah' | 'setengah' | 'belum';
 
 export type Format = 'video' | 'audio' | 'bacaan' | 'latihan';
@@ -27,23 +36,34 @@ export interface SiswaRingkas {
   nama: string;
 }
 
-/** GET /api/sesi */
+/** POST /api/sesi/gabung */
 export interface SesiUntukSiswa {
   sesi: {
     id: string;
     kodeKelas: string;
     status: StatusSesi;
+    kelasId: string;
     namaKelas: string;
     namaTopik: string;
   };
-  siswa: SiswaRingkas[];
 }
 
 // ===== Respons API untuk guru (architecture.md bagian 6 dan 6.1) =====
 
+/** GET /api/guru/kelas */
+export interface KelasRingkas {
+  id: string;
+  nama: string;
+  mapel: string;
+  kodeUndangan: string;
+  jumlahSiswa: number;
+}
+
 /** GET /api/guru/sesi */
 export interface SesiGuru {
   id: string;
+  kelasId: string;
+  namaKelas: string;
   kodeKelas: string;
   status: StatusSesi;
   dibuatPada: string;

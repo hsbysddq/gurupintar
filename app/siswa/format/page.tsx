@@ -1,29 +1,31 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { KerangkaSiswa } from "@/components/KerangkaSiswa";
-import { PilihanFormat } from "@/components/PilihanFormat";
-import { StatusHalaman } from "@/components/StatusHalaman";
-import { Tombol } from "@/components/Tombol";
-import { useIdentitasSiswa } from "@/hooks/use-identitas-siswa";
-import { ErrorApi, kirimFormat } from "@/lib/api-klien";
-import { simpanFormatLokal } from "@/lib/sesi-lokal";
-import type { Format } from "@/lib/tipe";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { KerangkaSiswa } from '@/components/KerangkaSiswa';
+import { useSiswa } from '@/components/PenyediaSiswa';
+import { PilihanFormat } from '@/components/PilihanFormat';
+import { StatusHalaman } from '@/components/StatusHalaman';
+import { Tombol } from '@/components/Tombol';
+import { useSesiAktif } from '@/hooks/use-sesi-aktif';
+import { ErrorApi, kirimFormat } from '@/lib/api-klien';
+import { simpanFormatLokal } from '@/lib/sesi-lokal';
+import type { Format } from '@/lib/tipe';
 
 export default function HalamanPilihFormat() {
   const router = useRouter();
-  const identitas = useIdentitasSiswa();
+  const profil = useSiswa();
+  const sesi = useSesiAktif();
   const [pilihan, setPilihan] = useState<Format | null>(null);
   const [memuat, setMemuat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
 
-  // AC-1.7: belum ada identitas → kembali ke halaman gabung.
+  // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
-    if (identitas === null) router.replace("/siswa");
-  }, [identitas, router]);
+    if (sesi === null) router.replace('/siswa');
+  }, [sesi, router]);
 
-  if (!identitas) {
+  if (!sesi) {
     return (
       <KerangkaSiswa>
         <StatusHalaman jenis="memuat" judul="Memuat halaman" />
@@ -31,18 +33,18 @@ export default function HalamanPilihFormat() {
     );
   }
 
-  const nilai = pilihan ?? identitas.format;
+  const nilai = pilihan ?? sesi.format;
 
   async function lanjut() {
-    if (!identitas || !nilai) return;
+    if (!nilai) return;
     setMemuat(true);
     setGalat(null);
     try {
-      await kirimFormat(identitas.siswaId, nilai);
+      await kirimFormat(sesi!.sesiId, nilai);
       simpanFormatLokal(nilai);
-      router.push("/siswa/kuis");
+      router.push('/siswa/kuis');
     } catch (err) {
-      setGalat(err instanceof ErrorApi ? err.message : "Terjadi kesalahan. Coba lagi sebentar.");
+      setGalat(err instanceof ErrorApi ? err.message : 'Terjadi kesalahan. Coba lagi sebentar.');
       setMemuat(false);
     }
   }
@@ -63,7 +65,7 @@ export default function HalamanPilihFormat() {
       }
     >
       <header className="flex flex-col gap-2">
-        <p className="text-[13px] leading-normal font-medium text-tinta-lembut">Halo, {identitas.namaSiswa}</p>
+        <p className="text-[13px] leading-normal font-medium text-tinta-lembut">Halo, {profil.nama}</p>
         <h1 className="text-[28px] leading-tight font-bold">Kamu lebih suka belajar lewat apa?</h1>
       </header>
       <PilihanFormat nilai={nilai} onPilih={setPilihan} />

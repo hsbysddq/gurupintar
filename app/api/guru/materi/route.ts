@@ -6,6 +6,7 @@ import { cadanganTersedia } from '@/lib/soal-guru';
 import { periksaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
 import { buatMateriSemua } from '@/lib/server/materi-ai';
 import { ambilMateriCadangan } from '@/lib/server/materi-cadangan';
+import { materiMilikGuru, sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
@@ -52,20 +53,17 @@ async function bacaMateriSesi(db: SupabaseClient, sesiId: string) {
   return { daftar, barisMateri: materi.data as BarisMateri[], barisHasil, jumlahPerKelompok };
 }
 
-async function cariSesi(db: SupabaseClient, sesiId: string) {
-  const { data, error } = await db.from('sesi_kuis').select('id, topik_id').eq('id', sesiId).maybeSingle();
-  if (error) throw error;
-  return data as { id: string; topik_id: string } | null;
-}
-
 // GET /api/guru/materi?sesi= (PRD AC-6.5)
 export async function GET(request: NextRequest) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaQueryMateriGuru.safeParse({ sesi: request.nextUrl.searchParams.get('sesi') ?? '' });
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
 
   try {
     const db = ambilSupabase();
-    if (!(await cariSesi(db, input.data.sesi))) return responsError(PESAN_SESI_TIDAK_ADA, 404);
+    if (!(await sesiMilikGuru(db, auth.profil.id, input.data.sesi))) return responsError(PESAN_SESI_TIDAK_ADA, 404);
     const { daftar } = await bacaMateriSesi(db, input.data.sesi);
     return responsOk(daftar);
   } catch (err) {
@@ -76,13 +74,16 @@ export async function GET(request: NextRequest) {
 
 // POST /api/guru/materi (PRD F-6, architecture.md 7.3 dan 7.4)
 export async function POST(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaBodyBuatMateri.safeParse(await bacaBodyJson(request));
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
   const { sesiId, gunakanCadangan = false, ganti = false } = input.data;
 
   try {
     const db = ambilSupabase();
-    const sesi = await cariSesi(db, sesiId);
+    const sesi = await sesiMilikGuru(db, auth.profil.id, sesiId);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
     // Diperiksa sebelum kunci materi diambil (PRD F-10).
     if (gunakanCadangan && !cadanganTersedia(sesi.topik_id)) return responsError(PESAN_CADANGAN_TIDAK_ADA, 400);
@@ -175,6 +176,9 @@ export async function POST(request: Request) {
 
 // PATCH /api/guru/materi (PRD AC-6.6, AC-6.7; optimistic locking architecture.md 7.4)
 export async function PATCH(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaBodyUbahMateri.safeParse(await bacaBodyJson(request));
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
   const { id, versi } = input.data;
@@ -183,7 +187,11 @@ export async function PATCH(request: Request) {
   if (!periksa.ok) return responsError(`Isi materi belum sesuai. ${periksa.alasan}`, 400);
 
   try {
-    const { data, error } = await ambilSupabase()
+    const db = ambilSupabase();
+    const sesiId = await materiMilikGuru(db, auth.profil.id, id);
+    if (!sesiId) return responsError(PESAN_SESI_TIDAK_ADA, 404);
+
+    const { data, error } = await db
       .from('materi')
       .update({ isi: periksa.isi, versi: versi + 1 })
       .eq('id', id)

@@ -42,12 +42,12 @@ export function NavbarLanding() {
         {/* Teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), sama dengan padding tepi kapsul. */}
         <div className="flex items-center gap-2">
           <span className="hidden sm:flex">
-            <Tombol varian="teks" href="/siswa">
-              Gabung kuis
+            <Tombol varian="teks" href="/masuk">
+              Masuk
             </Tombol>
           </span>
-          <Tombol varian="sekunder" href="/guru">
-            Coba sebagai guru
+          <Tombol varian="sekunder" href="/daftar/guru">
+            Daftar guru
           </Tombol>
         </div>
       </nav>

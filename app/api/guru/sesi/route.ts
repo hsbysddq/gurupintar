@@ -1,6 +1,8 @@
+import type { NextRequest } from 'next/server';
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
-import { JUMLAH_SOAL_TOPIK, KELAS_DEMO_ID, TOPIK_DEMO_ID } from '@/lib/konstanta';
-import { skemaBodyBukaSesi } from '@/lib/skema-api';
+import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
+import { skemaBodyBukaSesi, skemaQueryKelasOpsional } from '@/lib/skema-api';
+import { idKelasMilikGuru, kelasMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 import type { SesiBaru, SesiGuru, StatusSesi } from '@/lib/tipe';
@@ -8,20 +10,42 @@ import type { SesiBaru, SesiGuru, StatusSesi } from '@/lib/tipe';
 const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba buka kuis lagi.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
 const PESAN_JUMLAH_SOAL = `Topik harus punya tepat ${JUMLAH_SOAL_TOPIK} soal.`;
+const PESAN_BELUM_PUNYA_KELAS = 'Buat kelas dulu sebelum membuka kuis.';
 
-// GET /api/guru/sesi (PRD AC-4.1): sesi kelas demo, terbaru di atas, beserta jumlah siswa yang menjawab.
-export async function GET() {
+// GET /api/guru/sesi?kelas=: sesi milik guru, terbaru di atas, beserta jumlah siswa yang menjawab.
+export async function GET(request: NextRequest) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
+  const input = skemaQueryKelasOpsional.safeParse({
+    kelas: request.nextUrl.searchParams.get('kelas') ?? undefined,
+  });
+  if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
+
   try {
     const db = ambilSupabase();
+    let ids: string[];
+    if (input.data.kelas) {
+      if (!(await kelasMilikGuru(db, auth.profil.id, input.data.kelas))) {
+        return responsError('Kelas tidak ditemukan.', 404);
+      }
+      ids = [input.data.kelas];
+    } else {
+      ids = await idKelasMilikGuru(db, auth.profil.id);
+    }
+    if (ids.length === 0) return responsOk<SesiGuru[]>([]);
+
     const { data, error } = await db
       .from('sesi_kuis')
-      .select('id, kode_kelas, status, dibuat_pada, hasil_siswa(count)')
-      .eq('kelas_id', KELAS_DEMO_ID)
+      .select('id, kelas_id, kode_kelas, status, dibuat_pada, kelas(nama), hasil_siswa(count)')
+      .in('kelas_id', ids)
       .order('dibuat_pada', { ascending: false });
     if (error) return petakanErrorDb(error);
 
     const respons: SesiGuru[] = data.map((s) => ({
       id: s.id,
+      kelasId: s.kelas_id,
+      namaKelas: (s.kelas as unknown as { nama: string }).nama,
       kodeKelas: s.kode_kelas,
       status: s.status as StatusSesi,
       dibuatPada: s.dibuat_pada,
@@ -34,16 +58,29 @@ export async function GET() {
   }
 }
 
-// POST /api/guru/sesi (PRD AC-4.2, AC-4.3): buka_sesi menutup kuis aktif lain dan membuat yang baru
-// dalam satu transaksi. Kode bentrok dicoba ulang dengan kode baru, maksimal 5 kali (architecture.md 7.4).
-// Tanpa topikId → topik demo, sehingga perilaku lama tetap (PRD F-10).
+// POST /api/guru/sesi: buka_sesi menutup kuis aktif lain di kelas yang sama dan membuat yang baru
+// dalam satu transaksi. Kode bentrok dicoba ulang dengan kode baru, maksimal 5 kali.
 export async function POST(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaBodyBukaSesi.safeParse((await bacaBodyJson(request)) ?? {});
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
   const topikId = input.data.topikId ?? TOPIK_DEMO_ID;
 
   try {
     const db = ambilSupabase();
+    let kelasId = input.data.kelasId;
+    if (kelasId) {
+      if (!(await kelasMilikGuru(db, auth.profil.id, kelasId))) {
+        return responsError('Kelas tidak ditemukan.', 404);
+      }
+    } else {
+      const ids = await idKelasMilikGuru(db, auth.profil.id);
+      if (ids.length === 0) return responsError(PESAN_BELUM_PUNYA_KELAS, 400);
+      kelasId = ids[0];
+    }
+
     const topik = await db.from('topik').select('id, soal(count)').eq('id', topikId).maybeSingle();
     if (topik.error) return petakanErrorDb(topik.error);
     if (!topik.data) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
@@ -52,7 +89,7 @@ export async function POST(request: Request) {
 
     const hasil = await cobaDenganKodeBaru(async (kode): Promise<HasilPercobaan<string>> => {
       const { data, error } = await db.rpc('buka_sesi', {
-        p_kelas: KELAS_DEMO_ID,
+        p_kelas: kelasId,
         p_topik: topikId,
         p_kode: kode,
       });

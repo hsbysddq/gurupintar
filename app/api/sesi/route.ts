@@ -1,15 +1,26 @@
 import type { NextRequest } from 'next/server';
-import { skemaQuerySesi } from '@/lib/skema-api';
+import { skemaBodyGabungSesi } from '@/lib/skema-api';
+import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
-import { petakanErrorDb, PESAN_SESI_DITUTUP, responsError, responsOk } from '@/lib/server/respons';
+import {
+  bacaBodyJson,
+  petakanErrorDb,
+  PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_DITUTUP,
+  responsError,
+  responsOk,
+} from '@/lib/server/respons';
 import type { SesiUntukSiswa, StatusSesi } from '@/lib/tipe';
 
 const PESAN_KODE_TIDAK_DITEMUKAN = 'Kode kelas tidak ditemukan. Periksa lagi kode dari gurumu.';
 
-// GET /api/sesi?kode= (PRD F-1)
-export async function GET(request: NextRequest) {
-  const input = skemaQuerySesi.safeParse({ kode: request.nextUrl.searchParams.get('kode') ?? '' });
-  if (!input.success) return responsError(PESAN_KODE_TIDAK_DITEMUKAN, 400);
+// POST /api/sesi: siswa login memasukkan kode kuis. Server mendaftarkannya ke kelas bila belum.
+export async function POST(request: NextRequest) {
+  const auth = await wajibPeranApi('siswa');
+  if (!auth.ok) return auth.respons;
+
+  const input = skemaBodyGabungSesi.safeParse(await bacaBodyJson(request));
+  if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
 
   try {
     const db = ambilSupabase();
@@ -22,24 +33,34 @@ export async function GET(request: NextRequest) {
     if (!sesi) return responsError(PESAN_KODE_TIDAK_DITEMUKAN, 404);
     if (sesi.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
 
-    const [kelas, topik, siswa] = await Promise.all([
+    const [kelas, topik, anggota] = await Promise.all([
       db.from('kelas').select('nama').eq('id', sesi.kelas_id).single(),
       db.from('topik').select('nama').eq('id', sesi.topik_id).single(),
-      db.from('siswa').select('id, nama').eq('kelas_id', sesi.kelas_id).order('nama'),
+      db.from('keanggotaan_kelas').select('siswa_id').eq('kelas_id', sesi.kelas_id).eq('siswa_id', auth.profil.id).maybeSingle(),
     ]);
     if (kelas.error) return petakanErrorDb(kelas.error);
     if (topik.error) return petakanErrorDb(topik.error);
-    if (siswa.error) return petakanErrorDb(siswa.error);
+    if (anggota.error) return petakanErrorDb(anggota.error);
+
+    if (!anggota.data) {
+      const { error: galatGabung } = await db
+        .from('keanggotaan_kelas')
+        .upsert(
+          { kelas_id: sesi.kelas_id, siswa_id: auth.profil.id },
+          { onConflict: 'kelas_id,siswa_id', ignoreDuplicates: true },
+        );
+      if (galatGabung) return petakanErrorDb(galatGabung);
+    }
 
     const respons: SesiUntukSiswa = {
       sesi: {
         id: sesi.id,
         kodeKelas: sesi.kode_kelas,
         status: sesi.status as StatusSesi,
+        kelasId: sesi.kelas_id,
         namaKelas: kelas.data.nama,
         namaTopik: topik.data.nama,
       },
-      siswa: siswa.data.map((s) => ({ id: s.id, nama: s.nama })),
     };
     return responsOk(respons);
   } catch (err) {
@@ -47,3 +68,5 @@ export async function GET(request: NextRequest) {
     return petakanErrorDb(err);
   }
 }
+
+// Sesi tidak pernah dibaca lewat GET agar daftar siswa dan kode tidak bisa diintip tanpa login.

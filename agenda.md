@@ -7,6 +7,8 @@
 | Isi | Project roadmap dan prompting agenda untuk Claude Code |
 | Dokumen terkait | `PRD.md`, `architecture.md`, `design.md` |
 
+> **Pembaruan autentikasi (Oktober 2026).** Aplikasi kini memakai Supabase Auth: guru dan siswa punya akun email+sandi, peran disimpan di `app_metadata`, dan setiap API memeriksa peran serta kepemilikan kelas. Seed menghasilkan **40 siswa** dan **132 baris hasil** (bukan 32/94 seperti tertulis di beberapa langkah lama di bawah), serta membuat akun demo. Endpoint bergabung berubah menjadi `POST /api/sesi`. Acuan teknis terbaru: `README.md` dan `architecture.md` bagian 12.
+
 > **Aturan untuk Claude Code dan tim**
 > - Kerjakan fase **berurutan**. Satu fase = satu sesi Claude Code.
 > - Fase selesai hanya jika **Definition of Done** terpenuhi, termasuk bukti output `npm run lint`, `npm run build`, dan `npm test`.

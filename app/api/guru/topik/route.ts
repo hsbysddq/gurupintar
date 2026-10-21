@@ -1,5 +1,6 @@
 import { skemaBodyTopikBaru } from '@/lib/skema-api';
 import { keBarisSoal, susunDaftarTopik } from '@/lib/soal-guru';
+import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
 import type { TopikRingkas } from '@/lib/tipe';
@@ -8,6 +9,9 @@ const PESAN_TOPIK_TIDAK_VALID = 'Isian topik atau soal belum sesuai. Periksa lag
 
 // GET /api/guru/topik (PRD F-10): topik yang bisa dipakai kuis, tanpa isi soal.
 export async function GET() {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   try {
     const { data, error } = await ambilSupabase().from('topik').select('id, nama, soal(count)');
     if (error) return petakanErrorDb(error);
@@ -24,6 +28,9 @@ export async function GET() {
 
 // POST /api/guru/topik (PRD F-10): topik lalu 5 soal dalam satu insert; jika soal gagal, topik dihapus lagi.
 export async function POST(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
   const input = skemaBodyTopikBaru.safeParse(await bacaBodyJson(request));
   if (!input.success) return responsError(PESAN_TOPIK_TIDAK_VALID, 400);
   const { nama, capaianPembelajaran, soal } = input.data;
@@ -32,7 +39,7 @@ export async function POST(request: Request) {
     const db = ambilSupabase();
     const topik = await db
       .from('topik')
-      .insert({ nama, capaian_pembelajaran: capaianPembelajaran })
+      .insert({ nama, capaian_pembelajaran: capaianPembelajaran, dibuat_oleh: auth.profil.id })
       .select('id, nama')
       .single();
     if (topik.error) return petakanErrorDb(topik.error);

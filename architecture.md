@@ -24,7 +24,8 @@
 | AD-5 | Operasi yang harus atomik dijalankan sebagai **fungsi PostgreSQL** (dipanggil lewat `rpc`) | Beberapa query berurutan dari API | `supabase-js` tidak mendukung transaksi. Fungsi SQL menjamin tidak ada data setengah jadi. |
 | AD-6 | Logika bisnis (pengelompokan, soal tersulit, pendampingan) ditulis sebagai **fungsi TypeScript murni** di `lib/` | Logika di SQL | Mudah diuji dengan vitest dan mudah dibaca. SQL hanya menyimpan data secara atomik. |
 | AD-7 | API route **tanpa segmen dinamis**; parameter lewat query string atau body | `app/api/sesi/[id]/route.ts` | Menghindari perbedaan tipe `params` antarversi Next.js. |
-| AD-8 | Tanpa autentikasi | Supabase Auth | Di luar cakupan PRD bagian 6.2. |
+| AD-8 | **Supabase Auth dengan peran di `app_metadata`**; guru dan siswa memakai akun email+sandi | Tanpa autentikasi; satu kata sandi guru dari env | Peran tidak bisa dipalsukan dari browser, sesi disimpan di cookie HttpOnly, dan setiap API memeriksa peran serta kepemilikan kelas/sesi. |
+| AD-9 | **Next.js 16 `proxy.ts`** menyegarkan sesi dan melakukan redirect optimistis | `middleware.ts` | Next.js 16 mengganti middleware dengan proxy. Otorisasi sebenarnya tetap di layout dan API route. |
 
 ---
 
@@ -35,6 +36,7 @@
 | Framework | Next.js (App Router) + TypeScript | Versi stabil terbaru dari `create-next-app`, opsi: TypeScript, ESLint, Tailwind, App Router, folder `src/` **tidak** dipakai |
 | Styling | Tailwind CSS | Bawaan `create-next-app`. Token di `design.md` bagian 2 |
 | Database | Supabase (PostgreSQL) | Paket `@supabase/supabase-js` |
+| Autentikasi | Supabase Auth + `@supabase/ssr` | Sesi berbasis cookie; `getClaims()` di proxy, `getUser()` di server |
 | Validasi | `zod` | Input API dan output AI |
 | AI | Anthropic API | Paket `@anthropic-ai/sdk` |
 | Pengaman server | `server-only` | Diimpor di semua file `lib/server/*` agar tidak ikut terbundel ke browser |
@@ -52,10 +54,12 @@ Simpan di `.env.local` (tidak di-commit). Sediakan `.env.example` dengan nama ya
 
 | Nama | Dipakai di | Keterangan |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Server | URL proyek Supabase (tidak rahasia) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server saja | Rahasia |
+| `NEXT_PUBLIC_SUPABASE_URL` | Server dan browser | URL proyek Supabase (tidak rahasia) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Server dan browser | Kunci publishable/anon untuk Supabase Auth (tidak rahasia) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server saja | Rahasia; akses data dan admin Auth |
 | `ANTHROPIC_API_KEY` | Server saja | Rahasia |
 | `ANTHROPIC_MODEL` | Server saja | Nama model Claude yang tersedia di akun tim; cek di docs.claude.com |
+| `KODE_UNDANGAN_GURU` | Server saja | Rahasia; wajib untuk mendaftar sebagai guru. Jika kosong, pendaftaran guru ditutup. |
 
 ---
 
@@ -150,6 +154,8 @@ export const PANJANG_KODE = 5;
 ---
 
 ## 4. Skema Database (`supabase/schema.sql`)
+
+> **Diperbarui untuk autentikasi.** Sumber kebenaran skema adalah `supabase/schema.sql`. Tabel `siswa` diganti `pengguna` (profil ber-ID sama dengan `auth.users`) dan `keanggotaan_kelas` (banyak kelas per siswa). `kelas` memiliki `guru_id` dan `kode_undangan`. `jawaban.siswa_id` dan `hasil_siswa.siswa_id` menunjuk `pengguna.id`. SQL di bawah dipertahankan sebagai catatan historis dan tidak lagi dijalankan.
 
 Jalankan di SQL Editor Supabase. File ini harus bisa dijalankan ulang (pakai `drop ... if exists`).
 
@@ -307,6 +313,8 @@ grant execute on function lepas_kunci_materi(uuid) to service_role;
 ---
 
 ## 5. Data Awal (`supabase/seed.sql`)
+
+> **Diperbarui untuk autentikasi.** Seed sekarang juga membuat 1 akun guru dan 40 akun siswa di `auth.users`/`auth.identities` dengan ID tetap, lalu mengisi `pengguna`, `kelas`, dan `keanggotaan_kelas`. Akun demo: `guru@demo.gurupintar.id` / `GuruPintar123!` dan `siswa1@demo.gurupintar.id` … `siswa40@demo.gurupintar.id` / `SiswaPintar123!`. Kode undangan kelas demo: `KEL7A`.
 
 Isi harus sama persis dengan `PRD.md` bagian 8. Seed boleh dijalankan ulang untuk **mereset demo**.
 
@@ -709,10 +717,17 @@ Sebelum disisipkan, `<<<AWAL MODUL>>>` dan `<<<AKHIR MODUL>>>` dibuang dari `tek
 ## 10. Keamanan
 
 - `lib/server/*` diawali `import 'server-only'`.
-- Tidak ada `NEXT_PUBLIC_` pada variabel rahasia.
-- Respons API untuk siswa tidak pernah memuat `kunci` soal kuis, `miskonsepsi`, atau `kelompok`.
+- Tidak ada `NEXT_PUBLIC_` pada variabel rahasia. Hanya URL dan anon/publishable key yang publik.
+- Peran pengguna disimpan di `auth.users.raw_app_meta_data.peran` (hanya bisa ditulis service role) **dan** di tabel `pengguna`. Keduanya harus cocok; jika tidak, akses ditolak.
+- `proxy.ts` hanya melakukan pemeriksaan optimistis. Setiap layout dan API route memverifikasi ulang dengan `supabase.auth.getUser()`.
+- Setiap route guru memeriksa kepemilikan kelas/sesi/materi; setiap route siswa memeriksa keanggotaan kelas.
+- Identitas siswa di `POST /api/jawaban`, `POST /api/siswa/format`, dan `GET /api/materi` diambil dari sesi login, bukan dari body/query.
+- Pendaftaran guru memerlukan `KODE_UNDANGAN_GURU`; pendaftaran siswa tidak pernah bisa menetapkan peran guru.
+- Respons API untuk siswa tidak pernah memuat `kunci` soal kuis, `miskonsepsi`, `kelompok`, atau daftar siswa sekelas.
 - Semua input divalidasi `zod`; ID harus berformat UUID.
 - Error tak terduga dicatat di log server tanpa data siswa, dan dikembalikan ke pengguna sebagai `500` "Terjadi kesalahan. Coba lagi."
+- Kata sandi ditangani Supabase Auth (bcrypt) dan tidak pernah disimpan atau dicatat aplikasi. Panjang minimum 8, maksimum 72 karakter.
+- Seed demo mengonfirmasi email otomatis agar demo tanpa SMTP. Di produksi, aktifkan konfirmasi email Supabase dan jangan memakai kata sandi demo.
 
 ---
 
@@ -726,3 +741,45 @@ Sebelum disisipkan, `<<<AWAL MODUL>>>` dan `<<<AKHIR MODUL>>>` dibuang dari `tek
 | Manual end-to-end | Checklist di `agenda.md` bagian 5 | — |
 
 Definisi selesai untuk setiap fase: ketiga perintah di atas lulus dan bukti output ditunjukkan.
+
+---
+
+## 12. Autentikasi dan Otorisasi
+
+### 12.1 Peran
+
+- Satu akun Supabase Auth = satu baris `pengguna` dengan `peran` `'guru'` atau `'siswa'`.
+- Peran ditulis di `app_metadata` oleh service role saat pendaftaran; browser tidak bisa mengubahnya.
+- Setelah login, pengguna diarahkan ke `/guru` atau `/siswa` berdasarkan peran dari server.
+
+### 12.2 Rute
+
+| Rute | Akses | Keterangan |
+| --- | --- | --- |
+| `/`, `/masuk`, `/daftar/siswa`, `/daftar/guru` | Publik | Halaman masuk dan pendaftaran |
+| `/guru/*`, `/api/guru/*` | Guru | Layout dan setiap route memeriksa peran + kepemilikan |
+| `/siswa/*`, `/api/sesi`, `/api/soal`, `/api/jawaban`, `/api/siswa/*`, `/api/materi` | Siswa | Identitas diambil dari sesi login |
+| `/api/auth/masuk`, `/api/auth/keluar`, `/api/auth/saya` | Publik | Login, logout, profil sesi |
+
+### 12.3 Alur
+
+1. **Daftar guru:** `POST /api/auth/daftar-guru` dengan `KODE_UNDANGAN_GURU` → akun dibuat, kelas pertama dibuat, sesi login dipasang.
+2. **Daftar siswa:** `POST /api/auth/daftar-siswa`, opsional dengan kode undangan kelas atau kode sesi aktif → akun dibuat dan siswa langsung terdaftar di kelas tersebut.
+3. **Masuk:** `POST /api/auth/masuk` → Supabase memverifikasi sandi → cookie sesi ditulis → respons berisi `peran`.
+4. **Gabung kuis:** siswa memasukkan kode sesi di `/siswa` → `POST /api/sesi` → keanggotaan kelas dibuat otomatis bila belum ada.
+5. **Keluar:** `POST /api/auth/keluar` menghapus cookie sesi.
+
+### 12.4 File utama
+
+- `proxy.ts` dan `lib/supabase/proxy.ts`: penyegaran sesi + redirect optimistis.
+- `lib/server/auth.ts`: klien Auth berbasis cookie, `profilWajib`, `wajibPeranApi`, pendaftaran, dan helper kepemilikan.
+- `lib/auth.ts`: logika murni (tujuan per peran, validasi `lanjut`, normalisasi email, kode undangan) dengan tes.
+- `app/api/auth/*`: masuk, keluar, saya, daftar-guru, daftar-siswa.
+- `app/masuk`, `app/daftar/guru`, `app/daftar/siswa`: halaman publik.
+
+### 12.5 Batasan yang disengaja
+
+- Tidak ada reset kata sandi di UI; gunakan alur pemulihan Supabase Auth atau dashboard.
+- Pendaftaran guru bergantung pada satu kode undangan dari env. Untuk banyak sekolah, ganti dengan tabel undangan per sekolah.
+- Email akun yang dibuat lewat API admin langsung dikonfirmasi. Aktifkan konfirmasi email di produksi.
+- Rate limit login/daftar mengandalkan rate limit bawaan Supabase Auth.

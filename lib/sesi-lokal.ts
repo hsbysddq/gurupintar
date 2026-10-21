@@ -1,16 +1,16 @@
 // Satu-satunya modul yang boleh memakai localStorage (design.md bagian 5).
+// Identitas siswa kini berasal dari sesi login di server; yang disimpan di sini hanya kuis aktif.
 import type { Format } from './tipe';
 
-export interface IdentitasSiswa {
+export interface SesiAktif {
   sesiId: string;
   kodeKelas: string;
-  siswaId: string;
-  namaSiswa: string;
   format: Format | null;
 }
 
-const KUNCI = 'guru-pintar:identitas';
-const PERISTIWA = 'guru-pintar:identitas-berubah';
+const KUNCI = 'guru-pintar:sesi-aktif';
+const PERISTIWA = 'guru-pintar:sesi-aktif-berubah';
+const DAFTAR_FORMAT: Format[] = ['video', 'audio', 'bacaan', 'latihan'];
 
 function penyimpanan(): Storage | null {
   try {
@@ -21,7 +21,7 @@ function penyimpanan(): Storage | null {
 }
 
 /** Nilai mentah (string) agar bisa dipakai sebagai snapshot useSyncExternalStore. */
-export function bacaIdentitasMentah(): string | null {
+export function bacaSesiMentah(): string | null {
   try {
     return penyimpanan()?.getItem(KUNCI) ?? null;
   } catch {
@@ -29,20 +29,23 @@ export function bacaIdentitasMentah(): string | null {
   }
 }
 
-export function uraiIdentitas(mentah: string | null): IdentitasSiswa | null {
+export function uraiSesi(mentah: string | null): SesiAktif | null {
   if (!mentah) return null;
   try {
     const data: unknown = JSON.parse(mentah);
     if (
       typeof data === 'object' &&
       data !== null &&
-      'sesiId' in data && typeof data.sesiId === 'string' &&
-      'kodeKelas' in data && typeof data.kodeKelas === 'string' &&
-      'siswaId' in data && typeof data.siswaId === 'string' &&
-      'namaSiswa' in data && typeof data.namaSiswa === 'string'
+      'sesiId' in data &&
+      typeof data.sesiId === 'string' &&
+      'kodeKelas' in data &&
+      typeof data.kodeKelas === 'string'
     ) {
-      const format = 'format' in data && typeof data.format === 'string' ? (data.format as Format) : null;
-      return { sesiId: data.sesiId, kodeKelas: data.kodeKelas, siswaId: data.siswaId, namaSiswa: data.namaSiswa, format };
+      const format =
+        'format' in data && typeof data.format === 'string' && DAFTAR_FORMAT.includes(data.format as Format)
+          ? (data.format as Format)
+          : null;
+      return { sesiId: data.sesiId, kodeKelas: data.kodeKelas, format };
     }
     return null;
   } catch {
@@ -50,8 +53,8 @@ export function uraiIdentitas(mentah: string | null): IdentitasSiswa | null {
   }
 }
 
-export function ambilIdentitas(): IdentitasSiswa | null {
-  return uraiIdentitas(bacaIdentitasMentah());
+export function ambilSesi(): SesiAktif | null {
+  return uraiSesi(bacaSesiMentah());
 }
 
 function tulis(nilai: string | null) {
@@ -62,25 +65,25 @@ function tulis(nilai: string | null) {
     else simpanan.setItem(KUNCI, nilai);
     window.dispatchEvent(new Event(PERISTIWA));
   } catch {
-    // Penyimpanan diblokir (misalnya mode privat); alur tetap berjalan tanpa identitas tersimpan.
+    // Penyimpanan diblokir (misalnya mode privat); alur tetap berjalan tanpa sesi tersimpan.
   }
 }
 
-export function simpanIdentitas(identitas: IdentitasSiswa) {
-  tulis(JSON.stringify(identitas));
+export function simpanSesi(sesi: SesiAktif) {
+  tulis(JSON.stringify(sesi));
 }
 
 export function simpanFormatLokal(format: Format) {
-  const identitas = ambilIdentitas();
-  if (identitas) simpanIdentitas({ ...identitas, format });
+  const sesi = ambilSesi();
+  if (sesi) simpanSesi({ ...sesi, format });
 }
 
-export function hapusIdentitas() {
+export function hapusSesi() {
   tulis(null);
 }
 
-/** Berlangganan perubahan identitas (tab ini maupun tab lain). */
-export function berlanggananIdentitas(panggil: () => void): () => void {
+/** Berlangganan perubahan sesi (tab ini maupun tab lain). */
+export function berlanggananSesi(panggil: () => void): () => void {
   window.addEventListener('storage', panggil);
   window.addEventListener(PERISTIWA, panggil);
   return () => {

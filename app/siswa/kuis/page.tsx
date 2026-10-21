@@ -7,9 +7,9 @@ import { KerangkaSiswa } from "@/components/KerangkaSiswa";
 import { ProgressKuis } from "@/components/ProgressKuis";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
-import { useIdentitasSiswa } from "@/hooks/use-identitas-siswa";
+import { useSesiAktif } from "@/hooks/use-sesi-aktif";
 import { ambilSoal, ErrorApi, kirimJawaban } from "@/lib/api-klien";
-import { hapusIdentitas } from "@/lib/sesi-lokal";
+import { hapusSesi } from "@/lib/sesi-lokal";
 import type { KodePilihan, SoalUntukSiswa } from "@/lib/tipe";
 
 type Muatan =
@@ -23,8 +23,8 @@ const PESAN_GAGAL_KIRIM = "Jawaban belum terkirim. Periksa koneksi, lalu coba la
 
 export default function HalamanKuis() {
   const router = useRouter();
-  const identitas = useIdentitasSiswa();
-  const sesiId = identitas?.sesiId;
+  const sesi = useSesiAktif();
+  const sesiId = sesi?.sesiId;
 
   const [percobaan, setPercobaan] = useState(0);
   const [muatan, setMuatan] = useState<Muatan>({ status: "memuat" });
@@ -32,10 +32,10 @@ export default function HalamanKuis() {
   const [jawaban, setJawaban] = useState<Record<string, KodePilihan>>({});
   const [kiriman, setKiriman] = useState<Kiriman>({ status: "diam" });
 
-  // AC-1.7: belum ada identitas → kembali ke halaman gabung.
+  // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
-    if (identitas === null) router.replace("/siswa");
-  }, [identitas, router]);
+    if (sesi === null) router.replace("/siswa");
+  }, [sesi, router]);
 
   useEffect(() => {
     if (!sesiId) return;
@@ -58,7 +58,7 @@ export default function HalamanKuis() {
     };
   }, [sesiId, percobaan]);
 
-  if (!identitas || muatan.status === "memuat") {
+  if (!sesi || muatan.status === "memuat") {
     return (
       <KerangkaSiswa>
         <StatusHalaman jenis="memuat" judul="Memuat soal" />
@@ -71,7 +71,7 @@ export default function HalamanKuis() {
       ? {
           label: "Masukkan kode lagi",
           onClick: () => {
-            hapusIdentitas();
+            hapusSesi();
             router.replace("/siswa");
           },
         }
@@ -112,12 +112,11 @@ export default function HalamanKuis() {
   const mengirim = kiriman.status === "mengirim";
 
   async function kirim() {
-    if (!identitas) return;
+    if (!sesi) return;
     setKiriman({ status: "mengirim" });
     try {
       await kirimJawaban({
-        sesiId: identitas.sesiId,
-        siswaId: identitas.siswaId,
+        sesiId: sesi.sesiId,
         jawaban: soal.map((s) => ({ soalId: s.id, pilihan: jawaban[s.id] })),
       });
       router.replace("/siswa/selesai");

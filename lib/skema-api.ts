@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PANJANG_SANDI_MAKS, PANJANG_SANDI_MIN, normalisasiEmail } from './auth';
 import { JUMLAH_SOAL_TOPIK, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN } from './konstanta';
 import { samakanTeksPilihan } from './soal-guru';
 
@@ -9,6 +10,53 @@ export function normalisasiKode(kode: string): string {
 
 const skemaFormat = z.enum(['video', 'audio', 'bacaan', 'latihan']);
 const skemaKodePilihan = z.enum(['A', 'B', 'C', 'D']);
+const skemaEmail = z.string().trim().max(254).pipe(z.email()).transform(normalisasiEmail);
+const skemaSandi = z.string().min(PANJANG_SANDI_MIN).max(PANJANG_SANDI_MAKS);
+const skemaKodeKelas = z
+  .string()
+  .transform(normalisasiKode)
+  .pipe(z.string().regex(/^[A-Z0-9]{5,6}$/));
+const skemaKodeKelasOpsional = z.preprocess(
+  (nilai) => (typeof nilai === 'string' && nilai.trim() === '' ? undefined : nilai),
+  skemaKodeKelas.optional(),
+);
+
+// ===== Autentikasi =====
+
+// POST /api/auth/masuk; panjang minimum tidak diperiksa agar pesan tidak membocorkan kebijakan sandi.
+export const skemaBodyMasuk = z.object({
+  email: skemaEmail,
+  password: z.string().min(1).max(PANJANG_SANDI_MAKS),
+});
+
+// POST /api/auth/daftar-siswa; kode kelas boleh kosong, siswa dapat bergabung nanti lewat kode kuis.
+export const skemaBodyDaftarSiswa = z.object({
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+  kodeKelas: skemaKodeKelasOpsional,
+});
+
+// POST /api/auth/daftar-guru; memerlukan kode undangan dari server.
+export const skemaBodyDaftarGuru = z.object({
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+  kodeUndangan: z.string().trim().min(1).max(80),
+  namaKelas: z.string().trim().min(3).max(80).optional(),
+  mapel: z.string().trim().min(3).max(40).optional(),
+});
+
+// POST /api/guru/kelas
+export const skemaBodyBuatKelas = z.object({
+  nama: z.string().trim().min(3).max(80),
+  mapel: z.string().trim().min(3).max(40),
+});
+
+// POST /api/sesi/gabung
+export const skemaBodyGabungSesi = z.object({
+  kode: skemaKodeKelas,
+});
 
 // GET /api/sesi?kode=
 export const skemaQuerySesi = z.object({
@@ -20,16 +68,15 @@ export const skemaQuerySoal = z.object({
   sesi: z.uuid(),
 });
 
-// POST /api/siswa/format
+// POST /api/siswa/format; siswa diambil dari sesi login, bukan dari body.
 export const skemaBodyFormat = z.object({
-  siswaId: z.uuid(),
+  sesiId: z.uuid(),
   format: skemaFormat,
 });
 
-// POST /api/jawaban
+// POST /api/jawaban; siswa diambil dari sesi login, bukan dari body.
 export const skemaBodyJawaban = z.object({
   sesiId: z.uuid(),
-  siswaId: z.uuid(),
   jawaban: z
     .array(z.object({ soalId: z.uuid(), pilihan: skemaKodePilihan }))
     .min(1),
@@ -69,10 +116,9 @@ export const skemaBodyBagikanMateri = z.object({
   sesiId: z.uuid(),
 });
 
-// GET /api/materi?sesi=&siswa=
+// GET /api/materi?sesi= (siswa diambil dari sesi login)
 export const skemaQueryMateriSiswa = z.object({
   sesi: z.uuid(),
-  siswa: z.uuid(),
 });
 
 // POST /api/guru/modul; panjang dihitung setelah spasi di awal dan akhir dibuang.
@@ -80,9 +126,15 @@ export const skemaBodyUbahModul = z.object({
   teks: z.string().trim().min(PANJANG_MODUL_MIN).max(PANJANG_MODUL_MAKS),
 });
 
-// POST /api/guru/sesi; tanpa topikId → TOPIK_DEMO_ID.
+// POST /api/guru/sesi; tanpa kelasId → kelas pertama milik guru, tanpa topikId → TOPIK_DEMO_ID.
 export const skemaBodyBukaSesi = z.object({
+  kelasId: z.uuid().optional(),
   topikId: z.uuid().optional(),
+});
+
+// GET /api/guru/sesi?kelas= dan GET /api/guru/pendampingan?kelas=
+export const skemaQueryKelasOpsional = z.object({
+  kelas: z.uuid().optional(),
 });
 
 // POST /api/guru/topik (PRD F-10). Pilihan kembar dibandingkan dengan samakanTeksPilihan.
@@ -122,5 +174,9 @@ export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
 export type BodyTopikBaru = z.infer<typeof skemaBodyTopikBaru>;
+export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
+export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
+export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
+export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;

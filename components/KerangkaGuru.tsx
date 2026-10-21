@@ -2,11 +2,13 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, ListChecks, type LucideIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, ListChecks, LogOut, type LucideIcon } from "lucide-react";
+import { keluar } from "@/lib/api-klien";
 
 type KerangkaGuruProps = {
   children: ReactNode;
+  nama: string;
 };
 
 type Menu = { href: string; label: string; ikon: LucideIcon; aktif: (path: string) => boolean };
@@ -43,8 +45,18 @@ const MENU: Menu[] = [
  * Kerangka semua halaman guru (design.md 3.1, 3.7): sidebar penuh 248px di ≥1280px,
  * hanya ikon 72px di 768–1279px, dan bar atas di bawah 768px.
  */
-export function KerangkaGuru({ children }: KerangkaGuruProps) {
+export function KerangkaGuru({ children, nama }: KerangkaGuruProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function keluarAkun() {
+    try {
+      await keluar();
+    } finally {
+      router.replace("/masuk");
+      router.refresh();
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">
@@ -77,10 +89,20 @@ export function KerangkaGuru({ children }: KerangkaGuruProps) {
           </ul>
         </nav>
 
-        <div className="hidden flex-col px-2 xl:flex">
-          <span className="text-[15px] font-semibold">Kelas 7A</span>
-          <span className="text-[13px] leading-normal font-medium text-tinta-lembut">Bu Rina</span>
+        <div className="mt-auto hidden flex-col gap-2 px-2 xl:flex">
+          <span className="text-[15px] font-semibold">{nama}</span>
+          <span className="text-[13px] leading-normal font-medium text-tinta-lembut">Guru</span>
         </div>
+
+        <button
+          type="button"
+          onClick={keluarAkun}
+          title="Keluar"
+          className="flex min-h-12 items-center gap-3 rounded-full px-3 text-[15px] font-semibold text-tinta-lembut transition-colors hover:bg-belum-latar hover:text-belum-teks md:justify-center xl:justify-start xl:px-4"
+        >
+          <LogOut aria-hidden="true" className="size-5 shrink-0" />
+          <span className="sr-only sm:not-sr-only md:sr-only xl:not-sr-only">Keluar</span>
+        </button>
       </aside>
 
       <main className="w-full max-w-[1200px] flex-1 px-4 py-6 text-[15px] leading-relaxed md:p-8">{children}</main>

@@ -1,31 +1,35 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  ambilIdentitas,
-  berlanggananIdentitas,
-  hapusIdentitas,
+  ambilSesi,
+  berlanggananSesi,
+  hapusSesi,
   simpanFormatLokal,
-  simpanIdentitas,
-  uraiIdentitas,
-  type IdentitasSiswa,
+  simpanSesi,
+  uraiSesi,
+  type SesiAktif,
 } from '@/lib/sesi-lokal';
 
-const IDENTITAS: IdentitasSiswa = {
+const SESI: SesiAktif = {
   sesiId: 'sesi-1',
   kodeKelas: 'A7K2P',
-  siswaId: 'siswa-1',
-  namaSiswa: 'Budi Santoso',
   format: null,
 };
 
 function penyimpananPalsu(): Storage {
   const isi = new Map<string, string>();
   return {
-    get length() { return isi.size; },
+    get length() {
+      return isi.size;
+    },
     clear: () => isi.clear(),
     getItem: (k) => isi.get(k) ?? null,
     key: (i) => [...isi.keys()][i] ?? null,
-    removeItem: (k) => { isi.delete(k); },
-    setItem: (k, v) => { isi.set(k, v); },
+    removeItem: (k) => {
+      isi.delete(k);
+    },
+    setItem: (k, v) => {
+      isi.set(k, v);
+    },
   };
 }
 
@@ -44,57 +48,57 @@ afterEach(() => {
 });
 
 describe('sesi-lokal', () => {
-  it('null jika belum ada identitas', () => {
-    expect(ambilIdentitas()).toBeNull();
+  it('null jika belum ada sesi', () => {
+    expect(ambilSesi()).toBeNull();
   });
 
-  it('menyimpan dan membaca identitas', () => {
-    simpanIdentitas(IDENTITAS);
-    expect(ambilIdentitas()).toEqual(IDENTITAS);
+  it('menyimpan dan membaca sesi aktif', () => {
+    simpanSesi(SESI);
+    expect(ambilSesi()).toEqual(SESI);
   });
 
   it('menyimpan format tanpa mengubah data lain', () => {
-    simpanIdentitas(IDENTITAS);
+    simpanSesi(SESI);
     simpanFormatLokal('audio');
-    expect(ambilIdentitas()).toEqual({ ...IDENTITAS, format: 'audio' });
+    expect(ambilSesi()).toEqual({ ...SESI, format: 'audio' });
   });
 
-  it('simpanFormatLokal tidak membuat identitas baru jika belum ada', () => {
+  it('simpanFormatLokal tidak membuat sesi baru jika belum ada', () => {
     simpanFormatLokal('audio');
-    expect(ambilIdentitas()).toBeNull();
+    expect(ambilSesi()).toBeNull();
   });
 
-  it('menghapus identitas', () => {
-    simpanIdentitas(IDENTITAS);
-    hapusIdentitas();
-    expect(ambilIdentitas()).toBeNull();
+  it('menghapus sesi', () => {
+    simpanSesi(SESI);
+    hapusSesi();
+    expect(ambilSesi()).toBeNull();
   });
 
-  it('memberi tahu pelanggan saat identitas berubah', () => {
+  it('memberi tahu pelanggan saat sesi berubah', () => {
     const panggil = vi.fn();
-    const berhenti = berlanggananIdentitas(panggil);
-    simpanIdentitas(IDENTITAS);
+    const berhenti = berlanggananSesi(panggil);
+    simpanSesi(SESI);
     expect(panggil).toHaveBeenCalledTimes(1);
     berhenti();
-    hapusIdentitas();
+    hapusSesi();
     expect(panggil).toHaveBeenCalledTimes(1);
   });
 
   it('aman ketika window tidak ada (render server)', () => {
     vi.unstubAllGlobals();
-    expect(ambilIdentitas()).toBeNull();
-    expect(() => simpanIdentitas(IDENTITAS)).not.toThrow();
+    expect(ambilSesi()).toBeNull();
+    expect(() => simpanSesi(SESI)).not.toThrow();
   });
 });
 
-describe('uraiIdentitas', () => {
+describe('uraiSesi', () => {
   it.each([null, '', 'bukan json', '{}', '{"sesiId":"x"}', '[]'])('mengembalikan null untuk %o', (mentah) => {
-    expect(uraiIdentitas(mentah)).toBeNull();
+    expect(uraiSesi(mentah)).toBeNull();
   });
 
-  it('format tidak ada dianggap null', () => {
-    const { format, ...tanpaFormat } = IDENTITAS;
-    expect(format).toBeNull();
-    expect(uraiIdentitas(JSON.stringify(tanpaFormat))).toEqual(IDENTITAS);
+  it('format tidak ada atau tidak dikenal dianggap null', () => {
+    const tanpaFormat = { sesiId: 's', kodeKelas: 'A7K2P', format: null };
+    expect(uraiSesi(JSON.stringify({ sesiId: 's', kodeKelas: 'A7K2P' }))).toEqual(tanpaFormat);
+    expect(uraiSesi(JSON.stringify({ sesiId: 's', kodeKelas: 'A7K2P', format: 'visual' }))).toEqual(tanpaFormat);
   });
 });
