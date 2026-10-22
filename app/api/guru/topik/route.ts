@@ -1,4 +1,5 @@
 import { skemaBodyTopikBaru } from '@/lib/skema-api';
+import { TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { keBarisSoal, susunDaftarTopik } from '@/lib/soal-guru';
 import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -13,7 +14,11 @@ export async function GET() {
   if (!auth.ok) return auth.respons;
 
   try {
-    const { data, error } = await ambilSupabase().from('topik').select('id, nama, soal(count)');
+    // Bank soal guru: topik miliknya sendiri + topik demo bersama.
+    const { data, error } = await ambilSupabase()
+      .from('topik')
+      .select('id, nama, soal(count)')
+      .or(`dibuat_oleh.eq.${auth.profil.id},id.eq.${TOPIK_DEMO_ID}`);
     if (error) return petakanErrorDb(error);
 
     const respons: TopikRingkas[] = susunDaftarTopik(

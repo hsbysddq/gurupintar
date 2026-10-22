@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
 import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaBodyBukaSesi, skemaQueryKelasOpsional } from '@/lib/skema-api';
+import { bolehPakaiTopik } from '@/lib/topik';
 import { idKelasMilikGuru, kelasMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
@@ -81,9 +82,16 @@ export async function POST(request: Request) {
       kelasId = ids[0];
     }
 
-    const topik = await db.from('topik').select('id, soal(count)').eq('id', topikId).maybeSingle();
+    const topik = await db
+      .from('topik')
+      .select('id, dibuat_oleh, soal(count)')
+      .eq('id', topikId)
+      .maybeSingle();
     if (topik.error) return petakanErrorDb(topik.error);
     if (!topik.data) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+    if (!bolehPakaiTopik({ id: topik.data.id, dibuatOleh: topik.data.dibuat_oleh }, auth.profil.id)) {
+      return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+    }
     const jumlahSoal = (topik.data.soal as { count: number }[])[0]?.count ?? 0;
     if (jumlahSoal !== JUMLAH_SOAL_TOPIK) return responsError(PESAN_JUMLAH_SOAL, 400);
 
