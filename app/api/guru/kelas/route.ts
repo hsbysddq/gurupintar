@@ -1,6 +1,7 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
 import { skemaBodyBuatKelas } from '@/lib/skema-api';
 import { wajibPeranApi } from '@/lib/server/auth';
+import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 import type { KelasRingkas } from '@/lib/tipe';
@@ -13,21 +14,8 @@ export async function GET() {
   if (!auth.ok) return auth.respons;
 
   try {
-    const { data, error } = await ambilSupabase()
-      .from('kelas')
-      .select('id, nama, mapel, kode_undangan, keanggotaan_kelas(count)')
-      .eq('guru_id', auth.profil.id)
-      .order('dibuat_pada');
-    if (error) return petakanErrorDb(error);
-
-    const respons: KelasRingkas[] = data.map((k) => ({
-      id: k.id,
-      nama: k.nama,
-      mapel: k.mapel,
-      kodeUndangan: k.kode_undangan,
-      jumlahSiswa: (k.keanggotaan_kelas as { count: number }[])[0]?.count ?? 0,
-    }));
-    return responsOk(respons);
+    const daftar = await ambilKelasGuru(ambilSupabase(), auth.profil.id);
+    return responsOk(daftar);
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);
@@ -68,6 +56,7 @@ export async function POST(request: Request) {
       mapel: input.data.mapel,
       kodeUndangan: hasil.kode,
       jumlahSiswa: 0,
+      kuisAktif: null,
     };
     return responsOk(respons, 201);
   } catch (err) {

@@ -51,12 +51,19 @@ export interface SesiUntukSiswa {
 // ===== Respons API untuk guru (architecture.md bagian 6 dan 6.1) =====
 
 /** GET /api/guru/kelas */
+export interface KuisAktifRingkas {
+  id: string;
+  kodeKelas: string;
+}
+
 export interface KelasRingkas {
   id: string;
   nama: string;
   mapel: string;
   kodeUndangan: string;
   jumlahSiswa: number;
+  /** Sesi aktif kelas ini, jika ada. */
+  kuisAktif: KuisAktifRingkas | null;
 }
 
 /** GET /api/guru/sesi */

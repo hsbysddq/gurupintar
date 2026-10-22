@@ -27,7 +27,9 @@ export default function HalamanMateri() {
 // PRD F-6: guru meninjau, mengubah, dan membagikan materi (design.md 3.4).
 function MateriLanjutan() {
   const router = useRouter();
-  const sesiId = useSearchParams().get("sesi");
+  const params = useSearchParams();
+  const sesiId = params.get("sesi");
+  const kelasId = params.get("kelas");
   const [percobaan, setPercobaan] = useState(0);
   const [muatan, setMuatan] = useState<Muatan>({ status: "memuat" });
   const [konfirmasiGanti, setKonfirmasiGanti] = useState(false);
@@ -125,7 +127,7 @@ function MateriLanjutan() {
   const gagalAi = keadaan.status === "gagal-ai";
   const adaDibagikan = materi.some((m) => m.status === "dibagikan");
   const adaDraf = materi.some((m) => m.status === "draf");
-  const kembali = `/guru/hasil?sesi=${encodeURIComponent(sesiId)}`;
+  const kembali = `/guru/hasil?sesi=${encodeURIComponent(sesiId)}${kelasId ? `&kelas=${encodeURIComponent(kelasId)}` : ""}`;
 
   const statusProses = (
     <div aria-live="polite" className="flex flex-col gap-1">

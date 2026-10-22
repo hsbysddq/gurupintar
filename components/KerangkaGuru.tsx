@@ -1,52 +1,23 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { FileText, GraduationCap, HeartHandshake, LayoutDashboard, ListChecks, LogOut, type LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { GraduationCap, LogOut } from "lucide-react";
+import { NavigasiGuru, type KelasNav } from "@/components/NavigasiGuru";
 import { keluar } from "@/lib/api-klien";
 
 type KerangkaGuruProps = {
   children: ReactNode;
   nama: string;
+  kelas: KelasNav[];
 };
-
-type Menu = { href: string; label: string; ikon: LucideIcon; aktif: (path: string) => boolean };
-
-const MENU: Menu[] = [
-  {
-    href: "/guru",
-    label: "Dashboard",
-    ikon: LayoutDashboard,
-    // Daftar positif agar menu baru tidak ikut membuat Dashboard aktif.
-    aktif: (path) => path === "/guru" || path.startsWith("/guru/hasil") || path.startsWith("/guru/materi"),
-  },
-  {
-    href: "/guru/soal",
-    label: "Buat Soal",
-    ikon: ListChecks,
-    aktif: (path) => path.startsWith("/guru/soal"),
-  },
-  {
-    href: "/guru/modul",
-    label: "Ubah Modul",
-    ikon: FileText,
-    aktif: (path) => path.startsWith("/guru/modul"),
-  },
-  {
-    href: "/guru/pendampingan",
-    label: "Perlu Pendampingan",
-    ikon: HeartHandshake,
-    aktif: (path) => path.startsWith("/guru/pendampingan"),
-  },
-];
 
 /**
  * Kerangka semua halaman guru (design.md 3.1, 3.7): sidebar penuh 248px di ≥1280px,
  * hanya ikon 72px di 768–1279px, dan bar atas di bawah 768px.
  */
-export function KerangkaGuru({ children, nama }: KerangkaGuruProps) {
-  const pathname = usePathname();
+export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
   const router = useRouter();
 
   async function keluarAkun() {
@@ -66,27 +37,10 @@ export function KerangkaGuru({ children, nama }: KerangkaGuruProps) {
           <span className="md:sr-only xl:not-sr-only">Guru Pintar</span>
         </Link>
 
-        <nav aria-label="Menu guru" className="flex-1">
-          <ul className="flex flex-row gap-2 md:flex-col">
-            {MENU.map(({ href, label, ikon: Ikon, aktif }) => {
-              const sedangAktif = aktif(pathname);
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    title={label}
-                    aria-current={sedangAktif ? "page" : undefined}
-                    className={`flex min-h-12 items-center gap-3 rounded-full px-3 text-[15px] font-semibold transition-colors md:justify-center xl:justify-start xl:px-4 ${
-                      sedangAktif ? "bg-primer text-white" : "text-tinta-lembut hover:bg-primer-lembut hover:text-primer"
-                    }`}
-                  >
-                    <Ikon aria-hidden="true" className="size-5 shrink-0" />
-                    <span className="sr-only sm:not-sr-only md:sr-only xl:not-sr-only">{label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav aria-label="Menu guru" className="flex flex-1">
+          <Suspense fallback={null}>
+            <NavigasiGuru kelas={kelas} />
+          </Suspense>
         </nav>
 
         <div className="mt-auto hidden flex-col gap-2 px-2 xl:flex">

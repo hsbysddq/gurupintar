@@ -33,10 +33,13 @@ export default function HalamanHasil() {
 // PRD F-5: dasbor hasil yang diperbarui otomatis lewat polling (architecture.md 7.2).
 function HasilKuis() {
   const router = useRouter();
-  const sesiId = useSearchParams().get("sesi");
+  const params = useSearchParams();
+  const sesiId = params.get("sesi");
+  const kelasId = params.get("kelas");
   const ambil = useCallback((signal: AbortSignal) => ambilHasil(sesiId ?? "", signal), [sesiId]);
   const { data, galat, memuat, muatUlang } = usePolling(sesiId ? ambil : null, INTERVAL_POLLING_GURU_MS);
-  const halamanMateri = `/guru/materi?sesi=${encodeURIComponent(sesiId ?? "")}`;
+  const akhiranKelas = kelasId ? `&kelas=${encodeURIComponent(kelasId)}` : "";
+  const halamanMateri = `/guru/materi?sesi=${encodeURIComponent(sesiId ?? "")}${akhiranKelas}`;
   const keHalamanMateri = useCallback(() => router.push(halamanMateri), [router, halamanMateri]);
   const pembuat = useBuatMateri(sesiId, keHalamanMateri);
 
@@ -139,7 +142,10 @@ function HasilKuis() {
             Tombol aktif setelah ada siswa yang menjawab.
           </p>
         )}
-        <Link href="/guru/pendampingan" className="inline-flex min-h-12 items-center px-2 font-semibold text-primer hover:underline">
+        <Link
+          href={kelasId ? `/guru/pendampingan?kelas=${encodeURIComponent(kelasId)}` : "/guru/pendampingan"}
+          className="inline-flex min-h-12 items-center px-2 font-semibold text-primer hover:underline"
+        >
           Lihat siswa yang perlu pendampingan
         </Link>
       </div>
