@@ -29,8 +29,8 @@ type BarisSesiAktif = {
   hasil_siswa: { count: number }[];
 };
 
-type BarisAnggota = { siswa_id: string; preferensi_format: Format | null };
-type BarisPengguna = { id: string; nama: string };
+type BarisAnggota = { siswa_id: string; preferensi_format: Format | null; nama_tampil?: string | null };
+type BarisPengguna = { id: string; nama: string; email?: string | null };
 type BarisSesi = { id: string; dibuat_pada: string };
 type BarisHasil = {
   sesi_id: string;
@@ -93,6 +93,14 @@ export async function ambilKelasGuru(
   });
 }
 
+function kolomHilang(err: unknown, namaKolom: string): boolean {
+  const pesan =
+    typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string'
+      ? err.message
+      : '';
+  return pesan.includes(namaKolom) && (pesan.includes('does not exist') || pesan.includes('schema cache'));
+}
+
 /** Anggota satu kelas (harus milik guru) beserta hasil kuis terbarunya. */
 export async function ambilSiswaKelas(
   db: SupabaseClient,
@@ -101,22 +109,40 @@ export async function ambilSiswaKelas(
 ): Promise<SiswaKelas[] | null> {
   if (!(await kelasMilikGuru(db, guruId, kelasId))) return null;
 
-  const anggota = await db
+  let barisAnggota: BarisAnggota[] = [];
+  const anggotaLengkap = await db
     .from('keanggotaan_kelas')
-    .select('siswa_id, preferensi_format')
+    .select('siswa_id, preferensi_format, nama_tampil')
     .eq('kelas_id', kelasId);
-  if (anggota.error) throw anggota.error;
+  if (!anggotaLengkap.error) {
+    barisAnggota = anggotaLengkap.data as BarisAnggota[];
+  } else if (kolomHilang(anggotaLengkap.error, 'nama_tampil')) {
+    const cadangan = await db
+      .from('keanggotaan_kelas')
+      .select('siswa_id, preferensi_format')
+      .eq('kelas_id', kelasId);
+    if (cadangan.error) throw cadangan.error;
+    barisAnggota = cadangan.data as BarisAnggota[];
+  } else {
+    throw anggotaLengkap.error;
+  }
 
-  const barisAnggota = anggota.data as BarisAnggota[];
   const idSiswa = barisAnggota.map((a) => a.siswa_id);
 
   let daftarPengguna: BarisPengguna[] = [];
   if (idSiswa.length > 0) {
-    const pengguna = await db.from('pengguna').select('id, nama').in('id', idSiswa);
-    if (pengguna.error) throw pengguna.error;
-    daftarPengguna = pengguna.data as BarisPengguna[];
+    const penggunaLengkap = await db.from('pengguna').select('id, nama, email').in('id', idSiswa);
+    if (!penggunaLengkap.error) {
+      daftarPengguna = penggunaLengkap.data as BarisPengguna[];
+    } else if (kolomHilang(penggunaLengkap.error, 'email')) {
+      const cadangan = await db.from('pengguna').select('id, nama').in('id', idSiswa);
+      if (cadangan.error) throw cadangan.error;
+      daftarPengguna = cadangan.data as BarisPengguna[];
+    } else {
+      throw penggunaLengkap.error;
+    }
   }
-  const namaSiswa = new Map(daftarPengguna.map((p) => [p.id, p.nama]));
+  const petaPengguna = new Map(daftarPengguna.map((p) => [p.id, p]));
 
   const sesi = await db
     .from('sesi_kuis')
@@ -153,9 +179,11 @@ export async function ambilSiswaKelas(
   return barisAnggota
     .map((a) => {
       const hasil = terbaru.get(a.siswa_id);
+      const pengguna = petaPengguna.get(a.siswa_id);
       return {
         siswaId: a.siswa_id,
-        nama: namaSiswa.get(a.siswa_id) ?? '',
+        nama: a.nama_tampil ?? pengguna?.nama ?? '',
+        email: pengguna?.email ?? null,
         format: a.preferensi_format,
         kelompok: hasil?.kelompok ?? null,
         skor: hasil?.skor ?? null,

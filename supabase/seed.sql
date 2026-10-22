@@ -73,10 +73,11 @@ where u.email like '%@demo.gurupintar.id';
 
 -- ===== Profil aplikasi =====
 
-insert into pengguna (id, nama, peran)
+insert into pengguna (id, nama, email, peran)
 select
   u.id,
   u.raw_user_meta_data->>'nama',
+  u.email,
   u.raw_app_meta_data->>'peran'
 from auth.users u
 where u.email like '%@demo.gurupintar.id';
@@ -85,8 +86,8 @@ insert into kelas (id, guru_id, nama, mapel, kode_undangan) values
 ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-000000000001',
  'Kelas 7A', 'Matematika', 'KEL7A');
 
-insert into keanggotaan_kelas (kelas_id, siswa_id)
-select '00000000-0000-4000-8000-0000000000c1', id
+insert into keanggotaan_kelas (kelas_id, siswa_id, nama_tampil)
+select '00000000-0000-4000-8000-0000000000c1', id, nama
 from pengguna
 where peran = 'siswa';
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { KerangkaSiswa } from '@/components/KerangkaSiswa';
 import { useSiswa } from '@/components/PenyediaSiswa';
@@ -83,6 +84,13 @@ function GabungKelas() {
           Lanjut
         </Tombol>
       </form>
+
+      <p className="text-center text-tinta-lembut">
+        Sudah punya kelas?{' '}
+        <Link href="/siswa/kelas" className="font-semibold text-primer hover:underline">
+          Lihat kelas saya
+        </Link>
+      </p>
     </KerangkaSiswa>
   );
 }

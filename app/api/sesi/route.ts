@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { skemaBodyGabungSesi } from '@/lib/skema-api';
+import { PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
 import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
@@ -43,13 +44,11 @@ export async function POST(request: NextRequest) {
     if (anggota.error) return petakanErrorDb(anggota.error);
 
     if (!anggota.data) {
-      const { error: galatGabung } = await db
-        .from('keanggotaan_kelas')
-        .upsert(
-          { kelas_id: sesi.kelas_id, siswa_id: auth.profil.id },
-          { onConflict: 'kelas_id,siswa_id', ignoreDuplicates: true },
-        );
-      if (galatGabung) return petakanErrorDb(galatGabung);
+      const tambah = await tambahAnggotaKelas(db, sesi.kelas_id, auth.profil.id, auth.profil.nama);
+      if (!tambah.ok) {
+        if (tambah.konflikNama) return responsError(PESAN_NAMA_DIPAKAI, 409);
+        return petakanErrorDb(tambah.error);
+      }
     }
 
     const respons: SesiUntukSiswa = {

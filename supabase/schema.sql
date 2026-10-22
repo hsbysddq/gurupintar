@@ -7,6 +7,7 @@ drop table if exists materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, keang
 create table pengguna (
   id uuid primary key references auth.users(id) on delete cascade,
   nama text not null,
+  email text,
   peran text not null check (peran in ('guru','siswa')),
   dibuat_pada timestamptz not null default now()
 );
@@ -27,11 +28,14 @@ create index kelas_guru on kelas (guru_id);
 create table keanggotaan_kelas (
   kelas_id uuid not null references kelas(id) on delete cascade,
   siswa_id uuid not null references pengguna(id) on delete cascade,
+  nama_tampil text,
   preferensi_format text check (preferensi_format in ('video','audio','bacaan','latihan')),
   gabung_pada timestamptz not null default now(),
   primary key (kelas_id, siswa_id)
 );
 create index keanggotaan_siswa on keanggotaan_kelas (siswa_id);
+-- Satu nama hanya boleh dipakai satu akun di kelas yang sama (tidak peka huruf besar-kecil).
+create unique index keanggotaan_kelas_nama_unik on keanggotaan_kelas (kelas_id, lower(nama_tampil));
 
 create table topik (
   id uuid primary key default gen_random_uuid(),
@@ -157,11 +161,24 @@ returns void language sql as $$
   update sesi_kuis set materi_diproses_sejak = null where id = p_sesi;
 $$;
 
+-- Keluarkan siswa dari kelas sekaligus hapus jawaban/hasilnya di kelas tersebut.
+create or replace function hapus_anggota_kelas(p_kelas uuid, p_siswa uuid)
+returns void language plpgsql as $$
+begin
+  delete from jawaban j using sesi_kuis s
+    where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  delete from hasil_siswa h using sesi_kuis s
+    where h.sesi_id = s.id and s.kelas_id = p_kelas and h.siswa_id = p_siswa;
+  delete from keanggotaan_kelas where kelas_id = p_kelas and siswa_id = p_siswa;
+end $$;
+
 revoke execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) from public, anon, authenticated;
 revoke execute on function buka_sesi(uuid, uuid, text) from public, anon, authenticated;
 revoke execute on function ambil_kunci_materi(uuid) from public, anon, authenticated;
 revoke execute on function lepas_kunci_materi(uuid) from public, anon, authenticated;
+revoke execute on function hapus_anggota_kelas(uuid, uuid) from public, anon, authenticated;
 grant execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) to service_role;
 grant execute on function buka_sesi(uuid, uuid, text) to service_role;
 grant execute on function ambil_kunci_materi(uuid) to service_role;
 grant execute on function lepas_kunci_materi(uuid) to service_role;
+grant execute on function hapus_anggota_kelas(uuid, uuid) to service_role;

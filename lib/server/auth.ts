@@ -150,8 +150,14 @@ export async function buatAkun(nama: string, email: string, password: string, pe
     throw new GalatAuth('Akun belum berhasil dibuat. Coba lagi sebentar.', 500);
   }
 
-  const { error: galatProfil } = await admin.from('pengguna').insert({ id: data.user.id, nama, peran });
+  const { error: galatProfil } = await admin.from('pengguna').insert({ id: data.user.id, nama, email, peran });
   if (galatProfil) {
+    const pesan = galatProfil.message ?? '';
+    const kolomEmailHilang = pesan.includes('email') && (pesan.includes('does not exist') || pesan.includes('schema cache'));
+    if (kolomEmailHilang) {
+      const { error: galatCadangan } = await admin.from('pengguna').insert({ id: data.user.id, nama, peran });
+      if (!galatCadangan) return data.user.id;
+    }
     await admin.auth.admin.deleteUser(data.user.id);
     throw new GalatAuth('Akun belum berhasil dibuat. Coba lagi sebentar.', 500);
   }

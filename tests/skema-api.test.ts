@@ -8,7 +8,9 @@ import {
   skemaBodyBuatMateri,
   skemaBodyDaftarGuru,
   skemaBodyDaftarSiswa,
+  skemaBodyGabungKelas,
   skemaBodyGabungSesi,
+  skemaBodyHapusSiswa,
   skemaBodyMasuk,
   skemaBodyTopikBaru,
   skemaBodyFormat,
@@ -322,6 +324,18 @@ describe('skemaBodyUbahKelas', () => {
   });
 });
 
+describe('skemaBodyHapusSiswa', () => {
+  it('menerima kelasId dan siswaId uuid', () => {
+    expect(skemaBodyHapusSiswa.safeParse({ kelasId: SESI_ID, siswaId: SISWA_ID }).success).toBe(true);
+  });
+
+  it('menolak id yang tidak lengkap atau bukan uuid', () => {
+    expect(skemaBodyHapusSiswa.safeParse({ kelasId: SESI_ID }).success).toBe(false);
+    expect(skemaBodyHapusSiswa.safeParse({ kelasId: '7a', siswaId: SISWA_ID }).success).toBe(false);
+    expect(skemaBodyHapusSiswa.safeParse({ kelasId: SESI_ID, siswaId: 'andi' }).success).toBe(false);
+  });
+});
+
 describe('skemaBodyBukaSesi', () => {
   it('menerima tanpa id (bawaan kelas pertama dan topik demo) dan dengan uuid', () => {
     expect(skemaBodyBukaSesi.safeParse({}).success).toBe(true);
@@ -400,5 +414,11 @@ describe('skema autentikasi', () => {
   it('skemaBodyGabungSesi menormalkan kode dan menolak kode pendek', () => {
     expect(skemaBodyGabungSesi.parse({ kode: 'a7 k2p' })).toEqual({ kode: 'A7K2P' });
     expect(skemaBodyGabungSesi.safeParse({ kode: 'A7' }).success).toBe(false);
+  });
+
+  it('skemaBodyGabungKelas memakai aturan kode yang sama', () => {
+    expect(skemaBodyGabungKelas.parse({ kode: 'kel 7a' })).toEqual({ kode: 'KEL7A' });
+    expect(skemaBodyGabungKelas.safeParse({ kode: '' }).success).toBe(false);
+    expect(skemaBodyGabungKelas.safeParse({}).success).toBe(false);
   });
 });

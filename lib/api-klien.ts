@@ -5,6 +5,7 @@ import type {
   BodyBukaSesiBanyak,
   BodyDaftarGuru,
   BodyDaftarSiswa,
+  BodyHapusSiswa,
   BodyJawaban,
   BodyMasuk,
   BodyTopikBaru,
@@ -16,6 +17,7 @@ import type {
   HasilGuru,
   IsiMateri,
   KelasRingkas,
+  KelasSiswa,
   MateriGuru,
   MateriSiswa,
   Peran,
@@ -99,6 +101,16 @@ export function gabungSesi(kode: string): Promise<SesiUntukSiswa> {
   return minta('/api/sesi', { method: 'POST', body: JSON.stringify({ kode }) });
 }
 
+/** Daftar kelas yang diikuti siswa. */
+export function ambilKelasSiswa(signal?: AbortSignal): Promise<KelasSiswa[]> {
+  return minta('/api/siswa/kelas', { signal });
+}
+
+/** Bergabung ke kelas lewat kode undangan kelas, tanpa perlu kuis aktif. */
+export function gabungKelas(kode: string): Promise<{ ok: true; kelas: { id: string; nama: string; mapel: string } }> {
+  return minta('/api/siswa/kelas', { method: 'POST', body: JSON.stringify({ kode }) });
+}
+
 export function ambilSoal(sesiId: string): Promise<SoalUntukSiswa[]> {
   return minta(`/api/soal?sesi=${encodeURIComponent(sesiId)}`);
 }
@@ -127,6 +139,10 @@ export function buatKelas(body: BodyBuatKelas): Promise<KelasRingkas> {
 
 export function ubahKelas(body: BodyUbahKelas): Promise<{ ok: true }> {
   return minta('/api/guru/kelas', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function keluarkanSiswa(body: BodyHapusSiswa): Promise<{ ok: true }> {
+  return minta('/api/guru/kelas/siswa', { method: 'DELETE', body: JSON.stringify(body) });
 }
 
 export function ambilDaftarSesi(kelasId?: string, signal?: AbortSignal): Promise<SesiGuru[]> {

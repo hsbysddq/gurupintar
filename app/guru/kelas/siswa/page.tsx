@@ -26,7 +26,7 @@ export default async function HalamanSiswaKelas({
   return (
     <div className="flex flex-col gap-6">
       <KepalaKelas kelas={dipilih} />
-      <DaftarSiswaKelas siswa={siswa} kodeUndangan={dipilih.kodeUndangan} />
+      <DaftarSiswaKelas siswa={siswa} kodeUndangan={dipilih.kodeUndangan} kelasId={dipilih.id} />
     </div>
   );
 }

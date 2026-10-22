@@ -1,4 +1,5 @@
 import { skemaBodyDaftarSiswa } from '@/lib/skema-api';
+import { PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
 import { buatAkun, GalatAuth, kelasDariKode, masukDenganSandi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, PESAN_ERROR_UMUM, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
@@ -20,9 +21,10 @@ export async function POST(request: Request) {
     const siswaId = await buatAkun(nama, email, password, 'siswa');
 
     if (kelasId) {
-      const { error } = await db.from('keanggotaan_kelas').insert({ kelas_id: kelasId, siswa_id: siswaId });
-      if (error) {
+      const tambah = await tambahAnggotaKelas(db, kelasId, siswaId, nama);
+      if (!tambah.ok) {
         await db.auth.admin.deleteUser(siswaId);
+        if (tambah.konflikNama) return responsError(PESAN_NAMA_DIPAKAI, 409);
         return responsError(PESAN_DAFTAR_GAGAL, 500);
       }
     }
