@@ -1,12 +1,13 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
-import { skemaBodyBuatKelas } from '@/lib/skema-api';
-import { wajibPeranApi } from '@/lib/server/auth';
+import { skemaBodyBuatKelas, skemaBodyUbahKelas } from '@/lib/skema-api';
+import { kelasMilikGuru, kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 import type { KelasRingkas } from '@/lib/tipe';
 
 const PESAN_KODE_GAGAL = 'Kode undangan kelas belum berhasil dibuat. Coba lagi.';
+const PESAN_KELAS_TIDAK_ADA = 'Kelas tidak ditemukan.';
 
 // GET /api/guru/kelas: hanya kelas milik guru yang login.
 export async function GET() {
@@ -59,6 +60,58 @@ export async function POST(request: Request) {
       kuisAktif: null,
     };
     return responsOk(respons, 201);
+  } catch (err) {
+    console.error(err);
+    return petakanErrorDb(err);
+  }
+}
+
+// PATCH /api/guru/kelas: ubah nama/mapel, arsipkan, atau pulihkan kelas.
+export async function PATCH(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
+  const input = skemaBodyUbahKelas.safeParse(await bacaBodyJson(request));
+  if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
+  const { id, nama, mapel, arsip } = input.data;
+
+  try {
+    const db = ambilSupabase();
+    if (!(await kelasMilikGuru(db, auth.profil.id, id, { termasukArsip: true }))) {
+      return responsError(PESAN_KELAS_TIDAK_ADA, 404);
+    }
+
+    // Beri pesan jelas jika kolom arsip belum dibuat, sebelum menutup kuis aktif.
+    if (arsip !== undefined) {
+      const cek = await db.from('kelas').select('diarsipkan_pada').eq('id', id).maybeSingle();
+      if (cek.error && kolomArsipBelumAda(cek.error)) {
+        return responsError(
+          'Fitur arsip belum aktif. Jalankan supabase/migrasi-arsip-kelas.sql di Supabase.',
+          503,
+        );
+      }
+      if (cek.error) return petakanErrorDb(cek.error);
+    }
+
+    // Kelas yang diarsipkan tidak boleh menyisakan kuis aktif.
+    if (arsip === true) {
+      const sesi = await db
+        .from('sesi_kuis')
+        .update({ status: 'selesai' })
+        .eq('kelas_id', id)
+        .eq('status', 'aktif');
+      if (sesi.error) return petakanErrorDb(sesi.error);
+    }
+
+    const perubahan: Record<string, unknown> = {};
+    if (nama !== undefined) perubahan.nama = nama;
+    if (mapel !== undefined) perubahan.mapel = mapel;
+    if (arsip !== undefined) perubahan.diarsipkan_pada = arsip ? new Date().toISOString() : null;
+
+    const { error } = await db.from('kelas').update(perubahan).eq('id', id).eq('guru_id', auth.profil.id);
+    if (error) return petakanErrorDb(error);
+
+    return responsOk({ ok: true });
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);

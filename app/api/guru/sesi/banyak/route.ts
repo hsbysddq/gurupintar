@@ -1,7 +1,7 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
 import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaBodyBukaSesiBanyak } from '@/lib/skema-api';
-import { wajibPeranApi } from '@/lib/server/auth';
+import { wajibPeranApi, kolomArsipBelumAda } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 import type { SesiBanyakBaru } from '@/lib/tipe';
@@ -26,13 +26,13 @@ export async function POST(request: Request) {
   try {
     const db = ambilSupabase();
 
-    const { data: kelas, error } = await db
-      .from('kelas')
-      .select('id, nama')
-      .in('id', ids)
-      .eq('guru_id', auth.profil.id);
-    if (error) return petakanErrorDb(error);
+    const dasar = () =>
+      db.from('kelas').select('id, nama').in('id', ids).eq('guru_id', auth.profil.id);
+    let hasil = await dasar().is('diarsipkan_pada', null);
+    if (hasil.error && kolomArsipBelumAda(hasil.error)) hasil = await dasar();
+    if (hasil.error) return petakanErrorDb(hasil.error);
 
+    const kelas = hasil.data;
     const namaKelas = new Map<string, string>(kelas.map((k) => [k.id as string, k.nama as string]));
     if (namaKelas.size !== ids.length) return responsError(PESAN_KELAS_TIDAK_ADA, 404);
 

@@ -77,6 +77,30 @@ export interface SiswaKelas {
   total: number | null;
 }
 
+/** Satu sesi dan materi-materinya (untuk tab Materi per kelas). */
+export interface MateriKelasRingkas {
+  sesiId: string;
+  kodeKelas: string;
+  status: StatusSesi;
+  dibuatPada: string;
+  namaTopik: string;
+  jumlahMenjawab: number;
+  materi: { kelompok: Kelompok; status: StatusMateri; sumber: SumberMateri; versi: number }[];
+  statusMateri: StatusMateriSesi;
+}
+
+/** Ringkasan satu kelas untuk halaman lintas kelas. */
+export interface RingkasanKelas {
+  id: string;
+  nama: string;
+  mapel: string;
+  jumlahSiswa: number;
+  kuisAktif: KuisAktifRingkas | null;
+  jumlahPerluPendampingan: number;
+  jumlahSesi: number;
+  sesiTerakhir: string | null;
+}
+
 /** GET /api/guru/sesi */
 export interface SesiGuru {
   id: string;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { FileText, HeartHandshake, LayoutDashboard, ListChecks, type LucideIcon } from 'lucide-react';
+import { BarChart3, FileText, LayoutDashboard, ListChecks, type LucideIcon } from 'lucide-react';
 
 export type KelasNav = { id: string; nama: string };
 
@@ -27,8 +27,14 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
         path.startsWith('/guru/materi'),
     },
     {
+      href: '/guru/ringkasan',
+      label: 'Ringkasan',
+      ikon: BarChart3,
+      aktif: (path) => path === '/guru/ringkasan',
+    },
+    {
       href: '/guru/soal',
-      label: 'Buat Soal',
+      label: 'Bank Soal',
       ikon: ListChecks,
       aktif: (path) => path.startsWith('/guru/soal'),
     },
@@ -37,12 +43,6 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
       label: 'Ubah Modul',
       ikon: FileText,
       aktif: (path) => path.startsWith('/guru/modul'),
-    },
-    {
-      href: `/guru/pendampingan${kelasAktif ? `?kelas=${encodeURIComponent(kelasAktif)}` : ''}`,
-      label: 'Perlu Pendampingan',
-      ikon: HeartHandshake,
-      aktif: (path) => path.startsWith('/guru/pendampingan'),
     },
   ];
 

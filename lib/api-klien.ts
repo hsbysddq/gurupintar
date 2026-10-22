@@ -8,6 +8,7 @@ import type {
   BodyJawaban,
   BodyMasuk,
   BodyTopikBaru,
+  BodyUbahKelas,
 } from './skema-api';
 import type {
   DataPendampingan,
@@ -122,6 +123,10 @@ export function ambilDaftarKelas(): Promise<KelasRingkas[]> {
 
 export function buatKelas(body: BodyBuatKelas): Promise<KelasRingkas> {
   return minta('/api/guru/kelas', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ubahKelas(body: BodyUbahKelas): Promise<{ ok: true }> {
+  return minta('/api/guru/kelas', { method: 'PATCH', body: JSON.stringify(body) });
 }
 
 export function ambilDaftarSesi(kelasId?: string, signal?: AbortSignal): Promise<SesiGuru[]> {

@@ -14,6 +14,7 @@ import {
   skemaBodyFormat,
   skemaBodyJawaban,
   skemaBodyTutupSesi,
+  skemaBodyUbahKelas,
   skemaBodyUbahMateri,
   skemaBodyUbahModul,
   skemaQueryHasil,
@@ -296,6 +297,28 @@ describe('skema kelas', () => {
     expect(skemaQueryKelasOpsional.safeParse({}).success).toBe(true);
     expect(skemaQueryKelasOpsional.safeParse({ kelas: SESI_ID }).success).toBe(true);
     expect(skemaQueryKelasOpsional.safeParse({ kelas: '7a' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyUbahKelas', () => {
+  it('menerima perubahan nama, mapel, atau arsip', () => {
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, nama: 'Kelas 7B' }).success).toBe(true);
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, mapel: 'Biologi' }).success).toBe(true);
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, arsip: true }).success).toBe(true);
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, arsip: false }).success).toBe(true);
+  });
+
+  it('menolak body tanpa perubahan', () => {
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID }).success).toBe(false);
+  });
+
+  it('menolak nama atau mapel terlalu pendek', () => {
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, nama: '7B' }).success).toBe(false);
+    expect(skemaBodyUbahKelas.safeParse({ id: SESI_ID, mapel: 'BI' }).success).toBe(false);
+  });
+
+  it('menolak id bukan uuid', () => {
+    expect(skemaBodyUbahKelas.safeParse({ id: '7a', arsip: true }).success).toBe(false);
   });
 });
 

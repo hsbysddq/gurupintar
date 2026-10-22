@@ -30,6 +30,11 @@ function IsiPendampingan() {
   const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[] | null>(null);
   const [kelasId, setKelasId] = useState(kelasDariUrl);
 
+  // Pendampingan sekarang selalu dibuka dari tab kelas; tanpa ?kelas= kembali ke daftar.
+  useEffect(() => {
+    if (!kelasDariUrl) router.replace("/guru");
+  }, [kelasDariUrl, router]);
+
   useEffect(() => {
     let batal = false;
     ambilDaftarKelas()

@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { KeyRound, PlayCircle, Users } from 'lucide-react';
+import { Archive, KeyRound, PlayCircle, Users } from 'lucide-react';
 import { KartuKaca } from '@/components/KartuKaca';
+import { PulihkanKelas } from '@/components/PulihkanKelas';
 import { profilWajib } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -8,9 +9,56 @@ import { FormBuatKelas } from './FormBuatKelas';
 import { FormKuisBanyak } from './FormKuisBanyak';
 
 // Daftar kelas milik guru. Satu kartu per kelas, dengan status kuis aktifnya.
-export default async function HalamanDaftarKelas() {
+export default async function HalamanDaftarKelas({
+  searchParams,
+}: {
+  searchParams: Promise<{ arsip?: string }>;
+}) {
+  const { arsip } = await searchParams;
+  const modeArsip = arsip === '1';
   const profil = await profilWajib('guru');
-  const daftar = await ambilKelasGuru(ambilSupabase(), profil.id);
+  const daftar = await ambilKelasGuru(ambilSupabase(), profil.id, { arsip: modeArsip });
+
+  if (modeArsip) {
+    return (
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-2">
+          <Link href="/guru" className="text-[13px] leading-normal font-semibold text-primer hover:underline">
+            ← Kembali ke kelas aktif
+          </Link>
+          <h1 className="flex items-center gap-2 text-[28px] leading-tight font-bold">
+            <Archive aria-hidden="true" className="size-7 text-tinta-lembut" />
+            Kelas diarsipkan
+          </h1>
+          <p className="text-tinta-lembut">
+            Kelas di sini tidak muncul di daftar aktif dan tidak bisa dipakai untuk kuis baru. Datanya tetap tersimpan.
+          </p>
+        </header>
+
+        {daftar.length === 0 ? (
+          <KartuKaca as="section" className="p-6">
+            <p className="text-tinta-lembut">Belum ada kelas yang diarsipkan.</p>
+          </KartuKaca>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {daftar.map((kelas) => (
+              <li key={kelas.id}>
+                <KartuKaca as="div" className="flex flex-wrap items-center justify-between gap-4 p-4">
+                  <div className="flex flex-col gap-0.5">
+                    <h2 className="text-lg leading-snug font-semibold">{kelas.nama}</h2>
+                    <p className="text-[14px] leading-normal text-tinta-lembut">
+                      {kelas.mapel} · {kelas.jumlahSiswa} siswa · Kode {kelas.kodeUndangan}
+                    </p>
+                  </div>
+                  <PulihkanKelas id={kelas.id} />
+                </KartuKaca>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -83,7 +131,15 @@ export default async function HalamanDaftarKelas() {
         </ul>
       )}
 
-      <FormBuatKelas pertamaKali={daftar.length === 0} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FormBuatKelas pertamaKali={daftar.length === 0} />
+      </div>
+
+      <div className="flex justify-end">
+        <Link href="/guru?arsip=1" className="text-[13px] leading-normal font-semibold text-tinta-lembut hover:text-primer">
+          Lihat kelas diarsipkan →
+        </Link>
+      </div>
     </div>
   );
 }

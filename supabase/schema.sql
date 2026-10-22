@@ -18,6 +18,7 @@ create table kelas (
   nama text not null,
   mapel text not null,
   kode_undangan text not null unique check (kode_undangan ~ '^[A-Z0-9]{5,6}$'),
+  diarsipkan_pada timestamptz,
   dibuat_pada timestamptz not null default now()
 );
 create index kelas_guru on kelas (guru_id);

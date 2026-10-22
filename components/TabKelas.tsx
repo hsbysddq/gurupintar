@@ -12,6 +12,11 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
       aktif: pathname === '/guru/kelas',
     },
     {
+      href: `/guru/kelas/materi?kelas=${kelasId}`,
+      label: 'Materi',
+      aktif: pathname.startsWith('/guru/kelas/materi'),
+    },
+    {
       href: `/guru/kelas/siswa?kelas=${kelasId}`,
       label: 'Siswa',
       aktif: pathname.startsWith('/guru/kelas/siswa'),
@@ -20,6 +25,11 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
       href: `/guru/pendampingan?kelas=${kelasId}`,
       label: 'Pendampingan',
       aktif: pathname.startsWith('/guru/pendampingan'),
+    },
+    {
+      href: `/guru/kelas/pengaturan?kelas=${kelasId}`,
+      label: 'Pengaturan',
+      aktif: pathname.startsWith('/guru/kelas/pengaturan'),
     },
   ];
 

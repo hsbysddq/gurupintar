@@ -53,6 +53,18 @@ export const skemaBodyBuatKelas = z.object({
   mapel: z.string().trim().min(3).max(40),
 });
 
+// PATCH /api/guru/kelas: ubah nama/mapel atau arsipkan/pulihkan kelas.
+export const skemaBodyUbahKelas = z
+  .object({
+    id: z.uuid(),
+    nama: z.string().trim().min(3).max(80).optional(),
+    mapel: z.string().trim().min(3).max(40).optional(),
+    arsip: z.boolean().optional(),
+  })
+  .refine((data) => data.nama !== undefined || data.mapel !== undefined || data.arsip !== undefined, {
+    message: 'Tidak ada perubahan yang dikirim.',
+  });
+
 // POST /api/sesi/gabung
 export const skemaBodyGabungSesi = z.object({
   kode: skemaKodeKelas,
@@ -189,6 +201,7 @@ export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
 export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
 export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
+export type BodyUbahKelas = z.infer<typeof skemaBodyUbahKelas>;
 export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;

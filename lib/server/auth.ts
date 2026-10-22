@@ -18,6 +18,15 @@ export class GalatAuth extends Error {
   }
 }
 
+/** True jika database belum menjalankan migrasi kolom arsip kelas. */
+export function kolomArsipBelumAda(err: unknown): boolean {
+  const pesan =
+    typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string'
+      ? err.message
+      : '';
+  return pesan.includes('diarsipkan_pada') && (pesan.includes('does not exist') || pesan.includes('schema cache'));
+}
+
 function envAuth(): { url: string; kunci: string } {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const kunci = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -150,22 +159,28 @@ export async function buatAkun(nama: string, email: string, password: string, pe
   return data.user.id;
 }
 
-/** ID kelas yang dimiliki guru. */
+/** ID kelas aktif milik guru (kelas diarsipkan tidak ikut). */
 export async function idKelasMilikGuru(db: SupabaseClient, guruId: string): Promise<string[]> {
-  const { data, error } = await db.from('kelas').select('id').eq('guru_id', guruId);
-  if (error) throw error;
-  return data.map((k) => k.id as string);
+  const dasar = () => db.from('kelas').select('id').eq('guru_id', guruId);
+  let hasil = await dasar().is('diarsipkan_pada', null);
+  if (hasil.error && kolomArsipBelumAda(hasil.error)) hasil = await dasar();
+  if (hasil.error) throw hasil.error;
+  return hasil.data.map((k) => k.id as string);
 }
 
-export async function kelasMilikGuru(db: SupabaseClient, guruId: string, kelasId: string): Promise<boolean> {
-  const { data, error } = await db
-    .from('kelas')
-    .select('id')
-    .eq('id', kelasId)
-    .eq('guru_id', guruId)
-    .maybeSingle();
-  if (error) throw error;
-  return data !== null;
+export async function kelasMilikGuru(
+  db: SupabaseClient,
+  guruId: string,
+  kelasId: string,
+  opsi: { termasukArsip?: boolean } = {},
+): Promise<boolean> {
+  const dasar = () => db.from('kelas').select('id').eq('id', kelasId).eq('guru_id', guruId);
+  let hasil = await (opsi.termasukArsip ? dasar() : dasar().is('diarsipkan_pada', null)).maybeSingle();
+  if (hasil.error && !opsi.termasukArsip && kolomArsipBelumAda(hasil.error)) {
+    hasil = await dasar().maybeSingle();
+  }
+  if (hasil.error) throw hasil.error;
+  return hasil.data !== null;
 }
 
 export type SesiMilikGuru = { id: string; kelas_id: string; topik_id: string };

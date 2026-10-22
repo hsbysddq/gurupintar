@@ -1,8 +1,18 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { pilihHasilTerbaru } from '@/lib/hasil-terbaru';
-import { kelasMilikGuru } from './auth';
-import type { Format, KelasRingkas, Kelompok, SiswaKelas } from '@/lib/tipe';
+import { ringkasStatusMateri } from '@/lib/status-materi';
+import { kelasMilikGuru, kolomArsipBelumAda } from './auth';
+import type {
+  Format,
+  KelasRingkas,
+  Kelompok,
+  MateriKelasRingkas,
+  SiswaKelas,
+  StatusMateri,
+  StatusSesi,
+  SumberMateri,
+} from '@/lib/tipe';
 
 type BarisKelas = {
   id: string;
@@ -30,16 +40,27 @@ type BarisHasil = {
   kelompok: Kelompok;
 };
 
-/** Semua kelas milik guru, lengkap dengan jumlah siswa dan sesi aktifnya. */
-export async function ambilKelasGuru(db: SupabaseClient, guruId: string): Promise<KelasRingkas[]> {
-  const { data, error } = await db
-    .from('kelas')
-    .select('id, nama, mapel, kode_undangan, keanggotaan_kelas(count)')
-    .eq('guru_id', guruId)
-    .order('nama');
-  if (error) throw error;
+/** Semua kelas milik guru. Default hanya kelas aktif; `arsip: true` untuk kelas diarsipkan. */
+export async function ambilKelasGuru(
+  db: SupabaseClient,
+  guruId: string,
+  opsi: { arsip?: boolean } = {},
+): Promise<KelasRingkas[]> {
+  const dasar = () =>
+    db.from('kelas').select('id, nama, mapel, kode_undangan, keanggotaan_kelas(count)').eq('guru_id', guruId);
+  const kueri = opsi.arsip
+    ? dasar().not('diarsipkan_pada', 'is', null)
+    : dasar().is('diarsipkan_pada', null);
 
-  const daftar = data as BarisKelas[];
+  let hasil = await kueri.order('nama');
+  if (hasil.error && kolomArsipBelumAda(hasil.error)) {
+    // Sebelum migrasi arsip dijalankan: semua kelas dianggap aktif, daftar arsip kosong.
+    if (opsi.arsip) return [];
+    hasil = await dasar().order('nama');
+  }
+  if (hasil.error) throw hasil.error;
+
+  const daftar = hasil.data as BarisKelas[];
   const ids = daftar.map((k) => k.id);
 
   let sesiAktif: BarisSesiAktif[] = [];
@@ -142,4 +163,72 @@ export async function ambilSiswaKelas(
       };
     })
     .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
+}
+
+type BarisSesiMateri = {
+  id: string;
+  kode_kelas: string;
+  status: string;
+  dibuat_pada: string;
+  topik: unknown;
+  hasil_siswa: { count: number }[];
+};
+
+type BarisMateriSesi = {
+  sesi_id: string;
+  kelompok: Kelompok;
+  status: StatusMateri;
+  sumber: SumberMateri;
+  versi: number;
+};
+
+function namaTopikDari(nilai: unknown): string {
+  if (Array.isArray(nilai)) return (nilai[0] as { nama?: string } | undefined)?.nama ?? '';
+  return (nilai as { nama?: string } | null)?.nama ?? '';
+}
+
+/** Semua sesi satu kelas beserta materi yang sudah dibuat. */
+export async function ambilMateriKelas(
+  db: SupabaseClient,
+  guruId: string,
+  kelasId: string,
+): Promise<MateriKelasRingkas[] | null> {
+  if (!(await kelasMilikGuru(db, guruId, kelasId))) return null;
+
+  const sesi = await db
+    .from('sesi_kuis')
+    .select('id, kode_kelas, status, dibuat_pada, topik(nama), hasil_siswa(count)')
+    .eq('kelas_id', kelasId)
+    .order('dibuat_pada', { ascending: false });
+  if (sesi.error) throw sesi.error;
+
+  const barisSesi = sesi.data as BarisSesiMateri[];
+  const idSesi = barisSesi.map((s) => s.id);
+
+  let barisMateri: BarisMateriSesi[] = [];
+  if (idSesi.length > 0) {
+    const materi = await db
+      .from('materi')
+      .select('sesi_id, kelompok, status, sumber, versi')
+      .in('sesi_id', idSesi);
+    if (materi.error) throw materi.error;
+    barisMateri = materi.data as BarisMateriSesi[];
+  }
+
+  return barisSesi.map((s) => {
+    const daftar = barisMateri
+      .filter((m) => m.sesi_id === s.id)
+      .map((m) => ({ kelompok: m.kelompok, status: m.status, sumber: m.sumber, versi: m.versi }));
+
+    return {
+      sesiId: s.id,
+      kodeKelas: s.kode_kelas,
+      status: s.status as StatusSesi,
+      dibuatPada: s.dibuat_pada,
+      namaTopik: namaTopikDari(s.topik),
+      jumlahMenjawab: s.hasil_siswa[0]?.count ?? 0,
+      materi: daftar,
+      statusMateri: ringkasStatusMateri(daftar),
+    };
+  });
 }

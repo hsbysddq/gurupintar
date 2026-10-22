@@ -22,6 +22,7 @@ import {
   PESAN_GAGAL_KONEKSI,
   simpanTopik,
   tutupSesi,
+  ubahKelas,
   ubahMateri,
 } from '@/lib/api-klien';
 import type { IsiMateri } from '@/lib/tipe';
@@ -138,13 +139,21 @@ describe('api-klien guru', () => {
     });
   });
 
-  it('kelas memakai GET dan POST yang benar', async () => {
+  it('kelas memakai GET, POST, dan PATCH yang benar', async () => {
     const palsu = stubFetch(async () => Response.json([]));
     await ambilDaftarKelas();
     await buatKelas({ nama: 'Kelas 7B', mapel: 'Matematika' });
+    await ubahKelas({ id: 'k1', nama: 'Kelas 7C', arsip: false });
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/kelas');
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/kelas');
     expect(palsu.mock.calls[1][1]?.method).toBe('POST');
+    expect(palsu.mock.calls[2][0]).toBe('/api/guru/kelas');
+    expect(palsu.mock.calls[2][1]?.method).toBe('PATCH');
+    expect(JSON.parse(palsu.mock.calls[2][1]?.body as string)).toEqual({
+      id: 'k1',
+      nama: 'Kelas 7C',
+      arsip: false,
+    });
   });
 
   it('fungsi materi memakai URL, metode, dan body yang benar', async () => {

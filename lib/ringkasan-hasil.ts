@@ -1,3 +1,4 @@
+import { ringkasStatusMateri } from './status-materi';
 import type { Kelompok, RingkasanMateri, SiswaHasil, StatusMateri } from './tipe';
 
 const URUTAN_KELOMPOK: Kelompok[] = ['sudah', 'setengah', 'belum'];
@@ -21,10 +22,7 @@ export function ringkasMateri(
   kelompok: Record<Kelompok, SiswaHasil[]>,
   materi: { kelompok: Kelompok; status: StatusMateri }[],
 ): RingkasanMateri {
-  const adaDraf = materi.some((m) => m.status === 'draf');
-  const adaDibagikan = materi.some((m) => m.status === 'dibagikan');
-  const statusMateri =
-    adaDraf && adaDibagikan ? 'campuran' : adaDraf ? 'draf' : adaDibagikan ? 'dibagikan' : 'belum-ada';
+  const statusMateri = ringkasStatusMateri(materi);
 
   const punyaMateri = new Set(materi.map((m) => m.kelompok));
   const kelompokTanpaMateri = URUTAN_KELOMPOK.filter((k) => kelompok[k].length > 0 && !punyaMateri.has(k));
