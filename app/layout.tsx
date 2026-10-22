@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import "@fontsource-variable/plus-jakarta-sans/wght.css";
+import "@fontsource-variable/inter/wght.css";
 import { LatarPastel } from "@/components/LatarPastel";
 import "./globals.css";
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Guru Pintar",
@@ -15,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
+    <html lang="id" className="h-full antialiased">
       <body className="min-h-full flex flex-col font-sans">
         <LatarPastel />
         {children}

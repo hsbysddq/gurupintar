@@ -25,7 +25,23 @@
   --color-blob-peach: #FFD8BF;
   --color-blob-biru: #BFE3FF;
 
-  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  /* Aura Docent: token khusus landing page */
+  --color-aura-canvas: #F8FAFC;
+  --color-aura-surface: #FAF8FF;
+  --color-aura-ink: #131B2E;
+  --color-aura-muted: #434655;
+  --color-aura-outline: #C3C6D7;
+  --color-aura-primary: #2563EB;
+  --color-aura-primary-deep: #1D4ED8;
+  --color-aura-indigo: #4F46E5;
+  --color-aura-violet: #8B5CF6;
+  --color-aura-red: #EF4444;
+  --color-aura-amber: #F59E0B;
+  --color-aura-emerald: #10B981;
+
+  --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-body: "Inter Variable", system-ui, sans-serif;
   --radius-kartu: 20px;
   --radius-tombol: 14px;
   --radius-kecil: 10px;
@@ -48,6 +64,128 @@
   border: 1px solid rgb(255 255 255 / 0.8);
   border-radius: var(--radius-kartu);
   box-shadow: var(--shadow-kaca);
+}
+
+/* Aura Docent: permukaan kaca ber-refraksi tinggi untuk landing page. */
+.aura-glass {
+  background-color: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.06),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.aura-glass-strong {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 12px 40px -8px rgba(37, 99, 235, 0.18),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 1);
+}
+
+.aura-glass-subtle {
+  background-color: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.aura-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.aura-btn:hover {
+  transform: translateY(-1px);
+}
+
+.aura-btn:active {
+  transform: scale(0.98);
+}
+
+.aura-btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  box-shadow:
+    0 12px 28px -8px rgba(37, 99, 235, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.aura-btn-primary:hover {
+  box-shadow:
+    0 16px 32px -8px rgba(37, 99, 235, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.aura-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  color: #2563eb;
+  box-shadow: 0 8px 24px rgba(31, 38, 135, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.aura-btn-secondary:hover {
+  background-color: rgba(238, 242, 255, 0.95);
+}
+
+.aura-btn-light {
+  background-color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #2563eb;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+}
+
+.aura-btn-light:hover {
+  background-color: #f2f3ff;
+}
+
+.aura-btn-ghost-light {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.aura-btn-ghost-light:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.aura-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background-color: rgba(255, 255, 255, 0.65);
+  padding: 0.375rem 0.75rem;
+  color: #2563eb;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Pola titik halus untuk latar hero landing page (design.md 3.10). */

@@ -1,20 +1,26 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import {
+  ArrowRight,
   CircleCheck,
+  Clock3,
   FileText,
+  GraduationCap,
   Headphones,
   HeartHandshake,
+  LayoutGrid,
   Lightbulb,
   ListChecks,
   Pencil,
   PlayCircle,
+  ShieldCheck,
   Sparkles,
+  Users,
   type LucideIcon,
 } from "lucide-react";
-import { KartuKaca } from "@/components/KartuKaca";
 import { NavbarLanding } from "@/components/NavbarLanding";
 import { PratinjauDasbor } from "@/components/PratinjauDasbor";
-import { Tombol } from "@/components/Tombol";
 
 export const metadata: Metadata = {
   title: "Guru Pintar: tahu siapa yang tertinggal hari ini",
@@ -24,24 +30,27 @@ export const metadata: Metadata = {
 
 const KEUNGGULAN = ["Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"];
 
-const MASALAH: { angka: string; satuan: string; keterangan: string }[] = [
-  { angka: "40", satuan: "siswa", keterangan: "dalam satu kelas" },
-  { angka: "80", satuan: "menit", keterangan: "dua jam pelajaran" },
-  { angka: "2", satuan: "menit per anak", keterangan: "jika waktunya dibagi rata" },
+const MASALAH: { label: string; angka: string; satuan: string; keterangan: string; aksen: string }[] = [
+  { label: "Ukuran kelas", angka: "40", satuan: "siswa", keterangan: "dalam satu kelas", aksen: "from-aura-red to-aura-amber" },
+  { label: "Waktu mengajar", angka: "80", satuan: "menit", keterangan: "dua jam pelajaran", aksen: "from-aura-amber to-aura-primary" },
+  { label: "Waktu per anak", angka: "2", satuan: "menit", keterangan: "jika waktunya dibagi rata", aksen: "from-aura-primary to-aura-violet" },
 ];
 
-const LANGKAH: { judul: string; isi: string }[] = [
+const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
   {
     judul: "Cek",
     isi: "Buka kuis 5 soal. Siswa bergabung dari HP dengan kode kelas atau QR dan menjawab dalam beberapa menit.",
+    ikon: ListChecks,
   },
   {
     judul: "Petakan",
     isi: "Jawaban langsung terpetakan menjadi tiga kelompok, lengkap dengan soal yang paling banyak salah.",
+    ikon: LayoutGrid,
   },
   {
     judul: "Tindak lanjut",
     isi: "AI menyusun materi lanjutan untuk tiap kelompok. Guru memeriksa dan menyesuaikannya, lalu membagikannya.",
+    ikon: Sparkles,
   },
 ];
 
@@ -53,31 +62,37 @@ const BENTUK_MATERI: { label: string; ikon: LucideIcon }[] = [
   { label: "Latihan", ikon: Pencil },
 ];
 
-// Kotak bento kecil; peta kelas dan materi AI ditulis terpisah karena isinya berbeda.
+const KELOMPOK_PETA = [
+  { label: "Belum paham", jumlah: 16, lebar: "w-[42%]", warna: "bg-aura-red", garis: "" },
+  { label: "Setengah paham", jumlah: 12, lebar: "w-[32%]", warna: "bg-aura-amber", garis: "border-l-2 border-white" },
+  { label: "Sudah paham", jumlah: 10, lebar: "w-[26%]", warna: "bg-aura-emerald", garis: "border-l-2 border-white" },
+];
+
+// Bento kecil; peta kelas dan materi AI ditulis terpisah karena isinya berbeda.
 const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string }[] = [
   {
     judul: "Soal paling banyak salah",
     isi: "Lengkap dengan kesalahan pemahaman yang paling sering muncul, jadi guru tahu apa yang perlu diluruskan.",
     ikon: Lightbulb,
-    kelas: "",
+    kelas: "lg:col-span-3",
   },
   {
-    judul: "Perlu Pendampingan",
+    judul: "Perlu pendampingan",
     isi: "Siswa yang berulang kali tertinggal, tidak mengerjakan, atau skornya terus turun ditandai beserta saran tindakan.",
     ikon: HeartHandshake,
-    kelas: "",
+    kelas: "lg:col-span-3",
   },
   {
-    judul: "Ubah Modul",
+    judul: "Ubah modul",
     isi: "Tempelkan teks modul matematika kelas 7, lalu lihat pratinjaunya dalam empat bentuk belajar.",
     ikon: FileText,
-    kelas: "lg:col-span-2",
+    kelas: "lg:col-span-3",
   },
   {
     judul: "Buat soal sendiri",
     isi: "Susun topik dengan 5 soal pilihan ganda beserta kesalahan pemahaman tiap pilihan, lalu pakai untuk kuis berikutnya.",
     ikon: ListChecks,
-    kelas: "lg:col-span-2",
+    kelas: "lg:col-span-3",
   },
 ];
 
@@ -88,232 +103,389 @@ const PRINSIP = [
   "Pilihan bentuk materi hanya preferensi siswa yang bisa diganti kapan saja, bukan diagnosis gaya belajar.",
 ];
 
-// Proporsi bilah di kotak peta kelas, sama dengan PratinjauDasbor (RIW004).
-const BILAH_KELOMPOK = [
-  { label: "Belum", jumlah: 16, kelas: "bg-belum grow-[16]" },
-  { label: "Setengah", jumlah: 12, kelas: "bg-setengah grow-[12]" },
-  { label: "Sudah", jumlah: 10, kelas: "bg-sudah grow-[10]" },
-];
+const KARTU = "aura-glass rounded-[24px]";
 
-const JUDUL_BAGIAN = "text-[28px] leading-tight font-bold tracking-tight md:text-[32px]";
-const LABEL_BAGIAN = "text-[13px] leading-normal font-semibold text-primer-hover";
-const IKON_KOTAK = "flex size-10 items-center justify-center rounded-kecil bg-primer-lembut text-primer-hover";
+function JudulBagian({
+  id,
+  eyebrow,
+  title,
+  description,
+}: {
+  id: string;
+  eyebrow: string;
+  title: ReactNode;
+  description?: ReactNode;
+}) {
+  return (
+    <div className="flex max-w-2xl flex-col gap-3">
+      <span className="aura-eyebrow w-fit">{eyebrow}</span>
+      <h2
+        id={id}
+        className="text-balance font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink md:text-[32px] md:leading-[1.15]"
+      >
+        {title}
+      </h2>
+      {description && <p className="font-body text-[15px] leading-[26px] text-aura-muted">{description}</p>}
+    </div>
+  );
+}
+
+function IkonKotak({ ikon: Ikon }: { ikon: LucideIcon }) {
+  return (
+    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-aura-primary/10 via-aura-primary/5 to-aura-violet/15 text-aura-primary ring-1 ring-white/70">
+      <Ikon aria-hidden="true" className="size-5" />
+    </span>
+  );
+}
 
 // design.md 3.10. Server Component tanpa data dari database.
 export default function Beranda() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="relative isolate flex flex-1 flex-col overflow-x-clip bg-aura-canvas font-body text-aura-ink">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-32 -top-40 size-[520px] rounded-full bg-aura-primary/10 blur-[120px]" />
+        <div className="absolute -right-32 top-40 size-[480px] rounded-full bg-aura-violet/10 blur-[120px]" />
+        <div className="absolute bottom-0 left-1/3 size-[420px] rounded-full bg-[#FB923C]/10 blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(37,99,235,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(37,99,235,0.06) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage: "radial-gradient(ellipse at 50% 0%, black, transparent 72%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, black, transparent 72%)",
+          }}
+        />
+      </div>
+
       <NavbarLanding />
 
-      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-16 overflow-x-clip px-4 pt-12 pb-16 text-[15px] leading-relaxed md:gap-24 md:px-8 md:pt-16">
-        {/* Hero: satu-satunya tombol varian utama di layar pertama; navbar memakai sekunder. */}
+      <main className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-16 px-4 pt-10 pb-20 text-[15px] leading-relaxed sm:px-5 md:gap-24 md:px-8 md:pt-16">
         <section
           id="atas"
           aria-labelledby="judul-hero"
-          className="grid scroll-mt-28 items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-12"
+          className="grid scroll-mt-28 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10"
         >
           <div className="flex flex-col items-start gap-6">
-            <p className="rounded-full bg-primer-lembut px-3 py-1 text-[13px] leading-normal font-semibold text-primer-hover">
-              Untuk guru SMP · Kurikulum Merdeka
-            </p>
-            <h1 id="judul-hero" className="text-[36px] leading-[1.1] font-extrabold tracking-tight lg:text-[56px] lg:leading-[1.05]">
-              Tahu siapa yang tertinggal <span className="text-primer">hari ini</span>, bukan saat ulangan.
+            <span className="aura-eyebrow">
+              <Sparkles aria-hidden="true" className="size-3.5" />
+              Guru SMP · Kurikulum Merdeka
+            </span>
+
+            <h1
+              id="judul-hero"
+              className="text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink min-[390px]:text-[34px] min-[390px]:leading-[42px] min-[390px]:tracking-[-0.03em] lg:text-[52px] lg:leading-[1.05]"
+            >
+              Tahu siapa yang tertinggal <span className="text-aura-primary">hari ini</span>, bukan saat ulangan.
             </h1>
-            <p className="max-w-prose text-base leading-relaxed text-tinta-lembut md:text-lg">
+
+            <p className="max-w-[560px] font-body text-[16px] leading-[26px] text-aura-muted">
               Cek pemahaman kilat 5 soal dari HP siswa, lalu materi lanjutan untuk tiap kelompok disusun dengan bantuan AI
               dan diperiksa guru.
             </p>
+
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <Tombol varian="utama" href="/masuk">
+              <Link href="/masuk" className="aura-btn aura-btn-primary h-[52px] w-full px-6 text-[15px] sm:w-auto">
                 Masuk sebagai guru
-              </Tombol>
-              <Tombol varian="sekunder" href="/masuk">
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
+              <Link href="/masuk" className="aura-btn aura-btn-secondary h-[50px] w-full px-6 text-[15px] sm:w-auto">
+                <Users aria-hidden="true" className="size-4" />
                 Masuk sebagai siswa
-              </Tombol>
+              </Link>
             </div>
+
             <ul className="flex flex-wrap gap-2">
               {KEUNGGULAN.map((k) => (
                 <li
                   key={k}
-                  className="kaca inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] leading-normal font-semibold"
+                  className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink"
                 >
-                  <CircleCheck aria-hidden="true" className="size-4 text-sudah-teks" />
+                  <CircleCheck aria-hidden="true" className="size-4 text-aura-emerald" />
                   {k}
                 </li>
               ))}
             </ul>
           </div>
+
           <PratinjauDasbor />
         </section>
 
         <section id="masalah" aria-labelledby="judul-masalah" className="flex scroll-mt-28 flex-col gap-8">
-          <div className="flex max-w-2xl flex-col gap-2">
-            <p className={LABEL_BAGIAN}>Masalah</p>
-            <h2 id="judul-masalah" className={JUDUL_BAGIAN}>
-              Satu guru tidak bisa menanyai 40 anak satu per satu
-            </h2>
-          </div>
+          <JudulBagian
+            id="judul-masalah"
+            eyebrow="Masalah"
+            title="Satu guru tidak bisa menanyai 40 anak satu per satu"
+            description="Di kelas yang penuh, anak yang tertinggal sering baru terlihat saat ulangan. Padahal bantuan paling berguna diberikan hari itu juga."
+          />
+
           <dl className="grid gap-4 sm:grid-cols-3">
-            {MASALAH.map(({ angka, satuan, keterangan }) => (
-              <KartuKaca key={satuan} className="flex flex-col gap-1 p-6">
-                <dt className="order-2 text-tinta-lembut">{keterangan}</dt>
-                <dd className="order-1 flex items-baseline gap-2">
-                  <span className="text-[40px] leading-[1.1] font-extrabold tracking-tight md:text-[48px]">{angka}</span>
-                  <span className="text-base font-semibold">{satuan}</span>
+            {MASALAH.map(({ label, angka, satuan, keterangan, aksen }) => (
+              <div key={label} className={`${KARTU} relative overflow-hidden p-5 sm:p-6`}>
+                <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
+                <dt className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">{label}</dt>
+                <dd className="mt-3 flex items-baseline gap-2">
+                  <span className="font-display text-[32px] leading-[38px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[38px] sm:leading-[44px]">
+                    {angka}
+                  </span>
+                  <span className="font-display text-[15px] font-semibold text-aura-muted">{satuan}</span>
                 </dd>
-              </KartuKaca>
+                <dd className="mt-1 font-body text-[13px] leading-[18px] text-aura-muted">{keterangan}</dd>
+              </div>
             ))}
           </dl>
-          <p className="max-w-prose text-base">
+
+          <p className="max-w-[760px] rounded-[24px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4 font-body text-[15px] leading-[26px] text-aura-muted backdrop-blur-sm">
             Waktunya tidak cukup untuk memastikan setiap anak paham. Siswa yang tertinggal berada di zona buta, dan sering
             baru terlihat saat ulangan, ketika kesenjangannya sudah lebar dan semangatnya sudah turun.
           </p>
         </section>
 
         <section id="cara-kerja" aria-labelledby="judul-cara" className="flex scroll-mt-28 flex-col gap-8">
-          <div className="flex max-w-2xl flex-col gap-2">
-            <p className={LABEL_BAGIAN}>Cara kerja</p>
-            <h2 id="judul-cara" className={JUDUL_BAGIAN}>
-              Cara kerjanya
-            </h2>
-          </div>
-          <ol className="relative grid gap-8 md:grid-cols-3 md:gap-6">
-            {/* Garis penghubung di belakang lingkaran nomor, hanya di desktop. */}
-            <span aria-hidden="true" className="absolute top-6 right-[16%] left-[16%] hidden h-0.5 bg-primer/20 md:block" />
-            {LANGKAH.map(({ judul, isi }, i) => (
-              <li key={judul} className="relative flex flex-col gap-3 md:items-center md:text-center">
-                <span className="flex size-12 items-center justify-center rounded-full bg-primer text-lg font-bold text-white ring-8 ring-latar">
-                  {i + 1}
-                </span>
-                <h3 className="text-xl leading-snug font-semibold">{judul}</h3>
-                <p className="max-w-xs text-tinta-lembut">{isi}</p>
+          <JudulBagian
+            id="judul-cara"
+            eyebrow="Cara kerja"
+            title="Tiga langkah, satu siklus yang jelas"
+            description="Dari kuis singkat sampai materi yang tepat sasaran, semuanya terjadi dalam alur yang sama."
+          />
+
+          <ol className="relative grid gap-4 md:grid-cols-3">
+            <span
+              aria-hidden="true"
+              className="absolute top-10 right-[16%] left-[16%] hidden h-px bg-gradient-to-r from-aura-primary/20 via-aura-violet/30 to-aura-emerald/30 md:block"
+            />
+            {LANGKAH.map(({ judul, isi, ikon: Ikon }, i) => (
+              <li key={judul} className="relative">
+                <div className={`${KARTU} flex h-full flex-col gap-4 p-5 sm:p-6`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex size-8 items-center justify-center rounded-full bg-aura-primary font-display text-[13px] font-extrabold text-white shadow-[0_6px_16px_rgba(37,99,235,0.28)]">
+                      {i + 1}
+                    </span>
+                    <IkonKotak ikon={Ikon} />
+                  </div>
+                  <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">{judul}</h3>
+                  <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
+                </div>
               </li>
             ))}
           </ol>
         </section>
 
         <section id="fitur" aria-labelledby="judul-fitur" className="flex scroll-mt-28 flex-col gap-8">
-          <div className="flex max-w-2xl flex-col gap-2">
-            <p className={LABEL_BAGIAN}>Fitur</p>
-            <h2 id="judul-fitur" className={JUDUL_BAGIAN}>
-              Yang bisa dilakukan guru
-            </h2>
-          </div>
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <li className="md:col-span-2 lg:row-span-2">
-              <KartuKaca className="flex h-full flex-col gap-4 p-6 md:p-8">
-                <span className={IKON_KOTAK}>
-                  <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
-                    <span className="size-2 rounded-full bg-belum" />
-                    <span className="size-2 rounded-full bg-setengah" />
-                    <span className="size-2 rounded-full bg-sudah" />
-                    <span className="size-2 rounded-full bg-tinta/15" />
-                  </span>
-                </span>
-                <h3 className="text-xl leading-snug font-semibold">Peta kelas</h3>
-                <p className="max-w-prose text-tinta-lembut">
+          <JudulBagian
+            id="judul-fitur"
+            eyebrow="Fitur"
+            title="Yang bisa dilakukan guru"
+            description="Diagnosis kelas, materi yang bisa disesuaikan, dan alat bantu mengajar dalam satu ruang kerja."
+          />
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
+            <article className={`${KARTU} flex flex-col gap-5 p-6 md:col-span-2 lg:col-span-7`}>
+              <IkonKotak ikon={LayoutGrid} />
+              <div className="flex flex-col gap-2">
+                <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">Peta kelas</h3>
+                <p className="font-body text-[14px] leading-[22px] text-aura-muted">
                   Siapa yang sudah, setengah, dan belum paham terlihat dalam satu layar, bukan di tumpukan kertas.
                 </p>
-                <div className="mt-auto flex flex-col gap-3 pt-4">
-                  <div
-                    role="img"
-                    aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 sudah paham."
-                    className="flex h-4 gap-1 overflow-hidden rounded-full"
-                  >
-                    {BILAH_KELOMPOK.map((b) => (
-                      <span key={b.label} className={`basis-0 ${b.kelas}`} />
-                    ))}
-                  </div>
-                  <p aria-hidden="true" className="flex flex-wrap gap-x-4 text-[13px] leading-normal font-medium">
-                    {BILAH_KELOMPOK.map((b) => (
-                      <span key={b.label}>
-                        <span className="font-bold">{b.jumlah}</span> {b.label}
-                      </span>
-                    ))}
-                  </p>
+              </div>
+              <div className="mt-auto flex flex-col gap-4 pt-2">
+                <div
+                  role="img"
+                  aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 sudah paham."
+                  className="flex h-2.5 overflow-hidden rounded-full bg-white/70 ring-1 ring-inset ring-white/80"
+                >
+                  {KELOMPOK_PETA.map((k) => (
+                    <span key={k.label} className={`h-full ${k.lebar} ${k.warna} ${k.garis}`} />
+                  ))}
                 </div>
-              </KartuKaca>
-            </li>
+                <div className="grid grid-cols-3 gap-2">
+                  {KELOMPOK_PETA.map((k) => (
+                    <div key={k.label} className="rounded-2xl border border-white/60 bg-white/50 p-3">
+                      <span aria-hidden="true" className={`block size-2 rounded-full ${k.warna}`} />
+                      <p className="mt-2 font-display text-[20px] leading-[24px] font-bold tracking-[-0.015em] text-aura-ink">
+                        {k.jumlah}
+                      </p>
+                      <p className="font-body text-[11px] leading-[16px] text-aura-muted">{k.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
 
-            <li className="md:col-span-2">
-              <KartuKaca className="flex h-full flex-col gap-4 p-6">
-                <span className={IKON_KOTAK}>
-                  <Sparkles aria-hidden="true" className="size-5 text-ai" />
+            <article className={`${KARTU} flex flex-col gap-5 p-6 md:col-span-2 lg:col-span-5`}>
+              <div className="flex items-start justify-between gap-3">
+                <IkonKotak ikon={Sparkles} />
+                <span className="rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-primary">
+                  Draf AI
                 </span>
-                <h3 className="text-xl leading-snug font-semibold">Materi AI dalam 4 bentuk</h3>
-                <p className="text-tinta-lembut">
+              </div>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+                  Materi AI dalam 4 bentuk
+                </h3>
+                <p className="font-body text-[14px] leading-[22px] text-aura-muted">
                   Satu materi untuk tiap kelompok. Siswa membukanya dalam bentuk yang mereka pilih.
                 </p>
-                <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {BENTUK_MATERI.map(({ label, ikon: Ikon }) => (
-                    <li
-                      key={label}
-                      className="flex flex-col items-center gap-1 rounded-kecil bg-primer-lembut px-2 py-3 text-[13px] leading-normal font-semibold text-primer-hover"
-                    >
-                      <Ikon aria-hidden="true" className="size-5" />
-                      {label}
-                    </li>
-                  ))}
-                </ul>
-              </KartuKaca>
-            </li>
+              </div>
+              <ul className="mt-auto grid grid-cols-2 gap-2">
+                {BENTUK_MATERI.map(({ label, ikon: Ikon }) => (
+                  <li
+                    key={label}
+                    className="flex flex-col items-center gap-2 rounded-full border border-aura-primary/15 bg-aura-primary/5 px-3 py-4 text-center"
+                  >
+                    <Ikon aria-hidden="true" className="size-5 text-aura-primary" />
+                    <span className="font-display text-[13px] font-semibold text-aura-ink">{label}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
 
             {FITUR_KECIL.map(({ judul, isi, ikon: Ikon, kelas }) => (
-              <li key={judul} className={kelas}>
-                <KartuKaca className="flex h-full flex-col gap-3 p-6">
-                  <span className={IKON_KOTAK}>
-                    <Ikon aria-hidden="true" className="size-5" />
-                  </span>
-                  <h3 className="text-base leading-snug font-semibold">{judul}</h3>
-                  <p className="text-tinta-lembut">{isi}</p>
-                </KartuKaca>
-              </li>
+              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5 sm:p-6 ${kelas}`}>
+                <IkonKotak ikon={Ikon} />
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
+                    {judul}
+                  </h3>
+                  <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
         </section>
 
         <section id="prinsip" aria-labelledby="judul-prinsip" className="flex scroll-mt-28 flex-col gap-8">
-          <div className="flex max-w-2xl flex-col gap-2">
-            <p className={LABEL_BAGIAN}>Prinsip</p>
-            <h2 id="judul-prinsip" className={JUDUL_BAGIAN}>
-              Prinsip yang kami pegang
-            </h2>
+          <JudulBagian
+            id="judul-prinsip"
+            eyebrow="Prinsip"
+            title="AI membantu, guru tetap memutuskan"
+            description="Teknologi tidak boleh mengambil alih penilaian pedagogis. Karena itu setiap materi tetap melewati tangan guru."
+          />
+
+          <div className={`${KARTU} relative overflow-hidden p-6 md:p-10`}>
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-6 left-0 w-1 rounded-full bg-gradient-to-b from-aura-emerald via-aura-primary to-aura-violet"
+            />
+            <div className="relative grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-start">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-aura-emerald/20 bg-aura-emerald/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-[#047857]">
+                  <ShieldCheck aria-hidden="true" className="size-3.5" />
+                  Etika & privasi
+                </span>
+                <h3 className="mt-4 text-balance font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
+                  AI menyusun draf, guru memutuskan sebelum materi dibagikan.
+                </h3>
+                <p className="mt-3 font-body text-[15px] leading-[26px] text-aura-muted">
+                  Guru Pintar menjaga batas yang jelas: data pribadi tidak dikirim ke model AI, label kelompok tidak
+                  ditampilkan ke siswa, dan setiap materi diperiksa guru.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/50 px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
+                    <CircleCheck aria-hidden="true" className="size-4 text-aura-emerald" />
+                    Data siswa tidak dikirim ke AI
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/50 px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
+                    <ShieldCheck aria-hidden="true" className="size-4 text-aura-primary" />
+                    Diperiksa guru
+                  </span>
+                </div>
+              </div>
+
+              <ul className="flex flex-col gap-3">
+                {PRINSIP.map((p) => (
+                  <li key={p} className="flex gap-3 rounded-2xl border border-white/60 bg-white/45 p-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-aura-emerald/10 text-aura-emerald">
+                      <CircleCheck aria-hidden="true" className="size-3.5" />
+                    </span>
+                    <span className="font-body text-[14px] leading-[22px] text-aura-ink">{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <KartuKaca className="p-6 md:p-8">
-            <ul className="grid gap-x-8 gap-y-4 md:grid-cols-2">
-              {PRINSIP.map((p) => (
-                <li key={p} className="flex items-start gap-3">
-                  <CircleCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-sudah-teks" />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-          </KartuKaca>
         </section>
 
-        {/* Pita penutup: aksi utama layar ini memakai varian terang di atas latar primer. */}
         <section
           aria-labelledby="judul-penutup"
           data-latar="primer"
-          className="flex flex-col items-start gap-6 rounded-kartu bg-primer p-8 text-white md:flex-row md:items-center md:justify-between md:p-12"
+          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-aura-primary via-aura-primary-deep to-aura-indigo p-7 text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.65)] md:p-12"
         >
-          <div className="flex flex-col gap-2">
-            <h2 id="judul-penutup" className="text-[28px] leading-tight font-bold tracking-tight md:text-[32px]">
-              Coba satu siklus dalam lima menit
-            </h2>
-            <p className="max-w-prose text-base">Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Akun guru dan siswa terpisah.</p>
+          <div aria-hidden="true" className="absolute -right-20 -top-24 size-72 rounded-full bg-white/10 blur-3xl" />
+          <div aria-hidden="true" className="absolute -bottom-24 -left-10 size-64 rounded-full bg-aura-violet/30 blur-3xl" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.5) 1px, transparent 1px), radial-gradient(circle at 80% 60%, rgba(255,255,255,0.4) 1px, transparent 1px)",
+              backgroundSize: "28px 28px, 36px 36px",
+            }}
+          />
+          <div className="relative flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-white/90">
+                <Sparkles aria-hidden="true" className="size-3.5" />
+                Mulai dari satu kelas
+              </span>
+              <h2
+                id="judul-penutup"
+                className="mt-4 text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] md:text-[34px] md:leading-[42px]"
+              >
+                Coba satu siklus dalam lima menit
+              </h2>
+              <p className="mt-3 font-body text-[15px] leading-[26px] text-white/80">
+                Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Akun guru dan siswa terpisah, tanpa instal.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 font-display text-[12px] font-semibold text-white/80">
+                <span className="inline-flex items-center gap-1.5">
+                  <CircleCheck aria-hidden="true" className="size-3.5" />
+                  5 soal per kuis
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <CircleCheck aria-hidden="true" className="size-3.5" />
+                  Siap dari HP
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 aria-hidden="true" className="size-3.5" />
+                  Hasil langsung
+                </span>
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row md:flex-col lg:flex-row">
+              <Link href="/masuk" className="aura-btn aura-btn-light h-[52px] w-full px-6 text-[15px] sm:w-auto">
+                Mulai sekarang
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
+              <Link href="/daftar/guru" className="aura-btn aura-btn-ghost-light h-[52px] w-full px-6 text-[15px] sm:w-auto">
+                Daftar guru
+              </Link>
+            </div>
           </div>
-          <Tombol varian="terang" href="/masuk">
-            Mulai sekarang
-          </Tombol>
         </section>
       </main>
 
-      <footer className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-tinta/10 px-4 py-6 text-[13px] leading-normal font-medium text-tinta-lembut md:px-8">
-        <span>Prototipe hackathon. Guru Pintar.</span>
-        <a href="#atas" className="inline-flex min-h-12 items-center hover:text-tinta">
-          Kembali ke atas
-        </a>
+      <footer className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-4 border-t border-aura-outline/50 px-4 py-8 font-body text-[13px] leading-[18px] text-aura-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex size-7 items-center justify-center rounded-xl bg-gradient-to-br from-aura-primary to-aura-indigo text-white">
+            <GraduationCap aria-hidden="true" className="size-4" />
+          </span>
+          <span className="font-display font-bold text-aura-ink">Guru Pintar</span>
+          <span aria-hidden="true">·</span>
+          <span>Prototipe hackathon</span>
+        </div>
+        <nav aria-label="Tautan footer" className="flex flex-wrap items-center gap-x-4">
+          <Link href="/masuk" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
+            Masuk
+          </Link>
+          <Link href="/daftar/guru" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
+            Daftar guru
+          </Link>
+          <a href="#atas" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
+            Kembali ke atas
+          </a>
+        </nav>
       </footer>
     </div>
   );
