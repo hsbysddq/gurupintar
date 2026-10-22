@@ -107,7 +107,7 @@ export function kirimFormat(sesiId: string, format: Format): Promise<{ ok: true 
   return minta('/api/siswa/format', { method: 'POST', body: JSON.stringify({ sesiId, format }) });
 }
 
-export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true }> {
+export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true; skor: number; total: number }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
 }
 
@@ -178,6 +178,10 @@ export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagik
 
 export function ubahModul(teks: string): Promise<{ isi: IsiMateri }> {
   return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks }) });
+}
+
+export function ubahModulPdf(pdfBase64: string): Promise<{ isi: IsiMateri }> {
+  return minta('/api/guru/modul/pdf', { method: 'POST', body: JSON.stringify({ pdf: pdfBase64 }) });
 }
 
 export function ambilPendampingan(kelasId?: string, signal?: AbortSignal): Promise<DataPendampingan> {

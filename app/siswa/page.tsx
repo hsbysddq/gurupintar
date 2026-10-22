@@ -83,6 +83,10 @@ function GabungKelas() {
           Lanjut
         </Tombol>
       </form>
+
+      <Tombol varian="teks" lebarPenuh href="/siswa/performa">
+        Lihat performa dan riwayatku
+      </Tombol>
     </KerangkaSiswa>
   );
 }
