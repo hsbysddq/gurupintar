@@ -31,13 +31,13 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">
-      <aside className="kaca sticky top-0 z-10 m-3 flex shrink-0 flex-row items-center gap-3 p-3 md:m-4 md:h-[calc(100vh-2rem)] md:w-[72px] md:flex-col md:items-stretch xl:w-[248px] xl:p-4">
-        <Link href="/" className="flex min-h-12 items-center gap-2 px-2 font-bold md:justify-center xl:justify-start">
+      <aside className="kaca sticky top-0 z-10 m-2 flex shrink-0 flex-row items-center gap-2 p-2 sm:gap-3 md:m-4 md:h-[calc(100vh-2rem)] md:w-[72px] md:flex-col md:items-stretch md:gap-3 md:p-4 xl:w-[248px]">
+        <Link href="/" className="flex min-h-12 shrink-0 items-center gap-2 px-1 font-bold md:justify-center md:px-2 xl:justify-start">
           <GraduationCap aria-hidden="true" className="size-6 shrink-0 text-primer" />
-          <span className="md:sr-only xl:not-sr-only">Guru Pintar</span>
+          <span className="sr-only xl:not-sr-only">Guru Pintar</span>
         </Link>
 
-        <nav aria-label="Menu guru" className="flex flex-1">
+        <nav aria-label="Menu guru" className="flex min-w-0 flex-1">
           <Suspense fallback={null}>
             <NavigasiGuru kelas={kelas} />
           </Suspense>
@@ -52,14 +52,14 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
           type="button"
           onClick={keluarAkun}
           title="Keluar"
-          className="flex min-h-12 items-center gap-3 rounded-full px-3 text-[15px] font-semibold text-tinta-lembut transition-colors hover:bg-belum-latar hover:text-belum-teks md:justify-center xl:justify-start xl:px-4"
+          className="flex min-h-12 shrink-0 items-center justify-center gap-0 rounded-full px-2 text-[15px] font-semibold text-tinta-lembut transition-colors hover:bg-belum-latar hover:text-belum-teks xl:justify-start xl:gap-3 xl:px-4"
         >
           <LogOut aria-hidden="true" className="size-5 shrink-0" />
-          <span className="sr-only sm:not-sr-only md:sr-only xl:not-sr-only">Keluar</span>
+          <span className="sr-only xl:not-sr-only">Keluar</span>
         </button>
       </aside>
 
-      <main className="w-full max-w-[1200px] flex-1 px-4 py-6 text-[15px] leading-relaxed md:p-8">{children}</main>
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 text-[15px] leading-relaxed md:p-8">{children}</main>
     </div>
   );
 }

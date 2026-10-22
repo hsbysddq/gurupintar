@@ -25,7 +25,7 @@ export function TombolSalinKode({ kode }: { kode: string }) {
     <button
       type="button"
       onClick={salin}
-      className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white/80 px-3 text-[13px] font-semibold text-primer transition-colors hover:bg-primer-lembut"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/80 px-3 text-[13px] font-semibold text-primer transition-colors hover:bg-primer-lembut"
     >
       {tersalin ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}
       <span aria-live="polite">{tersalin ? 'Tersalin' : 'Salin kode'}</span>

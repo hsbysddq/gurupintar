@@ -92,7 +92,7 @@ export default function HalamanPerforma() {
         <p className="text-tinta-lembut">Lihat naik turunnya nilaimu dari kuis ke kuis.</p>
       </header>
 
-      <section aria-label="Ringkasan" className="grid grid-cols-3 gap-3">
+      <section aria-label="Ringkasan" className="grid grid-cols-3 gap-2 sm:gap-3">
         <KartuStat label="Rata-rata" nilai={ringkas.rataRata === null ? "-" : `${ringkas.rataRata}%`} />
         <KartuStat label="Terbaik" nilai={ringkas.terbaik === null ? "-" : `${ringkas.terbaik}%`} />
         <KartuStat label="Kuis" nilai={String(ringkas.jumlahKuis)} />
@@ -144,9 +144,9 @@ export default function HalamanPerforma() {
 
 function KartuStat({ label, nilai }: { label: string; nilai: string }) {
   return (
-    <KartuKaca className="flex flex-col items-center gap-1 p-3 text-center">
-      <p className="text-2xl leading-none font-bold">{nilai}</p>
-      <p className="text-[13px] leading-normal text-tinta-lembut">{label}</p>
+    <KartuKaca className="flex min-w-0 flex-col items-center gap-1 p-2 text-center sm:p-3">
+      <p className="text-xl leading-none font-bold sm:text-2xl">{nilai}</p>
+      <p className="text-[11px] leading-normal text-tinta-lembut sm:text-[13px]">{label}</p>
     </KartuKaca>
   );
 }

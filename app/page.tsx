@@ -105,12 +105,12 @@ export default function Beranda() {
     <div className="flex flex-1 flex-col">
       <NavbarLanding />
 
-      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-24 overflow-x-clip px-4 pt-12 pb-16 text-[15px] leading-relaxed md:px-8 md:pt-16">
+      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-16 overflow-x-clip px-4 pt-12 pb-16 text-[15px] leading-relaxed md:gap-24 md:px-8 md:pt-16">
         {/* Hero: satu-satunya tombol varian utama di layar pertama; navbar memakai sekunder. */}
         <section
           id="atas"
           aria-labelledby="judul-hero"
-          className="grid scroll-mt-28 items-center gap-16 lg:grid-cols-[1.15fr_1fr] lg:gap-12"
+          className="grid scroll-mt-28 items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-12"
         >
           <div className="flex flex-col items-start gap-6">
             <p className="rounded-full bg-primer-lembut px-3 py-1 text-[13px] leading-normal font-semibold text-primer-hover">

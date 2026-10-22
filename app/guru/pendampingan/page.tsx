@@ -99,7 +99,7 @@ function IsiPendampingan() {
                   setKelasPilihan(id);
                   router.replace(`/guru/pendampingan?kelas=${encodeURIComponent(id)}`);
                 }}
-                className="h-10 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-[15px] text-tinta"
+                className="h-11 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta sm:text-[15px]"
               >
                 {daftarKelas.map((k) => (
                   <option key={k.id} value={k.id}>

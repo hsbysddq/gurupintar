@@ -42,7 +42,7 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
             <Link
               href={href}
               aria-current={aktif ? 'page' : undefined}
-              className={`inline-flex min-h-10 items-center rounded-full px-4 text-[14px] font-semibold transition-colors ${
+              className={`inline-flex min-h-11 items-center rounded-full px-3 text-[14px] font-semibold transition-colors sm:px-4 ${
                 aktif ? 'bg-primer text-white' : 'bg-white/70 text-tinta-lembut hover:bg-primer-lembut hover:text-primer'
               }`}
             >

@@ -92,7 +92,7 @@ export default function HalamanUbahModul() {
       </header>
 
       <KartuKaca className="flex flex-col gap-3 p-6">
-        <div role="tablist" aria-label="Sumber modul" className="flex gap-2">
+        <div role="tablist" aria-label="Sumber modul" className="flex flex-wrap gap-2">
           {([
             ["teks", "Tempel teks", FileText],
             ["pdf", "Unggah PDF", FileUp],
@@ -149,7 +149,7 @@ export default function HalamanUbahModul() {
               type="file"
               accept="application/pdf,.pdf"
               onChange={(e) => pilihBerkas(e.target.files?.[0] ?? null)}
-              className="w-full rounded-kecil border border-dashed border-tinta/25 bg-white/80 px-3 py-6 text-base text-tinta"
+              className="w-full min-w-0 rounded-kecil border border-dashed border-tinta/25 bg-white/80 px-3 py-6 text-base text-tinta"
             />
             <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
               Hanya PDF, maksimal 5 MB. Jangan unggah file yang berisi nama siswa atau data pribadi.

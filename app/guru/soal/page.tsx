@@ -288,7 +288,7 @@ export default function HalamanBuatSoal() {
               const demo = t.id === TOPIK_DEMO_ID;
               return (
                 <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-                  <span className="min-w-0 font-semibold">
+                  <span className="min-w-0 flex-1 break-words font-semibold">
                     {t.nama}
                     {demo && (
                       <span className="ml-2 rounded-full bg-tinta/5 px-2 py-0.5 text-[11px] leading-normal font-medium text-tinta-lembut">
@@ -306,7 +306,7 @@ export default function HalamanBuatSoal() {
                         type="button"
                         disabled={menghapus}
                         onClick={() => void hapusTopikAksi(t.id)}
-                        className="rounded-full bg-belum-latar px-2.5 py-1 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
+                        className="inline-flex min-h-11 items-center rounded-full bg-belum-latar px-3 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
                       >
                         {menghapus ? "Menghapus…" : "Ya, hapus"}
                       </button>
@@ -314,18 +314,18 @@ export default function HalamanBuatSoal() {
                         type="button"
                         disabled={menghapus}
                         onClick={() => setHapusId(null)}
-                        className="rounded-full px-2.5 py-1 text-[12px] leading-normal font-semibold text-tinta-lembut hover:bg-tinta/5"
+                        className="inline-flex min-h-11 items-center rounded-full px-3 text-[12px] leading-normal font-semibold text-tinta-lembut hover:bg-tinta/5"
                       >
                         Batal
                       </button>
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1">
+                    <span className="flex flex-wrap items-center gap-1">
                       <button
                         type="button"
                         disabled={memuatDetail}
                         onClick={() => void mulaiUbah(t.id)}
-                        className="inline-flex min-h-9 items-center gap-1 rounded-full px-2.5 text-[12px] leading-normal font-semibold text-primer hover:bg-primer-lembut disabled:opacity-60"
+                        className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-[12px] leading-normal font-semibold text-primer hover:bg-primer-lembut disabled:opacity-60"
                       >
                         <Pencil aria-hidden="true" className="size-3.5" />
                         Ubah
@@ -333,7 +333,7 @@ export default function HalamanBuatSoal() {
                       <button
                         type="button"
                         onClick={() => setHapusId(t.id)}
-                        className="inline-flex min-h-9 items-center gap-1 rounded-full px-2.5 text-[12px] leading-normal font-semibold text-belum-teks hover:bg-belum-latar"
+                        className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-[12px] leading-normal font-semibold text-belum-teks hover:bg-belum-latar"
                       >
                         <Trash2 aria-hidden="true" className="size-3.5" />
                         Hapus

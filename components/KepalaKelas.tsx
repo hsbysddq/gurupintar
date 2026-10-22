@@ -11,7 +11,7 @@ export function KepalaKelas({ kelas }: { kelas: KelasRingkas }) {
       <div>
         <Link
           href="/guru"
-          className="inline-flex min-h-10 items-center gap-1.5 text-[13px] leading-normal font-semibold text-tinta-lembut hover:text-primer"
+          className="inline-flex min-h-11 items-center gap-1.5 text-[13px] leading-normal font-semibold text-tinta-lembut hover:text-primer"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
           Semua kelas

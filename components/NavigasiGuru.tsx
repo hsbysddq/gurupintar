@@ -53,7 +53,7 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-3">
+    <div className="flex min-w-0 flex-1 flex-col gap-2 md:gap-3">
       {kelas.length > 0 && (
         <div className="hidden flex-col gap-1 px-1 xl:flex">
           <label htmlFor="pilih-kelas-sidebar" className="text-[12px] leading-normal font-medium text-tinta-lembut">
@@ -75,21 +75,21 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
         </div>
       )}
 
-      <ul className="flex flex-row gap-2 md:flex-col">
+      <ul className="flex w-full flex-row justify-around gap-1 md:w-full md:flex-col md:justify-start md:gap-2">
         {menu.map(({ href, label, ikon: Ikon, aktif }) => {
           const sedangAktif = aktif(pathname);
           return (
-            <li key={href}>
+            <li key={href} className="min-w-0 flex-1 md:w-full md:flex-none">
               <Link
                 href={href}
                 title={label}
                 aria-current={sedangAktif ? 'page' : undefined}
-                className={`flex min-h-12 items-center gap-3 rounded-full px-3 text-[15px] font-semibold transition-colors md:justify-center xl:justify-start xl:px-4 ${
+                className={`flex min-h-12 w-full items-center justify-center gap-0 rounded-full px-2 text-[15px] font-semibold transition-colors xl:justify-start xl:gap-3 xl:px-4 ${
                   sedangAktif ? 'bg-primer text-white' : 'text-tinta-lembut hover:bg-primer-lembut hover:text-primer'
                 }`}
               >
                 <Ikon aria-hidden="true" className="size-5 shrink-0" />
-                <span className="sr-only sm:not-sr-only md:sr-only xl:not-sr-only">{label}</span>
+                <span className="sr-only xl:not-sr-only">{label}</span>
               </Link>
             </li>
           );

@@ -39,7 +39,7 @@ export function PetaKelas({ kelompok, jumlahSiswa }: PetaKelasProps) {
   }, [disorot]);
 
   return (
-    <KartuKaca as="section" className="flex flex-col gap-8 p-6">
+    <KartuKaca as="section" className="flex flex-col gap-6 p-5 sm:gap-8 sm:p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-xl leading-snug font-semibold">Peta kelas</h2>
         <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
@@ -48,18 +48,18 @@ export function PetaKelas({ kelompok, jumlahSiswa }: PetaKelasProps) {
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <dl className="grid grid-cols-3 gap-3">
+        <dl className="grid grid-cols-3 gap-2 sm:gap-3">
           {URUTAN_TAMPIL_KELOMPOK.map((k) => (
             <div
               key={k}
-              className={`flex flex-col gap-1 rounded-kecil p-3 transition-colors duration-200 ${
+              className={`flex flex-col gap-1 rounded-kecil p-2 transition-colors duration-200 sm:p-3 ${
                 disorot.includes(k) ? WARNA_KELOMPOK[k].sorot : ""
               }`}
             >
-              <dt className={`text-[13px] leading-normal font-medium ${WARNA_KELOMPOK[k].teks}`}>
+              <dt className={`text-[12px] leading-normal font-medium sm:text-[13px] ${WARNA_KELOMPOK[k].teks}`}>
                 {LABEL_KELOMPOK[k]}
               </dt>
-              <dd className={`text-[40px] leading-[1.1] font-bold ${WARNA_KELOMPOK[k].teks}`}>{jumlah[k]}</dd>
+              <dd className={`text-[32px] leading-[1.1] font-bold sm:text-[40px] ${WARNA_KELOMPOK[k].teks}`}>{jumlah[k]}</dd>
             </div>
           ))}
         </dl>

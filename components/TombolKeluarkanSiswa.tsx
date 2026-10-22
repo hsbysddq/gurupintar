@@ -35,7 +35,7 @@ export function TombolKeluarkanSiswa({
       <button
         type="button"
         onClick={() => setKonfirmasi(true)}
-        className="rounded-full px-2.5 py-1 text-[12px] leading-normal font-semibold text-belum-teks hover:bg-belum-latar"
+        className="inline-flex min-h-11 items-center rounded-full px-3 text-[12px] leading-normal font-semibold text-belum-teks hover:bg-belum-latar"
       >
         Keluarkan
       </button>
@@ -51,7 +51,7 @@ export function TombolKeluarkanSiswa({
         type="button"
         onClick={keluarkan}
         disabled={memuat}
-        className="rounded-full bg-belum-latar px-2.5 py-1 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
+        className="inline-flex min-h-11 items-center rounded-full bg-belum-latar px-3 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
       >
         {memuat ? 'Mengeluarkan…' : 'Ya, keluarkan'}
       </button>
@@ -59,7 +59,7 @@ export function TombolKeluarkanSiswa({
         type="button"
         onClick={() => setKonfirmasi(false)}
         disabled={memuat}
-        className="rounded-full px-2.5 py-1 text-[12px] leading-normal font-semibold text-tinta-lembut hover:bg-tinta/5"
+        className="inline-flex min-h-11 items-center rounded-full px-3 text-[12px] leading-normal font-semibold text-tinta-lembut hover:bg-tinta/5"
       >
         Batal
       </button>
