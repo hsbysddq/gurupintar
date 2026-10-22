@@ -5,6 +5,7 @@ import { profilWajib } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { FormBuatKelas } from './FormBuatKelas';
+import { FormKuisBanyak } from './FormKuisBanyak';
 
 // Daftar kelas milik guru. Satu kartu per kelas, dengan status kuis aktifnya.
 export default async function HalamanDaftarKelas() {
@@ -21,6 +22,8 @@ export default async function HalamanDaftarKelas() {
             : 'Belum ada kelas. Buat kelas pertama untuk mulai mengajar.'}
         </p>
       </header>
+
+      <FormKuisBanyak kelas={daftar} />
 
       {daftar.length > 0 && (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

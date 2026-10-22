@@ -3,6 +3,7 @@ import {
   normalisasiKode,
   skemaBodyBagikanMateri,
   skemaBodyBukaSesi,
+  skemaBodyBukaSesiBanyak,
   skemaBodyBuatKelas,
   skemaBodyBuatMateri,
   skemaBodyDaftarGuru,
@@ -308,6 +309,36 @@ describe('skemaBodyBukaSesi', () => {
   it('menolak id yang bukan uuid', () => {
     expect(skemaBodyBukaSesi.safeParse({ topikId: 'pecahan' }).success).toBe(false);
     expect(skemaBodyBukaSesi.safeParse({ kelasId: '7a' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyBukaSesiBanyak', () => {
+  const KELAS_B = '00000000-0000-4000-8000-0000000000c2';
+
+  it('menerima beberapa kelas unik dan topik opsional', () => {
+    expect(skemaBodyBukaSesiBanyak.safeParse({ kelasIds: [SESI_ID, KELAS_B] }).success).toBe(true);
+    expect(
+      skemaBodyBukaSesiBanyak.safeParse({ kelasIds: [SESI_ID, KELAS_B], topikId: SESI_ID }).success,
+    ).toBe(true);
+  });
+
+  it('menolak daftar kosong atau lebih dari 20 kelas', () => {
+    expect(skemaBodyBukaSesiBanyak.safeParse({ kelasIds: [] }).success).toBe(false);
+    expect(
+      skemaBodyBukaSesiBanyak.safeParse({
+        kelasIds: Array.from({ length: 21 }, () => SESI_ID),
+      }).success,
+    ).toBe(false);
+  });
+
+  it('menolak kelas yang dipilih dua kali', () => {
+    const hasil = skemaBodyBukaSesiBanyak.safeParse({ kelasIds: [SESI_ID, SESI_ID] });
+    expect(hasil.success).toBe(false);
+    expect(hasil.success ? [] : hasil.error.issues[0]?.path).toEqual(['kelasIds']);
+  });
+
+  it('menolak id yang bukan uuid', () => {
+    expect(skemaBodyBukaSesiBanyak.safeParse({ kelasIds: ['7a', KELAS_B] }).success).toBe(false);
   });
 });
 

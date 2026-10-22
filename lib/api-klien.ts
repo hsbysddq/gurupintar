@@ -1,5 +1,14 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
-import type { BodyBuatKelas, BodyBuatMateri, BodyDaftarGuru, BodyDaftarSiswa, BodyJawaban, BodyMasuk, BodyTopikBaru } from './skema-api';
+import type {
+  BodyBuatKelas,
+  BodyBuatMateri,
+  BodyBukaSesiBanyak,
+  BodyDaftarGuru,
+  BodyDaftarSiswa,
+  BodyJawaban,
+  BodyMasuk,
+  BodyTopikBaru,
+} from './skema-api';
 import type {
   DataPendampingan,
   Format,
@@ -10,6 +19,7 @@ import type {
   MateriSiswa,
   Peran,
   SesiBaru,
+  SesiBanyakBaru,
   SesiGuru,
   SesiUntukSiswa,
   SoalUntukSiswa,
@@ -122,6 +132,11 @@ export function ambilDaftarSesi(kelasId?: string, signal?: AbortSignal): Promise
 /** Tanpa `topikId`, server memakai topik demo; tanpa `kelasId`, kelas pertama milik guru. */
 export function bukaSesi(input: { kelasId?: string; topikId?: string } = {}): Promise<SesiBaru> {
   return minta('/api/guru/sesi', { method: 'POST', body: JSON.stringify(input) });
+}
+
+/** Buka satu topik untuk beberapa kelas sekaligus. */
+export function bukaSesiBanyak(body: BodyBukaSesiBanyak): Promise<SesiBanyakBaru> {
+  return minta('/api/guru/sesi/banyak', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function ambilDaftarTopik(): Promise<TopikRingkas[]> {

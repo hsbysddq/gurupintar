@@ -11,6 +11,7 @@ import {
   buatKelas,
   buatMateri,
   bukaSesi,
+  bukaSesiBanyak,
   daftarGuru,
   daftarSiswa,
   ErrorApi,
@@ -124,6 +125,17 @@ describe('api-klien guru', () => {
     await ambilDaftarSesi('k 1');
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/sesi');
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi?kelas=k%201');
+  });
+
+  it('bukaSesiBanyak memakai rute batch dan mengirim daftar kelas', async () => {
+    const palsu = stubFetch(async () => Response.json({ sesi: [], gagal: [] }));
+    await bukaSesiBanyak({ kelasIds: ['k1', 'k2'], topikId: 't1' });
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/sesi/banyak');
+    expect(palsu.mock.calls[0][1]?.method).toBe('POST');
+    expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({
+      kelasIds: ['k1', 'k2'],
+      topikId: 't1',
+    });
   });
 
   it('kelas memakai GET dan POST yang benar', async () => {

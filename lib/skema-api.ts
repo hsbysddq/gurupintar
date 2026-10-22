@@ -132,6 +132,17 @@ export const skemaBodyBukaSesi = z.object({
   topikId: z.uuid().optional(),
 });
 
+// POST /api/guru/sesi/banyak: satu topik untuk beberapa kelas sekaligus.
+export const skemaBodyBukaSesiBanyak = z
+  .object({
+    kelasIds: z.array(z.uuid()).min(1).max(20),
+    topikId: z.uuid().optional(),
+  })
+  .refine((data) => new Set(data.kelasIds).size === data.kelasIds.length, {
+    path: ['kelasIds'],
+    message: 'Kelas tidak boleh dipilih lebih dari sekali.',
+  });
+
 // GET /api/guru/sesi?kelas= dan GET /api/guru/pendampingan?kelas=
 export const skemaQueryKelasOpsional = z.object({
   kelas: z.uuid().optional(),
@@ -178,5 +189,6 @@ export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
 export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
 export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
+export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;

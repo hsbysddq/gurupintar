@@ -100,6 +100,12 @@ export interface SesiBaru {
   kodeKelas: string;
 }
 
+/** POST /api/guru/sesi/banyak */
+export interface SesiBanyakBaru {
+  sesi: { kelasId: string; namaKelas: string; id: string; kodeKelas: string }[];
+  gagal: { kelasId: string; namaKelas: string; pesan: string }[];
+}
+
 export interface SiswaHasil {
   siswaId: string;
   nama: string;
