@@ -67,7 +67,8 @@ export default async function HalamanDaftarKelas() {
 
                   {kelas.kuisAktif && (
                     <p className="text-[14px] leading-normal text-tinta-lembut">
-                      Kode kuis <strong className="tracking-wide text-tinta">{kelas.kuisAktif.kodeKelas}</strong>
+                      Kode kuis <strong className="tracking-wide text-tinta">{kelas.kuisAktif.kodeKelas}</strong> ·{' '}
+                      {kelas.kuisAktif.jumlahMenjawab}/{kelas.jumlahSiswa} menjawab
                     </p>
                   )}
 

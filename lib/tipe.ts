@@ -54,6 +54,7 @@ export interface SesiUntukSiswa {
 export interface KuisAktifRingkas {
   id: string;
   kodeKelas: string;
+  jumlahMenjawab: number;
 }
 
 export interface KelasRingkas {
@@ -64,6 +65,16 @@ export interface KelasRingkas {
   jumlahSiswa: number;
   /** Sesi aktif kelas ini, jika ada. */
   kuisAktif: KuisAktifRingkas | null;
+}
+
+/** Anggota kelas beserta hasil terbarunya (untuk tab Siswa). */
+export interface SiswaKelas {
+  siswaId: string;
+  nama: string;
+  format: Format | null;
+  kelompok: Kelompok | null;
+  skor: number | null;
+  total: number | null;
 }
 
 /** GET /api/guru/sesi */

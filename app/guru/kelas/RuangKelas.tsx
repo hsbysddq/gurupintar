@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, HeartHandshake, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { KartuKaca } from '@/components/KartuKaca';
 import { PanelKodeKelas } from '@/components/PanelKodeKelas';
 import { StatusHalaman } from '@/components/StatusHalaman';
@@ -87,32 +87,6 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <Link
-          href="/guru"
-          className="inline-flex min-h-10 items-center gap-1.5 text-[13px] leading-normal font-semibold text-tinta-lembut hover:text-primer"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          Semua kelas
-        </Link>
-      </div>
-
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] leading-tight font-bold">{kelas.nama}</h1>
-          <p className="text-tinta-lembut">
-            {kelas.mapel} · {kelas.jumlahSiswa} siswa · Kode undangan {kelas.kodeUndangan}
-          </p>
-        </div>
-        <Link
-          href={`/guru/pendampingan?kelas=${kelas.id}`}
-          className="inline-flex min-h-12 items-center gap-2 self-start rounded-full px-3 text-[15px] font-semibold text-primer hover:bg-primer-lembut"
-        >
-          <HeartHandshake aria-hidden="true" className="size-5" />
-          Perlu pendampingan
-        </Link>
-      </header>
-
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-1">

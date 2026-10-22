@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { KepalaKelas } from '@/components/KepalaKelas';
 import { profilWajib } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -18,5 +19,10 @@ export default async function HalamanRuangKelas({
   const dipilih = daftar.find((k) => k.id === kelas);
   if (!dipilih) redirect(`/guru/kelas?kelas=${daftar[0].id}`);
 
-  return <RuangKelas kelas={dipilih} />;
+  return (
+    <div className="flex flex-col gap-6">
+      <KepalaKelas kelas={dipilih} />
+      <RuangKelas kelas={dipilih} />
+    </div>
+  );
 }
