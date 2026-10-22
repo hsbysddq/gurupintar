@@ -147,6 +147,13 @@ export default function HalamanKelasSiswa() {
                     Belum ada kuis aktif. Materi akan muncul setelah gurumu membagikannya.
                   </p>
                 )}
+
+                <Link
+                  href={`/siswa/kelas/detail?kelas=${kelas.id}`}
+                  className="text-[14px] leading-normal font-semibold text-primer hover:underline"
+                >
+                  Lihat semua kuis & materi →
+                </Link>
               </KartuKaca>
             </li>
           ))}

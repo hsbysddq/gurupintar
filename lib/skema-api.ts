@@ -81,6 +81,11 @@ export const skemaBodyGabungKelas = z.object({
   kode: skemaKodeKelas,
 });
 
+// GET /api/siswa/kelas/sesi?kelas=
+export const skemaQueryKelasSiswa = z.object({
+  kelas: z.uuid(),
+});
+
 // GET /api/sesi?kode=
 export const skemaQuerySesi = z.object({
   kode: z.string().transform(normalisasiKode).pipe(z.string().regex(/^[A-Z0-9]{5,6}$/)),

@@ -4,6 +4,7 @@ import {
   ambilDaftarSesi,
   ambilDaftarTopik,
   ambilHasil,
+  ambilDetailKelasSiswa,
   ambilKelasSiswa,
   ambilMateriGuru,
   ambilMateriSiswa,
@@ -34,7 +35,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function stubFetch(impl: () => Promise<Response>) {
+function stubFetch(impl: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) {
   const palsu = vi.fn<typeof fetch>(impl);
   vi.stubGlobal('fetch', palsu);
   return palsu;
@@ -77,6 +78,17 @@ describe('api-klien siswa', () => {
     expect(palsu.mock.calls[1][0]).toBe('/api/siswa/kelas');
     expect(palsu.mock.calls[1][1]?.method).toBe('POST');
     expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({ kode: 'KEL7A' });
+  });
+
+  it('ambilDetailKelasSiswa menggabungkan daftar kelas dan riwayat sesi', async () => {
+    stubFetch(async (url) =>
+      String(url).includes('/sesi')
+        ? Response.json([{ id: 's1', statusMateri: 'disiapkan' }])
+        : Response.json([{ id: 'k1', nama: 'Kelas 7A' }]),
+    );
+    const hasil = await ambilDetailKelasSiswa('k1');
+    expect(hasil.kelas.id).toBe('k1');
+    expect(hasil.sesi).toEqual([{ id: 's1', statusMateri: 'disiapkan' }]);
   });
 
   it('memakai pesan umum jika respons error bukan JSON', async () => {

@@ -112,6 +112,18 @@ export interface KelasSiswa {
   kuisAktif: { kodeKelas: string } | null;
 }
 
+export type StatusMateriSiswa = 'belum-mengerjakan' | 'disiapkan' | 'tersedia';
+
+/** GET /api/siswa/kelas/sesi */
+export interface SesiSiswa {
+  id: string;
+  kodeKelas: string;
+  status: StatusSesi;
+  dibuatPada: string;
+  namaTopik: string;
+  statusMateri: StatusMateriSiswa;
+}
+
 /** GET /api/guru/sesi */
 export interface SesiGuru {
   id: string;
@@ -206,7 +218,7 @@ export interface MateriGuru {
 export type MateriSiswa =
   | { status: 'belum-mengerjakan' }
   | { status: 'disiapkan' }
-  | { status: 'tersedia'; namaTopik: string; isi: IsiMateri };
+  | { status: 'tersedia'; namaTopik: string; isi: IsiMateri; format: Format | null };
 
 // ===== Perlu pendampingan (architecture.md bagian 6, hanya untuk guru) =====
 

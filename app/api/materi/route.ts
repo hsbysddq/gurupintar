@@ -1,9 +1,9 @@
 import type { NextRequest } from 'next/server';
 import { skemaQueryMateriSiswa } from '@/lib/skema-api';
-import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { petakanErrorDb, PESAN_INPUT_TIDAK_VALID, PESAN_SESI_TIDAK_ADA, responsError, responsOk } from '@/lib/server/respons';
-import type { IsiMateri, MateriSiswa } from '@/lib/tipe';
+import type { Format, IsiMateri, MateriSiswa } from '@/lib/tipe';
 
 // GET /api/materi?sesi= (PRD F-7)
 // Kelompok hanya dipakai di server untuk memilih materi; tidak pernah ikut dalam respons (D-2, AC-7.7).
@@ -23,9 +23,14 @@ export async function GET(request: NextRequest) {
     if (sesi.error) return petakanErrorDb(sesi.error);
     if (!sesi.data) return responsError(PESAN_SESI_TIDAK_ADA, 404);
 
-    if (!(await anggotaKelas(db, siswaId, sesi.data.kelas_id))) {
-      return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
-    }
+    const anggota = await db
+      .from('keanggotaan_kelas')
+      .select('preferensi_format')
+      .eq('kelas_id', sesi.data.kelas_id)
+      .eq('siswa_id', siswaId)
+      .maybeSingle();
+    if (anggota.error) return petakanErrorDb(anggota.error);
+    if (!anggota.data) return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
 
     // Selalu kelompok terbaru, termasuk jika siswa mengirim ulang (architecture.md 7.4).
     const hasil = await db
@@ -51,7 +56,12 @@ export async function GET(request: NextRequest) {
     if (topik.error) return petakanErrorDb(topik.error);
     if (!materi.data) return responsOk<MateriSiswa>({ status: 'disiapkan' });
 
-    return responsOk<MateriSiswa>({ status: 'tersedia', namaTopik: topik.data.nama, isi: materi.data.isi as IsiMateri });
+    return responsOk<MateriSiswa>({
+      status: 'tersedia',
+      namaTopik: topik.data.nama,
+      isi: materi.data.isi as IsiMateri,
+      format: (anggota.data.preferensi_format as Format | null) ?? null,
+    });
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);

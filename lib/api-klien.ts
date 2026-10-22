@@ -24,6 +24,7 @@ import type {
   SesiBaru,
   SesiBanyakBaru,
   SesiGuru,
+  SesiSiswa,
   SesiUntukSiswa,
   SoalUntukSiswa,
   TopikRingkas,
@@ -109,6 +110,22 @@ export function ambilKelasSiswa(signal?: AbortSignal): Promise<KelasSiswa[]> {
 /** Bergabung ke kelas lewat kode undangan kelas, tanpa perlu kuis aktif. */
 export function gabungKelas(kode: string): Promise<{ ok: true; kelas: { id: string; nama: string; mapel: string } }> {
   return minta('/api/siswa/kelas', { method: 'POST', body: JSON.stringify({ kode }) });
+}
+
+/** Riwayat sesi satu kelas untuk siswa. */
+export function ambilSesiKelas(kelasId: string, signal?: AbortSignal): Promise<SesiSiswa[]> {
+  return minta(`/api/siswa/kelas/sesi?kelas=${encodeURIComponent(kelasId)}`, { signal });
+}
+
+/** Detail kelas + riwayat sesinya untuk halaman siswa. */
+export async function ambilDetailKelasSiswa(
+  kelasId: string,
+  signal?: AbortSignal,
+): Promise<{ kelas: KelasSiswa; sesi: SesiSiswa[] }> {
+  const [daftar, sesi] = await Promise.all([ambilKelasSiswa(signal), ambilSesiKelas(kelasId, signal)]);
+  const kelas = daftar.find((k) => k.id === kelasId);
+  if (!kelas) throw new ErrorApi(404, 'Kelas tidak ditemukan.');
+  return { kelas, sesi };
 }
 
 export function ambilSoal(sesiId: string): Promise<SoalUntukSiswa[]> {

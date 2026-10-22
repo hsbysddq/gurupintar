@@ -21,6 +21,7 @@ import {
   skemaBodyUbahModul,
   skemaQueryHasil,
   skemaQueryKelasOpsional,
+  skemaQueryKelasSiswa,
   skemaQueryMateriGuru,
   skemaQueryMateriSiswa,
   skemaQuerySesi,
@@ -321,6 +322,14 @@ describe('skemaBodyUbahKelas', () => {
 
   it('menolak id bukan uuid', () => {
     expect(skemaBodyUbahKelas.safeParse({ id: '7a', arsip: true }).success).toBe(false);
+  });
+});
+
+describe('skemaQueryKelasSiswa', () => {
+  it('menerima kelas uuid dan menolak yang lain', () => {
+    expect(skemaQueryKelasSiswa.safeParse({ kelas: SESI_ID }).success).toBe(true);
+    expect(skemaQueryKelasSiswa.safeParse({ kelas: '' }).success).toBe(false);
+    expect(skemaQueryKelasSiswa.safeParse({ kelas: '7a' }).success).toBe(false);
   });
 });
 
