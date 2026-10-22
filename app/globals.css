@@ -146,6 +146,19 @@
   background-color: rgba(238, 242, 255, 0.95);
 }
 
+.aura-btn-danger {
+  background-color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #b91c1c;
+  box-shadow: 0 8px 24px rgba(31, 38, 135, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.aura-btn-danger:hover {
+  background-color: #fef2f2;
+}
+
 .aura-btn-light {
   background-color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.8);

@@ -3,15 +3,12 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
-import { KartuKaca } from '@/components/KartuKaca';
+import { AlertTriangle, ArrowUpRight, CalendarDays, Inbox, Loader2, Plus, Sparkles } from 'lucide-react';
 import { PanelKodeKelas } from '@/components/PanelKodeKelas';
-import { StatusHalaman } from '@/components/StatusHalaman';
-import { Tombol } from '@/components/Tombol';
 import { usePolling } from '@/hooks/use-polling';
 import { ambilDaftarSesi, ambilDaftarTopik, bukaSesi, ErrorApi, tutupSesi } from '@/lib/api-klien';
 import { INTERVAL_POLLING_GURU_MS, TOPIK_DEMO_ID } from '@/lib/konstanta';
-import type { KelasRingkas, TopikRingkas } from '@/lib/tipe';
+import type { KelasRingkas, SesiGuru, TopikRingkas } from '@/lib/tipe';
 
 const FORMAT_TANGGAL = new Intl.DateTimeFormat('id-ID', {
   weekday: 'long',
@@ -96,63 +93,113 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-1">
-            <label htmlFor={idPilihTopik} className="text-[13px] leading-normal font-medium text-tinta-lembut">
-              Topik kuis
-            </label>
-            <select
-              id={idPilihTopik}
-              value={topikId}
-              disabled={!daftarTopik || membuka}
-              onChange={(e) => setTopikId(e.target.value)}
-              className="h-12 min-w-[220px] rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta disabled:opacity-60"
+    <div className="flex flex-col gap-6">
+      <section aria-labelledby="judul-kuis" className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-aura-primary/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 left-1/4 size-48 rounded-full bg-aura-violet/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div className="flex max-w-xl flex-col gap-2">
+            <span className="aura-eyebrow">
+              <Sparkles aria-hidden="true" className="size-3.5" />
+              Kuis kelas
+            </span>
+            <h2
+              id="judul-kuis"
+              className="text-balance font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
             >
-              {daftarTopik ? (
-                daftarTopik.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.nama}
-                  </option>
-                ))
-              ) : (
-                <option value={TOPIK_DEMO_ID}>{galatTopik ? 'Pecahan Senilai' : 'Memuat topik…'}</option>
-              )}
-            </select>
+              Cek pemahaman, tanpa menunggu ulangan.
+            </h2>
+            <p className="font-body text-[14px] leading-[22px] text-aura-muted">
+              Buka kuis 5 soal, bagikan kode atau QR, lalu pantau siswa yang sudah menjawab.
+            </p>
           </div>
-          <Tombol varian="utama" ikon={Plus} memuat={membuka} onClick={bukaKuisBaru}>
-            Buka kuis baru
-          </Tombol>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-1">
+              <label htmlFor={idPilihTopik} className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                Topik kuis
+              </label>
+              <select
+                id={idPilihTopik}
+                value={topikId}
+                disabled={!daftarTopik || membuka}
+                onChange={(e) => setTopikId(e.target.value)}
+                className="h-12 min-w-[220px] rounded-full border border-white/70 bg-white/70 px-4 font-body text-base text-aura-ink shadow-sm backdrop-blur-sm disabled:opacity-60"
+              >
+                {daftarTopik ? (
+                  daftarTopik.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nama}
+                    </option>
+                  ))
+                ) : (
+                  <option value={TOPIK_DEMO_ID}>{galatTopik ? 'Pecahan Senilai' : 'Memuat topik…'}</option>
+                )}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={bukaKuisBaru}
+              disabled={membuka}
+              className="aura-btn aura-btn-primary h-[52px] w-full px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            >
+              {membuka ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Plus aria-hidden="true" className="size-4" />}
+              Buka kuis baru
+            </button>
+          </div>
         </div>
 
         {galatTopik && (
-          <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
+          <p className="relative mt-4 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
             Daftar topik belum berhasil dimuat. Kuis baru memakai topik Pecahan Senilai.
           </p>
         )}
         {galatAksi && (
-          <p role="alert" className="font-medium text-belum-teks">
+          <div
+            role="alert"
+            className="relative mt-4 flex items-start gap-2 rounded-2xl border border-aura-red/20 bg-aura-red/5 px-4 py-3 font-body text-[13px] leading-[20px] font-medium text-[#93000a]"
+          >
+            <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
             {galatAksi}
-          </p>
+          </div>
         )}
       </section>
 
       {konfirmasiGanti && sesiAktif && (
-        <KartuKaca varian="pekat" className="flex flex-col gap-3 p-4">
-          <p role="alert" className="font-semibold">
-            Kuis <strong className="tracking-wide">{sesiAktif.kodeKelas}</strong> masih aktif. Membuka kuis baru akan
-            menutupnya dan membuat kode baru.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Tombol varian="utama" memuat={membuka} onClick={() => void jalankanBukaKuis()}>
-              Ya, ganti kuis
-            </Tombol>
-            <Tombol varian="teks" disabled={membuka} onClick={() => setKonfirmasiGanti(false)}>
-              Batal
-            </Tombol>
+        <section className="relative overflow-hidden rounded-[24px] border border-aura-amber/25 bg-aura-amber/10 p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 text-aura-amber">
+              <AlertTriangle aria-hidden="true" className="size-5" />
+            </span>
+            <div>
+              <h2 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Kuis masih aktif</h2>
+              <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+                Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong> masih aktif. Membuka
+                kuis baru akan menutupnya dan membuat kode baru.
+              </p>
+            </div>
           </div>
-        </KartuKaca>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void jalankanBukaKuis()}
+              disabled={membuka}
+              className="aura-btn aura-btn-primary h-11 px-4 text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {membuka ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
+              Ya, ganti kuis
+            </button>
+            <button
+              type="button"
+              onClick={() => setKonfirmasiGanti(false)}
+              disabled={membuka}
+              className="aura-btn aura-btn-secondary h-11 px-4 text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Batal
+            </button>
+          </div>
+        </section>
       )}
 
       {sesiAktif && (
@@ -160,51 +207,128 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
           kodeKelas={sesiAktif.kodeKelas}
           urlGabung={`${window.location.origin}/siswa?kode=${sesiAktif.kodeKelas}`}
           urlHasil={`/guru/hasil?sesi=${sesiAktif.id}&kelas=${kelas.id}`}
+          jumlahSiswa={kelas.jumlahSiswa}
+          jumlahMenjawab={sesiAktif.jumlahMenjawab}
           onTutup={() => tutupKuis(sesiAktif.id)}
           sedangMenutup={menutup}
         />
       )}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xl leading-snug font-semibold">Riwayat kuis</h2>
+      <section aria-labelledby="judul-riwayat" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <span className="aura-eyebrow">Riwayat</span>
+            <h2
+              id="judul-riwayat"
+              className="mt-2 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
+            >
+              Riwayat kuis
+            </h2>
+          </div>
+          {daftar && daftar.length > 0 && (
+            <span className="font-body text-[12px] leading-[18px] text-aura-muted">{daftar.length} sesi</span>
+          )}
+        </div>
+
         {memuat ? (
-          <StatusHalaman jenis="memuat" judul="Memuat riwayat kuis" />
+          <PanelMemuat />
         ) : !daftar ? (
-          <StatusHalaman
-            jenis="gagal"
-            judul="Riwayat kuis belum berhasil dimuat"
-            pesan={galat ?? undefined}
-            aksi={{ label: 'Coba lagi', onClick: muatUlang }}
-          />
+          <PanelGagal pesan={galat ?? undefined} onCobaLagi={muatUlang} />
         ) : daftar.length === 0 ? (
-          <StatusHalaman jenis="kosong" judul="Belum ada kuis" pesan="Tekan Buka kuis baru untuk memulai cek pemahaman." />
+          <PanelKosong />
         ) : (
-          <KartuKaca as="div" className="p-2">
+          <div className="aura-glass rounded-[24px] p-2">
             <ul className="flex flex-col">
               {daftar.map((s) => (
-                <li key={s.id}>
-                  <Link
-                    href={`/guru/hasil?sesi=${s.id}&kelas=${kelas.id}`}
-                    className="flex min-h-12 flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-kecil px-4 py-3 transition-colors hover:bg-primer-lembut"
-                  >
-                    <span className="font-semibold">{FORMAT_TANGGAL.format(new Date(s.dibuatPada))}</span>
-                    <span className="flex items-center gap-4">
-                      <span
-                        className={`rounded-full px-3 py-1 text-[13px] leading-normal font-medium ${
-                          s.status === 'aktif' ? 'bg-primer-lembut text-primer' : 'bg-tinta/5 text-tinta-lembut'
-                        }`}
-                      >
-                        {s.status === 'aktif' ? 'Aktif' : 'Selesai'}
-                      </span>
-                      <span className="text-tinta-lembut">{s.jumlahMenjawab} menjawab</span>
-                    </span>
-                  </Link>
-                </li>
+                <HistoryRow key={s.id} sesi={s} kelasId={kelas.id} />
               ))}
             </ul>
-          </KartuKaca>
+          </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function HistoryRow({ sesi, kelasId }: { sesi: SesiGuru; kelasId: string }) {
+  const aktif = sesi.status === 'aktif';
+  return (
+    <li>
+      <Link
+        href={`/guru/hasil?sesi=${sesi.id}&kelas=${kelasId}`}
+        className="group flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-[18px] px-3 py-3 transition-colors hover:bg-white/55 sm:px-4"
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-aura-primary/10 to-aura-violet/15 text-aura-primary ring-1 ring-white/70">
+            <CalendarDays aria-hidden="true" className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="break-words font-display text-[13px] leading-[20px] font-semibold text-aura-ink sm:text-[14px]">
+              {FORMAT_TANGGAL.format(new Date(sesi.dibuatPada))}
+            </p>
+            <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
+              Kode <span className="font-semibold tracking-wide text-aura-ink">{sesi.kodeKelas}</span> ·{' '}
+              {sesi.jumlahMenjawab} menjawab
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] ${
+              aktif ? 'bg-aura-emerald/10 text-[#047857]' : 'bg-white/60 text-aura-muted'
+            }`}
+          >
+            {aktif && <span aria-hidden="true" className="size-1.5 rounded-full bg-aura-emerald" />}
+            {aktif ? 'Aktif' : 'Selesai'}
+          </span>
+          <ArrowUpRight aria-hidden="true" className="size-4 text-aura-muted transition-colors group-hover:text-aura-primary" />
+        </div>
+      </Link>
+    </li>
+  );
+}
+
+function PanelMemuat() {
+  return (
+    <div className="aura-glass flex items-center gap-3 rounded-[24px] p-5">
+      <Loader2 aria-hidden="true" className="size-5 animate-spin text-aura-primary" />
+      <p className="font-body text-[14px] leading-[22px] text-aura-muted">Memuat riwayat kuis…</p>
+    </div>
+  );
+}
+
+function PanelGagal({ pesan, onCobaLagi }: { pesan?: string; onCobaLagi: () => void }) {
+  return (
+    <div className="aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5">
+      <span className="flex size-10 items-center justify-center rounded-2xl bg-aura-red/10 text-aura-red">
+        <AlertTriangle aria-hidden="true" className="size-5" />
+      </span>
+      <div>
+        <h3 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">
+          Riwayat kuis belum berhasil dimuat
+        </h3>
+        {pesan && <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">{pesan}</p>}
+      </div>
+      <button type="button" onClick={onCobaLagi} className="aura-btn aura-btn-secondary h-11 px-4 text-[13px]">
+        Coba lagi
+      </button>
+    </div>
+  );
+}
+
+function PanelKosong() {
+  return (
+    <div className="aura-glass flex flex-col items-center gap-3 rounded-[24px] p-8 text-center">
+      <span className="flex size-12 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary">
+        <Inbox aria-hidden="true" className="size-6" />
+      </span>
+      <div>
+        <h3 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Belum ada kuis</h3>
+        <p className="mt-1 max-w-sm font-body text-[13px] leading-[20px] text-aura-muted">
+          Tekan Buka kuis baru untuk memulai cek pemahaman hari ini.
+        </p>
+      </div>
     </div>
   );
 }

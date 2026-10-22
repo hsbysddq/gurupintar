@@ -35,15 +35,17 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
   ];
 
   return (
-    <nav aria-label="Bagian kelas">
-      <ul className="flex flex-wrap gap-2">
+    <nav aria-label="Bagian kelas" className="aura-glass rounded-[24px] p-1 md:rounded-full">
+      <ul className="flex flex-wrap gap-1 md:flex-nowrap md:overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tab.map(({ href, label, aktif }) => (
-          <li key={href}>
+          <li key={href} className="shrink-0">
             <Link
               href={href}
               aria-current={aktif ? 'page' : undefined}
-              className={`inline-flex min-h-11 items-center rounded-full px-3 text-[14px] font-semibold transition-colors sm:px-4 ${
-                aktif ? 'bg-primer text-white' : 'bg-white/70 text-tinta-lembut hover:bg-primer-lembut hover:text-primer'
+              className={`inline-flex min-h-12 items-center rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors sm:px-4 sm:text-[14px] ${
+                aktif
+                  ? 'bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]'
+                  : 'text-aura-muted hover:bg-white/60 hover:text-aura-primary'
               }`}
             >
               {label}
