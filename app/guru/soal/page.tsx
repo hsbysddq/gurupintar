@@ -1,26 +1,31 @@
 "use client";
 
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { Save } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
 import { Tombol } from "@/components/Tombol";
-import { simpanTopik } from "@/lib/api-klien";
+import { ambilDaftarKelas, bukaSesi, simpanTopik } from "@/lib/api-klien";
 import { JUMLAH_SOAL_TOPIK } from "@/lib/konstanta";
 import { skemaBodyTopikBaru } from "@/lib/skema-api";
 import { KODE_PILIHAN, pesanGalatTopik } from "@/lib/soal-guru";
-import type { KodePilihan } from "@/lib/tipe";
+import type { KelasRingkas, KodePilihan } from "@/lib/tipe";
 
 type Empat = [string, string, string, string];
 type IsianSoal = { teks: string; pilihan: Empat; kunci: KodePilihan | ""; miskonsepsi: Empat };
-type Isian = { nama: string; capaianPembelajaran: string; soal: IsianSoal[] };
-type Pengiriman = { status: "diam" } | { status: "mengirim" } | { status: "berhasil"; nama: string } | { status: "gagal"; pesan: string };
+type Isian = { kelasId: string; soal: IsianSoal[] };
+type Pengiriman =
+  | { status: "diam" }
+  | { status: "mengirim" }
+  | { status: "berhasil"; kelasId: string; namaKelas: string; kode: string | null }
+  | { status: "gagal"; pesan: string };
+
+const namaKelasLengkap = (k: KelasRingkas) => `${k.nama} · ${k.mapel}`;
 
 const KELAS_ISIAN = "w-full rounded-kecil border border-tinta/15 bg-white/80 px-3 py-2 text-base leading-relaxed text-tinta";
 
 const isianKosong = (): Isian => ({
-  nama: "",
-  capaianPembelajaran: "",
+  kelasId: "",
   soal: Array.from({ length: JUMLAH_SOAL_TOPIK }, () => ({
     teks: "",
     pilihan: ["", "", "", ""],
@@ -35,6 +40,27 @@ export default function HalamanBuatSoal() {
   const [isian, setIsian] = useState<Isian>(isianKosong);
   const [galat, setGalat] = useState<Record<string, string>>({});
   const [pengiriman, setPengiriman] = useState<Pengiriman>({ status: "diam" });
+  const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[] | null>(null);
+  const [galatKelas, setGalatKelas] = useState<string | null>(null);
+
+  // Pilihan kelas diambil dari kelas yang sudah dibuat guru. Jika hanya ada satu, langsung terpilih.
+  useEffect(() => {
+    let batal = false;
+    ambilDaftarKelas()
+      .then((daftar) => {
+        if (batal) return;
+        setDaftarKelas(daftar);
+        if (daftar.length === 1) setIsian((lama) => ({ ...lama, kelasId: daftar[0].id }));
+      })
+      .catch((err: unknown) => {
+        if (!batal) setGalatKelas(err instanceof Error ? err.message : "Daftar kelas belum bisa dimuat.");
+      });
+    return () => {
+      batal = true;
+    };
+  }, []);
+
+  const kelasDipilih = daftarKelas?.find((k) => k.id === isian.kelasId) ?? null;
 
   /** id elemen untuk jalur kolom, misalnya "soal.1.pilihan.2". */
   const idKolom = (jalur: string) => `${idDasar}-${jalur.replaceAll(".", "-")}`;
@@ -47,13 +73,25 @@ export default function HalamanBuatSoal() {
     e.preventDefault();
     if (pengiriman.status === "mengirim") return;
 
-    const hasil = skemaBodyTopikBaru.safeParse(isian);
-    if (!hasil.success) {
-      const pesan = pesanGalatTopik(hasil);
-      setGalat(pesan);
+    const kelas = kelasDipilih;
+    // Nama topik dan capaian dibuat otomatis dari kelas yang dipilih, guru tidak perlu mengisinya.
+    const tanggal = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    const hasil = skemaBodyTopikBaru.safeParse({
+      nama: kelas ? `${namaKelasLengkap(kelas)} · ${tanggal}`.slice(0, 80) : "",
+      capaianPembelajaran: kelas ? `Soal buatan guru untuk mata pelajaran ${kelas.mapel}, ${kelas.nama}.`.slice(0, 300) : "",
+      soal: isian.soal,
+    });
+
+    const pesan: Record<string, string> = hasil.success ? {} : pesanGalatTopik(hasil);
+    delete pesan.nama;
+    delete pesan.capaianPembelajaran;
+    if (!kelas) Object.assign(pesan, { kelasId: "Pilih kelas dulu." });
+    if (!hasil.success || !kelas) {
+      const urut = kelas ? pesan : { kelasId: pesan.kelasId, ...pesan };
+      setGalat(urut);
       setPengiriman({ status: "diam" });
       // Fokus ke kolom salah yang pertama agar mudah ditemukan.
-      document.getElementById(idKolom(Object.keys(pesan)[0]))?.focus();
+      document.getElementById(idKolom(Object.keys(urut)[0]))?.focus();
       return;
     }
 
@@ -61,10 +99,17 @@ export default function HalamanBuatSoal() {
     setPengiriman({ status: "mengirim" });
     try {
       const topik = await simpanTopik(hasil.data);
-      setIsian(isianKosong());
-      setPengiriman({ status: "berhasil", nama: topik.nama });
+      let kode: string | null = null;
+      try {
+        // Soal langsung dipakai sebagai kuis kelas ini, sehingga muncul di Riwayat kuis.
+        kode = (await bukaSesi({ kelasId: kelas.id, topikId: topik.id })).kodeKelas;
+      } catch {
+        // Soal sudah tersimpan; kuis bisa dibuka manual dari Kelola kelas.
+      }
+      setIsian({ ...isianKosong(), kelasId: kelas.id });
+      setPengiriman({ status: "berhasil", kelasId: kelas.id, namaKelas: namaKelasLengkap(kelas), kode });
     } catch (err) {
-      setPengiriman({ status: "gagal", pesan: err instanceof Error ? err.message : "Topik belum berhasil disimpan." });
+      setPengiriman({ status: "gagal", pesan: err instanceof Error ? err.message : "Soal belum berhasil disimpan." });
     }
   }
 
@@ -73,32 +118,38 @@ export default function HalamanBuatSoal() {
       <header className="flex flex-col gap-1">
         <h1 className="text-[28px] leading-tight font-bold">Buat soal</h1>
         <p className="text-base leading-snug font-semibold">
-          Khusus soal matematika SMP kelas 7. Buat satu topik dengan tepat {JUMLAH_SOAL_TOPIK} soal pilihan ganda.
+          Pilih kelas, lalu tulis tepat {JUMLAH_SOAL_TOPIK} soal pilihan ganda. Setelah disimpan, soal langsung menjadi kuis untuk kelas itu.
         </p>
       </header>
 
       <KartuKaca className="flex flex-col gap-4 p-6">
-        <Kolom id={idKolom("nama")} label="Nama topik" galat={galat.nama}>
-          <input
-            id={idKolom("nama")}
-            className={KELAS_ISIAN}
-            value={isian.nama}
-            aria-invalid={Boolean(galat.nama)}
-            aria-describedby={galat.nama ? `${idKolom("nama")}-galat` : undefined}
-            onChange={(e) => setIsian((l) => ({ ...l, nama: e.target.value }))}
-          />
+        <Kolom id={idKolom("kelasId")} label="Kelas dan mata pelajaran" galat={galat.kelasId ?? galatKelas ?? undefined}>
+          <select
+            id={idKolom("kelasId")}
+            className={`${KELAS_ISIAN} h-12`}
+            value={isian.kelasId}
+            disabled={daftarKelas === null}
+            aria-invalid={Boolean(galat.kelasId)}
+            aria-describedby={galat.kelasId ? `${idKolom("kelasId")}-galat` : undefined}
+            onChange={(e) => setIsian((l) => ({ ...l, kelasId: e.target.value }))}
+          >
+            <option value="">{daftarKelas === null ? "Memuat kelas…" : "Pilih kelas"}</option>
+            {daftarKelas?.map((k) => (
+              <option key={k.id} value={k.id}>
+                {namaKelasLengkap(k)}
+              </option>
+            ))}
+          </select>
         </Kolom>
-        <Kolom id={idKolom("capaianPembelajaran")} label="Capaian pembelajaran" galat={galat.capaianPembelajaran}>
-          <textarea
-            id={idKolom("capaianPembelajaran")}
-            rows={2}
-            className={KELAS_ISIAN}
-            value={isian.capaianPembelajaran}
-            aria-invalid={Boolean(galat.capaianPembelajaran)}
-            aria-describedby={galat.capaianPembelajaran ? `${idKolom("capaianPembelajaran")}-galat` : undefined}
-            onChange={(e) => setIsian((l) => ({ ...l, capaianPembelajaran: e.target.value }))}
-          />
-        </Kolom>
+        {daftarKelas?.length === 0 && (
+          <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
+            Kamu belum punya kelas.{" "}
+            <Link href="/guru" className="underline">
+              Buat kelas dulu
+            </Link>{" "}
+            sebelum membuat soal.
+          </p>
+        )}
       </KartuKaca>
 
       {isian.soal.map((s, i) => {
@@ -219,19 +270,28 @@ export default function HalamanBuatSoal() {
         )}
         {pengiriman.status === "berhasil" && (
           <p className="font-semibold text-sudah-teks">
-            Topik &quot;{pengiriman.nama}&quot; tersimpan. Pilih topik ini saat membuka kuis baru di{" "}
-            <Link href="/guru" className="underline">
-              Dashboard
+            {pengiriman.kode
+              ? `Soal tersimpan dan kuis ${pengiriman.namaKelas} sudah dibuka. Kode kuis: ${pengiriman.kode}. `
+              : `Soal tersimpan untuk ${pengiriman.namaKelas}, tetapi kuis belum terbuka. Buka dari halaman kelas. `}
+            <Link href={`/guru/kelas?kelas=${pengiriman.kelasId}`} className="underline">
+              Lihat di Kelola kelas
             </Link>
             .
           </p>
         )}
       </div>
 
-      <div>
-        <Tombol varian="utama" type="submit" ikon={Save} memuat={pengiriman.status === "mengirim"}>
-          Simpan topik dan soal
-        </Tombol>
+      <div className="flex flex-col gap-2">
+        {kelasDipilih && (
+          <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
+            Menyimpan akan membuka kuis baru untuk {namaKelasLengkap(kelasDipilih)} dan menutup kuis yang sedang aktif di kelas itu.
+          </p>
+        )}
+        <div>
+          <Tombol varian="utama" type="submit" ikon={Save} memuat={pengiriman.status === "mengirim"}>
+            Simpan soal dan buka kuis
+          </Tombol>
+        </div>
       </div>
     </form>
   );

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PANJANG_SANDI_MAKS, PANJANG_SANDI_MIN, normalisasiEmail } from './auth';
-import { JUMLAH_SOAL_TOPIK, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN } from './konstanta';
+import { JUMLAH_SOAL_TOPIK, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from './konstanta';
 import { samakanTeksPilihan } from './soal-guru';
 
 /** AC-1.2: kode diubah ke huruf kapital dan spasi dihapus. */
@@ -152,6 +152,11 @@ export const skemaQueryMateriSiswa = z.object({
 // POST /api/guru/modul; panjang dihitung setelah spasi di awal dan akhir dibuang.
 export const skemaBodyUbahModul = z.object({
   teks: z.string().trim().min(PANJANG_MODUL_MIN).max(PANJANG_MODUL_MAKS),
+});
+
+// POST /api/guru/modul/pdf; PDF dikirim sebagai base64 (batas ukuran file diperiksa di route).
+export const skemaBodyUbahModulPdf = z.object({
+  pdf: z.string().min(100).max(Math.ceil((UKURAN_PDF_MAKS_BYTE * 4) / 3) + 8),
 });
 
 // POST /api/guru/sesi; tanpa kelasId → kelas pertama milik guru, tanpa topikId → TOPIK_DEMO_ID.

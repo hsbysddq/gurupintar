@@ -85,6 +85,9 @@ function GabungKelas() {
         </Tombol>
       </form>
 
+      <Tombol varian="teks" lebarPenuh href="/siswa/performa">
+        Lihat performa dan riwayatku
+      </Tombol>
       <p className="text-center text-tinta-lembut">
         Sudah punya kelas?{' '}
         <Link href="/siswa/kelas" className="font-semibold text-primer hover:underline">
