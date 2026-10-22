@@ -6,5 +6,6 @@ export const BATAS_WAKTU_AI_MS = 60000;
 export const JUMLAH_SOAL_TOPIK = 5;         // PRD F-3, F-10
 export const PANJANG_MODUL_MIN = 200;      // PRD F-9
 export const PANJANG_MODUL_MAKS = 8000;
+export const UKURAN_PDF_MAKS_BYTE = 5 * 1024 * 1024; // unggah modul PDF
 export const KARAKTER_KODE = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const PANJANG_KODE = 5;

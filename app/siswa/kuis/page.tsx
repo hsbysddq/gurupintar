@@ -115,10 +115,15 @@ export default function HalamanKuis() {
     if (!sesi) return;
     setKiriman({ status: "mengirim" });
     try {
-      await kirimJawaban({
+      const hasil = await kirimJawaban({
         sesiId: sesi.sesiId,
         jawaban: soal.map((s) => ({ soalId: s.id, pilihan: jawaban[s.id] })),
       });
+      try {
+        sessionStorage.setItem("gp-hasil-kuis", JSON.stringify({ sesiId: sesi.sesiId, skor: hasil.skor, total: hasil.total }));
+      } catch {
+        // Penyimpanan tidak tersedia: halaman selesai tampil tanpa skor.
+      }
       router.replace("/siswa/selesai");
     } catch (err) {
       const status = err instanceof ErrorApi ? err.status : 0;

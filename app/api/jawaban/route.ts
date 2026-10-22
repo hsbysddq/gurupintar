@@ -14,7 +14,7 @@ import {
 
 // POST /api/jawaban (PRD F-3, architecture.md 7.1)
 // `siswaId` diambil dari sesi login, tidak pernah dari body. Kunci hanya dibaca di server;
-// respons hanya { ok: true } tanpa skor atau kelompok (D-2, AC-3.6).
+// respons berisi { ok, skor, total } tanpa kelompok (D-2).
 export async function POST(request: Request) {
   const auth = await wajibPeranApi('siswa');
   if (!auth.ok) return auth.respons;
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     });
     if (simpan.error) return petakanErrorDb(simpan.error);
 
-    return responsOk({ ok: true });
+    return responsOk({ ok: true, skor, total });
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);
