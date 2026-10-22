@@ -141,6 +141,23 @@ export interface TopikRingkas {
   nama: string;
 }
 
+/** GET /api/guru/topik/detail */
+export interface SoalTopikDetail {
+  nomor: number;
+  teks: string;
+  pilihan: PilihanSoal[];
+  kunci: KodePilihan;
+  miskonsepsi: Partial<Record<KodePilihan, string>>;
+}
+
+export interface TopikDetail {
+  id: string;
+  nama: string;
+  capaianPembelajaran: string;
+  soal: SoalTopikDetail[];
+  dipakai: boolean;
+}
+
 /** POST /api/guru/sesi */
 export interface SesiBaru {
   id: string;

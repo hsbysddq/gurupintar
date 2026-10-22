@@ -11,8 +11,10 @@ import {
   skemaBodyGabungKelas,
   skemaBodyGabungSesi,
   skemaBodyHapusSiswa,
+  skemaBodyHapusTopik,
   skemaBodyMasuk,
   skemaBodyTopikBaru,
+  skemaBodyUbahTopik,
   skemaBodyFormat,
   skemaBodyJawaban,
   skemaBodyTutupSesi,
@@ -20,6 +22,7 @@ import {
   skemaBodyUbahMateri,
   skemaBodyUbahModul,
   skemaQueryHasil,
+  skemaQueryDetailTopik,
   skemaQueryKelasOpsional,
   skemaQueryKelasSiswa,
   skemaQueryMateriGuru,
@@ -342,6 +345,42 @@ describe('skemaBodyHapusSiswa', () => {
     expect(skemaBodyHapusSiswa.safeParse({ kelasId: SESI_ID }).success).toBe(false);
     expect(skemaBodyHapusSiswa.safeParse({ kelasId: '7a', siswaId: SISWA_ID }).success).toBe(false);
     expect(skemaBodyHapusSiswa.safeParse({ kelasId: SESI_ID, siswaId: 'andi' }).success).toBe(false);
+  });
+});
+
+describe('skema ubah/hapus/detail topik', () => {
+  const soalUji = () => ({
+    teks: 'Pecahan yang senilai dengan 1/2 adalah …',
+    pilihan: ['2/4', '1/3', '3/5', '4/7'],
+    kunci: 'A',
+    miskonsepsi: ['', '', '', ''],
+  });
+  const bodyUbah = () => ({
+    id: SESI_ID,
+    nama: 'Topik Uji',
+    capaianPembelajaran: 'Peserta didik dapat menguji topik.',
+    soal: Array.from({ length: 5 }, soalUji),
+  });
+
+  it('menerima ubah topik dengan id dan 5 soal', () => {
+    expect(skemaBodyUbahTopik.safeParse(bodyUbah()).success).toBe(true);
+  });
+
+  it('menolak ubah topik tanpa id atau dengan soal kurang', () => {
+    const tanpaId = { ...bodyUbah(), id: undefined };
+    expect(skemaBodyUbahTopik.safeParse(tanpaId).success).toBe(false);
+    expect(skemaBodyUbahTopik.safeParse({ ...bodyUbah(), soal: [soalUji()] }).success).toBe(false);
+  });
+
+  it('hapus topik membutuhkan id uuid', () => {
+    expect(skemaBodyHapusTopik.safeParse({ id: SESI_ID }).success).toBe(true);
+    expect(skemaBodyHapusTopik.safeParse({ id: 'topik' }).success).toBe(false);
+    expect(skemaBodyHapusTopik.safeParse({}).success).toBe(false);
+  });
+
+  it('detail topik membutuhkan query uuid', () => {
+    expect(skemaQueryDetailTopik.safeParse({ topik: SESI_ID }).success).toBe(true);
+    expect(skemaQueryDetailTopik.safeParse({ topik: '' }).success).toBe(false);
   });
 });
 

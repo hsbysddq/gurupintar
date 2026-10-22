@@ -172,13 +172,30 @@ begin
   delete from keanggotaan_kelas where kelas_id = p_kelas and siswa_id = p_siswa;
 end $$;
 
+-- Ubah topik + ganti 5 soalnya dalam satu transaksi.
+create or replace function ubah_topik(p_topik uuid, p_nama text, p_capaian text, p_soal jsonb)
+returns void language plpgsql as $$
+begin
+  update topik set nama = p_nama, capaian_pembelajaran = p_capaian where id = p_topik;
+  if not found then raise exception 'TOPIK_TIDAK_ADA'; end if;
+
+  delete from soal where topik_id = p_topik;
+
+  insert into soal (topik_id, nomor, teks, pilihan, kunci, miskonsepsi)
+  select p_topik, (s->>'nomor')::int, s->>'teks', s->'pilihan', s->>'kunci',
+         coalesce(s->'miskonsepsi', '{}'::jsonb)
+  from jsonb_array_elements(p_soal) as s;
+end $$;
+
 revoke execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) from public, anon, authenticated;
 revoke execute on function buka_sesi(uuid, uuid, text) from public, anon, authenticated;
 revoke execute on function ambil_kunci_materi(uuid) from public, anon, authenticated;
 revoke execute on function lepas_kunci_materi(uuid) from public, anon, authenticated;
 revoke execute on function hapus_anggota_kelas(uuid, uuid) from public, anon, authenticated;
+revoke execute on function ubah_topik(uuid, text, text, jsonb) from public, anon, authenticated;
 grant execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) to service_role;
 grant execute on function buka_sesi(uuid, uuid, text) to service_role;
 grant execute on function ambil_kunci_materi(uuid) to service_role;
 grant execute on function lepas_kunci_materi(uuid) to service_role;
 grant execute on function hapus_anggota_kelas(uuid, uuid) to service_role;
+grant execute on function ubah_topik(uuid, text, text, jsonb) to service_role;

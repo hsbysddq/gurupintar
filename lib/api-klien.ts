@@ -10,6 +10,7 @@ import type {
   BodyMasuk,
   BodyTopikBaru,
   BodyUbahKelas,
+  BodyUbahTopik,
 } from './skema-api';
 import type {
   DataPendampingan,
@@ -27,6 +28,7 @@ import type {
   SesiSiswa,
   SesiUntukSiswa,
   SoalUntukSiswa,
+  TopikDetail,
   TopikRingkas,
 } from './tipe';
 
@@ -183,6 +185,18 @@ export function ambilDaftarTopik(): Promise<TopikRingkas[]> {
 
 export function simpanTopik(body: BodyTopikBaru): Promise<TopikRingkas> {
   return minta('/api/guru/topik', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ambilDetailTopik(topikId: string, signal?: AbortSignal): Promise<TopikDetail> {
+  return minta(`/api/guru/topik/detail?topik=${encodeURIComponent(topikId)}`, { signal });
+}
+
+export function ubahTopik(body: BodyUbahTopik): Promise<{ ok: true }> {
+  return minta('/api/guru/topik', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function hapusTopik(id: string): Promise<{ ok: true }> {
+  return minta('/api/guru/topik', { method: 'DELETE', body: JSON.stringify({ id }) });
 }
 
 export function tutupSesi(sesiId: string): Promise<{ ok: true }> {

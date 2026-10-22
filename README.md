@@ -34,8 +34,9 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
 
 3. Jalankan `supabase/schema.sql`, lalu `supabase/seed.sql` di SQL Editor Supabase.
    `schema.sql` bersifat destruktif dan hanya untuk menyiapkan/reset database demo.
-   Jika database sudah berisi data, jalankan `supabase/migrasi-arsip-kelas.sql` dan
-   `supabase/migrasi-identitas-siswa.sql` untuk menambah kolom arsip serta identitas siswa per kelas.
+   Jika database sudah berisi data, jalankan `supabase/migrasi-arsip-kelas.sql`,
+   `supabase/migrasi-identitas-siswa.sql`, dan `supabase/migrasi-ubah-topik.sql` untuk
+   menambah kolom arsip, identitas siswa per kelas, serta fungsi ubah topik.
 
 4. Jalankan aplikasi.
 

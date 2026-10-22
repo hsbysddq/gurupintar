@@ -1,12 +1,16 @@
-import { skemaBodyTopikBaru } from '@/lib/skema-api';
+import { skemaBodyHapusTopik, skemaBodyTopikBaru, skemaBodyUbahTopik } from '@/lib/skema-api';
 import { TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { keBarisSoal, susunDaftarTopik } from '@/lib/soal-guru';
 import { wajibPeranApi } from '@/lib/server/auth';
+import { topikDipakai, topikMilikGuru } from '@/lib/server/topik';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
 import type { TopikRingkas } from '@/lib/tipe';
 
 const PESAN_TOPIK_TIDAK_VALID = 'Isian topik atau soal belum sesuai. Periksa lagi form.';
+const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
+const PESAN_TOPIK_DIPAKAI = 'Topik ini sudah dipakai kuis dan tidak bisa diubah atau dihapus. Buat topik baru untuk versi berbeda.';
+const PESAN_MIGRASI_UBAH = 'Fitur ubah topik belum aktif. Jalankan supabase/migrasi-ubah-topik.sql di Supabase.';
 
 // GET /api/guru/topik (PRD F-10): topik yang bisa dipakai kuis, tanpa isi soal.
 export async function GET() {
@@ -60,6 +64,72 @@ export async function POST(request: Request) {
 
     const respons: TopikRingkas = { id: topik.data.id, nama: topik.data.nama };
     return responsOk(respons, 201);
+  } catch (err) {
+    console.error(err);
+    return petakanErrorDb(err);
+  }
+}
+
+// PATCH /api/guru/topik: ubah topik + 5 soal sekaligus, hanya jika belum dipakai kuis.
+export async function PATCH(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
+  const input = skemaBodyUbahTopik.safeParse(await bacaBodyJson(request));
+  if (!input.success) return responsError(PESAN_TOPIK_TIDAK_VALID, 400);
+
+  try {
+    const db = ambilSupabase();
+    const topik = await topikMilikGuru(db, auth.profil.id, input.data.id);
+    if (!topik) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+    if (await topikDipakai(db, topik.id)) return responsError(PESAN_TOPIK_DIPAKAI, 409);
+
+    const { error } = await db.rpc('ubah_topik', {
+      p_topik: topik.id,
+      p_nama: input.data.nama,
+      p_capaian: input.data.capaianPembelajaran,
+      p_soal: keBarisSoal(topik.id, input.data.soal),
+    });
+    if (error) {
+      const pesan = error.message ?? '';
+      if (error.code === 'PGRST202' || (pesan.includes('ubah_topik') && pesan.includes('Could not find'))) {
+        return responsError(PESAN_MIGRASI_UBAH, 503);
+      }
+      if (pesan.includes('TOPIK_TIDAK_ADA')) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+      return petakanErrorDb(error);
+    }
+
+    return responsOk({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return petakanErrorDb(err);
+  }
+}
+
+// DELETE /api/guru/topik: hapus topik yang belum dipakai kuis.
+export async function DELETE(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
+  const input = skemaBodyHapusTopik.safeParse(await bacaBodyJson(request));
+  if (!input.success) return responsError(PESAN_TOPIK_TIDAK_VALID, 400);
+
+  try {
+    const db = ambilSupabase();
+    const topik = await topikMilikGuru(db, auth.profil.id, input.data.id);
+    if (!topik) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+    if (await topikDipakai(db, topik.id)) return responsError(PESAN_TOPIK_DIPAKAI, 409);
+
+    const { data, error } = await db
+      .from('topik')
+      .delete()
+      .eq('id', topik.id)
+      .eq('dibuat_oleh', auth.profil.id)
+      .select('id');
+    if (error) return petakanErrorDb(error);
+    if (data.length === 0) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
+
+    return responsOk({ ok: true });
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);

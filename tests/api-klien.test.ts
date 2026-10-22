@@ -3,6 +3,7 @@ import {
   ambilDaftarKelas,
   ambilDaftarSesi,
   ambilDaftarTopik,
+  ambilDetailTopik,
   ambilHasil,
   ambilDetailKelasSiswa,
   ambilKelasSiswa,
@@ -19,6 +20,7 @@ import {
   ErrorApi,
   gabungKelas,
   gabungSesi,
+  hapusTopik,
   keluar,
   keluarkanSiswa,
   kirimJawaban,
@@ -28,6 +30,7 @@ import {
   tutupSesi,
   ubahKelas,
   ubahMateri,
+  ubahTopik,
 } from '@/lib/api-klien';
 import type { IsiMateri } from '@/lib/tipe';
 
@@ -236,6 +239,29 @@ describe('fungsi topik (PRD F-10)', () => {
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/topik');
     expect(palsu.mock.calls[1][1]?.method).toBe('POST');
     expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual(body);
+  });
+
+  it('detail, ubah, dan hapus topik memakai rute yang benar', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    const pengendali = new AbortController();
+    await ambilDetailTopik('t 1', pengendali.signal);
+    const body = {
+      id: 't1',
+      nama: 'Topik',
+      capaianPembelajaran: 'Capaian uji',
+      soal: [],
+    } as Parameters<typeof ubahTopik>[0];
+    await ubahTopik(body);
+    await hapusTopik('t1');
+
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/topik/detail?topik=t%201');
+    expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
+    expect(palsu.mock.calls[1][0]).toBe('/api/guru/topik');
+    expect(palsu.mock.calls[1][1]?.method).toBe('PATCH');
+    expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual(body);
+    expect(palsu.mock.calls[2][0]).toBe('/api/guru/topik');
+    expect(palsu.mock.calls[2][1]?.method).toBe('DELETE');
+    expect(JSON.parse(palsu.mock.calls[2][1]?.body as string)).toEqual({ id: 't1' });
   });
 });
 

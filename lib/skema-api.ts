@@ -206,6 +206,21 @@ export const skemaBodyTopikBaru = z.object({
   soal: z.array(skemaSoalBaru).length(JUMLAH_SOAL_TOPIK),
 });
 
+// PATCH /api/guru/topik
+export const skemaBodyUbahTopik = skemaBodyTopikBaru.extend({
+  id: z.uuid(),
+});
+
+// DELETE /api/guru/topik
+export const skemaBodyHapusTopik = z.object({
+  id: z.uuid(),
+});
+
+// GET /api/guru/topik/detail?topik=
+export const skemaQueryDetailTopik = z.object({
+  topik: z.uuid(),
+});
+
 function skemaTeksPilihan() {
   return z.string().trim().min(1).max(100);
 }
@@ -218,6 +233,7 @@ export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
 export type BodyTopikBaru = z.infer<typeof skemaBodyTopikBaru>;
+export type BodyUbahTopik = z.infer<typeof skemaBodyUbahTopik>;
 export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
 export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
