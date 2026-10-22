@@ -71,6 +71,7 @@ export interface KelasRingkas {
 export interface SiswaKelas {
   siswaId: string;
   nama: string;
+  email: string | null;
   format: Format | null;
   kelompok: Kelompok | null;
   skor: number | null;
@@ -99,6 +100,16 @@ export interface RingkasanKelas {
   jumlahPerluPendampingan: number;
   jumlahSesi: number;
   sesiTerakhir: string | null;
+}
+
+/** GET /api/siswa/kelas */
+export interface KelasSiswa {
+  id: string;
+  nama: string;
+  mapel: string;
+  namaGuru: string;
+  kodeUndangan: string;
+  kuisAktif: { kodeKelas: string } | null;
 }
 
 /** GET /api/guru/sesi */

@@ -65,8 +65,19 @@ export const skemaBodyUbahKelas = z
     message: 'Tidak ada perubahan yang dikirim.',
   });
 
+// DELETE /api/guru/kelas/siswa
+export const skemaBodyHapusSiswa = z.object({
+  kelasId: z.uuid(),
+  siswaId: z.uuid(),
+});
+
 // POST /api/sesi/gabung
 export const skemaBodyGabungSesi = z.object({
+  kode: skemaKodeKelas,
+});
+
+// POST /api/siswa/kelas: bergabung ke kelas lewat kode undangan, tanpa perlu kuis aktif.
+export const skemaBodyGabungKelas = z.object({
   kode: skemaKodeKelas,
 });
 
@@ -207,6 +218,7 @@ export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
 export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
 export type BodyUbahKelas = z.infer<typeof skemaBodyUbahKelas>;
+export type BodyHapusSiswa = z.infer<typeof skemaBodyHapusSiswa>;
 export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;

@@ -34,7 +34,8 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
 
 3. Jalankan `supabase/schema.sql`, lalu `supabase/seed.sql` di SQL Editor Supabase.
    `schema.sql` bersifat destruktif dan hanya untuk menyiapkan/reset database demo.
-   Jika database sudah berisi data, jalankan `supabase/migrasi-arsip-kelas.sql` untuk menambah kolom arsip kelas.
+   Jika database sudah berisi data, jalankan `supabase/migrasi-arsip-kelas.sql` dan
+   `supabase/migrasi-identitas-siswa.sql` untuk menambah kolom arsip serta identitas siswa per kelas.
 
 4. Jalankan aplikasi.
 
@@ -64,6 +65,7 @@ Kode undangan kelas demo: `KEL7A`. Kode sesi kuis aktif: `A7K2P`.
 - Guru dan siswa memakai akun Supabase Auth dengan peran di `app_metadata` (tidak bisa diubah dari browser).
 - Sesi disimpan di cookie dan diverifikasi di server (`getUser()`), bukan hanya di proxy.
 - Setiap API guru memeriksa kepemilikan kelas/sesi/materi; setiap API siswa memeriksa keanggotaan kelas.
+- Nama siswa unik per kelas (tidak peka huruf besar-kecil), email akun terlihat oleh guru, dan guru bisa mengeluarkan siswa dari kelas.
 - Kunci jawaban, miskonsepsi, label kelompok, dan daftar siswa sekelas tidak pernah dikirim ke browser siswa.
 - Detail arsitektur dan batasan ada di `architecture.md` bagian 12.
 

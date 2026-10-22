@@ -4,6 +4,7 @@ import {
   ambilDaftarSesi,
   ambilDaftarTopik,
   ambilHasil,
+  ambilKelasSiswa,
   ambilMateriGuru,
   ambilMateriSiswa,
   ambilPendampingan,
@@ -15,8 +16,10 @@ import {
   daftarGuru,
   daftarSiswa,
   ErrorApi,
+  gabungKelas,
   gabungSesi,
   keluar,
+  keluarkanSiswa,
   kirimJawaban,
   masuk,
   PESAN_GAGAL_KONEKSI,
@@ -61,6 +64,19 @@ describe('api-klien siswa', () => {
     const err = await tangkap(gabungSesi('RIW001'));
     expect(err.status).toBe(409);
     expect(err.message).toBe('Kuis ini sudah ditutup.');
+  });
+
+  it('ambilKelasSiswa dan gabungKelas memakai rute /api/siswa/kelas', async () => {
+    const palsu = stubFetch(async () => Response.json([]));
+    const pengendali = new AbortController();
+    await ambilKelasSiswa(pengendali.signal);
+    await gabungKelas('KEL7A');
+    expect(palsu.mock.calls[0][0]).toBe('/api/siswa/kelas');
+    expect(palsu.mock.calls[0][1]?.method).toBeUndefined();
+    expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
+    expect(palsu.mock.calls[1][0]).toBe('/api/siswa/kelas');
+    expect(palsu.mock.calls[1][1]?.method).toBe('POST');
+    expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({ kode: 'KEL7A' });
   });
 
   it('memakai pesan umum jika respons error bukan JSON', async () => {
@@ -154,6 +170,14 @@ describe('api-klien guru', () => {
       nama: 'Kelas 7C',
       arsip: false,
     });
+  });
+
+  it('keluarkanSiswa memakai DELETE dan mengirim kedua id', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    await keluarkanSiswa({ kelasId: 'k1', siswaId: 's1' });
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/kelas/siswa');
+    expect(palsu.mock.calls[0][1]?.method).toBe('DELETE');
+    expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({ kelasId: 'k1', siswaId: 's1' });
   });
 
   it('fungsi materi memakai URL, metode, dan body yang benar', async () => {
