@@ -9,7 +9,8 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
     {
       href: `/guru/kelas?kelas=${kelasId}`,
       label: 'Kuis',
-      aktif: pathname === '/guru/kelas',
+      aktif:
+        pathname === '/guru/kelas' || pathname.startsWith('/guru/hasil') || pathname === '/guru/materi',
     },
     {
       href: `/guru/kelas/materi?kelas=${kelasId}`,

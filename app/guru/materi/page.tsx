@@ -6,6 +6,7 @@ import { RefreshCw, Send, Sparkles } from "lucide-react";
 import { GagalBuatMateri } from "@/components/GagalBuatMateri";
 import { KartuKaca } from "@/components/KartuKaca";
 import { KartuMateriGuru } from "@/components/KartuMateriGuru";
+import { KepalaKelasDariId } from "@/components/KepalaKelasDariId";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
 import { useBuatMateri } from "@/hooks/use-buat-materi";
@@ -162,6 +163,8 @@ function MateriLanjutan() {
 
   return (
     <div className="flex flex-col gap-6">
+      <KepalaKelasDariId kelasId={kelasId} />
+
       <header className="flex flex-col gap-1">
         <h1 className="text-[28px] leading-tight font-bold">Materi lanjutan</h1>
         <p className="text-base leading-snug font-semibold">Periksa dan sesuaikan materi sebelum dibagikan.</p>

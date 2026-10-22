@@ -35,6 +35,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
 
   const [membuka, setMembuka] = useState(false);
   const [menutup, setMenutup] = useState(false);
+  const [konfirmasiGanti, setKonfirmasiGanti] = useState(false);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
   const idPilihTopik = useId();
   const [daftarTopik, setDaftarTopik] = useState<TopikRingkas[] | null>(null);
@@ -57,11 +58,12 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
 
   const sesiAktif = daftar?.find((s) => s.status === 'aktif');
 
-  async function bukaKuisBaru() {
+  async function jalankanBukaKuis() {
     setMembuka(true);
     setGalatAksi(null);
     try {
       await bukaSesi({ kelasId: kelas.id, topikId });
+      setKonfirmasiGanti(false);
       muatUlang();
       router.refresh();
     } catch (err) {
@@ -69,6 +71,14 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
     } finally {
       setMembuka(false);
     }
+  }
+
+  function bukaKuisBaru() {
+    if (sesiAktif) {
+      setKonfirmasiGanti(true);
+      return;
+    }
+    void jalankanBukaKuis();
   }
 
   async function tutupKuis(sesiId: string) {
@@ -127,6 +137,23 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
           </p>
         )}
       </section>
+
+      {konfirmasiGanti && sesiAktif && (
+        <KartuKaca varian="pekat" className="flex flex-col gap-3 p-4">
+          <p role="alert" className="font-semibold">
+            Kuis <strong className="tracking-wide">{sesiAktif.kodeKelas}</strong> masih aktif. Membuka kuis baru akan
+            menutupnya dan membuat kode baru.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Tombol varian="utama" memuat={membuka} onClick={() => void jalankanBukaKuis()}>
+              Ya, ganti kuis
+            </Tombol>
+            <Tombol varian="teks" disabled={membuka} onClick={() => setKonfirmasiGanti(false)}>
+              Batal
+            </Tombol>
+          </div>
+        </KartuKaca>
+      )}
 
       {sesiAktif && (
         <PanelKodeKelas

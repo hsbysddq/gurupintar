@@ -76,7 +76,21 @@ npm run dev     # server pengembangan
 npm run lint    # ESLint
 npm run build   # build produksi + cek tipe
 npm test        # unit test vitest
+npm run test:e2e # tes alur utama ke aplikasi yang sedang berjalan
 ```
+
+## Pengujian
+
+- `npm test` menjalankan unit test dan tidak membutuhkan server atau database.
+- `npm run test:e2e` membutuhkan aplikasi yang sedang berjalan (`BASE_URL`, default
+  `http://localhost:3000`) serta `NEXT_PUBLIC_SUPABASE_URL` dan
+  `SUPABASE_SERVICE_ROLE_KEY`. Database harus sudah di-seed dengan `seed.sql`.
+  Tes membuat satu kelas sementara, menguji login/peran, gabung kelas, buka kuis,
+  riwayat sesi, dan arsip, lalu menghapus kelas itu kembali.
+- `.github/workflows/ci.yml` menjalankan lint, unit test, dan build pada push/PR.
+- `.github/workflows/e2e.yml` dijalankan manual dan memerlukan secrets
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+  dan `KODE_UNDANGAN_GURU`.
 
 ## Struktur singkat
 

@@ -1,0 +1,53 @@
+name: E2E
+
+# Sengaja manual karena tes ini menulis data sementara ke Supabase demo.
+# Tambahkan secrets: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY.
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          KODE_UNDANGAN_GURU: ${{ secrets.KODE_UNDANGAN_GURU }}
+
+      - name: Jalankan aplikasi
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          KODE_UNDANGAN_GURU: ${{ secrets.KODE_UNDANGAN_GURU }}
+        run: |
+          npm run start -- -p 3000 > /tmp/next.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/masuk > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/next.log
+          exit 1
+
+      - name: Jalankan tes E2E
+        env:
+          BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run test:e2e
+
+      - name: Tampilkan log server jika gagal
+        if: failure()
+        run: cat /tmp/next.log

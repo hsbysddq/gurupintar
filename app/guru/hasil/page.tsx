@@ -7,6 +7,7 @@ import { BookOpen, Sparkles, UserPlus } from "lucide-react";
 import { GagalBuatMateri } from "@/components/GagalBuatMateri";
 import { KartuKaca } from "@/components/KartuKaca";
 import { KartuSoalTersulit } from "@/components/KartuSoalTersulit";
+import { KepalaKelasDariId } from "@/components/KepalaKelasDariId";
 import { PetaKelas } from "@/components/PetaKelas";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { Tombol } from "@/components/Tombol";
@@ -71,6 +72,8 @@ function HasilKuis() {
 
   return (
     <div className="flex flex-col gap-6">
+      <KepalaKelasDariId kelasId={kelasId} />
+
       <header className="flex flex-col gap-1">
         <h1 className="text-[28px] leading-tight font-bold">Hasil cek pemahaman</h1>
         <p className="text-base leading-snug font-semibold">
