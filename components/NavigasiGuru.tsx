@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { BarChart3, FileText, LayoutDashboard, ListChecks, type LucideIcon } from 'lucide-react';
+import {
+  BarChart3,
+  ChevronDown,
+  FileText,
+  LayoutDashboard,
+  ListChecks,
+  School,
+  type LucideIcon,
+} from 'lucide-react';
 
 export type KelasNav = { id: string; nama: string };
 
@@ -14,6 +22,7 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
   const params = useSearchParams();
   const router = useRouter();
   const kelasAktif = params.get('kelas') ?? '';
+  const kelasTerpilih = kelas.find((k) => k.id === kelasAktif) ?? null;
 
   const menu: Menu[] = [
     {
@@ -53,29 +62,52 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
   }
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2 md:gap-3">
+    <div className="flex min-w-0 flex-1 flex-col gap-3">
       {kelas.length > 0 && (
-        <div className="hidden flex-col gap-1 px-1 xl:flex">
-          <label htmlFor="pilih-kelas-sidebar" className="text-[12px] leading-normal font-medium text-tinta-lembut">
-            Kelas aktif
-          </label>
-          <select
-            id="pilih-kelas-sidebar"
-            value={kelas.some((k) => k.id === kelasAktif) ? kelasAktif : ''}
-            onChange={(e) => pilihKelas(e.target.value)}
-            className="h-10 w-full rounded-kecil border border-tinta/15 bg-white/80 px-2 text-[14px] font-semibold text-tinta"
-          >
-            <option value="">Pilih kelas</option>
-            {kelas.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.nama}
-              </option>
-            ))}
-          </select>
+        <div className="hidden flex-col gap-1.5 xl:flex">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <label
+              htmlFor="pilih-kelas-sidebar"
+              className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted"
+            >
+              Kelas aktif
+            </label>
+            <span className="font-body text-[11px] leading-[16px] text-aura-muted">{kelas.length} kelas</span>
+          </div>
+
+          <div className="relative rounded-2xl border border-aura-primary/15 bg-gradient-to-br from-aura-primary/10 to-aura-violet/10 shadow-[0_4px_16px_-4px_rgba(37,99,235,0.12)] transition-colors hover:border-aura-primary/30 focus-within:ring-[3px] focus-within:ring-aura-primary/30">
+            <div aria-hidden="true" className="pointer-events-none flex items-center gap-3 p-2.5">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-aura-primary shadow-sm ring-1 ring-aura-primary/10">
+                <School className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-display text-[14px] leading-[20px] font-bold text-aura-ink">
+                  {kelasTerpilih?.nama ?? 'Pilih kelas'}
+                </p>
+                <p className="font-body text-[11px] leading-[16px] font-medium text-aura-muted">
+                  {kelasTerpilih ? 'Kelas aktif saat ini' : `${kelas.length} kelas terdaftar`}
+                </p>
+              </div>
+              <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-aura-muted" />
+            </div>
+            <select
+              id="pilih-kelas-sidebar"
+              value={kelasTerpilih ? kelasAktif : ''}
+              onChange={(e) => pilihKelas(e.target.value)}
+              className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+            >
+              <option value="">Pilih kelas</option>
+              {kelas.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.nama}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
-      <ul className="flex w-full flex-row justify-around gap-1 md:w-full md:flex-col md:justify-start md:gap-2">
+      <ul className="flex w-full flex-row justify-around gap-1 md:w-full md:flex-col md:justify-start md:gap-1.5">
         {menu.map(({ href, label, ikon: Ikon, aktif }) => {
           const sedangAktif = aktif(pathname);
           return (
@@ -84,12 +116,28 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
                 href={href}
                 title={label}
                 aria-current={sedangAktif ? 'page' : undefined}
-                className={`flex min-h-12 w-full items-center justify-center gap-0 rounded-full px-2 text-[15px] font-semibold transition-colors xl:justify-start xl:gap-3 xl:px-4 ${
-                  sedangAktif ? 'bg-primer text-white' : 'text-tinta-lembut hover:bg-primer-lembut hover:text-primer'
+                className={`group flex min-h-12 min-w-11 w-full items-center justify-center gap-0 rounded-2xl px-1 text-[15px] font-semibold transition-all duration-200 md:rounded-xl xl:justify-start xl:gap-3 xl:rounded-2xl xl:px-3 ${
+                  sedangAktif
+                    ? 'bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_10px_24px_-10px_rgba(37,99,235,0.65)]'
+                    : 'text-aura-muted hover:bg-white/70 hover:text-aura-primary'
                 }`}
               >
-                <Ikon aria-hidden="true" className="size-5 shrink-0" />
+                <span
+                  className={`flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                    sedangAktif
+                      ? 'bg-white/20 text-white'
+                      : 'bg-white/60 text-aura-muted ring-1 ring-white/70 group-hover:bg-aura-primary/10 group-hover:text-aura-primary'
+                  }`}
+                >
+                  <Ikon aria-hidden="true" className="size-5" />
+                </span>
                 <span className="sr-only xl:not-sr-only">{label}</span>
+                {sedangAktif && (
+                  <span
+                    aria-hidden="true"
+                    className="ml-auto hidden size-2 rounded-full bg-white shadow-sm ring-4 ring-white/25 xl:block"
+                  />
+                )}
               </Link>
             </li>
           );

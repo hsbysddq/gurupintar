@@ -203,7 +203,7 @@ export default function HalamanUbahModul() {
                   role="tab"
                   aria-selected={terpilih}
                   onClick={() => setSumber(nilai)}
-                  className={`flex min-h-12 items-center justify-center gap-2 rounded-full px-4 font-display text-[13px] font-semibold transition-colors ${
+                  className={`flex min-h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-1.5 font-display text-[12px] font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-[13px] ${
                     terpilih
                       ? "bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]"
                       : "text-aura-muted hover:bg-white/70 hover:text-aura-ink"
