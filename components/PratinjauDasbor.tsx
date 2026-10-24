@@ -1,4 +1,5 @@
-import { Clock3, GraduationCap, Sparkles, Users } from "lucide-react";
+import { Clock3, Sparkles, Users } from "lucide-react";
+import { LogoGuruPintar } from "@/components/LogoGuruPintar";
 
 const KELOMPOK = [
   { label: "Belum", jumlah: 16, lebar: "w-[42%]", warna: "bg-aura-red", garis: "" },
@@ -25,9 +26,7 @@ export function PratinjauDasbor() {
       <div className="aura-glass-strong overflow-hidden rounded-[28px]">
         <div className="flex items-center justify-between gap-3 border-b border-white/60 px-4 py-3.5 sm:px-5">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-aura-primary to-aura-indigo text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]">
-              <GraduationCap aria-hidden="true" className="size-5" />
-            </span>
+            <LogoGuruPintar className="h-7 w-auto shrink-0" />
             <div className="min-w-0">
               <p className="truncate font-display text-[13px] font-bold text-aura-ink">Peta kelas</p>
               <p className="truncate font-body text-[11px] leading-[16px] text-aura-muted">Kelas 7A · Matematika</p>

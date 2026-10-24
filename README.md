@@ -44,6 +44,11 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    npm run dev
    ```
 
+## Deploy ke VPS
+
+Panduan lengkap untuk VPS Ubuntu (Jagoan Hosting) ada di [`deploy/README.md`](deploy/README.md),
+beserta contoh `systemd`, Nginx, dan skrip update di folder `deploy/`.
+
 ## Akun demo
 
 | Peran | Email | Kata sandi |

@@ -1,0 +1,24 @@
+[Unit]
+Description=Guru Pintar (Next.js)
+Documentation=https://github.com/hsbysddq/gurupintar
+After=network.target
+
+[Service]
+Type=simple
+User=gurupintar
+Group=gurupintar
+WorkingDirectory=/var/www/gurupintar
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/usr/bin/node /var/www/gurupintar/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

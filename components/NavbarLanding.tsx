@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
+import { LogoGuruPintar } from "@/components/LogoGuruPintar";
 
 const TAUTAN: { href: string; label: string }[] = [
   { href: "#masalah", label: "Masalah" },
@@ -17,9 +17,7 @@ export function NavbarLanding() {
         className="aura-glass-strong mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 rounded-full px-3 sm:px-4"
       >
         <Link href="/" aria-label="Guru Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-aura-primary to-aura-indigo text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.55)]">
-            <GraduationCap aria-hidden="true" className="size-5" />
-          </span>
+          <LogoGuruPintar className="h-8 w-auto shrink-0" />
           <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guru Pintar</span>
         </Link>
 
