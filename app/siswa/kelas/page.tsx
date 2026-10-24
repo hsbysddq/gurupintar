@@ -138,7 +138,7 @@ export default function HalamanKelasSiswa() {
                     <p className="text-[14px] leading-normal text-tinta-lembut">
                       Kode kuis <strong className="tracking-wide text-tinta">{kelas.kuisAktif.kodeKelas}</strong>
                     </p>
-                    <Tombol varian="utama" href={`/siswa?kode=${kelas.kuisAktif.kodeKelas}`}>
+                    <Tombol varian="utama" href={`/siswa/gabung?kode=${kelas.kuisAktif.kodeKelas}`}>
                       Kerjakan kuis
                     </Tombol>
                   </div>
@@ -162,7 +162,7 @@ export default function HalamanKelasSiswa() {
 
       <p className="text-center text-tinta-lembut">
         Punya kode kuis?{' '}
-        <Link href="/siswa" className="font-semibold text-primer hover:underline">
+        <Link href="/siswa/gabung" className="font-semibold text-primer hover:underline">
           Gabung kuis
         </Link>
       </p>

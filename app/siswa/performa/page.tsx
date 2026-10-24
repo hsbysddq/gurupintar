@@ -43,7 +43,7 @@ export default function HalamanPerforma() {
   }, [percobaan]);
 
   const aksi = (
-    <Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa">
+    <Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa/gabung">
       Masukkan kode kuis
     </Tombol>
   );

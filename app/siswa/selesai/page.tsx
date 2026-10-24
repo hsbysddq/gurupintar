@@ -32,7 +32,7 @@ export default function HalamanSelesai() {
   const hasil = useMemo(() => (sesiId ? bacaHasil(sesiId) : null), [sesiId]);
 
   useEffect(() => {
-    if (sesi === null) router.replace('/siswa');
+    if (sesi === null) router.replace('/siswa/gabung');
   }, [sesi, router]);
 
   if (!sesi) {
