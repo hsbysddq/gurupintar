@@ -113,7 +113,7 @@ function IsiDetailKelas() {
             </div>
           </div>
           <div>
-            <Tombol varian="utama" href={`/siswa?kode=${kelas.kuisAktif.kodeKelas}`}>
+            <Tombol varian="utama" href={`/siswa/gabung?kode=${kelas.kuisAktif.kodeKelas}`}>
               Kerjakan kuis
             </Tombol>
           </div>
@@ -155,7 +155,7 @@ function IsiDetailKelas() {
                       </Tombol>
                     )}
                     {s.statusMateri === 'belum-mengerjakan' && s.status === 'aktif' && (
-                      <Tombol varian="sekunder" href={`/siswa?kode=${s.kodeKelas}`}>
+                      <Tombol varian="sekunder" href={`/siswa/gabung?kode=${s.kodeKelas}`}>
                         Kerjakan kuis
                       </Tombol>
                     )}

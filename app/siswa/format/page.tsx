@@ -22,7 +22,7 @@ export default function HalamanPilihFormat() {
 
   // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
-    if (sesi === null) router.replace('/siswa');
+    if (sesi === null) router.replace('/siswa/gabung');
   }, [sesi, router]);
 
   if (!sesi) {

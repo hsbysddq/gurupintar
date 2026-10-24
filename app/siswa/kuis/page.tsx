@@ -34,7 +34,7 @@ export default function HalamanKuis() {
 
   // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
-    if (sesi === null) router.replace("/siswa");
+    if (sesi === null) router.replace("/siswa/gabung");
   }, [sesi, router]);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function HalamanKuis() {
           label: "Masukkan kode lagi",
           onClick: () => {
             hapusSesi();
-            router.replace("/siswa");
+            router.replace("/siswa/gabung");
           },
         }
       : {
