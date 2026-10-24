@@ -205,7 +205,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
       {sesiAktif && (
         <PanelKodeKelas
           kodeKelas={sesiAktif.kodeKelas}
-          urlGabung={`${window.location.origin}/siswa?kode=${sesiAktif.kodeKelas}`}
+          urlGabung={`${window.location.origin}/siswa/gabung?kode=${sesiAktif.kodeKelas}`}
           urlHasil={`/guru/hasil?sesi=${sesiAktif.id}&kelas=${kelas.id}`}
           jumlahSiswa={kelas.jumlahSiswa}
           jumlahMenjawab={sesiAktif.jumlahMenjawab}
