@@ -7,8 +7,11 @@ import { Tombol } from '@/components/Tombol';
 import { ErrorApi, gabungKelas } from '@/lib/api-klien';
 import { normalisasiKode } from '@/lib/skema-api';
 
-/** Form gabung ke kelas lewat kode undangan dari guru (POST /api/siswa/kelas). */
-export function FormGabungMapel() {
+/**
+ * Form gabung ke kelas lewat kode undangan dari guru (POST /api/siswa/kelas).
+ * `tata="baris"` menaruh kolom kode dan tombol sebaris di layar lebar (bar di halaman Mata Pelajaran).
+ */
+export function FormGabungMapel({ tata = 'tumpuk' }: { tata?: 'tumpuk' | 'baris' }) {
   const router = useRouter();
   const [kode, setKode] = useState('');
   const [memuat, setMemuat] = useState(false);
@@ -34,28 +37,35 @@ export function FormGabungMapel() {
 
   return (
     <form onSubmit={kirim} className="flex flex-col gap-3" noValidate>
-      <div className="relative">
-        <label htmlFor="kode-undangan" className="sr-only">
-          Kode undangan kelas
-        </label>
-        <input
-          id="kode-undangan"
-          name="kode"
-          value={kode}
-          onChange={(e) => setKode(normalisasiKode(e.target.value))}
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck={false}
-          maxLength={6}
-          placeholder="Contoh: 4GSBM"
-          aria-invalid={galat ? true : undefined}
-          aria-describedby={galat ? 'galat-gabung-mapel' : undefined}
-          className="h-12 w-full rounded-xl border border-aura-outline/60 bg-white/70 pr-11 pl-4 text-[15px] font-semibold tracking-[0.15em] text-aura-ink placeholder:font-normal placeholder:tracking-normal placeholder:text-aura-muted/70"
-        />
-        <KeyRound
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-aura-muted"
-        />
+      <div className={tata === 'baris' ? 'flex flex-col gap-3 sm:flex-row sm:items-start' : 'contents'}>
+        <div className="relative min-w-0 flex-1">
+          <label htmlFor="kode-undangan" className="sr-only">
+            Kode undangan kelas
+          </label>
+          <input
+            id="kode-undangan"
+            name="kode"
+            value={kode}
+            onChange={(e) => setKode(normalisasiKode(e.target.value))}
+            autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            maxLength={6}
+            placeholder="Contoh: 4GSBM"
+            aria-invalid={galat ? true : undefined}
+            aria-describedby={galat ? 'galat-gabung-mapel' : undefined}
+            className="h-12 w-full rounded-xl border border-aura-outline/60 bg-white/70 pr-11 pl-4 text-[15px] font-semibold tracking-[0.15em] text-aura-ink placeholder:font-normal placeholder:tracking-normal placeholder:text-aura-muted/70"
+          />
+          <KeyRound
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-aura-muted"
+          />
+        </div>
+        <div className={tata === 'baris' ? 'sm:w-48 sm:shrink-0' : ''}>
+          <Tombol varian="utama" type="submit" lebarPenuh memuat={memuat} disabled={kode.length === 0}>
+            Gabung Kelas
+          </Tombol>
+        </div>
       </div>
       {galat && (
         <p id="galat-gabung-mapel" role="alert" className="text-[13px] leading-normal text-belum-teks">
@@ -67,9 +77,6 @@ export function FormGabungMapel() {
           {berhasil}
         </p>
       )}
-      <Tombol varian="utama" type="submit" lebarPenuh memuat={memuat} disabled={kode.length === 0}>
-        Gabung Kelas
-      </Tombol>
     </form>
   );
 }

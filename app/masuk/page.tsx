@@ -91,9 +91,9 @@ function FormMasuk() {
       </div>
 
       <header className="relative z-10 mx-auto flex w-full max-w-[1100px] items-center justify-between gap-3 px-4 py-5 sm:px-5">
-        <Link href="/" aria-label="Guru Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
+        <Link href="/" aria-label="Guruku Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
           <LogoGuruPintar className="h-8 w-auto shrink-0 sm:h-9" />
-          <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guru Pintar</span>
+          <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guruku Pintar</span>
         </Link>
 
         <Link
