@@ -5,7 +5,7 @@ import type { Kelompok } from '@/lib/tipe';
 import { kolomArsipBelumAda } from './auth';
 
 type BarisKelas = { id: string; nama: string; mapel: string; guru_id: string };
-type BarisSesi = { id: string; kelas_id: string };
+type BarisSesi = { id: string; kelas_id: string; kode_kelas: string; status: string };
 type BarisHasil = {
   sesi_id: string;
   skor: number;
@@ -44,7 +44,7 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
 
   const [guru, sesi] = await Promise.all([
     db.from('pengguna').select('id, nama').in('id', idGuru),
-    db.from('sesi_kuis').select('id, kelas_id').in('kelas_id', idAktif),
+    db.from('sesi_kuis').select('id, kelas_id, kode_kelas, status').in('kelas_id', idAktif),
   ]);
   if (guru.error) throw guru.error;
   if (sesi.error) throw sesi.error;
@@ -68,7 +68,11 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
   const daftarKelas: KelasBeranda[] = barisKelas
     .map((k) => ({ id: k.id, nama: k.nama, mapel: k.mapel, namaGuru: petaGuru.get(k.guru_id) ?? '' }))
     .sort((a, b) => a.mapel.localeCompare(b.mapel, 'id', { sensitivity: 'base' }));
-  const daftarSesi: SesiBeranda[] = barisSesi.map((s) => ({ id: s.id, kelasId: s.kelas_id }));
+  const daftarSesi: SesiBeranda[] = barisSesi.map((s) => ({
+    id: s.id,
+    kelasId: s.kelas_id,
+    kodeAktif: s.status === 'aktif' ? s.kode_kelas : null,
+  }));
   const daftarHasil: HasilBeranda[] = barisHasil.map((h) => ({
     sesiId: h.sesi_id,
     kelompok: h.kelompok,

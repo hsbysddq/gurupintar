@@ -469,7 +469,7 @@ export default function Beranda() {
       <footer className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-4 border-t border-aura-outline/50 px-4 py-8 font-body text-[13px] leading-[18px] text-aura-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <LogoGuruPintar className="h-7 w-auto" />
-          <span className="font-display font-bold text-aura-ink">Guru Pintar</span>
+          <span className="font-display font-bold text-aura-ink">Guruku Pintar</span>
           <span aria-hidden="true">·</span>
           <span>Prototipe hackathon</span>
         </div>

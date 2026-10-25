@@ -13,6 +13,8 @@ export interface KelasBeranda {
 export interface SesiBeranda {
   id: string;
   kelasId: string;
+  /** Kode kuis jika sesi ini sedang aktif; kosong jika sudah selesai. */
+  kodeAktif?: string | null;
 }
 
 export interface HasilBeranda {
@@ -42,6 +44,8 @@ export interface ProgresKelas {
   dikerjakan: number;
   /** Persen 0–100; 0 jika kelas belum punya kuis. */
   progres: number;
+  /** Kode kuis yang sedang aktif di kelas ini, atau null. */
+  kodeKuisAktif: string | null;
 }
 
 export interface AktivitasTerakhir {
@@ -140,6 +144,7 @@ export function hitungBeranda(data: DataBeranda, kelasId?: string | null): Ringk
         jumlahKuis,
         dikerjakan,
         progres: hitungPersen(dikerjakan, jumlahKuis),
+        kodeKuisAktif: sesi.find((s) => s.kelasId === k.id && s.kodeAktif)?.kodeAktif ?? null,
       };
     }),
     aktivitas,
@@ -157,6 +162,20 @@ export function labelHari(iso: string, sekarang: Date = new Date()): string {
   if (hari === kunciHari(sekarang)) return 'Hari ini';
   if (hari === kunciHari(new Date(sekarang.getTime() - 24 * 60 * 60 * 1000))) return 'Kemarin';
   return tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: ZONA_WAKTU });
+}
+
+/** "7A" menjadi "Kelas 7A"; nama yang sudah berawalan "Kelas" dibiarkan agar tidak tertulis dua kali. */
+export function labelKelas(nama: string): string {
+  const bersih = nama.trim();
+  return /^kelas\b/i.test(bersih) ? bersih : `Kelas ${bersih}`;
+}
+
+/** Indeks warna yang stabil untuk satu id (hash sederhana), supaya satu mapel selalu berwarna sama. */
+export function indeksWarna(id: string, jumlah: number): number {
+  if (jumlah <= 0) return 0;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return hash % jumlah;
 }
 
 export function namaDepan(nama: string): string {

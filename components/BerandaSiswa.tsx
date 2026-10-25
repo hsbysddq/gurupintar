@@ -1,40 +1,12 @@
 import Link from 'next/link';
-import {
-  BookOpen,
-  Brain,
-  Calculator,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  FileText,
-  FlaskConical,
-  Globe2,
-  Library,
-  Plus,
-  Target,
-  type LucideIcon,
-} from 'lucide-react';
+import { BookOpen, Brain, CheckCircle2, ChevronRight, Clock, FileText, Library, Plus, Target } from 'lucide-react';
 import { FormGabungMapel } from '@/components/FormGabungMapel';
 import { IlustrasiBelajar } from '@/components/IlustrasiBelajar';
 import { KartuKaca } from '@/components/KartuKaca';
-import { hitungPersen, labelHari, namaDepan, type RingkasanBeranda } from '@/lib/beranda-siswa';
+import { ikonMapel, warnaMapel } from '@/components/ikon-mapel';
+import { hitungPersen, labelHari, labelKelas, namaDepan, type RingkasanBeranda } from '@/lib/beranda-siswa';
 
 type Props = { nama: string; ringkasan: RingkasanBeranda };
-
-function ikonMapel(mapel: string): LucideIcon {
-  const m = mapel.toLowerCase();
-  if (/mat|hitung/.test(m)) return Calculator;
-  if (/ipa|sains|fisika|kimia|biologi/.test(m)) return FlaskConical;
-  if (/ips|ekonomi|sejarah|geografi|sosiologi|pkn|ppkn/.test(m)) return Globe2;
-  return BookOpen;
-}
-
-// Pasangan warna ikon dan bilah progres tiap mata pelajaran, diputar berurutan.
-const WARNA_MAPEL = [
-  { ikon: 'bg-aura-primary/10 text-aura-primary', bilah: 'bg-aura-primary', teks: 'text-aura-primary' },
-  { ikon: 'bg-aura-emerald/10 text-aura-emerald', bilah: 'bg-aura-emerald', teks: 'text-aura-emerald' },
-  { ikon: 'bg-aura-amber/10 text-aura-amber', bilah: 'bg-aura-amber', teks: 'text-aura-amber' },
-];
 
 const LINGKARAN = 2 * Math.PI * 52;
 
@@ -225,7 +197,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
               <ul className="flex flex-col gap-3">
                 {ringkasan.kelas.map((k, i) => {
                   const Ikon = ikonMapel(k.mapel);
-                  const warna = WARNA_MAPEL[i % WARNA_MAPEL.length];
+                  const warna = warnaMapel(k.id);
                   return (
                     <li
                       key={k.id}
@@ -237,7 +209,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                       <div className="min-w-0">
                         <p className="truncate font-display text-[15px] leading-snug font-bold text-aura-ink">{k.mapel}</p>
                         <p className="truncate text-[13px] leading-normal text-aura-muted">
-                          Kelas {k.nama}
+                          {labelKelas(k.nama)}
                           {k.namaGuru ? ` · ${k.namaGuru}` : ''}
                         </p>
                       </div>

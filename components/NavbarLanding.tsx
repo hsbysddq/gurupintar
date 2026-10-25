@@ -16,9 +16,9 @@ export function NavbarLanding() {
         aria-label="Navigasi utama"
         className="aura-glass-strong mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 rounded-full px-3 sm:px-4"
       >
-        <Link href="/" aria-label="Guru Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
+        <Link href="/" aria-label="Guruku Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
           <LogoGuruPintar className="h-8 w-auto shrink-0" />
-          <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guru Pintar</span>
+          <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guruku Pintar</span>
         </Link>
 
         <ul className="hidden items-center gap-1 md:flex">

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   hitungBeranda,
   hitungPersen,
+  indeksWarna,
   labelHari,
+  labelKelas,
   namaDepan,
   type DataBeranda,
   type HasilBeranda,
@@ -97,6 +99,23 @@ describe('hitungBeranda', () => {
     expect(peta.get('k4')).toMatchObject({ jumlahKuis: 0, dikerjakan: 0, progres: 0 });
   });
 
+  it('menyertakan kode kuis aktif per kelas, null bila tidak ada kuis aktif', () => {
+    const r = hitungBeranda({
+      ...DATA,
+      sesi: [
+        { id: 's1', kelasId: 'k1', kodeAktif: null },
+        { id: 's2', kelasId: 'k1', kodeAktif: 'A7K2P' },
+        { id: 's4', kelasId: 'k2', kodeAktif: null },
+        { id: 's5', kelasId: 'k2' },
+        { id: 's6', kelasId: 'k3', kodeAktif: 'ZZ9XQ' },
+      ],
+    });
+    const peta = new Map(r.kelas.map((k) => [k.id, k.kodeKuisAktif]));
+    expect(peta.get('k1')).toBe('A7K2P');
+    expect(peta.get('k2')).toBeNull();
+    expect(peta.get('k3')).toBe('ZZ9XQ');
+  });
+
   it('memfilter satu kelas bila kelasId valid', () => {
     const r = hitungBeranda(DATA, 'k2');
     expect(r.kelasId).toBe('k2');
@@ -159,5 +178,33 @@ describe('namaDepan', () => {
     expect(namaDepan('Lintang Buwono')).toBe('Lintang');
     expect(namaDepan('  Andi  ')).toBe('Andi');
     expect(namaDepan('')).toBe('');
+  });
+});
+
+describe('labelKelas', () => {
+  it('menambahkan awalan Kelas hanya bila belum ada', () => {
+    expect(labelKelas('7A')).toBe('Kelas 7A');
+    expect(labelKelas('Kelas 7A')).toBe('Kelas 7A');
+    expect(labelKelas('kelas 8C')).toBe('kelas 8C');
+    expect(labelKelas('  8C ')).toBe('Kelas 8C');
+    expect(labelKelas('Kelasku 7')).toBe('Kelas Kelasku 7');
+  });
+});
+
+describe('indeksWarna', () => {
+  it('stabil untuk id yang sama dan selalu berada dalam rentang', () => {
+    const ids = ['a', 'k1', '3f2c9a10-7d5e-4b1a-9c33-0a1b2c3d4e5f', 'zzzzzzzz', ''];
+    for (const id of ids) {
+      const i = indeksWarna(id, 3);
+      expect(i).toBe(indeksWarna(id, 3));
+      expect(i).toBeGreaterThanOrEqual(0);
+      expect(i).toBeLessThan(3);
+    }
+  });
+
+  it('memakai lebih dari satu warna untuk id yang berbeda dan aman bila jumlah 0', () => {
+    const dipakai = new Set(Array.from({ length: 30 }, (_, n) => indeksWarna(`kelas-${n}`, 3)));
+    expect(dipakai.size).toBeGreaterThan(1);
+    expect(indeksWarna('apa-saja', 0)).toBe(0);
   });
 });

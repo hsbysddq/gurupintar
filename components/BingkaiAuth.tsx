@@ -13,9 +13,9 @@ type BingkaiAuthProps = {
 export function BingkaiAuth({ judul, keterangan, children, footer }: BingkaiAuthProps) {
   return (
     <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col justify-center px-4 py-10">
-      <Link href="/" aria-label="Guru Pintar, ke beranda" className="mb-6 flex min-h-12 items-center gap-2 self-center rounded-full font-bold">
+      <Link href="/" aria-label="Guruku Pintar, ke beranda" className="mb-6 flex min-h-12 items-center gap-2 self-center rounded-full font-bold">
         <LogoGuruPintar className="h-8 w-auto shrink-0" />
-        Guru Pintar
+        Guruku Pintar
       </Link>
 
       <KartuKaca as="section" className="flex flex-col gap-6 p-6 sm:p-8">
