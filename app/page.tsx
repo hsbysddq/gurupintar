@@ -264,7 +264,7 @@ export default function Beranda() {
             id="judul-masalah"
             eyebrow="Masalah"
             title="Satu guru, 40 murid. Tak mungkin memahami semuanya satu per satu."
-            description="Di kelas yang penuh, anak yang tertinggal sering baru terlihat saat ulangan. Padahal bantuan paling berguna diberikan hari itu juga."
+            description="Di tengah padatnya kelas, kesulitan belajar seorang anak bisa luput dari perhatian. Sering kali, guru baru menyadarinya saat nilai ulangan keluar yang seharusnya bantuan sudah diberikan sejak awal."
           />
 
           <div className={`${KARTU} relative overflow-hidden p-5 sm:p-6 md:p-8`}>
@@ -333,7 +333,18 @@ export default function Beranda() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-5 border-t border-aura-outline/30 pt-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center md:gap-8 md:pt-6">
+            <div className="mt-6 grid gap-5 border-t border-aura-outline/30 pt-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-center md:gap-8 md:pt-6">
+              <div className="rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4">
+                <h3 className="font-display text-[15px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
+                  Anak yang diam belum tentu sudah memahami.
+                </h3>
+                <p className="mt-1.5 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
+                  Waktu yang terbatas membuat guru sulit mengetahui siapa yang benar-benar paham dan siapa yang mulai
+                  tertinggal. Tanpa deteksi dini, kesenjangan belajar bisa semakin lebar sebelum akhirnya terlihat dari
+                  nilai ulangan.
+                </p>
+              </div>
+
               <div className="flex flex-col gap-3">
                 <div
                   role="img"
@@ -352,17 +363,6 @@ export default function Beranda() {
                 </div>
                 <p className="font-body text-[12px] leading-[18px] text-aura-muted">
                   Satu titik satu anak. Waktu yang tersisa untuk tiap anak hanya dua menit.
-                </p>
-              </div>
-
-              <div className="rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4">
-                <h3 className="font-display text-[15px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
-                  Anak yang diam belum tentu sudah memahami.
-                </h3>
-                <p className="mt-1.5 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
-                  Waktu yang terbatas membuat guru sulit mengetahui siapa yang benar-benar paham dan siapa yang mulai
-                  tertinggal. Tanpa deteksi dini, kesenjangan belajar bisa semakin lebar sebelum akhirnya terlihat dari
-                  nilai ulangan.
                 </p>
               </div>
             </div>
