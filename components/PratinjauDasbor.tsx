@@ -189,10 +189,6 @@ export function PratinjauDasbor() {
         </div>
       </div>
 
-      <div className="aura-glass-subtle absolute -bottom-5 left-4 hidden items-center gap-2 rounded-full px-3.5 py-2 font-display text-[11px] font-bold text-aura-ink shadow-lg sm:flex">
-        <span aria-hidden="true" className="size-1.5 rounded-full bg-aura-emerald" />
-        5 soal · hasil 3 detik
-      </div>
     </div>
   );
 }

@@ -28,8 +28,6 @@ export const metadata: Metadata = {
     "Cek pemahaman kilat 5 soal dari HP siswa, peta kelas dalam hitungan menit, dan materi lanjutan per kelompok yang dibuat dengan bantuan AI lalu diperiksa guru.",
 };
 
-const KEUNGGULAN = ["Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"];
-
 const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
   {
     judul: "Hasil dalam hitungan menit",
@@ -218,17 +216,6 @@ export default function Beranda() {
               </Link>
             </div>
 
-            <ul className="flex flex-wrap gap-2">
-              {KEUNGGULAN.map((k) => (
-                <li
-                  key={k}
-                  className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink"
-                >
-                  <CircleCheck aria-hidden="true" className="size-4 text-aura-emerald" />
-                  {k}
-                </li>
-              ))}
-            </ul>
           </div>
 
           <PratinjauDasbor />
