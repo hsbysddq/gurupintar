@@ -18,7 +18,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { LogoGuruPintar } from "@/components/LogoGuruPintar";
+import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 import { NavbarLanding } from "@/components/NavbarLanding";
 import { PratinjauDasbor } from "@/components/PratinjauDasbor";
 
@@ -468,8 +468,7 @@ export default function Beranda() {
 
       <footer className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-4 border-t border-aura-outline/50 px-4 py-8 font-body text-[13px] leading-[18px] text-aura-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
         <div className="flex flex-wrap items-center gap-2">
-          <LogoGuruPintar className="h-7 w-auto" />
-          <span className="font-display font-bold text-aura-ink">Guru Pintar</span>
+          <TulisanGuruPintar className="h-4 w-auto" />
           <span aria-hidden="true">·</span>
           <span>Prototipe hackathon</span>
         </div>

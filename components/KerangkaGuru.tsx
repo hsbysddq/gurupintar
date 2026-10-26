@@ -4,7 +4,7 @@ import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { LogoGuruPintar } from "@/components/LogoGuruPintar";
+import { LogoGuruPintar, TulisanGuruPintar } from "@/components/LogoGuruPintar";
 import { NavigasiGuru, type KelasNav } from "@/components/NavigasiGuru";
 import { keluar } from "@/lib/api-klien";
 
@@ -48,11 +48,9 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
           aria-label="Guru Pintar, ke beranda"
           className="flex min-h-12 shrink-0 items-center gap-2 px-0.5 md:justify-center xl:justify-start xl:gap-3 xl:px-1"
         >
-          <LogoGuruPintar className="h-7 w-auto shrink-0 xl:h-10" />
-          <span className="hidden min-w-0 flex-col xl:flex">
-            <span className="truncate font-display text-[18px] leading-[24px] font-bold tracking-tight text-aura-ink">
-              Guru Pintar
-            </span>
+          <LogoGuruPintar className="h-9 w-auto shrink-0 xl:hidden" />
+          <span className="hidden min-w-0 flex-col gap-0.5 xl:flex">
+            <TulisanGuruPintar className="h-5 w-auto" />
             <span className="font-body text-[11px] leading-[16px] font-semibold text-aura-muted">
               Kurikulum Merdeka
             </span>

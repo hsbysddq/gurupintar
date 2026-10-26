@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogoGuruPintar } from "@/components/LogoGuruPintar";
+import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 
 const TAUTAN: { href: string; label: string }[] = [
   { href: "#masalah", label: "Masalah" },
@@ -17,8 +17,7 @@ export function NavbarLanding() {
         className="aura-glass-strong mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 rounded-full px-3 sm:px-4"
       >
         <Link href="/" aria-label="Guru Pintar, ke beranda" className="flex min-h-12 items-center gap-2.5 rounded-full">
-          <LogoGuruPintar className="h-8 w-auto shrink-0" />
-          <span className="font-display text-[15px] font-bold tracking-[-0.01em] text-aura-ink">Guru Pintar</span>
+          <TulisanGuruPintar className="h-4 w-auto shrink-0 sm:h-5" />
         </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
