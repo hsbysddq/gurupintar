@@ -51,11 +51,15 @@ const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
 ];
 
-const MASALAH: { label: string; angka: string; satuan: string; keterangan: string; aksen: string }[] = [
-  { label: "Ukuran kelas", angka: "40", satuan: "siswa", keterangan: "dalam satu kelas", aksen: "from-aura-red to-aura-amber" },
-  { label: "Waktu mengajar", angka: "80", satuan: "menit", keterangan: "dua jam pelajaran", aksen: "from-aura-amber to-aura-primary" },
-  { label: "Waktu per anak", angka: "2", satuan: "menit", keterangan: "jika waktunya dibagi rata", aksen: "from-aura-primary to-aura-violet" },
+const MASALAH = [
+  { label: "Waktu mengajar", angka: "80", satuan: "menit", keterangan: "dua jam pelajaran" },
+  { label: "Ukuran kelas", angka: "40", satuan: "siswa", keterangan: "satu guru, satu kelas" },
 ];
+
+const HASIL_MASALAH = { label: "Waktu per anak", angka: "2", satuan: "menit", keterangan: "jika waktunya dibagi rata" };
+
+// Satu titik mewakili satu anak; dua titik terang mewakili dua menit bagiannya.
+const TITIK_KELAS = Array.from({ length: 40 }, (_, i) => i < 2);
 
 const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
   {
@@ -258,26 +262,98 @@ export default function Beranda() {
             description="Di kelas yang penuh, anak yang tertinggal sering baru terlihat saat ulangan. Padahal bantuan paling berguna diberikan hari itu juga."
           />
 
-          <dl className="grid gap-4 sm:grid-cols-3">
-            {MASALAH.map(({ label, angka, satuan, keterangan, aksen }) => (
-              <div key={label} className={`${KARTU} relative overflow-hidden p-5 sm:p-6`}>
-                <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
-                <dt className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">{label}</dt>
-                <dd className="mt-3 flex items-baseline gap-2">
-                  <span className="font-display text-[32px] leading-[38px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[38px] sm:leading-[44px]">
-                    {angka}
-                  </span>
-                  <span className="font-display text-[15px] font-semibold text-aura-muted">{satuan}</span>
-                </dd>
-                <dd className="mt-1 font-body text-[13px] leading-[18px] text-aura-muted">{keterangan}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className={`${KARTU} relative overflow-hidden p-5 sm:p-6 md:p-8`}>
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-aura-red via-aura-amber to-aura-violet"
+            />
 
-          <p className="max-w-[760px] rounded-[24px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4 font-body text-[15px] leading-[26px] text-aura-muted backdrop-blur-sm">
-            Waktunya tidak cukup untuk memastikan setiap anak paham. Siswa yang tertinggal berada di zona buta, dan sering
-            baru terlihat saat ulangan, ketika kesenjangannya sudah lebar dan semangatnya sudah turun.
-          </p>
+            <div
+              role="group"
+              aria-label="80 menit waktu mengajar dibagi 40 siswa sama dengan 2 menit per anak"
+              className="grid gap-2 md:grid-cols-[1fr_auto_1fr_auto_1.15fr] md:gap-3"
+            >
+              <div className="flex flex-col justify-center rounded-[20px] border border-white/70 bg-white/55 p-4 sm:p-5">
+                <p className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                  {MASALAH[0].label}
+                </p>
+                <p className="mt-2 flex items-baseline gap-1.5">
+                  <span className="font-display text-[36px] leading-none font-extrabold tracking-[-0.03em] text-aura-ink">
+                    {MASALAH[0].angka}
+                  </span>
+                  <span className="font-display text-[14px] font-semibold text-aura-muted">{MASALAH[0].satuan}</span>
+                </p>
+                <p className="mt-1.5 font-body text-[12px] leading-[18px] text-aura-muted">{MASALAH[0].keterangan}</p>
+              </div>
+
+              <span
+                aria-hidden="true"
+                className="mx-auto flex size-8 items-center justify-center self-center rounded-full border border-white/70 bg-white/80 font-display text-[16px] font-bold text-aura-muted shadow-[0_4px_12px_rgba(31,38,135,0.08)]"
+              >
+                ÷
+              </span>
+
+              <div className="flex flex-col justify-center rounded-[20px] border border-white/70 bg-white/55 p-4 sm:p-5">
+                <p className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                  {MASALAH[1].label}
+                </p>
+                <p className="mt-2 flex items-baseline gap-1.5">
+                  <span className="font-display text-[36px] leading-none font-extrabold tracking-[-0.03em] text-aura-ink">
+                    {MASALAH[1].angka}
+                  </span>
+                  <span className="font-display text-[14px] font-semibold text-aura-muted">{MASALAH[1].satuan}</span>
+                </p>
+                <p className="mt-1.5 font-body text-[12px] leading-[18px] text-aura-muted">{MASALAH[1].keterangan}</p>
+              </div>
+
+              <span
+                aria-hidden="true"
+                className="mx-auto flex size-8 items-center justify-center self-center rounded-full border border-white/70 bg-white/80 font-display text-[16px] font-bold text-aura-muted shadow-[0_4px_12px_rgba(31,38,135,0.08)]"
+              >
+                =
+              </span>
+
+              <div className="relative flex flex-col justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-aura-primary via-aura-primary-deep to-aura-indigo p-4 text-white shadow-[0_18px_44px_-22px_rgba(37,99,235,0.75)] sm:p-5">
+                <span aria-hidden="true" className="absolute -top-10 -right-8 size-28 rounded-full bg-white/15 blur-2xl" />
+                <p className="relative font-display text-[11px] font-bold uppercase tracking-[0.04em] text-white/70">
+                  {HASIL_MASALAH.label}
+                </p>
+                <p className="relative mt-2 flex items-baseline gap-1.5">
+                  <span className="font-display text-[40px] leading-none font-extrabold tracking-[-0.03em]">
+                    {HASIL_MASALAH.angka}
+                  </span>
+                  <span className="font-display text-[14px] font-semibold text-white/85">{HASIL_MASALAH.satuan}</span>
+                </p>
+                <p className="relative mt-1.5 font-body text-[12px] leading-[18px] text-white/80">{HASIL_MASALAH.keterangan}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 border-t border-aura-outline/30 pt-5">
+              <div
+                role="img"
+                aria-label="40 titik mewakili 40 anak, dua titik ditandai terang mewakili dua menit bagian tiap anak."
+                className="flex max-w-[440px] flex-wrap gap-2.5"
+              >
+                {TITIK_KELAS.map((disorot, i) => (
+                  <span
+                    key={i}
+                    aria-hidden="true"
+                    className={`size-2.5 rounded-full sm:size-3 ${
+                      disorot ? "bg-aura-primary shadow-[0_0_0_3px_rgba(37,99,235,0.14)]" : "bg-aura-primary/15"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="font-body text-[12px] leading-[18px] text-aura-muted">
+                Satu titik satu anak. Waktu yang tersisa untuk tiap anak hanya dua menit.
+              </p>
+            </div>
+
+            <p className="mt-5 max-w-[820px] rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
+              Waktunya tidak cukup untuk memastikan setiap anak paham. Siswa yang tertinggal berada di zona buta, dan
+              sering baru terlihat saat ulangan, ketika kesenjangannya sudah lebar dan semangatnya sudah turun.
+            </p>
+          </div>
         </section>
 
         <section id="cara-kerja" aria-labelledby="judul-cara" className="flex scroll-mt-28 flex-col gap-8">
