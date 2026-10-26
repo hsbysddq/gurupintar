@@ -143,6 +143,45 @@ describe('pilihTab', () => {
   });
 });
 
+describe('susunDetailMapel: kerjakan ulang', () => {
+  const ULANG: DataDetailMapel = {
+    kelas: KELAS,
+    sesi: [sesi('s4', '2026-10-22T03:00:00Z', { status: 'aktif', statusMateri: 'tersedia' })],
+    hasil: [
+      { sesiId: 's4', skor: 5, total: 5, dikirimPada: '2026-10-22T06:00:00Z' },
+      { sesiId: 's4', skor: 2, total: 5, dikirimPada: '2026-10-22T04:00:00Z' },
+    ],
+  };
+
+  it('kartu kuis memakai pengerjaan terakhir dan mencatat jumlah pengerjaan', () => {
+    const { kuis } = susunDetailMapel(ULANG);
+    expect(kuis[0]).toMatchObject({ status: 'aktif-selesai', skor: 5, total: 5, jumlahPengerjaan: 2 });
+    expect(kuis[0].hrefKerjakan).toBe('/siswa/gabung?kode=KODEs4');
+  });
+
+  it('histori memuat semua pengerjaan, terbaru dahulu, dengan nomor pengerjaan', () => {
+    const { histori } = susunDetailMapel(ULANG);
+    expect(histori.map((h) => [h.pengerjaanKe, h.skor])).toEqual([
+      [2, 5],
+      [1, 2],
+    ]);
+  });
+
+  it('ringkasan menghitung semua pengerjaan dan tren membandingkan dua pengerjaan terakhir', () => {
+    const { ringkasan } = susunDetailMapel(ULANG);
+    expect(ringkasan.jumlahKuis).toBe(2);
+    expect(ringkasan.rataRata).toBe(70);
+    expect(ringkasan.terbaik).toBe(100);
+    expect(ringkasan.perubahan).toBe(60);
+  });
+
+  it('kuis yang belum dikerjakan punya 0 pengerjaan', () => {
+    const { kuis } = susunDetailMapel(DATA);
+    expect(kuis.find((k) => k.sesiId === 's3')?.jumlahPengerjaan).toBe(0);
+    expect(kuis.find((k) => k.sesiId === 's1')?.jumlahPengerjaan).toBe(1);
+  });
+});
+
 describe('formatTanggalKartu', () => {
   it('memakai tanggal menurut WIB', () => {
     // 18:00 UTC tanggal 5 sudah 01:00 WIB tanggal 6.

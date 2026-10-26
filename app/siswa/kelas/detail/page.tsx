@@ -25,7 +25,7 @@ export default async function HalamanDetailMapel({
   if (!hasil) notFound();
 
   return (
-    <KerangkaDasborSiswa kelas={hasil.daftarKelas}>
+    <KerangkaDasborSiswa>
       <DetailMapelSiswa kelas={hasil.data.kelas} detail={susunDetailMapel(hasil.data)} tabAwal={pilihTab(tab)} />
       <PerbaruiOtomatis intervalMs={INTERVAL_POLLING_SISWA_MS} />
     </KerangkaDasborSiswa>

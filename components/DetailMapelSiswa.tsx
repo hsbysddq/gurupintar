@@ -122,7 +122,10 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
   return (
     <ul className="flex flex-col gap-4">
       {daftar.map((k) => {
-        const skor = k.skor !== null && k.total !== null ? `${k.skor} dari ${k.total} soal benar` : '';
+        const skorTerakhir = k.skor !== null && k.total !== null ? `${k.skor} dari ${k.total} soal benar` : '';
+        // Kuis yang dikerjakan ulang menampilkan jumlah pengerjaan; semua hasilnya ada di tab Histori.
+        const skor =
+          k.jumlahPengerjaan > 1 ? `Dikerjakan ${k.jumlahPengerjaan}× · terakhir ${skorTerakhir}` : `Sudah dikerjakan · ${skorTerakhir}`;
         const aktif = k.status === 'aktif-belum' || k.status === 'aktif-selesai';
         return (
           <li key={k.sesiId}>
@@ -139,7 +142,7 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
               )}
               {k.status === 'aktif-selesai' && (
                 <>
-                  <p className={`${TEKS_REDUP} py-3`}>Sudah dikerjakan · {skor}</p>
+                  <p className={`${TEKS_REDUP} py-3`}>{skor}</p>
                   {k.hrefKerjakan && (
                     <Link href={k.hrefKerjakan} className={LINK_AKSI}>
                       Kerjakan ulang
@@ -147,7 +150,7 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
                   )}
                 </>
               )}
-              {k.status === 'selesai-dikerjakan' && <p className={`${TEKS_REDUP} py-3`}>Sudah dikerjakan · {skor}</p>}
+              {k.status === 'selesai-dikerjakan' && <p className={`${TEKS_REDUP} py-3`}>{skor}</p>}
               {k.status === 'selesai-tidak' && (
                 <p className={`${TEKS_REDUP} py-3`}>Kamu belum mengerjakan kuis ini.</p>
               )}
@@ -165,7 +168,7 @@ function PanelHistori({ detail }: { detail: DetailMapel }) {
     return <Kosong judul="Belum ada hasil kuis" isi="Hasil kuis yang sudah kamu kerjakan akan tercatat di sini." />;
   }
   const ringkas = [
-    { label: 'Kuis dikerjakan', nilai: String(ringkasan.jumlahKuis) },
+    { label: 'Total pengerjaan', nilai: String(ringkasan.jumlahKuis) },
     { label: 'Rata-rata', nilai: ringkasan.rataRata === null ? '–' : `${ringkasan.rataRata}%` },
     { label: 'Terbaik', nilai: ringkasan.terbaik === null ? '–' : `${ringkasan.terbaik}%` },
   ];
@@ -187,7 +190,7 @@ function PanelHistori({ detail }: { detail: DetailMapel }) {
 
       <ul className="flex flex-col gap-4">
         {histori.map((h: ItemHistori) => (
-          <li key={h.sesiId}>
+          <li key={`${h.sesiId}-${h.tanggal}`}>
             <KartuFeed
               ikon={History}
               judul={`Hasil kuis: ${h.judul}`}
@@ -196,7 +199,7 @@ function PanelHistori({ detail }: { detail: DetailMapel }) {
             >
               <div className="flex w-full flex-col gap-2 py-3">
                 <p className={TEKS_REDUP}>
-                  {h.skor} dari {h.total} soal benar
+                  {h.skor} dari {h.total} soal benar · pengerjaan ke-{h.pengerjaanKe}
                 </p>
                 <div
                   role="img"

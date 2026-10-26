@@ -27,6 +27,7 @@ export interface SesiDetail {
   statusMateri: StatusMateriSiswa;
 }
 
+/** Satu pengerjaan kuis. Kuis yang dikerjakan ulang punya beberapa baris dengan `sesiId` yang sama. */
 export interface HasilDetail {
   sesiId: string;
   skor: number;
@@ -70,14 +71,19 @@ export interface ItemKuis {
   judul: string;
   tanggal: string;
   status: StatusKuis;
+  /** Skor pengerjaan terakhir; null bila belum dikerjakan. */
   skor: number | null;
   total: number | null;
-  /** Tautan untuk mengerjakan; hanya ada selama kuis masih aktif. */
+  /** Berapa kali kuis ini dikerjakan. */
+  jumlahPengerjaan: number;
+  /** Tautan untuk mengerjakan atau mengerjakan ulang; hanya ada selama kuis masih aktif. */
   hrefKerjakan: string | null;
 }
 
 export interface ItemHistori {
   sesiId: string;
+  /** Pengerjaan ke berapa untuk kuis ini (1 = pertama). */
+  pengerjaanKe: number;
   judul: string;
   tanggal: string;
   skor: number;
@@ -105,7 +111,17 @@ function hrefKuis(kodeKelas: string): string {
 
 export function susunDetailMapel(data: DataDetailMapel): DetailMapel {
   const sesi = urutTerbaru(data.sesi, (s) => s.dibuatPada);
-  const hasilPerSesi = new Map(data.hasil.map((h) => [h.sesiId, h]));
+  // Kuis bisa dikerjakan ulang: status memakai pengerjaan terakhir, histori memuat semuanya.
+  const urutLama = [...data.hasil].sort((a, b) => a.dikirimPada.localeCompare(b.dikirimPada));
+  const hasilPerSesi = new Map<string, HasilDetail>();
+  const jumlahPerSesi = new Map<string, number>();
+  const nomorPengerjaan = new Map<HasilDetail, number>();
+  for (const h of urutLama) {
+    hasilPerSesi.set(h.sesiId, h);
+    const n = (jumlahPerSesi.get(h.sesiId) ?? 0) + 1;
+    jumlahPerSesi.set(h.sesiId, n);
+    nomorPengerjaan.set(h, n);
+  }
 
   const materi: ItemMateri[] = [];
   for (const s of sesi) {
@@ -136,15 +152,17 @@ export function susunDetailMapel(data: DataDetailMapel): DetailMapel {
       status,
       skor: hasil?.skor ?? null,
       total: hasil?.total ?? null,
+      jumlahPengerjaan: jumlahPerSesi.get(s.id) ?? 0,
       hrefKerjakan: aktif ? hrefKuis(s.kodeKelas) : null,
     };
   });
 
   const namaTopik = new Map(data.sesi.map((s) => [s.id, s.namaTopik]));
-  const riwayat: RiwayatKuis[] = data.hasil
+  const riwayat: (RiwayatKuis & { pengerjaanKe: number })[] = data.hasil
     .filter((h) => namaTopik.has(h.sesiId))
     .map((h) => ({
       sesiId: h.sesiId,
+      pengerjaanKe: nomorPengerjaan.get(h) ?? 1,
       dikirimPada: h.dikirimPada,
       namaKelas: data.kelas.nama,
       namaTopik: namaTopik.get(h.sesiId) ?? '',
@@ -154,6 +172,7 @@ export function susunDetailMapel(data: DataDetailMapel): DetailMapel {
 
   const histori: ItemHistori[] = urutTerbaru(riwayat, (r) => r.dikirimPada).map((r) => ({
     sesiId: r.sesiId,
+    pengerjaanKe: r.pengerjaanKe,
     judul: r.namaTopik,
     tanggal: r.dikirimPada,
     skor: r.skor,

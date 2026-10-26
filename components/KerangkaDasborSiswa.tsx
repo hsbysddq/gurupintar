@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, LogOut } from "lucide-react";
 import { LogoGuruPintar } from "@/components/LogoGuruPintar";
 import { NavigasiSiswa } from "@/components/NavigasiSiswa";
-import { PemilihKelasSiswa, type KelasPilihan } from "@/components/PemilihKelasSiswa";
 import { useSiswa } from "@/components/PenyediaSiswa";
 import { keluar } from "@/lib/api-klien";
 
@@ -25,7 +24,7 @@ function inisial(nama: string) {
  * hanya ikon 76px di 768–1279px, dan bar atas di bawah 768px.
  * Halaman alur kuis (format, kuis, materi, selesai) tetap memakai KerangkaSiswa yang sempit.
  */
-export function KerangkaDasborSiswa({ children, kelas = [] }: { children: ReactNode; kelas?: KelasPilihan[] }) {
+export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
   const router = useRouter();
   const profil = useSiswa();
 
@@ -59,11 +58,6 @@ export function KerangkaDasborSiswa({ children, kelas = [] }: { children: ReactN
 
         <nav aria-label="Menu siswa" className="flex min-w-0 flex-1">
           <div className="flex min-w-0 flex-1 flex-col gap-3">
-            {kelas.length > 0 && (
-              <Suspense fallback={null}>
-                <PemilihKelasSiswa kelas={kelas} />
-              </Suspense>
-            )}
             <NavigasiSiswa />
           </div>
         </nav>

@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { DataBeranda, HasilBeranda, KelasBeranda, SesiBeranda } from '@/lib/beranda-siswa';
 import type { Kelompok } from '@/lib/tipe';
 import { kolomArsipBelumAda } from './auth';
+import { ambilPercobaanSiswa } from './percobaan';
 
 type BarisKelas = { id: string; nama: string; mapel: string; guru_id: string };
 type BarisSesi = { id: string; kelas_id: string; kode_kelas: string; status: string };
@@ -54,13 +55,12 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
 
   let barisHasil: BarisHasil[] = [];
   if (idSesi.length > 0) {
-    const hasil = await db
-      .from('hasil_siswa')
-      .select('sesi_id, skor, total, kelompok, dikirim_pada, sesi_kuis(topik(nama))')
-      .eq('siswa_id', siswaId)
-      .in('sesi_id', idSesi);
-    if (hasil.error) throw hasil.error;
-    barisHasil = hasil.data as unknown as BarisHasil[];
+    barisHasil = await ambilPercobaanSiswa<BarisHasil>(
+      db,
+      siswaId,
+      'sesi_id, skor, total, kelompok, dikirim_pada, sesi_kuis(topik(nama))',
+      { idSesi },
+    );
   }
 
   const petaGuru = new Map(guru.data.map((g) => [g.id as string, g.nama as string]));

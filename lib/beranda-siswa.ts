@@ -17,6 +17,7 @@ export interface SesiBeranda {
   kodeAktif?: string | null;
 }
 
+/** Satu pengerjaan kuis. Kuis yang dikerjakan ulang punya beberapa baris dengan `sesiId` yang sama. */
 export interface HasilBeranda {
   sesiId: string;
   kelompok: Kelompok;
@@ -40,7 +41,7 @@ export interface ProgresKelas {
   namaGuru: string;
   /** Jumlah kuis di kelas ini. */
   jumlahKuis: number;
-  /** Jumlah kuis yang sudah dikerjakan siswa. */
+  /** Jumlah kuis (bukan jumlah pengerjaan) yang sudah dikerjakan siswa. */
   dikerjakan: number;
   /** Persen 0–100; 0 jika kelas belum punya kuis. */
   progres: number;
@@ -85,7 +86,8 @@ export function hitungPersen(bagian: number, total: number): number {
  * Meringkas beranda siswa.
  * - Belum Paham: kuis yang hasilnya kelompok "belum" ditambah kuis yang belum dikerjakan.
  * - Sedang Belajar: hasil kelompok "setengah". Sudah Paham: hasil kelompok "sudah".
- * - Soal benar dan total dijumlahkan dari skor dan total tiap hasil kuis.
+ * - Kuis yang dikerjakan ulang: kelompok dan status dikerjakan mengikuti pengerjaan terakhir, sedangkan soal
+ *   benar dan salah dijumlahkan dari semua pengerjaan, jadi hasil pertama tetap terhitung.
  */
 export function hitungBeranda(data: DataBeranda, kelasId?: string | null): RingkasanBeranda {
   const dipilih = kelasId && data.kelas.some((k) => k.id === kelasId) ? kelasId : null;
@@ -96,16 +98,24 @@ export function hitungBeranda(data: DataBeranda, kelasId?: string | null): Ringk
   const kelasPerSesi = new Map(sesi.map((s) => [s.id, s.kelasId]));
   const hasil = data.hasil.filter((h) => kelasPerSesi.has(h.sesiId));
 
-  const sudah = hasil.filter((h) => h.kelompok === 'sudah').length;
-  const sedang = hasil.filter((h) => h.kelompok === 'setengah').length;
-  const belumMengerjakan = Math.max(0, sesi.length - hasil.length);
-  const belum = hasil.filter((h) => h.kelompok === 'belum').length + belumMengerjakan;
+  // Pengerjaan terakhir tiap kuis menentukan kelompok; semua pengerjaan ikut dihitung untuk soal dan aktivitas.
+  const terakhirPerSesi = new Map<string, HasilBeranda>();
+  for (const h of hasil) {
+    const lama = terakhirPerSesi.get(h.sesiId);
+    if (!lama || h.dikirimPada > lama.dikirimPada) terakhirPerSesi.set(h.sesiId, h);
+  }
+  const terakhir = [...terakhirPerSesi.values()];
+
+  const sudah = terakhir.filter((h) => h.kelompok === 'sudah').length;
+  const sedang = terakhir.filter((h) => h.kelompok === 'setengah').length;
+  const belumMengerjakan = Math.max(0, sesi.length - terakhir.length);
+  const belum = terakhir.filter((h) => h.kelompok === 'belum').length + belumMengerjakan;
 
   const benar = hasil.reduce((jumlah, h) => jumlah + h.skor, 0);
   const totalSoal = hasil.reduce((jumlah, h) => jumlah + h.total, 0);
 
   const dikerjakanPerKelas = new Map<string, number>();
-  for (const h of hasil) {
+  for (const h of terakhir) {
     const id = kelasPerSesi.get(h.sesiId)!;
     dikerjakanPerKelas.set(id, (dikerjakanPerKelas.get(id) ?? 0) + 1);
   }

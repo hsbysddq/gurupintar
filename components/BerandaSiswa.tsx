@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { BookOpen, Brain, CheckCircle2, ChevronRight, Clock, FileText, Library, Plus, Target } from 'lucide-react';
-import { FormGabungMapel } from '@/components/FormGabungMapel';
+import { Brain, CheckCircle2, ChevronRight, Clock, FileText, Library, Plus, Target } from 'lucide-react';
+import { FormGabungKuis } from '@/components/FormGabungKuis';
 import { IlustrasiBelajar } from '@/components/IlustrasiBelajar';
 import { KartuKaca } from '@/components/KartuKaca';
 import { ikonMapel, warnaMapel } from '@/components/ikon-mapel';
@@ -55,13 +55,6 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
 
   const kartu = [
     {
-      judul: 'Total Mapel',
-      nilai: String(ringkasan.totalMapel),
-      keterangan: `${ringkasan.jumlahKelas} kelas diikuti`,
-      ikon: BookOpen,
-      warna: 'bg-aura-primary',
-    },
-    {
       judul: 'Materi Paham',
       nilai: String(materi.sudah),
       keterangan: `dari ${totalMateri} materi`,
@@ -95,7 +88,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
         <IlustrasiBelajar className="hidden h-28 w-auto shrink-0 sm:block" />
       </header>
 
-      <ul className="grid gap-4 sm:grid-cols-3">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {kartu.map(({ judul, nilai, keterangan, ikon: Ikon, warna }) => (
           <li key={judul}>
             <KartuKaca className="flex h-full items-center gap-4 p-5">
@@ -191,7 +184,11 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
 
             {ringkasan.kelas.length === 0 ? (
               <p className="text-aura-muted">
-                Kamu belum bergabung ke mata pelajaran mana pun. Masukkan kode undangan dari gurumu di kotak Gabung ke Mata Pelajaran.
+                Kamu belum bergabung ke mata pelajaran mana pun. Buka{' '}
+                <Link href="/siswa/kelas" className="font-semibold text-aura-primary hover:underline">
+                  Mata Pelajaran
+                </Link>{' '}
+                lalu masukkan kode undangan dari gurumu.
               </p>
             ) : (
               <ul className="flex flex-col gap-3">
@@ -262,11 +259,11 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                 <Plus aria-hidden="true" className="size-5" />
               </span>
               <div>
-                <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Gabung ke Mata Pelajaran</h2>
-                <p className="text-[13px] leading-normal text-aura-muted">Masukkan kode undangan kelas dari gurumu.</p>
+                <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Masukkan Kode Quiz</h2>
+                <p className="text-[13px] leading-normal text-aura-muted">Masukkan kode quiz dari gurumu untuk mulai mengerjakan.</p>
               </div>
             </div>
-            <FormGabungMapel />
+            <FormGabungKuis />
           </KartuKaca>
 
           <KartuKaca as="section" className="flex flex-col gap-4 p-6">
@@ -287,7 +284,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
             ) : (
               <ul className="flex flex-col gap-2">
                 {ringkasan.aktivitas.map((a) => (
-                  <li key={a.sesiId}>
+                  <li key={`${a.sesiId}-${a.dikirimPada}`}>
                     <Link
                       href="/siswa/performa"
                       className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-3 hover:bg-white/70"
