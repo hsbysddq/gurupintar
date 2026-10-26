@@ -15,7 +15,7 @@ export default async function HalamanMataPelajaran() {
   const ringkasan = hitungBeranda(data);
 
   return (
-    <KerangkaDasborSiswa kelas={data.kelas.map((k) => ({ id: k.id, nama: k.nama, mapel: k.mapel }))}>
+    <KerangkaDasborSiswa>
       <DaftarMapelSiswa kelas={ringkasan.kelas} />
       <PerbaruiOtomatis intervalMs={INTERVAL_POLLING_SISWA_MS} />
     </KerangkaDasborSiswa>

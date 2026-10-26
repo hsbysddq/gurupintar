@@ -6,6 +6,7 @@ import { GrafikPerforma } from "@/components/GrafikPerforma";
 import { KartuKaca } from "@/components/KartuKaca";
 import { KerangkaSiswa } from "@/components/KerangkaSiswa";
 import { StatusHalaman } from "@/components/StatusHalaman";
+import { useSesiAktif } from "@/hooks/use-sesi-aktif";
 import { Tombol } from "@/components/Tombol";
 import {
   formatTanggalPanjang,
@@ -25,6 +26,9 @@ export default function HalamanPerforma() {
   const [keadaan, setKeadaan] = useState<Keadaan>({ status: "memuat" });
 
   const [percobaan, setPercobaan] = useState(0);
+  const sesi = useSesiAktif();
+  // Kuis terakhir yang dibuka menentukan tujuan tombol kembali; tanpa itu, ke daftar mata pelajaran.
+  const hrefMapel = sesi?.kelasId ? `/siswa/kelas/detail?kelas=${encodeURIComponent(sesi.kelasId)}&tab=histori` : "/siswa/kelas";
 
   // setState hanya dipanggil dari callback asinkron; keadaan awal (dan saat "Coba lagi") sudah "memuat".
   useEffect(() => {
@@ -43,9 +47,19 @@ export default function HalamanPerforma() {
   }, [percobaan]);
 
   const aksi = (
-    <Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa/gabung">
-      Masukkan kode kuis
-    </Tombol>
+    <>
+      <Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa/gabung">
+        Masukkan kode kuis
+      </Tombol>
+      <div className="grid grid-cols-2 gap-3">
+        <Tombol varian="sekunder" ukuran="besar" lebarPenuh href={hrefMapel}>
+          Ke mata pelajaran
+        </Tombol>
+        <Tombol varian="sekunder" ukuran="besar" lebarPenuh href="/siswa">
+          Ke beranda
+        </Tombol>
+      </div>
+    </>
   );
 
   if (keadaan.status === "memuat") {
@@ -119,7 +133,7 @@ export default function HalamanPerforma() {
         </h2>
         <ul className="flex flex-col gap-3">
           {terbaruDulu.map((k) => (
-            <li key={k.sesiId}>
+            <li key={`${k.sesiId}-${k.dikirimPada}`}>
               <KartuKaca className="flex items-center justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{k.namaTopik}</p>

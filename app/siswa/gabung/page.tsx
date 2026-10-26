@@ -39,7 +39,7 @@ function GabungKelas() {
     setGalat(null);
     try {
       const { sesi } = await gabungSesi(kode);
-      simpanSesi({ sesiId: sesi.id, kodeKelas: sesi.kodeKelas, format: null });
+      simpanSesi({ sesiId: sesi.id, kodeKelas: sesi.kodeKelas, format: null, kelasId: sesi.kelasId });
       router.push('/siswa/format');
     } catch (err) {
       setGalat(err instanceof ErrorApi ? err.message : 'Terjadi kesalahan. Coba lagi sebentar.');

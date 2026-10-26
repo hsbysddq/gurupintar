@@ -3,6 +3,8 @@
 
 export interface RiwayatKuis {
   sesiId: string;
+  /** Kelas tempat kuis ini, untuk tautan ke halaman mata pelajarannya. */
+  kelasId?: string;
   /** ISO 8601, waktu jawaban dikirim. */
   dikirimPada: string;
   namaKelas: string;

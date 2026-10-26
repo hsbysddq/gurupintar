@@ -57,6 +57,21 @@ describe('sesi-lokal', () => {
     expect(ambilSesi()).toEqual(SESI);
   });
 
+  it('menyimpan dan membaca kelasId untuk tombol kembali ke mata pelajaran', () => {
+    simpanSesi({ ...SESI, kelasId: 'kelas-1' });
+    expect(ambilSesi()).toEqual({ ...SESI, kelasId: 'kelas-1' });
+    simpanFormatLokal('video');
+    expect(ambilSesi()?.kelasId).toBe('kelas-1');
+  });
+
+  it('data lama tanpa kelasId tetap terbaca', () => {
+    expect(uraiSesi(JSON.stringify({ sesiId: 's', kodeKelas: 'A7K2P', format: null }))).toEqual({
+      sesiId: 's',
+      kodeKelas: 'A7K2P',
+      format: null,
+    });
+  });
+
   it('menyimpan format tanpa mengubah data lain', () => {
     simpanSesi(SESI);
     simpanFormatLokal('audio');

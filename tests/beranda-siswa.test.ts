@@ -116,6 +116,35 @@ describe('hitungBeranda', () => {
     expect(peta.get('k3')).toBe('ZZ9XQ');
   });
 
+  it('kuis yang dikerjakan ulang: kelompok dari percobaan terakhir, soal dijumlah dari semua percobaan', () => {
+    const r = hitungBeranda({
+      kelas: [KELAS[0]],
+      sesi: [{ id: 's1', kelasId: 'k1' }],
+      hasil: [
+        hasil('s1', 'belum', 1, '2026-10-20T03:00:00Z'),
+        hasil('s1', 'sudah', 5, '2026-10-21T03:00:00Z'),
+      ],
+    });
+    // Satu kuis, jadi hanya satu materi dan statusnya mengikuti percobaan terakhir (sudah).
+    expect(r.totalMateri).toBe(1);
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1 });
+    // Percobaan pertama (1 benar) tetap terhitung: 1 + 5 benar dari 10 soal.
+    expect(r.soal).toEqual({ benar: 6, salah: 4, total: 10 });
+    expect(r.akurasi).toBe(60);
+    // Kuis tetap dihitung satu kali dikerjakan, tetapi kedua percobaan muncul di aktivitas.
+    expect(r.kelas[0]).toMatchObject({ jumlahKuis: 1, dikerjakan: 1, progres: 100 });
+    expect(r.aktivitas.map((a) => a.skor)).toEqual([5, 1]);
+  });
+
+  it('percobaan terakhir ditentukan dari waktu, bukan urutan data', () => {
+    const r = hitungBeranda({
+      kelas: [KELAS[0]],
+      sesi: [{ id: 's1', kelasId: 'k1' }],
+      hasil: [hasil('s1', 'sudah', 5, '2026-10-21T03:00:00Z'), hasil('s1', 'belum', 1, '2026-10-20T03:00:00Z')],
+    });
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1 });
+  });
+
   it('memfilter satu kelas bila kelasId valid', () => {
     const r = hitungBeranda(DATA, 'k2');
     expect(r.kelasId).toBe('k2');

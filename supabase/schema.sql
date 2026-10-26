@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
+drop table if exists materi, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
 
 -- ===== Akun dan peran =====
 -- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
@@ -88,6 +88,19 @@ create table hasil_siswa (
   check (skor <= total)
 );
 
+-- Riwayat tiap pengiriman kuis (siswa boleh mengerjakan ulang). hasil_siswa = percobaan terakhir.
+create table percobaan_kuis (
+  id uuid primary key default gen_random_uuid(),
+  sesi_id uuid not null references sesi_kuis(id) on delete cascade,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
+  skor int not null check (skor >= 0),
+  total int not null check (total > 0),
+  kelompok text not null check (kelompok in ('sudah','setengah','belum')),
+  dikirim_pada timestamptz not null default now(),
+  check (skor <= total)
+);
+create index percobaan_kuis_siswa_waktu on percobaan_kuis (siswa_id, sesi_id, dikirim_pada desc);
+
 create table materi (
   id uuid primary key default gen_random_uuid(),
   sesi_id uuid not null references sesi_kuis(id) on delete cascade,
@@ -108,6 +121,7 @@ alter table soal enable row level security;
 alter table sesi_kuis enable row level security;
 alter table jawaban enable row level security;
 alter table hasil_siswa enable row level security;
+alter table percobaan_kuis enable row level security;
 alter table materi enable row level security;
 -- Sengaja TANPA policy: hanya service role (server) yang bisa mengakses (AD-3).
 -- Otorisasi per pengguna dilakukan di API route setelah sesi Supabase diverifikasi.
@@ -135,6 +149,9 @@ begin
   on conflict (sesi_id, siswa_id)
   do update set skor = excluded.skor, total = excluded.total,
                 kelompok = excluded.kelompok, dikirim_pada = now();
+
+  insert into percobaan_kuis (sesi_id, siswa_id, skor, total, kelompok)
+  values (p_sesi, p_siswa, p_skor, p_total, p_kelompok);
 end $$;
 
 create or replace function buka_sesi(p_kelas uuid, p_topik uuid, p_kode text)
@@ -167,6 +184,8 @@ returns void language plpgsql as $$
 begin
   delete from jawaban j using sesi_kuis s
     where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  delete from percobaan_kuis p using sesi_kuis s
+    where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
   delete from hasil_siswa h using sesi_kuis s
     where h.sesi_id = s.id and s.kelas_id = p_kelas and h.siswa_id = p_siswa;
   delete from keanggotaan_kelas where kelas_id = p_kelas and siswa_id = p_siswa;
