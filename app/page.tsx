@@ -333,36 +333,38 @@ export default function Beranda() {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 border-t border-aura-outline/30 pt-5">
-              <div
-                role="img"
-                aria-label="40 titik mewakili 40 anak, dua titik ditandai terang mewakili dua menit bagian tiap anak."
-                className="flex max-w-[440px] flex-wrap gap-2.5"
-              >
-                {TITIK_KELAS.map((disorot, i) => (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    className={`size-2.5 rounded-full sm:size-3 ${
-                      disorot ? "bg-aura-primary shadow-[0_0_0_3px_rgba(37,99,235,0.14)]" : "bg-aura-primary/15"
-                    }`}
-                  />
-                ))}
+            <div className="mt-6 grid gap-5 border-t border-aura-outline/30 pt-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center md:gap-8 md:pt-6">
+              <div className="flex flex-col gap-3">
+                <div
+                  role="img"
+                  aria-label="40 titik mewakili 40 anak, dua titik ditandai terang mewakili dua menit bagian tiap anak."
+                  className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-x-1 gap-y-2.5"
+                >
+                  {TITIK_KELAS.map((disorot, i) => (
+                    <span
+                      key={i}
+                      aria-hidden="true"
+                      className={`size-2.5 justify-self-center rounded-full sm:size-3 ${
+                        disorot ? "bg-aura-primary shadow-[0_0_0_3px_rgba(37,99,235,0.14)]" : "bg-aura-primary/15"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="font-body text-[12px] leading-[18px] text-aura-muted">
+                  Satu titik satu anak. Waktu yang tersisa untuk tiap anak hanya dua menit.
+                </p>
               </div>
-              <p className="font-body text-[12px] leading-[18px] text-aura-muted">
-                Satu titik satu anak. Waktu yang tersisa untuk tiap anak hanya dua menit.
-              </p>
-            </div>
 
-            <div className="mt-5 max-w-[820px] rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4">
-              <h3 className="font-display text-[15px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
-                Anak yang diam belum tentu sudah memahami.
-              </h3>
-              <p className="mt-1.5 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
-                Waktu yang terbatas membuat guru sulit mengetahui siapa yang benar-benar paham dan siapa yang mulai
-                tertinggal. Tanpa deteksi dini, kesenjangan belajar bisa semakin lebar sebelum akhirnya terlihat dari
-                nilai ulangan.
-              </p>
+              <div className="rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4">
+                <h3 className="font-display text-[15px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
+                  Anak yang diam belum tentu sudah memahami.
+                </h3>
+                <p className="mt-1.5 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
+                  Waktu yang terbatas membuat guru sulit mengetahui siapa yang benar-benar paham dan siapa yang mulai
+                  tertinggal. Tanpa deteksi dini, kesenjangan belajar bisa semakin lebar sebelum akhirnya terlihat dari
+                  nilai ulangan.
+                </p>
+              </div>
             </div>
           </div>
         </section>
