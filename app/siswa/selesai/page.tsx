@@ -43,6 +43,11 @@ export default function HalamanSelesai() {
     );
   }
 
+  // Kembali ke halaman mata pelajaran kuis ini (tab Quiz); data lama tanpa kelas jatuh ke daftar mata pelajaran.
+  const hrefMapel = sesi.kelasId
+    ? `/siswa/kelas/detail?kelas=${encodeURIComponent(sesi.kelasId)}&tab=kuis`
+    : '/siswa/kelas';
+
   const persen = hasil && hasil.total > 0 ? Math.round((hasil.skor / hasil.total) * 100) : 0;
 
   return (
@@ -55,6 +60,14 @@ export default function HalamanSelesai() {
           <Tombol varian="sekunder" ukuran="besar" lebarPenuh href="/siswa/performa">
             Lihat performa dan riwayat
           </Tombol>
+          <div className="grid grid-cols-2 gap-3">
+            <Tombol varian="sekunder" ukuran="besar" lebarPenuh href={hrefMapel}>
+              Ke mata pelajaran
+            </Tombol>
+            <Tombol varian="sekunder" ukuran="besar" lebarPenuh href="/siswa">
+              Ke beranda
+            </Tombol>
+          </div>
         </>
       }
     >

@@ -8,6 +8,9 @@
 -- Catatan keamanan: email akun demo langsung dikonfirmasi agar demo bisa dipakai tanpa SMTP.
 -- Di produksi, aktifkan konfirmasi email di Supabase Auth dan jangan pakai kata sandi demo.
 
+do $$ begin
+  if to_regclass('public.percobaan_kuis') is not null then truncate percobaan_kuis; end if;
+end $$;
 truncate materi, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, kelas, pengguna restart identity cascade;
 
 -- Hapus akun demo lama agar seed bisa dijalankan ulang. FK pengguna ON DELETE CASCADE ikut membersihkan profil.
@@ -202,3 +205,12 @@ cross join lateral (select array_position(array[1,2,4,3,5], so.nomor) <= h.skor 
 where h.sesi_id = '00000000-0000-4000-8000-000000000104';
 
 -- Tabel materi sengaja tidak diisi.
+
+-- ===== Percobaan kuis =====
+-- Setiap hasil di atas dicatat sebagai percobaan pertama (hanya bila migrasi percobaan_kuis sudah dijalankan).
+do $$ begin
+  if to_regclass('public.percobaan_kuis') is not null then
+    insert into percobaan_kuis (sesi_id, siswa_id, skor, total, kelompok, dikirim_pada)
+    select sesi_id, siswa_id, skor, total, kelompok, dikirim_pada from hasil_siswa;
+  end if;
+end $$;

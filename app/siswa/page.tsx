@@ -21,7 +21,7 @@ export default async function HalamanBerandaSiswa({
   const ringkasan = hitungBeranda(data, kelas);
 
   return (
-    <KerangkaDasborSiswa kelas={data.kelas.map((k) => ({ id: k.id, nama: k.nama, mapel: k.mapel }))}>
+    <KerangkaDasborSiswa>
       <BerandaSiswa nama={profil.nama} ringkasan={ringkasan} />
     </KerangkaDasborSiswa>
   );

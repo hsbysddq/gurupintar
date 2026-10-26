@@ -4,6 +4,7 @@ import type { DataDetailMapel, HasilDetail, SesiDetail } from '@/lib/detail-mape
 import { tentukanStatusMateriSiswa } from '@/lib/status-materi-siswa';
 import type { Kelompok, StatusSesi } from '@/lib/tipe';
 import { kolomArsipBelumAda } from './auth';
+import { ambilPercobaanSiswa } from './percobaan';
 
 type BarisKelas = { id: string; nama: string; mapel: string; guru_id: string };
 type BarisSesi = { id: string; kode_kelas: string; status: string; dibuat_pada: string; topik: unknown };
@@ -12,8 +13,6 @@ type BarisMateri = { sesi_id: string; kelompok: Kelompok };
 
 export interface HasilMuatDetailMapel {
   data: DataDetailMapel;
-  /** Semua kelas aktif siswa, untuk pemilih kelas di sidebar. */
-  daftarKelas: { id: string; nama: string; mapel: string }[];
 }
 
 function namaTopikDari(nilai: unknown): string {
@@ -63,20 +62,20 @@ export async function ambilDataDetailMapel(
   let barisMateri: BarisMateri[] = [];
   if (idSesi.length > 0) {
     const [hasil, materi] = await Promise.all([
-      db
-        .from('hasil_siswa')
-        .select('sesi_id, skor, total, kelompok, dikirim_pada')
-        .eq('siswa_id', siswaId)
-        .in('sesi_id', idSesi),
+      ambilPercobaanSiswa<BarisHasil>(db, siswaId, 'sesi_id, skor, total, kelompok, dikirim_pada', { idSesi }),
       db.from('materi').select('sesi_id, kelompok').in('sesi_id', idSesi).eq('status', 'dibagikan'),
     ]);
-    if (hasil.error) throw hasil.error;
     if (materi.error) throw materi.error;
-    barisHasil = hasil.data as BarisHasil[];
+    barisHasil = hasil;
     barisMateri = materi.data as BarisMateri[];
   }
 
-  const hasilPerSesi = new Map(barisHasil.map((h) => [h.sesi_id, h]));
+  // Status materi mengikuti percobaan terakhir di tiap kuis.
+  const hasilPerSesi = new Map<string, BarisHasil>();
+  for (const h of barisHasil) {
+    const lama = hasilPerSesi.get(h.sesi_id);
+    if (!lama || h.dikirim_pada > lama.dikirim_pada) hasilPerSesi.set(h.sesi_id, h);
+  }
   const materiPerSesi = new Map<string, { kelompok: Kelompok }[]>();
   for (const m of barisMateri) {
     const daftar = materiPerSesi.get(m.sesi_id) ?? [];
@@ -105,8 +104,5 @@ export async function ambilDataDetailMapel(
       sesi: daftarSesi,
       hasil: daftarHasil,
     },
-    daftarKelas: semuaKelas
-      .map((k) => ({ id: k.id, nama: k.nama, mapel: k.mapel }))
-      .sort((a, b) => a.mapel.localeCompare(b.mapel, 'id', { sensitivity: 'base' })),
   };
 }
