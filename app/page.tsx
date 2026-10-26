@@ -139,7 +139,13 @@ function JudulBagian({
 }) {
   return (
     <div className="flex max-w-2xl flex-col gap-3">
-      <span className="aura-eyebrow w-fit">{eyebrow}</span>
+      <span className="aura-eyebrow-bagian w-fit">
+        <span
+          aria-hidden="true"
+          className="size-1.5 rounded-full bg-gradient-to-r from-aura-primary to-aura-violet shadow-[0_0_0_3px_rgba(37,99,235,0.08)]"
+        />
+        {eyebrow}
+      </span>
       <h2
         id={id}
         className="text-balance font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink md:text-[32px] md:leading-[1.15]"
@@ -188,7 +194,7 @@ export default function Beranda() {
           className="grid scroll-mt-28 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10"
         >
           <div className="flex flex-col items-start gap-6">
-            <span className="aura-eyebrow">
+            <span className="aura-eyebrow-bagian">
               <Sparkles aria-hidden="true" className="size-3.5" />
               Guru SMP · Kurikulum Merdeka
             </span>
