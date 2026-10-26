@@ -354,10 +354,16 @@ export default function Beranda() {
               </p>
             </div>
 
-            <p className="mt-5 max-w-[820px] rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
-              Waktunya tidak cukup untuk memastikan setiap anak paham. Siswa yang tertinggal berada di zona buta, dan
-              sering baru terlihat saat ulangan, ketika kesenjangannya sudah lebar dan semangatnya sudah turun.
-            </p>
+            <div className="mt-5 max-w-[820px] rounded-[18px] border-l-4 border-aura-primary/30 bg-white/45 px-5 py-4">
+              <h3 className="font-display text-[15px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
+                Anak yang diam belum tentu sudah memahami.
+              </h3>
+              <p className="mt-1.5 font-body text-[14px] leading-[24px] text-aura-muted sm:text-[15px] sm:leading-[26px]">
+                Waktu yang terbatas membuat guru sulit mengetahui siapa yang benar-benar paham dan siapa yang mulai
+                tertinggal. Tanpa deteksi dini, kesenjangan belajar bisa semakin lebar sebelum akhirnya terlihat dari
+                nilai ulangan.
+              </p>
+            </div>
           </div>
         </section>
 
