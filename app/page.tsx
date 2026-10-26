@@ -30,6 +30,29 @@ export const metadata: Metadata = {
 
 const KEUNGGULAN = ["Kuis 5 soal", "Tanpa instal", "Hasil dalam 3 detik"];
 
+const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
+  {
+    judul: "Hasil dalam hitungan menit",
+    isi: "Kuis 5 soal dari HP siswa langsung dipetakan, tanpa koreksi manual.",
+    ikon: Clock3,
+  },
+  {
+    judul: "Tahu siapa yang perlu dibantu",
+    isi: "Tiga kelompok pemahaman, soal tersulit, dan miskonsepsi terlihat dalam satu layar.",
+    ikon: LayoutGrid,
+  },
+  {
+    judul: "Materi berbeda untuk tiap kelompok",
+    isi: "Video, audio, bacaan, dan latihan disusun AI, lalu diperiksa guru sebelum dibagikan.",
+    ikon: Sparkles,
+  },
+  {
+    judul: "Siswa tidak merasa dihakimi",
+    isi: "Siswa hanya melihat materi untuknya, bukan label kelompok atau peringkat.",
+    ikon: HeartHandshake,
+  },
+];
+
 const MASALAH: { label: string; angka: string; satuan: string; keterangan: string; aksen: string }[] = [
   { label: "Ukuran kelas", angka: "40", satuan: "siswa", keterangan: "dalam satu kelas", aksen: "from-aura-red to-aura-amber" },
   { label: "Waktu mengajar", angka: "80", satuan: "menit", keterangan: "dua jam pelajaran", aksen: "from-aura-amber to-aura-primary" },
@@ -209,6 +232,29 @@ export default function Beranda() {
           </div>
 
           <PratinjauDasbor />
+        </section>
+
+        <section id="mengapa" aria-labelledby="judul-mengapa" className="flex scroll-mt-28 flex-col gap-8">
+          <JudulBagian
+            id="judul-mengapa"
+            eyebrow="Mengapa Guru Pintar"
+            title="Bukan sekadar kuis. Satu alur dari diagnosis sampai tindak lanjut."
+            description="Guru Pintar mengubah jawaban 5 soal menjadi peta pemahaman, materi yang berbeda untuk tiap kelompok, dan daftar siswa yang perlu dibantu."
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ALASAN.map(({ judul, isi, ikon: Ikon }) => (
+              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5`}>
+                <IkonKotak ikon={Ikon} />
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
+                    {judul}
+                  </h3>
+                  <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section id="masalah" aria-labelledby="judul-masalah" className="flex scroll-mt-28 flex-col gap-8">
