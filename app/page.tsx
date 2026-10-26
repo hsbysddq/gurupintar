@@ -56,7 +56,12 @@ const MASALAH = [
   { label: "Ukuran kelas", angka: "40", satuan: "siswa", keterangan: "satu guru, satu kelas" },
 ];
 
-const HASIL_MASALAH = { label: "Waktu per anak", angka: "2", satuan: "menit", keterangan: "jika waktunya dibagi rata" };
+const HASIL_MASALAH = {
+  label: "Waktu untuk setiap anak",
+  angka: "2",
+  satuan: "menit",
+  keterangan: "Itu pun jika seluruh waktu belajar digunakan untuk bertanya.",
+};
 
 // Satu titik mewakili satu anak; dua titik terang mewakili dua menit bagiannya.
 const TITIK_KELAS = Array.from({ length: 40 }, (_, i) => i < 2);
@@ -258,7 +263,7 @@ export default function Beranda() {
           <JudulBagian
             id="judul-masalah"
             eyebrow="Masalah"
-            title="Satu guru tidak bisa menanyai 40 anak satu per satu"
+            title="Satu guru, 40 murid. Tak mungkin memahami semuanya satu per satu."
             description="Di kelas yang penuh, anak yang tertinggal sering baru terlihat saat ulangan. Padahal bantuan paling berguna diberikan hari itu juga."
           />
 
@@ -270,7 +275,7 @@ export default function Beranda() {
 
             <div
               role="group"
-              aria-label="80 menit waktu mengajar dibagi 40 siswa sama dengan 2 menit per anak"
+              aria-label="80 menit waktu mengajar dibagi 40 siswa sama dengan 2 menit untuk setiap anak"
               className="grid gap-2 md:grid-cols-[1fr_auto_1fr_auto_1.15fr] md:gap-3"
             >
               <div className="flex flex-col justify-center rounded-[20px] border border-white/70 bg-white/55 p-4 sm:p-5">

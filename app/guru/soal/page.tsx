@@ -31,7 +31,7 @@ import type { KelasRingkas, KodePilihan, TopikDetail, TopikRingkas } from "@/lib
 
 type Empat = [string, string, string, string];
 type IsianSoal = { teks: string; pilihan: Empat; kunci: KodePilihan | ""; miskonsepsi: Empat };
-type Isian = { kelasId: string; soal: IsianSoal[] };
+type Isian = { kelasId: string; nama: string; soal: IsianSoal[] };
 type ModeUbah = { id: string; nama: string; capaianPembelajaran: string };
 type PesanAksi = { jenis: "sukses" | "gagal"; teks: string };
 type Pengiriman =
@@ -55,6 +55,7 @@ const soalKosong = (): IsianSoal => ({
 
 const isianKosong = (): Isian => ({
   kelasId: "",
+  nama: "",
   soal: Array.from({ length: JUMLAH_SOAL_TOPIK }, soalKosong),
 });
 
@@ -69,7 +70,7 @@ function isianDariDetail(detail: TopikDetail): Isian {
       miskonsepsi: KODE_PILIHAN.map((k) => s.miskonsepsi[k] ?? "") as Empat,
     }));
   while (soal.length < JUMLAH_SOAL_TOPIK) soal.push(soalKosong());
-  return { kelasId: "", soal: soal.slice(0, JUMLAH_SOAL_TOPIK) };
+  return { kelasId: "", nama: "", soal: soal.slice(0, JUMLAH_SOAL_TOPIK) };
 }
 
 // PRD F-10, design.md 3.9. Topik yang belum dipakai kuis bisa diubah atau dihapus.
@@ -223,20 +224,18 @@ export default function HalamanBuatSoal() {
     }
 
     const kelas = kelasDipilih;
-    // Nama topik dan capaian dibuat otomatis dari kelas yang dipilih, guru tidak perlu mengisinya.
-    const tanggal = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    // Nama topik diisi guru; capaian pembelajaran mengikuti kelas yang dipilih.
     const hasil = skemaBodyTopikBaru.safeParse({
-      nama: kelas ? `${namaKelasLengkap(kelas)} · ${tanggal}`.slice(0, 80) : "",
+      nama: isian.nama,
       capaianPembelajaran: kelas ? `Soal buatan guru untuk mata pelajaran ${kelas.mapel}, ${kelas.nama}.`.slice(0, 300) : "",
       soal: isian.soal,
     });
 
     const pesan: Record<string, string> = hasil.success ? {} : pesanGalatTopik(hasil);
-    delete pesan.nama;
     delete pesan.capaianPembelajaran;
     if (!kelas) Object.assign(pesan, { kelasId: "Pilih kelas dulu." });
     if (!hasil.success || !kelas) {
-      const urut = kelas ? pesan : { kelasId: pesan.kelasId, ...pesan };
+      const urut = kelas ? pesan : { ...pesan, kelasId: pesan.kelasId };
       setGalat(urut);
       setPengiriman({ status: "diam" });
       // Fokus ke kolom salah yang pertama agar mudah ditemukan.
@@ -285,7 +284,7 @@ export default function HalamanBuatSoal() {
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
               {mengubah
                 ? `Perbarui nama topik, capaian, dan tepat ${JUMLAH_SOAL_TOPIK} soal. Menyimpan tidak membuka kuis baru.`
-                : `Pilih kelas, lalu tulis tepat ${JUMLAH_SOAL_TOPIK} soal pilihan ganda. Setelah disimpan, soal langsung menjadi kuis untuk kelas itu.`}
+                : `Tentukan nama topik, pilih kelas, lalu tulis tepat ${JUMLAH_SOAL_TOPIK} soal pilihan ganda. Setelah disimpan, soal langsung menjadi kuis untuk kelas itu.`}
             </p>
             <div className="mt-1 flex flex-wrap gap-2">
               <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
@@ -479,14 +478,27 @@ export default function HalamanBuatSoal() {
             <div className="flex flex-col gap-1">
               <span className="aura-eyebrow">Topik baru</span>
               <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-                Pilih kelas dan susun soal
+                Tentukan topik dan kelas
               </h2>
               <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-                Nama topik dan capaian pembelajaran dibuat otomatis dari kelas yang dipilih.
+                Nama topik kamu tentukan sendiri. Capaian pembelajaran mengikuti kelas yang dipilih.
               </p>
             </div>
 
             <div className="mt-5 flex flex-col gap-4">
+              <Kolom id={idKolom("nama")} label="Nama topik" galat={galat.nama}>
+                <input
+                  id={idKolom("nama")}
+                  className={KELAS_ISIAN}
+                  value={isian.nama}
+                  maxLength={80}
+                  placeholder="Misalnya: Pecahan senilai"
+                  aria-invalid={Boolean(galat.nama)}
+                  aria-describedby={galat.nama ? `${idKolom("nama")}-galat` : undefined}
+                  onChange={(e) => setIsian((l) => ({ ...l, nama: e.target.value }))}
+                />
+              </Kolom>
+
               <Kolom id={idKolom("kelasId")} label="Kelas dan mata pelajaran" galat={galat.kelasId ?? galatKelas ?? undefined}>
                 <select
                   id={idKolom("kelasId")}
