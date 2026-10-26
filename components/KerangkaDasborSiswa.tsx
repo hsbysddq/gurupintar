@@ -3,7 +3,8 @@
 import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronDown, GraduationCap, LogOut } from "lucide-react";
+import { Bell, ChevronDown, LogOut } from "lucide-react";
+import { LogoGuruPintar } from "@/components/LogoGuruPintar";
 import { NavigasiSiswa } from "@/components/NavigasiSiswa";
 import { PemilihKelasSiswa, type KelasPilihan } from "@/components/PemilihKelasSiswa";
 import { useSiswa } from "@/components/PenyediaSiswa";
@@ -45,9 +46,7 @@ export function KerangkaDasborSiswa({ children, kelas = [] }: { children: ReactN
           aria-label="Guru Pintar, ke beranda"
           className="flex min-h-12 shrink-0 items-center gap-2 px-0.5 md:justify-center xl:justify-start xl:gap-3 xl:px-1"
         >
-          <span className="relative flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-aura-primary via-aura-indigo to-aura-violet text-white shadow-[0_8px_24px_-4px_rgba(37,99,235,0.35)]">
-            <GraduationCap aria-hidden="true" className="size-6 -rotate-3" />
-          </span>
+          <LogoGuruPintar className="h-7 w-auto shrink-0 xl:h-10" />
           <span className="hidden min-w-0 flex-col xl:flex">
             <span className="truncate font-display text-[18px] leading-[24px] font-bold tracking-tight text-aura-ink">
               Guru Pintar

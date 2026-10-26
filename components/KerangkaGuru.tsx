@@ -45,7 +45,7 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
       <aside className="aura-glass sticky top-0 z-20 m-2 flex shrink-0 flex-row items-center gap-1 rounded-[24px] p-2 sm:gap-3 md:m-3 md:h-[calc(100vh-1.5rem)] md:w-[76px] md:flex-col md:items-stretch md:gap-3 md:p-3 xl:w-[280px] xl:p-4">
         <Link
           href="/"
-          aria-label="Guru Pintar, ke beranda"
+          aria-label="Guru Pintarku, ke beranda"
           className="flex min-h-12 shrink-0 items-center gap-2 px-0.5 md:justify-center xl:justify-start xl:gap-3 xl:px-1"
         >
           <LogoGuruPintar className="h-9 w-auto shrink-0 xl:hidden" />

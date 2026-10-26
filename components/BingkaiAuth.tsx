@@ -13,7 +13,7 @@ type BingkaiAuthProps = {
 export function BingkaiAuth({ judul, keterangan, children, footer }: BingkaiAuthProps) {
   return (
     <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col justify-center px-4 py-10">
-      <Link href="/" aria-label="Guru Pintar, ke beranda" className="mb-6 flex min-h-12 items-center gap-2 self-center rounded-full font-bold">
+      <Link href="/" aria-label="Guru Pintarku, ke beranda" className="mb-6 flex min-h-12 items-center gap-2 self-center rounded-full font-bold">
         <TulisanGuruPintar className="h-5 w-auto shrink-0" />
       </Link>
 

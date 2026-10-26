@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown, School } from 'lucide-react';
 
 export type KelasPilihan = { id: string; nama: string; mapel: string };
@@ -8,13 +8,13 @@ export type KelasPilihan = { id: string; nama: string; mapel: string };
 /** Pemilih kelas aktif di sidebar siswa. Dipisah agar useSearchParams punya batas Suspense sendiri. */
 export function PemilihKelasSiswa({ kelas }: { kelas: KelasPilihan[] }) {
   const router = useRouter();
-  const pathname = usePathname();
   const params = useSearchParams();
   const kelasAktif = params.get('kelas') ?? '';
   const terpilih = kelas.find((k) => k.id === kelasAktif) ?? null;
 
   function pilih(id: string) {
-    router.push(id ? `${pathname}?kelas=${encodeURIComponent(id)}` : pathname);
+    // Filter kelas berlaku di beranda, jadi dari halaman mana pun pemilih ini membuka beranda.
+    router.push(id ? `/siswa?kelas=${encodeURIComponent(id)}` : '/siswa');
   }
 
   return (
