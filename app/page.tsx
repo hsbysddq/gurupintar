@@ -3,17 +3,19 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  CircleCheck,
   Clock3,
+  EyeOff,
   FileText,
   Headphones,
   HeartHandshake,
   LayoutGrid,
   Lightbulb,
   ListChecks,
+  LockKeyhole,
   Pencil,
   PlayCircle,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Users,
   type LucideIcon,
@@ -126,11 +128,20 @@ const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string
   },
 ];
 
-const PRINSIP = [
-  "Materi AI selalu berupa draf sampai guru memeriksanya dan menekan Bagikan ke Siswa.",
-  "Guru Pintar tidak mengirim nama atau data siswa ke AI.",
-  "Siswa tidak pernah melihat label kelompoknya. Yang mereka lihat hanya Materi untukmu.",
-  "Pilihan bentuk materi hanya preferensi siswa yang bisa diganti kapan saja, bukan diagnosis gaya belajar.",
+const PRINSIP: { teks: string; ikon: LucideIcon }[] = [
+  {
+    teks: "Materi AI selalu berupa draf sampai guru memeriksanya dan menekan Bagikan ke Siswa.",
+    ikon: ShieldCheck,
+  },
+  { teks: "Guru Pintar tidak mengirim nama atau data siswa ke AI.", ikon: LockKeyhole },
+  {
+    teks: "Siswa tidak pernah melihat label kelompoknya. Yang mereka lihat hanya Materi untukmu.",
+    ikon: EyeOff,
+  },
+  {
+    teks: "Pilihan bentuk materi hanya preferensi siswa yang bisa diganti kapan saja, bukan diagnosis gaya belajar.",
+    ikon: SlidersHorizontal,
+  },
 ];
 
 const KARTU = "aura-glass rounded-[24px]";
@@ -426,14 +437,19 @@ export default function Beranda() {
                     <span key={k.label} className={`h-full ${k.lebar} ${k.warna} ${k.garis}`} />
                   ))}
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-[42fr_32fr_26fr] gap-2">
                   {KELOMPOK_PETA.map((k) => (
-                    <div key={k.label} className="rounded-2xl border border-white/60 bg-white/50 p-3">
-                      <span aria-hidden="true" className={`block size-2 rounded-full ${k.warna}`} />
-                      <p className="mt-2 font-display text-[20px] leading-[24px] font-bold tracking-[-0.015em] text-aura-ink">
+                    <div key={k.label} className="min-w-0 rounded-2xl border border-white/60 bg-white/50 p-2.5 sm:p-3">
+                      <span
+                        aria-hidden="true"
+                        className={`-ml-2.5 block size-2 rounded-full sm:-ml-3 ${k.warna}`}
+                      />
+                      <p className="mt-2 font-display text-[18px] leading-[22px] font-bold tracking-[-0.015em] text-aura-ink sm:text-[20px] sm:leading-[24px]">
                         {k.jumlah}
                       </p>
-                      <p className="font-body text-[11px] leading-[16px] text-aura-muted">{k.label}</p>
+                      <p className="font-body text-[10px] leading-[14px] text-aura-muted sm:text-[11px] sm:leading-[16px]">
+                        {k.label}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -510,7 +526,7 @@ export default function Beranda() {
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/50 px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
-                    <CircleCheck aria-hidden="true" className="size-4 text-aura-emerald" />
+                    <ShieldCheck aria-hidden="true" className="size-4 text-aura-primary" />
                     Data siswa tidak dikirim ke AI
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/50 px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
@@ -521,12 +537,12 @@ export default function Beranda() {
               </div>
 
               <ul className="flex flex-col gap-3">
-                {PRINSIP.map((p) => (
-                  <li key={p} className="flex gap-3 rounded-2xl border border-white/60 bg-white/45 p-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-aura-emerald/10 text-aura-emerald">
-                      <CircleCheck aria-hidden="true" className="size-3.5" />
+                {PRINSIP.map(({ teks, ikon: Ikon }) => (
+                  <li key={teks} className="flex gap-3 rounded-2xl border border-white/60 bg-white/45 p-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-aura-primary/10 text-aura-primary">
+                      <Ikon aria-hidden="true" className="size-3.5" />
                     </span>
-                    <span className="font-body text-[14px] leading-[22px] text-aura-ink">{p}</span>
+                    <span className="font-body text-[14px] leading-[22px] text-aura-ink">{teks}</span>
                   </li>
                 ))}
               </ul>
