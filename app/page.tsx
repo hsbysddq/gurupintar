@@ -12,8 +12,8 @@ import {
   Lightbulb,
   ListChecks,
   LockKeyhole,
-  Pencil,
   PlayCircle,
+  Presentation,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -87,11 +87,31 @@ const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
 ];
 
 // Ikon sama dengan tab di TabMateriSiswa.
-const BENTUK_MATERI: { label: string; ikon: LucideIcon }[] = [
-  { label: "Video", ikon: PlayCircle },
-  { label: "Audio", ikon: Headphones },
-  { label: "Bacaan", ikon: FileText },
-  { label: "Latihan", ikon: Pencil },
+const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon; aksen: string }[] = [
+  {
+    label: "Video",
+    keterangan: "Tonton penjelasan langkah demi langkah.",
+    ikon: PlayCircle,
+    aksen: "from-aura-primary to-aura-indigo",
+  },
+  {
+    label: "Audio",
+    keterangan: "Dengar penjelasan sambil menyimak.",
+    ikon: Headphones,
+    aksen: "from-aura-violet to-aura-primary",
+  },
+  {
+    label: "Bacaan",
+    keterangan: "Baca ringkasan dengan contoh soal.",
+    ikon: FileText,
+    aksen: "from-aura-emerald to-aura-primary",
+  },
+  {
+    label: "PPT",
+    keterangan: "Lihat slide ringkas untuk diulang.",
+    ikon: Presentation,
+    aksen: "from-aura-amber to-aura-primary",
+  },
 ];
 
 const KELOMPOK_PETA = [
@@ -440,16 +460,15 @@ export default function Beranda() {
                 <div className="grid grid-cols-[42fr_32fr_26fr] gap-2">
                   {KELOMPOK_PETA.map((k) => (
                     <div key={k.label} className="min-w-0 rounded-2xl border border-white/60 bg-white/50 p-2.5 sm:p-3">
-                      <span
-                        aria-hidden="true"
-                        className={`-ml-2.5 block size-2 rounded-full sm:-ml-3 ${k.warna}`}
-                      />
-                      <p className="mt-2 font-display text-[18px] leading-[22px] font-bold tracking-[-0.015em] text-aura-ink sm:text-[20px] sm:leading-[24px]">
-                        {k.jumlah}
-                      </p>
-                      <p className="font-body text-[10px] leading-[14px] text-aura-muted sm:text-[11px] sm:leading-[16px]">
-                        {k.label}
-                      </p>
+                      <div className="-ml-2.5 sm:-ml-3">
+                        <span aria-hidden="true" className={`block size-2 rounded-full ${k.warna}`} />
+                        <p className="mt-2 font-display text-[18px] leading-[22px] font-bold tracking-[-0.015em] text-aura-ink sm:text-[20px] sm:leading-[24px]">
+                          {k.jumlah}
+                        </p>
+                        <p className="font-body text-[10px] leading-[14px] text-aura-muted sm:text-[11px] sm:leading-[16px]">
+                          {k.label}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -471,14 +490,20 @@ export default function Beranda() {
                   Satu materi untuk tiap kelompok. Siswa membukanya dalam bentuk yang mereka pilih.
                 </p>
               </div>
-              <ul className="mt-auto grid grid-cols-2 gap-2">
-                {BENTUK_MATERI.map(({ label, ikon: Ikon }) => (
+              <ul className="mt-auto grid grid-cols-2 gap-2.5">
+                {BENTUK_MATERI.map(({ label, keterangan, ikon: Ikon, aksen }) => (
                   <li
                     key={label}
-                    className="flex flex-col items-center gap-2 rounded-full border border-aura-primary/15 bg-aura-primary/5 px-3 py-4 text-center"
+                    className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60 p-3"
                   >
-                    <Ikon aria-hidden="true" className="size-5 text-aura-primary" />
-                    <span className="font-display text-[13px] font-semibold text-aura-ink">{label}</span>
+                    <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
+                      <Ikon aria-hidden="true" className="size-4" />
+                    </span>
+                    <span className="mt-2.5 block font-display text-[13px] font-semibold text-aura-ink">{label}</span>
+                    <span className="mt-0.5 block font-body text-[11px] leading-[16px] text-aura-muted">
+                      {keterangan}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -598,12 +623,6 @@ export default function Beranda() {
           <TulisanGuruPintar className="h-4 w-auto" />
         </div>
         <nav aria-label="Tautan footer" className="flex flex-wrap items-center gap-x-4">
-          <Link href="/masuk" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
-            Masuk
-          </Link>
-          <Link href="/daftar/guru" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
-            Daftar guru
-          </Link>
           <a href="#atas" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
             Kembali ke atas
           </a>
