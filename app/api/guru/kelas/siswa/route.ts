@@ -1,10 +1,10 @@
 import { skemaBodyHapusSiswa } from '@/lib/skema-api';
+import { hapusAnggotaKelas } from '@/lib/server/anggota';
 import { kelasMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 
 const PESAN_KELAS_TIDAK_ADA = 'Kelas tidak ditemukan.';
-const PESAN_MIGRASI = 'Fitur keluarkan siswa belum aktif. Jalankan supabase/migrasi-identitas-siswa.sql di Supabase.';
 
 // DELETE /api/guru/kelas/siswa: keluarkan siswa dari kelas beserta jawaban/hasilnya di kelas itu.
 export async function DELETE(request: Request) {
@@ -21,14 +21,7 @@ export async function DELETE(request: Request) {
       return responsError(PESAN_KELAS_TIDAK_ADA, 404);
     }
 
-    const { error } = await db.rpc('hapus_anggota_kelas', { p_kelas: kelasId, p_siswa: siswaId });
-    if (error) {
-      const pesan = error.message ?? '';
-      if (error.code === 'PGRST202' || (pesan.includes('hapus_anggota_kelas') && pesan.includes('Could not find'))) {
-        return responsError(PESAN_MIGRASI, 503);
-      }
-      return petakanErrorDb(error);
-    }
+    await hapusAnggotaKelas(db, kelasId, siswaId);
 
     return responsOk({ ok: true });
   } catch (err) {

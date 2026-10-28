@@ -1,6 +1,6 @@
-import { skemaBodyGabungKelas } from '@/lib/skema-api';
-import { PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
-import { kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
+import { skemaBodyGabungKelas, skemaQueryKelasSiswa } from '@/lib/skema-api';
+import { hapusAnggotaKelas, PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
+import { anggotaKelas, kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
@@ -103,6 +103,31 @@ export async function POST(request: Request) {
     }
 
     return responsOk({ ok: true, kelas: { id: kelas.data.id, nama: kelas.data.nama, mapel: kelas.data.mapel } });
+  } catch (err) {
+    console.error(err);
+    return petakanErrorDb(err);
+  }
+}
+
+const PESAN_BUKAN_ANGGOTA = 'Kamu tidak terdaftar di kelas ini.';
+
+// DELETE /api/siswa/kelas?kelas=: siswa keluar dari kelas beserta jawaban dan hasil kuisnya di kelas itu.
+// Identitas siswa dari sesi login; hanya bisa menghapus keanggotaan milik sendiri.
+export async function DELETE(request: Request) {
+  const auth = await wajibPeranApi('siswa');
+  if (!auth.ok) return auth.respons;
+
+  const query = skemaQueryKelasSiswa.safeParse({ kelas: new URL(request.url).searchParams.get('kelas') });
+  if (!query.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
+  const kelasId = query.data.kelas;
+
+  try {
+    const db = ambilSupabase();
+    if (!(await anggotaKelas(db, auth.profil.id, kelasId))) return responsError(PESAN_BUKAN_ANGGOTA, 404);
+
+    await hapusAnggotaKelas(db, kelasId, auth.profil.id);
+
+    return responsOk({ ok: true });
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);

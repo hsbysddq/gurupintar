@@ -20,8 +20,10 @@ import {
   ErrorApi,
   gabungKelas,
   gabungSesi,
+  hapusKelas,
   hapusTopik,
   keluar,
+  keluarKelas,
   keluarkanSiswa,
   kirimJawaban,
   masuk,
@@ -193,6 +195,21 @@ describe('api-klien guru', () => {
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/kelas/siswa');
     expect(palsu.mock.calls[0][1]?.method).toBe('DELETE');
     expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({ kelasId: 'k1', siswaId: 's1' });
+  });
+
+  it('hapusKelas memakai DELETE dengan id kelas di query string', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    await hapusKelas('k 1');
+    expect(palsu.mock.calls[0][0]).toBe('/api/guru/kelas?kelas=k%201');
+    expect(palsu.mock.calls[0][1]?.method).toBe('DELETE');
+  });
+
+  it('keluarKelas memakai DELETE dengan id kelas di query string', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    await keluarKelas('kelas 1');
+    expect(palsu.mock.calls[0][0]).toBe('/api/siswa/kelas?kelas=kelas%201');
+    expect(palsu.mock.calls[0][1]?.method).toBe('DELETE');
+    expect(palsu.mock.calls[0][1]?.body).toBeUndefined();
   });
 
   it('fungsi materi memakai URL, metode, dan body yang benar', async () => {

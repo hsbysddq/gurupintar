@@ -5,7 +5,7 @@ import { profilWajib } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 
-// Tab Pengaturan: ubah identitas kelas, salin kode undangan, atau arsipkan kelas.
+// Tab Pengaturan: ubah identitas kelas, salin kode undangan, arsipkan, atau hapus kelas.
 export default async function HalamanPengaturanKelas({
   searchParams,
 }: {

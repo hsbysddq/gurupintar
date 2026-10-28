@@ -1,5 +1,5 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
-import { skemaBodyBuatKelas, skemaBodyUbahKelas } from '@/lib/skema-api';
+import { skemaBodyBuatKelas, skemaBodyUbahKelas, skemaQueryKelasSiswa } from '@/lib/skema-api';
 import { kelasMilikGuru, kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -109,6 +109,32 @@ export async function PATCH(request: Request) {
     if (arsip !== undefined) perubahan.diarsipkan_pada = arsip ? new Date().toISOString() : null;
 
     const { error } = await db.from('kelas').update(perubahan).eq('id', id).eq('guru_id', auth.profil.id);
+    if (error) return petakanErrorDb(error);
+
+    return responsOk({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return petakanErrorDb(err);
+  }
+}
+
+// DELETE /api/guru/kelas?kelas=: hapus kelas milik guru secara permanen. Keanggotaan siswa, kuis, jawaban,
+// hasil, dan materi kelas ikut terhapus lewat ON DELETE CASCADE di database. Topik dan soal tidak terhapus.
+export async function DELETE(request: Request) {
+  const auth = await wajibPeranApi('guru');
+  if (!auth.ok) return auth.respons;
+
+  const query = skemaQueryKelasSiswa.safeParse({ kelas: new URL(request.url).searchParams.get('kelas') });
+  if (!query.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
+  const id = query.data.kelas;
+
+  try {
+    const db = ambilSupabase();
+    if (!(await kelasMilikGuru(db, auth.profil.id, id, { termasukArsip: true }))) {
+      return responsError(PESAN_KELAS_TIDAK_ADA, 404);
+    }
+
+    const { error } = await db.from('kelas').delete().eq('id', id).eq('guru_id', auth.profil.id);
     if (error) return petakanErrorDb(error);
 
     return responsOk({ ok: true });
