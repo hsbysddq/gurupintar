@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { PlayCircle } from 'lucide-react';
 import { FormGabungMapel } from '@/components/FormGabungMapel';
 import { KartuKaca } from '@/components/KartuKaca';
+import { TombolHapusKelas } from '@/components/TombolHapusKelas';
 import { ikonMapel, warnaMapel } from '@/components/ikon-mapel';
 import { labelKelas, type ProgresKelas } from '@/lib/beranda-siswa';
 
@@ -99,6 +100,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                     >
                       Buka Mapel
                     </Link>
+                    <TombolHapusKelas kelasId={k.id} mapel={k.mapel} />
                   </div>
                 </KartuKaca>
               </li>

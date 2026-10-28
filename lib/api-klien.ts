@@ -114,6 +114,11 @@ export function gabungKelas(kode: string): Promise<{ ok: true; kelas: { id: stri
   return minta('/api/siswa/kelas', { method: 'POST', body: JSON.stringify({ kode }) });
 }
 
+/** Siswa keluar dari kelas; jawaban dan hasil kuisnya di kelas itu ikut terhapus. */
+export function keluarKelas(kelasId: string): Promise<{ ok: true }> {
+  return minta(`/api/siswa/kelas?kelas=${encodeURIComponent(kelasId)}`, { method: 'DELETE' });
+}
+
 /** Riwayat sesi satu kelas untuk siswa. */
 export function ambilSesiKelas(kelasId: string, signal?: AbortSignal): Promise<SesiSiswa[]> {
   return minta(`/api/siswa/kelas/sesi?kelas=${encodeURIComponent(kelasId)}`, { signal });
@@ -158,6 +163,11 @@ export function buatKelas(body: BodyBuatKelas): Promise<KelasRingkas> {
 
 export function ubahKelas(body: BodyUbahKelas): Promise<{ ok: true }> {
   return minta('/api/guru/kelas', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+/** Hapus kelas permanen beserta siswa, kuis, hasil, dan materinya. */
+export function hapusKelas(kelasId: string): Promise<{ ok: true }> {
+  return minta(`/api/guru/kelas?kelas=${encodeURIComponent(kelasId)}`, { method: 'DELETE' });
 }
 
 export function keluarkanSiswa(body: BodyHapusSiswa): Promise<{ ok: true }> {

@@ -1,5 +1,6 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { tabelPercobaanBelumAda } from './percobaan';
 
 export const PESAN_NAMA_DIPAKAI =
   'Nama ini sudah dipakai siswa lain di kelas. Gunakan nama pembeda atau hubungi guru.';
@@ -41,4 +42,30 @@ export async function tambahAnggotaKelas(
 
   const konflikNama = hasil.error.code === '23505' && !pesanError(hasil.error).includes('keanggotaan_kelas_pkey');
   return { ok: false, konflikNama, error: hasil.error };
+}
+
+/**
+ * Mengeluarkan siswa dari kelas beserta jawaban, hasil, dan riwayat percobaan kuisnya di kelas itu.
+ * Dikerjakan langsung dengan penghapusan biasa (tanpa fungsi SQL khusus) supaya jalan di database mana pun;
+ * keanggotaan dihapus terakhir, jadi bila ada langkah yang gagal siswa tetap terdaftar dan bisa mengulang.
+ * Pemanggil wajib sudah memeriksa hak (siswa menghapus dirinya sendiri, atau guru pemilik kelas).
+ */
+export async function hapusAnggotaKelas(db: SupabaseClient, kelasId: string, siswaId: string): Promise<void> {
+  const sesi = await db.from('sesi_kuis').select('id').eq('kelas_id', kelasId);
+  if (sesi.error) throw sesi.error;
+  const idSesi = sesi.data.map((s) => s.id as string);
+
+  if (idSesi.length > 0) {
+    const jawaban = await db.from('jawaban').delete().eq('siswa_id', siswaId).in('sesi_id', idSesi);
+    if (jawaban.error) throw jawaban.error;
+
+    const percobaan = await db.from('percobaan_kuis').delete().eq('siswa_id', siswaId).in('sesi_id', idSesi);
+    if (percobaan.error && !tabelPercobaanBelumAda(percobaan.error)) throw percobaan.error;
+
+    const hasil = await db.from('hasil_siswa').delete().eq('siswa_id', siswaId).in('sesi_id', idSesi);
+    if (hasil.error) throw hasil.error;
+  }
+
+  const anggota = await db.from('keanggotaan_kelas').delete().eq('kelas_id', kelasId).eq('siswa_id', siswaId);
+  if (anggota.error) throw anggota.error;
 }
