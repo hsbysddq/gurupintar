@@ -278,13 +278,13 @@ export default function Beranda() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {ALASAN.map(({ judul, isi, ikon: Ikon }) => (
               <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5`}>
-                <IkonKotak ikon={Ikon} />
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <IkonKotak ikon={Ikon} />
                   <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
                     {judul}
                   </h3>
-                  <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
                 </div>
+                <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
               </article>
             ))}
           </div>
@@ -440,9 +440,13 @@ export default function Beranda() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
             <article className={`${KARTU} flex flex-col gap-5 p-6 md:col-span-2 lg:col-span-7`}>
-              <IkonKotak ikon={LayoutGrid} />
               <div className="flex flex-col gap-2">
-                <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">Peta kelas</h3>
+                <div className="flex items-center gap-3">
+                  <IkonKotak ikon={LayoutGrid} />
+                  <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+                    Peta kelas
+                  </h3>
+                </div>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
                   Siapa yang sudah, setengah, dan belum paham terlihat dalam satu layar, bukan di tumpukan kertas.
                 </p>
@@ -476,16 +480,18 @@ export default function Beranda() {
             </article>
 
             <article className={`${KARTU} flex flex-col gap-5 p-6 md:col-span-2 lg:col-span-5`}>
-              <div className="flex items-start justify-between gap-3">
-                <IkonKotak ikon={Sparkles} />
-                <span className="rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-primary">
-                  Draf AI
-                </span>
-              </div>
               <div className="flex flex-col gap-2">
-                <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
-                  Materi AI dalam 4 bentuk
-                </h3>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <IkonKotak ikon={Sparkles} />
+                    <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+                      Materi AI dalam 4 bentuk
+                    </h3>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-primary">
+                    Draf AI
+                  </span>
+                </div>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
                   Satu materi untuk tiap kelompok. Siswa membukanya dalam bentuk yang mereka pilih.
                 </p>
@@ -497,11 +503,13 @@ export default function Beranda() {
                     className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60 p-3"
                   >
                     <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
-                      <Ikon aria-hidden="true" className="size-4" />
-                    </span>
-                    <span className="mt-2.5 block font-display text-[13px] font-semibold text-aura-ink">{label}</span>
-                    <span className="mt-0.5 block font-body text-[11px] leading-[16px] text-aura-muted">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
+                        <Ikon aria-hidden="true" className="size-4" />
+                      </span>
+                      <span className="font-display text-[13px] font-semibold text-aura-ink">{label}</span>
+                    </div>
+                    <span className="mt-2 block font-body text-[11px] leading-[16px] text-aura-muted">
                       {keterangan}
                     </span>
                   </li>
@@ -511,13 +519,13 @@ export default function Beranda() {
 
             {FITUR_KECIL.map(({ judul, isi, ikon: Ikon, kelas }) => (
               <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5 sm:p-6 ${kelas}`}>
-                <IkonKotak ikon={Ikon} />
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <IkonKotak ikon={Ikon} />
                   <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
                     {judul}
                   </h3>
-                  <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
                 </div>
+                <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
               </article>
             ))}
           </div>
