@@ -2,11 +2,11 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Archive } from 'lucide-react';
+import { Archive, Trash2 } from 'lucide-react';
 import { KartuKaca } from '@/components/KartuKaca';
 import { Tombol } from '@/components/Tombol';
 import { TombolSalinKode } from '@/components/TombolSalinKode';
-import { ErrorApi, ubahKelas } from '@/lib/api-klien';
+import { ErrorApi, hapusKelas, ubahKelas } from '@/lib/api-klien';
 import type { KelasRingkas } from '@/lib/tipe';
 
 export function FormPengaturanKelas({ kelas }: { kelas: KelasRingkas }) {
@@ -18,6 +18,9 @@ export function FormPengaturanKelas({ kelas }: { kelas: KelasRingkas }) {
   const [galat, setGalat] = useState<string | null>(null);
   const [konfirmasiArsip, setKonfirmasiArsip] = useState(false);
   const [mengarsipkan, setMengarsipkan] = useState(false);
+  const [konfirmasiHapus, setKonfirmasiHapus] = useState(false);
+  const [menghapus, setMenghapus] = useState(false);
+  const [galatHapus, setGalatHapus] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tersimpan) return;
@@ -52,6 +55,19 @@ export function FormPengaturanKelas({ kelas }: { kelas: KelasRingkas }) {
     } catch (err) {
       setGalat(err instanceof ErrorApi ? err.message : 'Kelas belum berhasil diarsipkan. Coba lagi sebentar.');
       setMengarsipkan(false);
+    }
+  }
+
+  async function hapus() {
+    setMenghapus(true);
+    setGalatHapus(null);
+    try {
+      await hapusKelas(kelas.id);
+      router.push('/guru');
+      router.refresh();
+    } catch (err) {
+      setGalatHapus(err instanceof ErrorApi ? err.message : 'Kelas belum berhasil dihapus. Coba lagi sebentar.');
+      setMenghapus(false);
     }
   }
 
@@ -149,6 +165,47 @@ export function FormPengaturanKelas({ kelas }: { kelas: KelasRingkas }) {
             <Tombol varian="teks" disabled={mengarsipkan} onClick={() => setKonfirmasiArsip(false)}>
               Batal
             </Tombol>
+          </div>
+        )}
+      </KartuKaca>
+
+      <KartuKaca as="section" className="flex flex-col gap-3 border border-belum-teks/20 p-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="flex items-center gap-2 text-xl leading-snug font-semibold text-belum-teks">
+            <Trash2 aria-hidden="true" className="size-5" />
+            Hapus kelas
+          </h2>
+          <p className="text-tinta-lembut">
+            Kelas dihapus permanen beserta daftar siswa, kuis, jawaban, hasil, dan materinya. Tindakan ini tidak bisa
+            dibatalkan. Kalau hanya ingin menyembunyikan kelas, pakai Arsipkan kelas.
+          </p>
+        </div>
+
+        {!konfirmasiHapus ? (
+          <div>
+            <Tombol varian="sekunder" onClick={() => setKonfirmasiHapus(true)}>
+              Hapus kelas
+            </Tombol>
+          </div>
+        ) : (
+          <div role="alertdialog" aria-label={`Hapus ${kelas.nama}`} className="flex flex-col gap-3 rounded-kecil bg-belum-latar p-4">
+            <p className="font-medium text-belum-teks">
+              Hapus {kelas.nama} ({kelas.mapel}) dengan {kelas.jumlahSiswa} siswa? Semua datanya hilang dan tidak bisa
+              dikembalikan.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Tombol varian="utama" memuat={menghapus} onClick={hapus}>
+                Ya, hapus kelas
+              </Tombol>
+              <Tombol varian="teks" disabled={menghapus} onClick={() => setKonfirmasiHapus(false)}>
+                Batal
+              </Tombol>
+            </div>
+            {galatHapus && (
+              <p role="alert" className="font-medium text-belum-teks">
+                {galatHapus}
+              </p>
+            )}
           </div>
         )}
       </KartuKaca>
