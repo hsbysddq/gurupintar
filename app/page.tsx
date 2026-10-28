@@ -565,29 +565,12 @@ export default function Beranda() {
               <p className="mt-3 font-body text-[15px] leading-[26px] text-white/80">
                 Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Akun guru dan siswa terpisah, tanpa instal.
               </p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 font-display text-[12px] font-semibold text-white/80">
-                <span className="inline-flex items-center gap-1.5">
-                  <CircleCheck aria-hidden="true" className="size-3.5" />
-                  5 soal per kuis
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CircleCheck aria-hidden="true" className="size-3.5" />
-                  Siap dari HP
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock3 aria-hidden="true" className="size-3.5" />
-                  Hasil langsung
-                </span>
-              </div>
             </div>
 
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row md:flex-col lg:flex-row">
+            <div className="flex w-full sm:w-auto">
               <Link href="/masuk" className="aura-btn aura-btn-light h-[52px] w-full px-6 text-[15px] sm:w-auto">
                 Mulai sekarang
                 <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
-              <Link href="/daftar/guru" className="aura-btn aura-btn-ghost-light h-[52px] w-full px-6 text-[15px] sm:w-auto">
-                Daftar guru
               </Link>
             </div>
           </div>
@@ -595,10 +578,8 @@ export default function Beranda() {
       </main>
 
       <footer className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-4 border-t border-aura-outline/50 px-4 py-8 font-body text-[13px] leading-[18px] text-aura-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center">
           <TulisanGuruPintar className="h-4 w-auto" />
-          <span aria-hidden="true">·</span>
-          <span>Prototipe hackathon</span>
         </div>
         <nav aria-label="Tautan footer" className="flex flex-wrap items-center gap-x-4">
           <Link href="/masuk" className="inline-flex min-h-12 items-center transition-colors hover:text-aura-primary">
