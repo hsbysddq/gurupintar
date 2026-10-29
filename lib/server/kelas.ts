@@ -1,5 +1,6 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { normalisasiFormat } from '@/lib/format-materi';
 import { pilihHasilTerbaru } from '@/lib/hasil-terbaru';
 import { ringkasStatusMateri } from '@/lib/status-materi';
 import { kelasMilikGuru, kolomArsipBelumAda } from './auth';
@@ -184,7 +185,7 @@ export async function ambilSiswaKelas(
         siswaId: a.siswa_id,
         nama: a.nama_tampil ?? pengguna?.nama ?? '',
         email: pengguna?.email ?? null,
-        format: a.preferensi_format,
+        format: normalisasiFormat(a.preferensi_format),
         kelompok: hasil?.kelompok ?? null,
         skor: hasil?.skor ?? null,
         total: hasil?.total ?? null,

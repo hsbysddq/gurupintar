@@ -70,7 +70,7 @@ describe('skemaQuerySoal', () => {
 });
 
 describe('skemaBodyFormat', () => {
-  it.each(['video', 'audio', 'bacaan', 'latihan'])('menerima format %s', (format) => {
+  it.each(['ppt', 'audio', 'bacaan', 'latihan'])('menerima format %s', (format) => {
     expect(skemaBodyFormat.safeParse({ sesiId: SESI_ID, format }).success).toBe(true);
   });
 

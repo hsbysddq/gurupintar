@@ -35,6 +35,9 @@ export async function POST(request: Request) {
       .eq('kelas_id', sesi.data.kelas_id)
       .eq('siswa_id', auth.profil.id)
       .select('siswa_id');
+    // Database yang belum menjalankan migrasi PPT menolak nilai "ppt" (pelanggaran CHECK, kode 23514).
+    // Pilihan ini hanya preferensi tampilan dan juga tersimpan di perangkat siswa, jadi alur tidak diputus.
+    if (error && error.code === '23514') return responsOk({ ok: true });
     if (error) return petakanErrorDb(error);
     if (data.length === 0) return responsError('Keanggotaan kelas tidak ditemukan. Masukkan kode kelas lagi.', 404);
 
