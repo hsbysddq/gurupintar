@@ -2,16 +2,15 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalisasiFormat } from '@/lib/format-materi';
 import { pilihHasilTerbaru } from '@/lib/hasil-terbaru';
-import { ringkasStatusMateri } from '@/lib/status-materi';
+import { lengkapiIsiMateri } from '@/lib/validasi-materi';
 import { kelasMilikGuru, kolomArsipBelumAda } from './auth';
 import type {
+  AsalMateriPustaka,
   Format,
   KelasRingkas,
   Kelompok,
-  MateriKelasRingkas,
+  MateriPustaka,
   SiswaKelas,
-  StatusMateri,
-  StatusSesi,
   SumberMateri,
 } from '@/lib/tipe';
 
@@ -194,70 +193,44 @@ export async function ambilSiswaKelas(
     .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 }
 
-type BarisSesiMateri = {
+type BarisMateriPustaka = {
   id: string;
-  kode_kelas: string;
-  status: string;
-  dibuat_pada: string;
-  topik: unknown;
-  hasil_siswa: { count: number }[];
-};
-
-type BarisMateriSesi = {
-  sesi_id: string;
-  kelompok: Kelompok;
-  status: StatusMateri;
+  kelas_id: string;
+  bab: string;
+  judul: string;
+  isi: unknown;
   sumber: SumberMateri;
-  versi: number;
+  asal: AsalMateriPustaka;
+  dibuat_pada: string;
+  diperbarui_pada: string;
 };
 
-function namaTopikDari(nilai: unknown): string {
-  if (Array.isArray(nilai)) return (nilai[0] as { nama?: string } | undefined)?.nama ?? '';
-  return (nilai as { nama?: string } | null)?.nama ?? '';
-}
-
-/** Semua sesi satu kelas beserta materi yang sudah dibuat. */
-export async function ambilMateriKelas(
+/** Pustaka materi mandiri satu kelas (hasil Ubah Modul), dikelompokkan di UI berdasarkan `bab`. */
+export async function ambilMateriPustakaKelas(
   db: SupabaseClient,
   guruId: string,
   kelasId: string,
-): Promise<MateriKelasRingkas[] | null> {
+): Promise<MateriPustaka[] | null> {
   if (!(await kelasMilikGuru(db, guruId, kelasId))) return null;
 
-  const sesi = await db
-    .from('sesi_kuis')
-    .select('id, kode_kelas, status, dibuat_pada, topik(nama), hasil_siswa(count)')
+  const { data, error } = await db
+    .from('materi_pustaka')
+    .select('id, kelas_id, bab, judul, isi, sumber, asal, dibuat_pada, diperbarui_pada')
     .eq('kelas_id', kelasId)
-    .order('dibuat_pada', { ascending: false });
-  if (sesi.error) throw sesi.error;
+    .eq('guru_id', guruId)
+    .order('bab')
+    .order('diperbarui_pada', { ascending: false });
+  if (error) throw error;
 
-  const barisSesi = sesi.data as BarisSesiMateri[];
-  const idSesi = barisSesi.map((s) => s.id);
-
-  let barisMateri: BarisMateriSesi[] = [];
-  if (idSesi.length > 0) {
-    const materi = await db
-      .from('materi')
-      .select('sesi_id, kelompok, status, sumber, versi')
-      .in('sesi_id', idSesi);
-    if (materi.error) throw materi.error;
-    barisMateri = materi.data as BarisMateriSesi[];
-  }
-
-  return barisSesi.map((s) => {
-    const daftar = barisMateri
-      .filter((m) => m.sesi_id === s.id)
-      .map((m) => ({ kelompok: m.kelompok, status: m.status, sumber: m.sumber, versi: m.versi }));
-
-    return {
-      sesiId: s.id,
-      kodeKelas: s.kode_kelas,
-      status: s.status as StatusSesi,
-      dibuatPada: s.dibuat_pada,
-      namaTopik: namaTopikDari(s.topik),
-      jumlahMenjawab: s.hasil_siswa[0]?.count ?? 0,
-      materi: daftar,
-      statusMateri: ringkasStatusMateri(daftar),
-    };
-  });
+  return (data as BarisMateriPustaka[]).map((m) => ({
+    id: m.id,
+    kelasId: m.kelas_id,
+    bab: m.bab,
+    judul: m.judul,
+    isi: lengkapiIsiMateri(m.isi),
+    sumber: m.sumber,
+    asal: m.asal,
+    dibuatPada: m.dibuat_pada,
+    diperbaruiPada: m.diperbarui_pada,
+  }));
 }

@@ -23,6 +23,18 @@ export function responsError(pesan: string, status: number): Response {
   return Response.json({ error: pesan }, { status });
 }
 
+/** Supabase/Postgres: relasi belum ada, biasanya migrasi belum dijalankan. */
+export function tabelBelumAda(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) return false;
+  const kode = 'code' in err ? String(err.code) : '';
+  const pesan = 'message' in err && typeof err.message === 'string' ? err.message : '';
+  return (
+    kode === '42P01' ||
+    kode === 'PGRST205' ||
+    /could not find the table|relation .* does not exist/i.test(pesan)
+  );
+}
+
 /** Memetakan error dari Supabase/fungsi SQL (misalnya `raise exception` di simpan_hasil) ke respons API. */
 export function petakanErrorDb(err: unknown): Response {
   const pesan =

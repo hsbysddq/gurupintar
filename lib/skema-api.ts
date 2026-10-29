@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PANJANG_SANDI_MAKS, PANJANG_SANDI_MIN, normalisasiEmail } from './auth';
 import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, SOAL_MINIMAL_TOPIK, UKURAN_PDF_MAKS_BYTE } from './konstanta';
 import { samakanTeksPilihan } from './soal-guru';
+import { skemaIsiMateri } from './validasi-materi';
 
 /** AC-1.2: kode diubah ke huruf kapital dan spasi dihapus. */
 export function normalisasiKode(kode: string): string {
@@ -139,6 +140,24 @@ export const skemaBodyUbahMateri = z.object({
   isi: z.unknown(),
 });
 
+// POST /api/guru/materi-pustaka
+export const skemaBodyMateriPustaka = z.object({
+  kelasId: z.uuid(),
+  bab: z.string().trim().min(1).max(80),
+  judul: z.string().trim().min(5).max(80),
+  isi: skemaIsiMateri,
+  sumber: z.enum(['ai', 'cadangan']),
+  asal: z.enum(['teks', 'pdf']),
+});
+
+// PATCH /api/guru/materi-pustaka
+export const skemaBodyUbahMateriPustaka = z.object({
+  id: z.uuid(),
+  bab: z.string().trim().min(1).max(80),
+  judul: z.string().trim().min(5).max(80),
+  isi: skemaIsiMateri,
+});
+
 // POST /api/guru/materi/bagikan
 export const skemaBodyBagikanMateri = z.object({
   sesiId: z.uuid(),
@@ -232,6 +251,8 @@ function skemaTeksMiskonsepsi() {
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
+export type BodyMateriPustaka = z.infer<typeof skemaBodyMateriPustaka>;
+export type BodyUbahMateriPustaka = z.infer<typeof skemaBodyUbahMateriPustaka>;
 export type BodyTopikBaru = z.infer<typeof skemaBodyTopikBaru>;
 export type BodyUbahTopik = z.infer<typeof skemaBodyUbahTopik>;
 export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;

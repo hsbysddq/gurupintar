@@ -78,18 +78,6 @@ export interface SiswaKelas {
   total: number | null;
 }
 
-/** Satu sesi dan materi-materinya (untuk tab Materi per kelas). */
-export interface MateriKelasRingkas {
-  sesiId: string;
-  kodeKelas: string;
-  status: StatusSesi;
-  dibuatPada: string;
-  namaTopik: string;
-  jumlahMenjawab: number;
-  materi: { kelompok: Kelompok; status: StatusMateri; sumber: SumberMateri; versi: number }[];
-  statusMateri: StatusMateriSesi;
-}
-
 /** Ringkasan satu kelas untuk halaman lintas kelas. */
 export interface RingkasanKelas {
   id: string;
@@ -230,6 +218,21 @@ export interface MateriGuru {
   sumber: SumberMateri;
   versi: number;
   jumlahSiswa: number;
+}
+
+export type AsalMateriPustaka = 'teks' | 'pdf';
+
+/** Satu materi mandiri di pustaka kelas (hasil Ubah Modul). */
+export interface MateriPustaka {
+  id: string;
+  kelasId: string;
+  bab: string;
+  judul: string;
+  isi: IsiMateri;
+  sumber: SumberMateri;
+  asal: AsalMateriPustaka;
+  dibuatPada: string;
+  diperbaruiPada: string;
 }
 
 /** GET /api/materi, tanpa kelompok dan sumber (D-2) */

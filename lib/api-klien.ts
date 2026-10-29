@@ -8,7 +8,9 @@ import type {
   BodyHapusSiswa,
   BodyJawaban,
   BodyMasuk,
+  BodyMateriPustaka,
   BodyTopikBaru,
+  BodyUbahMateriPustaka,
   BodyUbahKelas,
   BodyUbahTopik,
 } from './skema-api';
@@ -20,6 +22,7 @@ import type {
   KelasRingkas,
   KelasSiswa,
   MateriGuru,
+  MateriPustaka,
   MateriSiswa,
   Peran,
   SesiBaru,
@@ -28,6 +31,7 @@ import type {
   SesiSiswa,
   SesiUntukSiswa,
   SoalUntukSiswa,
+  SumberMateri,
   TopikDetail,
   TopikRingkas,
 } from './tipe';
@@ -233,12 +237,33 @@ export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagik
   return minta('/api/guru/materi/bagikan', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }
 
-export function ubahModul(teks: string): Promise<{ isi: IsiMateri }> {
+export function ubahModul(teks: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
   return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks }) });
 }
 
-export function ubahModulPdf(pdfBase64: string): Promise<{ isi: IsiMateri }> {
+export function ubahModulPdf(pdfBase64: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
   return minta('/api/guru/modul/pdf', { method: 'POST', body: JSON.stringify({ pdf: pdfBase64 }) });
+}
+
+/** Daftar materi mandiri milik satu kelas. */
+export function ambilMateriPustakaKelas(kelasId: string, signal?: AbortSignal): Promise<MateriPustaka[]> {
+  return minta(`/api/guru/materi-pustaka?kelas=${encodeURIComponent(kelasId)}`, { signal });
+}
+
+export function ambilMateriPustaka(id: string): Promise<MateriPustaka> {
+  return minta(`/api/guru/materi-pustaka?id=${encodeURIComponent(id)}`);
+}
+
+export function simpanMateriPustaka(body: BodyMateriPustaka): Promise<MateriPustaka> {
+  return minta('/api/guru/materi-pustaka', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ubahMateriPustaka(body: BodyUbahMateriPustaka): Promise<MateriPustaka> {
+  return minta('/api/guru/materi-pustaka', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function hapusMateriPustaka(id: string): Promise<{ ok: true }> {
+  return minta(`/api/guru/materi-pustaka?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
 export function ambilPendampingan(kelasId?: string, signal?: AbortSignal): Promise<DataPendampingan> {

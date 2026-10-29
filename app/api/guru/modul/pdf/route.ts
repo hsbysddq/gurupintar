@@ -9,7 +9,7 @@ export const maxDuration = 70;
 const PESAN_PDF_TIDAK_VALID = 'File harus berupa PDF dengan ukuran maksimal 5 MB.';
 const PESAN_GAGAL_DIBUAT = 'Materi belum berhasil dibuat.';
 
-// POST /api/guru/modul/pdf. Hanya pratinjau: PDF tidak disimpan di server.
+// POST /api/guru/modul/pdf. PDF tidak disimpan di server; hasilnya bisa disimpan lewat API pustaka.
 export async function POST(request: Request) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   try {
     const isi = await buatMateriDariPdf(input.data.pdf);
-    return responsOk({ isi });
+    return responsOk({ isi, sumber: 'ai' });
   } catch (err) {
     // Isi PDF tidak dicatat di log.
     if (err instanceof ErrorMateriAi) {

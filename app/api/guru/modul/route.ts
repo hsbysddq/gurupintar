@@ -10,7 +10,7 @@ export const maxDuration = 70;
 const PESAN_PANJANG_MODUL = `Teks modul harus ${PANJANG_MODUL_MIN}–${PANJANG_MODUL_MAKS} karakter.`;
 const PESAN_GAGAL_DIBUAT = 'Materi belum berhasil dibuat.';
 
-// POST /api/guru/modul (PRD F-9). Hanya pratinjau: tidak ada yang disimpan ke database.
+// POST /api/guru/modul (PRD F-9). Menghasilkan isi materi; penyimpanan ke pustaka dilakukan lewat API terpisah.
 export async function POST(request: Request) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   try {
     const isi = await buatMateriDariModul(input.data.teks);
-    return responsOk({ isi });
+    return responsOk({ isi, sumber: 'ai' });
   } catch (err) {
     // Isi teks modul tidak dicatat di log.
     if (err instanceof ErrorMateriAi) {
