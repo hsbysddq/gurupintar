@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { miskonsepsiPerKelompok, tentukanTargetMateri } from '@/lib/rencana-materi';
 import { skemaBodyBuatMateri, skemaBodyUbahMateri, skemaQueryMateriGuru } from '@/lib/skema-api';
 import { cadanganTersedia } from '@/lib/soal-guru';
-import { periksaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
+import { lengkapiIsiMateri, periksaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
 import { buatMateriSemua } from '@/lib/server/materi-ai';
 import { ambilMateriCadangan } from '@/lib/server/materi-cadangan';
 import { materiMilikGuru, sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
@@ -47,7 +47,7 @@ async function bacaMateriSesi(db: SupabaseClient, sesiId: string) {
   for (const h of barisHasil) jumlahPerKelompok[h.kelompok] += 1;
 
   const daftar: MateriGuru[] = (materi.data as BarisMateri[])
-    .map((m) => ({ ...m, jumlahSiswa: jumlahPerKelompok[m.kelompok] }))
+    .map((m) => ({ ...m, isi: lengkapiIsiMateri(m.isi), jumlahSiswa: jumlahPerKelompok[m.kelompok] }))
     .sort((a, b) => URUTAN_KELOMPOK.indexOf(a.kelompok) - URUTAN_KELOMPOK.indexOf(b.kelompok));
 
   return { daftar, barisMateri: materi.data as BarisMateri[], barisHasil, jumlahPerKelompok };

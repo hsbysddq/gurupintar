@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import materiCadangan from '@/data/materi-cadangan.json';
-import { acakPilihanLatihan, periksaIsiMateri, skemaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
+import { acakPilihanLatihan, lengkapiIsiMateri, periksaIsiMateri, skemaIsiMateri, type IsiMateri } from '@/lib/validasi-materi';
 
 function isiValid(): IsiMateri {
   return {
@@ -9,10 +9,13 @@ function isiValid(): IsiMateri {
       'Pecahan senilai adalah pecahan yang tulisannya berbeda tetapi nilainya sama. Misalnya 1/2 pizza sama banyaknya dengan 2/4 pizza. Kalikan atau bagi pembilang dan penyebut dengan bilangan yang sama.',
     naskah_audio:
       'Halo! Satu per dua pizza sama banyaknya dengan dua per empat pizza. Kalikan angka atas dan bawah dengan bilangan yang sama, ya.',
-    ide_video: {
+    slide_ppt: {
       judul: 'Pecahan Senilai dengan Pizza',
-      deskripsi: 'Video pendek yang memotong pizza menjadi beberapa bagian sama besar.',
-      kata_kunci_pencarian: 'pecahan senilai pizza',
+      slide: [
+        { judul: 'Apa itu pecahan senilai?', poin: ['Tulisannya berbeda tetapi nilainya sama.', 'Contoh: 1/2 pizza sama dengan 2/4 pizza.'] },
+        { judul: 'Cara mencarinya', poin: ['Kalikan pembilang dan penyebut dengan bilangan yang sama.', 'Atau bagi keduanya dengan bilangan yang sama.'] },
+        { judul: 'Rangkuman', poin: ['Pecahan senilai punya nilai yang sama.', 'Coba cari tiga pecahan yang senilai dengan 1/3.'] },
+      ],
     },
     latihan: [
       {
@@ -97,8 +100,8 @@ describe('periksaIsiMateri', () => {
       ['belum paham', (isi: IsiMateri) => ({ ...isi, judul: 'Materi untuk yang belum paham' })],
       ['Setengah Paham', (isi: IsiMateri) => ({ ...isi, ringkasan: `${isi.ringkasan} Cocok untuk Setengah Paham.` })],
       ['SUDAH PAHAM', (isi: IsiMateri) => ({ ...isi, naskah_audio: `${isi.naskah_audio} Kamu SUDAH PAHAM.` })],
-      ['kelompok', (isi: IsiMateri) => ({ ...isi, ide_video: { ...isi.ide_video, deskripsi: 'Tonton bersama kelompok belajarmu di rumah.' } })],
-      ['Kelompok', (isi: IsiMateri) => ({ ...isi, ide_video: { ...isi.ide_video, kata_kunci_pencarian: 'Kelompok pecahan' } })],
+      ['kelompok', (isi: IsiMateri) => ({ ...isi, slide_ppt: { ...isi.slide_ppt, judul: 'Belajar bersama kelompok belajarmu' } })],
+      ['Kelompok', (isi: IsiMateri) => ({ ...isi, slide_ppt: { ...isi.slide_ppt, slide: [{ judul: 'Kelompok pecahan', poin: isi.slide_ppt.slide[0].poin }, ...isi.slide_ppt.slide.slice(1)] } })],
       [
         'belum  paham (spasi ganda) di pembahasan',
         (isi: IsiMateri) => ({
@@ -228,5 +231,30 @@ describe('data/materi-cadangan.json (architecture.md 9.5)', () => {
   it.each(['belum', 'setengah', 'sudah'] as const)('materi %s lolos periksaIsiMateri', (kelompok) => {
     const hasil = periksaIsiMateri(materiCadangan[kelompok]);
     expect(hasil.ok ? 'lolos' : hasil.alasan).toBe('lolos');
+  });
+});
+
+describe('lengkapiIsiMateri', () => {
+  const lama = () => {
+    const { slide_ppt: _s, ...sisa } = isiValid();
+    void _s;
+    return { ...sisa, ide_video: { judul: 'Video lama', deskripsi: 'x', kata_kunci_pencarian: 'y' } };
+  };
+
+  it('materi yang sudah punya slide_ppt dikembalikan apa adanya', () => {
+    const isi = isiValid();
+    expect(lengkapiIsiMateri(isi)).toBe(isi);
+  });
+
+  it('materi lama mendapat slide_ppt yang valid dan ide_video dibuang', () => {
+    const hasil = lengkapiIsiMateri(lama());
+    expect('ide_video' in hasil).toBe(false);
+    expect(periksaIsiMateri(hasil).ok).toBe(true);
+    expect(hasil.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('data yang bukan objek dikembalikan tanpa error', () => {
+    expect(lengkapiIsiMateri(null)).toBeNull();
+    expect(lengkapiIsiMateri('teks')).toBe('teks');
   });
 });

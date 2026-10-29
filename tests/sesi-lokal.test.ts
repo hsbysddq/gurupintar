@@ -60,7 +60,7 @@ describe('sesi-lokal', () => {
   it('menyimpan dan membaca kelasId untuk tombol kembali ke mata pelajaran', () => {
     simpanSesi({ ...SESI, kelasId: 'kelas-1' });
     expect(ambilSesi()).toEqual({ ...SESI, kelasId: 'kelas-1' });
-    simpanFormatLokal('video');
+    simpanFormatLokal('ppt');
     expect(ambilSesi()?.kelasId).toBe('kelas-1');
   });
 

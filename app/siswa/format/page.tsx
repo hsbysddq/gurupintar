@@ -16,7 +16,7 @@ export default function HalamanPilihFormat() {
   const router = useRouter();
   const profil = useSiswa();
   const sesi = useSesiAktif();
-  const [pilihan, setPilihan] = useState<Format | null>(null);
+  const [pilihan, setPilihan] = useState<Format | null>('ppt');
   const [memuat, setMemuat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export default function HalamanPilihFormat() {
     );
   }
 
-  const nilai = pilihan ?? sesi.format;
+  const nilai = pilihan ?? sesi.format ?? 'ppt';
 
   async function lanjut() {
     if (!nilai) return;

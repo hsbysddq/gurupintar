@@ -5,10 +5,12 @@ export const skemaIsiMateri = z.object({
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
   naskah_audio: z.string().min(50).max(900),
-  ide_video: z.object({
+  slide_ppt: z.object({
     judul: z.string().min(5).max(80),
-    deskripsi: z.string().min(20).max(300),
-    kata_kunci_pencarian: z.string().min(3).max(80),
+    slide: z.array(z.object({
+      judul: z.string().min(3).max(60),
+      poin: z.array(z.string().min(5).max(160)).min(2).max(4),
+    })).min(3).max(8),
   }),
   latihan: z.array(z.object({
     soal: z.string().min(10).max(300),
@@ -19,6 +21,7 @@ export const skemaIsiMateri = z.object({
 });
 
 export type IsiMateri = z.infer<typeof skemaIsiMateri>;
+export type SlidePpt = IsiMateri['slide_ppt']['slide'][number];
 type Latihan = IsiMateri['latihan'][number];
 
 export type HasilPeriksaMateri = { ok: true; isi: IsiMateri } | { ok: false; alasan: string };
@@ -54,9 +57,8 @@ function semuaTeks(isi: IsiMateri): string[] {
     isi.judul,
     isi.ringkasan,
     isi.naskah_audio,
-    isi.ide_video.judul,
-    isi.ide_video.deskripsi,
-    isi.ide_video.kata_kunci_pencarian,
+    isi.slide_ppt.judul,
+    ...isi.slide_ppt.slide.flatMap((s) => [s.judul, ...s.poin]),
     ...isi.latihan.flatMap((l) => [l.soal, ...l.pilihan, l.pembahasan]),
   ];
 }
@@ -98,6 +100,45 @@ export function periksaIsiMateri(data: unknown): HasilPeriksaMateri {
 }
 
 const KODE_PILIHAN = ['A', 'B', 'C', 'D'] as const;
+
+const BATAS_POIN = 160;
+
+function kalimatDari(teks: string): string[] {
+  return teks
+    .split(/\n+/)
+    .flatMap((baris) => baris.split(/(?<=[.!?])\s+/))
+    .map((k) => k.trim())
+    .filter((k) => k.length >= 5)
+    .map((k) => (k.length <= BATAS_POIN ? k : `${k.slice(0, BATAS_POIN - 1).trimEnd()}…`));
+}
+
+/**
+ * Materi lama (dibuat sebelum opsi Video diganti PPT) punya `ide_video` dan belum punya `slide_ppt`.
+ * Fungsi ini melengkapinya saat dibaca: slide disusun dari ringkasan, naskah, dan soal latihan yang sudah ada,
+ * supaya tab PPT tidak kosong dan guru tetap bisa menyimpan perubahan. Materi baru dikembalikan apa adanya.
+ */
+export function lengkapiIsiMateri(data: unknown): IsiMateri {
+  if (typeof data !== 'object' || data === null) return data as IsiMateri;
+  const mentah = data as Record<string, unknown>;
+  if ('slide_ppt' in mentah) return data as IsiMateri;
+  if (typeof mentah.judul !== 'string' || typeof mentah.ringkasan !== 'string' || typeof mentah.naskah_audio !== 'string' || !Array.isArray(mentah.latihan)) {
+    return data as IsiMateri;
+  }
+
+  const kumpulan = [...kalimatDari(mentah.ringkasan), ...kalimatDari(mentah.naskah_audio)];
+  const soal = (mentah.latihan as { soal?: unknown }[])
+    .map((l) => (typeof l.soal === 'string' ? kalimatDari(l.soal)[0] ?? l.soal : ''))
+    .filter((t) => t.length >= 5);
+  const slide = [
+    { judul: 'Ringkasan materi', poin: kumpulan.slice(0, 3) },
+    { judul: 'Penjelasan', poin: kumpulan.length >= 5 ? kumpulan.slice(3, 6) : kumpulan.slice(-2) },
+    { judul: 'Latihan', poin: soal.slice(0, 4) },
+  ].filter((s) => s.poin.length >= 2);
+
+  const { ide_video: _lama, ...sisanya } = mentah;
+  void _lama;
+  return { ...sisanya, slide_ppt: { judul: mentah.judul.slice(0, 80), slide } } as IsiMateri;
+}
 
 /**
  * Mengacak urutan empat pilihan tiap soal latihan (Fisher–Yates) dan menyesuaikan `kunci`,
