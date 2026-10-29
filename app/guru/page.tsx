@@ -141,9 +141,9 @@ export default async function HalamanDaftarKelas({
                           </span>
                           <div className="min-w-0">
                             <h3 className="break-words font-display text-[18px] leading-[24px] font-bold tracking-[-0.015em] text-aura-ink">
-                              {kelas.nama}
+                              {kelas.mapel}
                             </h3>
-                            <p className="font-body text-[13px] leading-[20px] text-aura-muted">{kelas.mapel}</p>
+                            <p className="font-body text-[13px] leading-[20px] text-aura-muted">{kelas.nama}</p>
                           </div>
                         </div>
                         {kelas.kuisAktif ? (

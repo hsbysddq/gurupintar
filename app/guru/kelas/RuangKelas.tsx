@@ -1,14 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowUpRight, CalendarDays, Inbox, Loader2, Plus, Sparkles } from 'lucide-react';
 import { PanelKodeKelas } from '@/components/PanelKodeKelas';
 import { usePolling } from '@/hooks/use-polling';
-import { ambilDaftarSesi, ambilDaftarTopik, bukaSesi, ErrorApi, tutupSesi } from '@/lib/api-klien';
-import { INTERVAL_POLLING_GURU_MS, TOPIK_DEMO_ID } from '@/lib/konstanta';
-import type { KelasRingkas, SesiGuru, TopikRingkas } from '@/lib/tipe';
+import { ambilDaftarSesi, ErrorApi, tutupSesi } from '@/lib/api-klien';
+import { INTERVAL_POLLING_GURU_MS } from '@/lib/konstanta';
+import type { KelasRingkas, SesiGuru } from '@/lib/tipe';
 
 const FORMAT_TANGGAL = new Intl.DateTimeFormat('id-ID', {
   weekday: 'long',
@@ -34,35 +34,16 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
   const [menutup, setMenutup] = useState(false);
   const [konfirmasiGanti, setKonfirmasiGanti] = useState(false);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
-  const idPilihTopik = useId();
-  const [daftarTopik, setDaftarTopik] = useState<TopikRingkas[] | null>(null);
-  const [galatTopik, setGalatTopik] = useState(false);
-  const [topikId, setTopikId] = useState(TOPIK_DEMO_ID);
-
-  useEffect(() => {
-    let batal = false;
-    ambilDaftarTopik()
-      .then((topik) => {
-        if (!batal) setDaftarTopik(topik);
-      })
-      .catch(() => {
-        if (!batal) setGalatTopik(true);
-      });
-    return () => {
-      batal = true;
-    };
-  }, []);
 
   const sesiAktif = daftar?.find((s) => s.status === 'aktif');
 
-  async function jalankanBukaKuis() {
+  async function jalankanBuatKuis() {
     setMembuka(true);
     setGalatAksi(null);
     try {
-      await bukaSesi({ kelasId: kelas.id, topikId });
+      if (sesiAktif) await tutupSesi(sesiAktif.id);
       setKonfirmasiGanti(false);
-      muatUlang();
-      router.refresh();
+      router.push(`/guru/soal?kelas=${encodeURIComponent(kelas.id)}&dari=kelas`);
     } catch (err) {
       setGalatAksi(pesanGalat(err));
     } finally {
@@ -75,7 +56,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
       setKonfirmasiGanti(true);
       return;
     }
-    void jalankanBukaKuis();
+    void jalankanBuatKuis();
   }
 
   async function tutupKuis(sesiId: string) {
@@ -111,50 +92,21 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
               Cek pemahaman, tanpa menunggu ulangan.
             </h2>
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-              Buka kuis 5 soal, bagikan kode atau QR, lalu pantau siswa yang sudah menjawab.
+              Buat 5 soal, bagikan kode atau QR, lalu pantau siswa yang sudah menjawab.
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex flex-col gap-1">
-              <label htmlFor={idPilihTopik} className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                Topik kuis
-              </label>
-              <select
-                id={idPilihTopik}
-                value={topikId}
-                disabled={!daftarTopik || membuka}
-                onChange={(e) => setTopikId(e.target.value)}
-                className="h-12 min-w-[220px] rounded-full border border-white/70 bg-white/70 px-4 font-body text-base text-aura-ink shadow-sm backdrop-blur-sm disabled:opacity-60"
-              >
-                {daftarTopik ? (
-                  daftarTopik.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nama}
-                    </option>
-                  ))
-                ) : (
-                  <option value={TOPIK_DEMO_ID}>{galatTopik ? 'Pecahan Senilai' : 'Memuat topik…'}</option>
-                )}
-              </select>
-            </div>
-            <button
-              type="button"
-              onClick={bukaKuisBaru}
-              disabled={membuka}
-              className="aura-btn aura-btn-primary h-[52px] w-full px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-            >
-              {membuka ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Plus aria-hidden="true" className="size-4" />}
-              Buka kuis baru
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={bukaKuisBaru}
+            disabled={membuka || !daftar}
+            className="aura-btn aura-btn-primary h-[52px] w-full px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto xl:shrink-0"
+          >
+            {membuka ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Plus aria-hidden="true" className="size-4" />}
+            Buat kuis baru
+          </button>
         </div>
 
-        {galatTopik && (
-          <p className="relative mt-4 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-            Daftar topik belum berhasil dimuat. Kuis baru memakai topik Pecahan Senilai.
-          </p>
-        )}
         {galatAksi && (
           <div
             role="alert"
@@ -175,20 +127,20 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
             <div>
               <h2 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Kuis masih aktif</h2>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong> masih aktif. Membuka
-                kuis baru akan menutupnya dan membuat kode baru.
+                Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong> masih aktif. Untuk
+                membuat kuis baru, kuis ini akan ditutup dan kamu diarahkan membuat 5 soal terlebih dahulu.
               </p>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => void jalankanBukaKuis()}
+              onClick={() => void jalankanBuatKuis()}
               disabled={membuka}
               className="aura-btn aura-btn-primary h-11 px-4 text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {membuka ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
-              Ya, ganti kuis
+              Ya, tutup & buat soal
             </button>
             <button
               type="button"
@@ -326,7 +278,7 @@ function PanelKosong() {
       <div>
         <h3 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Belum ada kuis</h3>
         <p className="mt-1 max-w-sm font-body text-[13px] leading-[20px] text-aura-muted">
-          Tekan Buka kuis baru untuk memulai cek pemahaman hari ini.
+          Tekan Buat kuis baru untuk membuat 5 soal dan membuka kuis.
         </p>
       </div>
     </div>

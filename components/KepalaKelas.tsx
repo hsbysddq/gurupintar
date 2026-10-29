@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, KeyRound, Users } from 'lucide-react';
+import { ArrowLeft, KeyRound, School, Users } from 'lucide-react';
 import { TabKelas } from '@/components/TabKelas';
 import type { KelasRingkas } from '@/lib/tipe';
 
@@ -24,11 +24,11 @@ export function KepalaKelas({ kelas }: { kelas: KelasRingkas }) {
           <div className="min-w-0">
             <span className="aura-eyebrow">Ruang kelas</span>
             <h1 className="mt-3 break-words font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
-              {kelas.nama}
+              {kelas.mapel}
             </h1>
             <p className="mt-1 flex items-center gap-2 font-body text-[15px] leading-[24px] text-aura-muted">
-              <BookOpen aria-hidden="true" className="size-4 shrink-0 text-aura-primary" />
-              {kelas.mapel}
+              <School aria-hidden="true" className="size-4 shrink-0 text-aura-primary" />
+              {kelas.nama}
             </p>
           </div>
 

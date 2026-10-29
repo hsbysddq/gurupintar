@@ -81,6 +81,7 @@ export default function HalamanBuatSoal() {
   const [pengiriman, setPengiriman] = useState<Pengiriman>({ status: "diam" });
   const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[] | null>(null);
   const [galatKelas, setGalatKelas] = useState<string | null>(null);
+  const [dariKelas, setDariKelas] = useState(false);
   const [daftarTopik, setDaftarTopik] = useState<TopikRingkas[] | null>(null);
   const [galatTopik, setGalatTopik] = useState<string | null>(null);
   const [percobaanTopik, setPercobaanTopik] = useState(0);
@@ -97,7 +98,14 @@ export default function HalamanBuatSoal() {
       .then((daftar) => {
         if (batal) return;
         setDaftarKelas(daftar);
-        if (daftar.length === 1) setIsian((lama) => ({ ...lama, kelasId: daftar[0].id }));
+        const params = new URLSearchParams(window.location.search);
+        const kelasId = params.get("kelas");
+        if (params.get("dari") === "kelas") setDariKelas(true);
+        if (kelasId && daftar.some((k) => k.id === kelasId)) {
+          setIsian((lama) => ({ ...lama, kelasId }));
+        } else if (daftar.length === 1) {
+          setIsian((lama) => ({ ...lama, kelasId: daftar[0].id }));
+        }
       })
       .catch((err: unknown) => {
         if (!batal) setGalatKelas(err instanceof Error ? err.message : "Daftar kelas belum bisa dimuat.");
@@ -122,6 +130,11 @@ export default function HalamanBuatSoal() {
       batal = true;
     };
   }, [percobaanTopik]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("dari") !== "kelas") return;
+    document.getElementById("form-soal")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const kelasDipilih = daftarKelas?.find((k) => k.id === isian.kelasId) ?? null;
 
@@ -484,6 +497,16 @@ export default function HalamanBuatSoal() {
                 Nama topik kamu tentukan sendiri. Capaian pembelajaran mengikuti kelas yang dipilih.
               </p>
             </div>
+
+            {dariKelas && kelasDipilih && (
+              <div className="mt-4 flex items-start gap-2 rounded-2xl border border-aura-primary/20 bg-aura-primary/5 px-4 py-3 font-body text-[13px] leading-[20px] text-aura-ink">
+                <Sparkles aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-aura-primary" />
+                <p>
+                  Kuis baru belum bisa diakses siswa. Isi nama topik dan 5 soal di bawah, lalu simpan untuk membuka
+                  kuis untuk <strong>{namaKelasLengkap(kelasDipilih)}</strong>.
+                </p>
+              </div>
+            )}
 
             <div className="mt-5 flex flex-col gap-4">
               <Kolom id={idKolom("nama")} label="Nama topik" galat={galat.nama}>
