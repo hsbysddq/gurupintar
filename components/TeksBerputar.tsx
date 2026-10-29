@@ -8,8 +8,8 @@ const KALIMAT = [
   "Inovasi dalam Mengajar",
 ];
 
-const JEDA_MS = 4000;
-const JEDA_GANTI_MS = 260;
+const JEDA_MS = 3200;
+const JEDA_GANTI_MS = 200;
 
 /** Teks badge landing yang berganti otomatis tanpa menggeser lebar pill. */
 export function TeksBerputar() {
@@ -38,7 +38,7 @@ export function TeksBerputar() {
           <span
             key={kalimat}
             aria-hidden={!sedangTampil}
-            className={`col-start-1 row-start-1 transition-all duration-300 ease-out motion-reduce:transition-none ${
+            className={`col-start-1 row-start-1 transition-all duration-200 ease-out motion-reduce:transition-none ${
               sedangTampil ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
             }`}
           >
