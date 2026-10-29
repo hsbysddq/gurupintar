@@ -256,7 +256,15 @@ export interface SiswaKemajuan {
 }
 
 /** GET /api/guru/pendampingan */
+export interface RingkasanPendampingan {
+  jumlahSiswa: number;
+  jumlahSesi: number;
+  jumlahSesiBerjawaban: number;
+  jumlahSesiSelesai: number;
+}
+
 export interface DataPendampingan {
   perluPendampingan: SiswaPerluPendampingan[];
   kemajuan: SiswaKemajuan[];
+  ringkasan?: RingkasanPendampingan;
 }

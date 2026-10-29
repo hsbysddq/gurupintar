@@ -11,7 +11,7 @@ export function TabelPendampingan({ data }: TabelPendampinganProps) {
   if (data.length === 0) {
     return (
       <KartuKaca className="p-6">
-        <p className="text-tinta-lembut">Tidak ada siswa yang perlu pendampingan saat ini.</p>
+        <p className="text-tinta-lembut">Belum ada siswa yang memenuhi kriteria pendampingan.</p>
       </KartuKaca>
     );
   }

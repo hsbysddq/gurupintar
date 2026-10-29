@@ -35,18 +35,33 @@ export async function dataPendampinganKelas(db: SupabaseClient, kelasId: string)
     hasil = r.data as BarisHasil[];
   }
 
-  return hitungPendampingan({
-    sesi: barisSesi.map((s) => ({
-      id: s.id,
-      status: s.status as StatusSesi,
-      dibuatPada: s.dibuat_pada,
-    })),
-    hasil: hasil.map((h) => ({
-      sesiId: h.sesi_id,
-      siswaId: h.siswa_id,
-      skor: h.skor,
-      kelompok: h.kelompok as Kelompok,
-    })),
+  const sesiAnalitik = barisSesi.map((s) => ({
+    id: s.id,
+    status: s.status as StatusSesi,
+    dibuatPada: s.dibuat_pada,
+  }));
+  const hasilAnalitik = hasil.map((h) => ({
+    sesiId: h.sesi_id,
+    siswaId: h.siswa_id,
+    skor: h.skor,
+    kelompok: h.kelompok as Kelompok,
+  }));
+
+  const analitik = hitungPendampingan({
+    sesi: sesiAnalitik,
+    hasil: hasilAnalitik,
     siswa,
   });
+
+  const sesiBerjawaban = new Set(hasilAnalitik.map((h) => h.sesiId));
+
+  return {
+    ...analitik,
+    ringkasan: {
+      jumlahSiswa: siswa.length,
+      jumlahSesi: barisSesi.length,
+      jumlahSesiBerjawaban: sesiBerjawaban.size,
+      jumlahSesiSelesai: sesiAnalitik.filter((s) => s.status === 'selesai' && sesiBerjawaban.has(s.id)).length,
+    },
+  };
 }

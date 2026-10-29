@@ -8,7 +8,8 @@ export const SARAN_BELUM_PAHAM = 'Beri materi penguatan konsep dan dampingi lang
 export const SARAN_TIDAK_MENGERJAKAN = 'Ajak bicara untuk mengetahui kendalanya.';
 export const SARAN_MENURUN = 'Periksa topik terakhir yang sulit baginya.';
 
-const JUMLAH_SESI_JENDELA = 3;
+export const JUMLAH_SESI_JENDELA = 3;
+export const JUMLAH_CEK_TIDAK_MENGERJAKAN = 2;
 
 export interface InputPendampingan {
   sesi: { id: string; status: StatusSesi; dibuatPada: string }[];
@@ -38,7 +39,7 @@ export function hitungPendampingan(input: InputPendampingan): DataPendampingan {
   }
 
   // 5. Dua sesi selesai terakhir (yang berisi jawaban) untuk aturan "tidak mengerjakan".
-  const duaSelesaiTerakhir = sesi.filter((s) => s.status === 'selesai').slice(-2);
+  const duaSelesaiTerakhir = sesi.filter((s) => s.status === 'selesai').slice(-JUMLAH_CEK_TIDAK_MENGERJAKAN);
 
   const perluPendampingan: DataPendampingan['perluPendampingan'] = [];
   const kemajuan: DataPendampingan['kemajuan'] = [];
@@ -65,7 +66,7 @@ export function hitungPendampingan(input: InputPendampingan): DataPendampingan {
       saran.push(SARAN_BELUM_PAHAM);
     }
     // 5. Tidak punya hasil di 2 sesi selesai terakhir.
-    if (duaSelesaiTerakhir.length === 2 && duaSelesaiTerakhir.every((s) => !milikSiswa.has(s.id))) {
+    if (duaSelesaiTerakhir.length === JUMLAH_CEK_TIDAK_MENGERJAKAN && duaSelesaiTerakhir.every((s) => !milikSiswa.has(s.id))) {
       alasan.push(ALASAN_TIDAK_MENGERJAKAN);
       saran.push(SARAN_TIDAK_MENGERJAKAN);
     }

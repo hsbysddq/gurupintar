@@ -12,7 +12,7 @@ export function DaftarKemajuan({ data }: DaftarKemajuanProps) {
   return (
     <KartuKaca className="p-6">
       {data.length === 0 ? (
-        <p className="text-tinta-lembut">Belum ada siswa yang mengalami kemajuan.</p>
+        <p className="text-tinta-lembut">Belum ada siswa yang menunjukkan kemajuan.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {data.map((s) => (
