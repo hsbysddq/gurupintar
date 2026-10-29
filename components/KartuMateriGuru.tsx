@@ -187,7 +187,7 @@ export function KartuMateriGuru({ materi, onSimpan }: KartuMateriGuruProps) {
             <p className="font-semibold">{materi.isi.judul}</p>
             <p className="line-clamp-5 whitespace-pre-line text-tinta-lembut">{materi.isi.ringkasan}</p>
             <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
-              {materi.isi.latihan.length} soal latihan · Ide video: {materi.isi.ide_video.judul}
+              {materi.isi.latihan.length} soal latihan · {materi.isi.slide_ppt.slide.length} slide PPT
             </p>
           </div>
           <div aria-live="polite">

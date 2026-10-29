@@ -3,7 +3,9 @@ import { skemaQueryMateriSiswa } from '@/lib/skema-api';
 import { wajibPeranApi } from '@/lib/server/auth';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { petakanErrorDb, PESAN_INPUT_TIDAK_VALID, PESAN_SESI_TIDAK_ADA, responsError, responsOk } from '@/lib/server/respons';
-import type { Format, IsiMateri, MateriSiswa } from '@/lib/tipe';
+import { normalisasiFormat } from '@/lib/format-materi';
+import type { MateriSiswa } from '@/lib/tipe';
+import { lengkapiIsiMateri } from '@/lib/validasi-materi';
 
 // GET /api/materi?sesi= (PRD F-7)
 // Kelompok hanya dipakai di server untuk memilih materi; tidak pernah ikut dalam respons (D-2, AC-7.7).
@@ -59,8 +61,8 @@ export async function GET(request: NextRequest) {
     return responsOk<MateriSiswa>({
       status: 'tersedia',
       namaTopik: topik.data.nama,
-      isi: materi.data.isi as IsiMateri,
-      format: (anggota.data.preferensi_format as Format | null) ?? null,
+      isi: lengkapiIsiMateri(materi.data.isi),
+      format: normalisasiFormat(anggota.data.preferensi_format),
     });
   } catch (err) {
     console.error(err);

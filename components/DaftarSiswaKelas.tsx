@@ -5,7 +5,7 @@ import { TombolSalinKode } from '@/components/TombolSalinKode';
 import type { Format, SiswaKelas } from '@/lib/tipe';
 
 const LABEL_FORMAT: Record<Format, string> = {
-  video: 'Video',
+  ppt: 'PPT',
   audio: 'Audio',
   bacaan: 'Bacaan',
   latihan: 'Latihan',

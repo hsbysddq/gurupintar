@@ -9,7 +9,6 @@ import {
   Headphones,
   Loader2,
   Pencil,
-  PlayCircle,
   Presentation,
   RefreshCw,
   ShieldCheck,
@@ -31,7 +30,7 @@ type Keadaan =
 type Sumber = "teks" | "pdf";
 
 const BENTUK: { label: string; ikon: LucideIcon }[] = [
-  { label: "Video", ikon: PlayCircle },
+  { label: "PPT", ikon: Presentation },
   { label: "Audio", ikon: Headphones },
   { label: "Bacaan", ikon: FileText },
   { label: "Latihan", ikon: Pencil },
@@ -130,7 +129,7 @@ export default function HalamanUbahModul() {
               Ubah modul
             </h1>
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-              Tempelkan teks atau unggah PDF modul matematika kelas 7, lalu ubah menjadi video, audio, bacaan, dan
+              Tempelkan teks atau unggah PDF modul matematika kelas 7, lalu ubah menjadi PPT, audio, bacaan, dan
               latihan.
             </p>
             <div className="mt-1 flex flex-wrap gap-2">

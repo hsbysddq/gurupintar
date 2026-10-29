@@ -3,27 +3,74 @@
     "judul": "Mengenal Pecahan Senilai Langkah demi Langkah",
     "ringkasan": "Pecahan senilai adalah pecahan yang tulisannya berbeda, tetapi nilainya sama. Bayangkan satu pizza dipotong 2 bagian sama besar, lalu kamu ambil 1 potong. Itu 1/2 pizza. Sekarang pizza yang sama dipotong 4 bagian, lalu kamu ambil 2 potong. Itu 2/4 pizza. Banyaknya pizza yang kamu makan tetap sama, jadi 1/2 = 2/4.\n\nCara mencari pecahan senilai:\n1. Kalikan pembilang dan penyebut dengan bilangan yang sama. Contoh: 1/2, dikali 3 di atas dan di bawah, menjadi 3/6.\n2. Atau bagi pembilang dan penyebut dengan bilangan yang sama. Contoh: 6/8, dibagi 2 di atas dan di bawah, menjadi 3/4.\n\nHati-hati: menambah angka yang sama tidak menghasilkan pecahan senilai. Jika 1/2 ditambah 1 di atas dan di bawah, hasilnya 2/3, dan 2/3 lebih besar dari 1/2.",
     "naskah_audio": "Halo! Kita belajar pecahan senilai, ya. Bayangkan satu pizza dipotong dua, lalu kamu makan satu potong. Itu satu per dua pizza. Kalau pizza yang sama dipotong empat, lalu kamu makan dua potong, itu dua per empat pizza. Ternyata banyaknya sama! Jadi satu per dua sama dengan dua per empat. Rahasianya: kalikan atau bagi angka atas dan angka bawah dengan bilangan yang sama. Jangan ditambah, ya, karena hasilnya akan berbeda.",
-    "ide_video": {
-      "judul": "Pecahan Senilai dengan Potongan Pizza",
-      "deskripsi": "Video pendek yang menunjukkan satu pizza dipotong menjadi 2, 4, dan 8 bagian untuk memperlihatkan bahwa 1/2, 2/4, dan 4/8 bernilai sama.",
-      "kata_kunci_pencarian": "pecahan senilai kelas 7 dengan gambar"
+    "slide_ppt": {
+      "judul": "Pecahan Senilai Langkah demi Langkah",
+      "slide": [
+        {
+          "judul": "Apa itu pecahan senilai?",
+          "poin": [
+            "Pecahan senilai tulisannya berbeda, tetapi nilainya sama.",
+            "Contoh: 1/2 pizza sama banyak dengan 2/4 pizza.",
+            "Potongan pizza lebih banyak, tetapi tiap potongan lebih kecil."
+          ]
+        },
+        {
+          "judul": "Cara pertama: dikali",
+          "poin": [
+            "Kalikan pembilang dan penyebut dengan bilangan yang sama.",
+            "Contoh: 1/2 dikali 3 di atas dan di bawah menjadi 3/6.",
+            "Hasilnya senilai, yaitu 1/2 = 3/6."
+          ]
+        },
+        {
+          "judul": "Cara kedua: dibagi",
+          "poin": [
+            "Bagi pembilang dan penyebut dengan bilangan yang sama.",
+            "Contoh: 6/8 dibagi 2 di atas dan di bawah menjadi 3/4.",
+            "Cara ini juga dipakai untuk menyederhanakan pecahan."
+          ]
+        },
+        {
+          "judul": "Hati-hati, jangan ditambah",
+          "poin": [
+            "Menambah angka yang sama tidak menghasilkan pecahan senilai.",
+            "Contoh: 1/2 ditambah 1 di atas dan bawah menjadi 2/3.",
+            "Nilai 2/3 lebih besar dari 1/2, jadi tidak senilai."
+          ]
+        }
+      ]
     },
     "latihan": [
       {
         "soal": "Pecahan yang senilai dengan 1/2 adalah …",
-        "pilihan": ["2/3", "2/4", "1/4", "3/4"],
+        "pilihan": [
+          "2/3",
+          "2/4",
+          "1/4",
+          "3/4"
+        ],
         "kunci": "B",
         "pembahasan": "1/2 dikali 2 pada pembilang dan penyebut menjadi 2/4. Pilihan 2/3 salah karena diperoleh dengan menambah 1, bukan mengalikan."
       },
       {
         "soal": "1/3 = …/6. Bilangan yang tepat untuk mengisi titik-titik adalah …",
-        "pilihan": ["1", "2", "3", "4"],
+        "pilihan": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
         "kunci": "B",
         "pembahasan": "Penyebut 3 menjadi 6 karena dikali 2. Pembilang juga harus dikali 2, jadi 1 × 2 = 2. Hasilnya 1/3 = 2/6."
       },
       {
         "soal": "Pecahan yang senilai dengan 3/4 adalah …",
-        "pilihan": ["4/5", "3/8", "6/8", "6/4"],
+        "pilihan": [
+          "4/5",
+          "3/8",
+          "6/8",
+          "6/4"
+        ],
         "kunci": "C",
         "pembahasan": "3/4 dikali 2 pada pembilang dan penyebut menjadi 6/8. Pada 3/8 dan 6/4, hanya satu bagian yang diubah, sehingga nilainya berbeda."
       }
@@ -33,10 +80,42 @@
     "judul": "Meluruskan Cara Mencari Pecahan Senilai",
     "ringkasan": "Ada tiga kesalahan yang sering terjadi saat mencari pecahan senilai.\n\n1. Menambah angka yang sama. Contoh: 2/5 menjadi 3/6 karena masing-masing ditambah 1. Ini keliru, karena 2/5 tidak sama dengan 3/6. Pecahan senilai hanya diperoleh dengan mengalikan atau membagi pembilang dan penyebut dengan bilangan yang sama.\n\n2. Hanya mengubah satu bagian. Contoh: 2/3 menjadi 2/6 karena hanya penyebut yang dikali 2. Ini keliru. Jika penyebut dikali 2, pembilang juga harus dikali 2, sehingga hasilnya 4/6.\n\n3. Berhenti sebelum paling sederhana. Contoh: 12/18 dibagi 2 menjadi 6/9. Hasil ini senilai, tetapi masih bisa dibagi 3. Bentuk paling sederhananya 2/3. Cara cepatnya, bagi dengan FPB pembilang dan penyebut.",
     "naskah_audio": "Yuk, kita luruskan tiga kesalahan yang sering terjadi. Pertama, jangan menambah angka yang sama. Dua per lima tidak sama dengan tiga per enam. Kedua, jangan hanya mengubah angka bawah. Kalau angka bawah dikali dua, angka atas juga dikali dua. Ketiga, saat menyederhanakan, jangan berhenti terlalu cepat. Dua belas per delapan belas bisa dibagi enam sekaligus, hasilnya dua per tiga. Kamu pasti bisa!",
-    "ide_video": {
-      "judul": "Kesalahan Umum Pecahan Senilai",
-      "deskripsi": "Video yang membahas contoh cara yang keliru dan cara yang benar dalam mencari pecahan senilai serta menyederhanakan pecahan dengan FPB.",
-      "kata_kunci_pencarian": "menyederhanakan pecahan dengan FPB"
+    "slide_ppt": {
+      "judul": "Meluruskan Pecahan Senilai",
+      "slide": [
+        {
+          "judul": "Kesalahan 1: menambah",
+          "poin": [
+            "Jangan menambah angka yang sama pada pembilang dan penyebut.",
+            "Contoh: 2/5 tidak sama dengan 3/6.",
+            "Pecahan senilai hanya dari perkalian atau pembagian."
+          ]
+        },
+        {
+          "judul": "Kesalahan 2: satu bagian saja",
+          "poin": [
+            "Jika penyebut dikali 2, pembilang juga harus dikali 2.",
+            "Contoh: 2/3 menjadi 4/6, bukan 2/6.",
+            "Ubah pembilang dan penyebut dengan cara yang sama."
+          ]
+        },
+        {
+          "judul": "Kesalahan 3: berhenti terlalu cepat",
+          "poin": [
+            "12/18 dibagi 2 menjadi 6/9, tetapi masih bisa dibagi 3.",
+            "Bentuk paling sederhananya adalah 2/3.",
+            "Cara cepat: bagi dengan FPB pembilang dan penyebut."
+          ]
+        },
+        {
+          "judul": "Cara memeriksa jawabanmu",
+          "poin": [
+            "Kalikan silang kedua pecahan dan bandingkan hasilnya.",
+            "Jika hasilnya sama, kedua pecahan senilai.",
+            "Biasakan memeriksa sebelum menjawab soal."
+          ]
+        }
+      ]
     },
     "latihan": [
       {
@@ -52,13 +131,23 @@
       },
       {
         "soal": "2/3 = …/15. Bilangan yang tepat untuk mengisi titik-titik adalah …",
-        "pilihan": ["14", "2", "5", "10"],
+        "pilihan": [
+          "14",
+          "2",
+          "5",
+          "10"
+        ],
         "kunci": "D",
         "pembahasan": "Penyebut 3 menjadi 15 karena dikali 5. Pembilang juga dikali 5, jadi 2 × 5 = 10. Hasilnya 2/3 = 10/15."
       },
       {
         "soal": "Bentuk paling sederhana dari 18/24 adalah …",
-        "pilihan": ["9/12", "6/8", "3/4", "2/3"],
+        "pilihan": [
+          "9/12",
+          "6/8",
+          "3/4",
+          "2/3"
+        ],
         "kunci": "C",
         "pembahasan": "FPB dari 18 dan 24 adalah 6. 18 : 6 = 3 dan 24 : 6 = 4, jadi hasilnya 3/4. Pecahan 9/12 dan 6/8 senilai, tetapi belum paling sederhana."
       }
@@ -68,10 +157,42 @@
     "judul": "Tantangan Pecahan Senilai dalam Kehidupan Sehari-hari",
     "ringkasan": "Pecahan senilai sangat berguna untuk membandingkan dua keadaan yang ukurannya berbeda. Contoh: Budi menjawab benar 15 dari 20 soal, sedangkan Tiara menjawab benar 18 dari 24 soal. Siapa yang lebih baik? Sederhanakan keduanya. 15/20 dibagi 5 menjadi 3/4, dan 18/24 dibagi 6 juga menjadi 3/4. Ternyata hasil mereka sama baiknya.\n\nPecahan senilai juga membantu mencari bilangan yang hilang. Jika 3/n = 12/20, sederhanakan dulu 12/20 menjadi 3/5. Karena pembilangnya sama-sama 3, maka n = 5.\n\nTantangan untukmu: saat membandingkan, ubah pecahan ke bentuk paling sederhana atau ke penyebut yang sama, lalu bandingkan.",
     "naskah_audio": "Siap untuk tantangan? Budi menjawab benar lima belas dari dua puluh soal. Tiara menjawab benar delapan belas dari dua puluh empat soal. Siapa yang lebih hebat? Coba sederhanakan. Lima belas per dua puluh menjadi tiga per empat. Delapan belas per dua puluh empat juga menjadi tiga per empat. Hasilnya sama! Jadi, ketika ukurannya berbeda, ubah dulu ke bentuk paling sederhana sebelum membandingkan.",
-    "ide_video": {
-      "judul": "Membandingkan Pecahan dalam Soal Cerita",
-      "deskripsi": "Video tentang penerapan pecahan senilai untuk membandingkan nilai ulangan, bagian buku yang dibaca, dan mencari bilangan yang hilang.",
-      "kata_kunci_pencarian": "soal cerita pecahan senilai SMP"
+    "slide_ppt": {
+      "judul": "Tantangan Pecahan Senilai",
+      "slide": [
+        {
+          "judul": "Membandingkan hasil",
+          "poin": [
+            "Budi benar 15 dari 20 soal, Tiara benar 18 dari 24 soal.",
+            "Sederhanakan: 15/20 menjadi 3/4 dan 18/24 menjadi 3/4.",
+            "Hasil mereka sama baiknya."
+          ]
+        },
+        {
+          "judul": "Mencari bilangan yang hilang",
+          "poin": [
+            "Jika 3/n = 12/20, sederhanakan 12/20 menjadi 3/5.",
+            "Pembilangnya sama-sama 3, jadi n = 5.",
+            "Cara ini lebih cepat daripada menebak."
+          ]
+        },
+        {
+          "judul": "Strategi membandingkan",
+          "poin": [
+            "Ubah pecahan ke bentuk paling sederhana.",
+            "Atau samakan penyebutnya, lalu bandingkan pembilangnya.",
+            "Pilih cara yang paling cepat untuk soalnya."
+          ]
+        },
+        {
+          "judul": "Tantangan untukmu",
+          "poin": [
+            "Cari soal cerita yang memakai pecahan senilai di sekitarmu.",
+            "Contohnya nilai ulangan, resep, atau bagian buku yang dibaca.",
+            "Ceritakan jawabanmu kepada temanmu."
+          ]
+        }
+      ]
     },
     "latihan": [
       {
@@ -87,13 +208,23 @@
       },
       {
         "soal": "Pecahan yang senilai dengan 4/6 dan memiliki penyebut 21 adalah …",
-        "pilihan": ["14/21", "12/21", "16/21", "19/21"],
+        "pilihan": [
+          "14/21",
+          "12/21",
+          "16/21",
+          "19/21"
+        ],
         "kunci": "A",
         "pembahasan": "Sederhanakan dulu 4/6 menjadi 2/3. Penyebut 3 menjadi 21 karena dikali 7, jadi pembilangnya 2 × 7 = 14. Hasilnya 14/21."
       },
       {
         "soal": "Nilai n yang membuat 3/n = 12/20 adalah …",
-        "pilihan": ["4", "8", "17", "5"],
+        "pilihan": [
+          "4",
+          "8",
+          "17",
+          "5"
+        ],
         "kunci": "D",
         "pembahasan": "12/20 dibagi 4 menjadi 3/5. Karena pembilangnya sama-sama 3, penyebutnya juga harus sama, jadi n = 5."
       }

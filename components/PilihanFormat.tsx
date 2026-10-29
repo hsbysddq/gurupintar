@@ -1,4 +1,4 @@
-import { FileText, Headphones, Pencil, PlayCircle, type LucideIcon } from "lucide-react";
+import { Presentation, type LucideIcon } from "lucide-react";
 import type { Format } from "@/lib/tipe";
 
 type PilihanFormatProps = {
@@ -7,15 +7,12 @@ type PilihanFormatProps = {
 };
 
 const DAFTAR: { format: Format; label: string; ikon: LucideIcon }[] = [
-  { format: "video", label: "Video", ikon: PlayCircle },
-  { format: "audio", label: "Audio", ikon: Headphones },
-  { format: "bacaan", label: "Bacaan", ikon: FileText },
-  { format: "latihan", label: "Latihan", ikon: Pencil },
+  { format: "ppt", label: "PPT", ikon: Presentation },
 ];
 
 export function PilihanFormat({ nilai, onPilih }: PilihanFormatProps) {
   return (
-    <div role="radiogroup" aria-label="Bentuk materi" className="grid grid-cols-2 gap-3">
+    <div role="radiogroup" aria-label="Bentuk materi" className="grid grid-cols-1 gap-3">
       {DAFTAR.map(({ format, label, ikon: Ikon }) => {
         const terpilih = nilai === format;
         return (

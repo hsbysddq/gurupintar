@@ -146,7 +146,7 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 
 **US-2:** Sebagai siswa, saya ingin memilih cara belajar yang saya sukai agar lebih mau mulai belajar.
 
-- AC-2.1: Judul "Kamu lebih suka belajar lewat apa?" dengan empat pilihan: Video, Audio, Bacaan, Latihan.
+- AC-2.1: Judul "Kamu lebih suka belajar lewat apa?" dengan empat pilihan: PPT, Audio, Bacaan, Latihan.
 - AC-2.2: Keterangan "Kamu bisa ganti kapan saja."
 - AC-2.3: Pilihan tersimpan, lalu siswa diarahkan ke `/siswa/kuis`.
 - AC-2.4: Tidak ada teks "gaya belajar", "tipe visual", atau istilah sejenis.
@@ -207,10 +207,10 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 **US-7:** Sebagai siswa, saya ingin menerima materi yang sesuai dalam bentuk yang saya pilih.
 
 - AC-7.1: Sebelum materi dibagikan: "Materimu sedang disiapkan gurumu." Halaman memeriksa ulang otomatis.
-- AC-7.2: Setelah dibagikan: judul "Materi untukmu: Pecahan Senilai" dan tab Video, Audio, Bacaan, Latihan. Tab pertama yang terbuka sesuai pilihan di F-2.
+- AC-7.2: Setelah dibagikan: judul "Materi untukmu: Pecahan Senilai" dan tab PPT, Audio, Bacaan, Latihan. Tab pertama yang terbuka sesuai pilihan di F-2.
 - AC-7.3: Tab Bacaan menampilkan ringkasan bacaan.
 - AC-7.4: Tab Audio menampilkan naskah dan tombol "Dengarkan" yang membacakan teks dengan suara bawaan browser berbahasa Indonesia. Jika browser tidak mendukung, tombol disembunyikan.
-- AC-7.5: Tab Video menampilkan ide video dan tautan "Cari video di YouTube". Tidak ada video yang dibuat.
+- AC-7.5: Tab PPT menampilkan kerangka slide (judul dan poin tiap slide) yang bisa dibuka satu per satu dan diunduh sebagai file PPTX. Tidak ada video yang dibuat.
 - AC-7.6: Tab Latihan berisi soal interaktif; setelah menjawab, siswa melihat benar/salah dan pembahasan.
 - AC-7.7: Nama kelompok siswa tidak pernah dikirim ke browser siswa (keputusan D-2).
 - AC-7.8: Siswa yang belum mengirim jawaban melihat "Kamu belum mengerjakan kuis ini." dan tombol menuju kuis.
@@ -234,11 +234,11 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 
 ### F-9 Ubah Modul (guru, tambahan)
 
-**US-9:** Sebagai guru, saya ingin menempelkan teks modul matematika yang sudah saya punya dan melihatnya diubah menjadi video, audio, bacaan, dan latihan, agar saya mendapat gambaran materi dalam beberapa bentuk belajar.
+**US-9:** Sebagai guru, saya ingin menempelkan teks modul matematika yang sudah saya punya dan melihatnya diubah menjadi PPT, audio, bacaan, dan latihan, agar saya mendapat gambaran materi dalam beberapa bentuk belajar.
 
 - AC-9.1: Menu "Ubah Modul" di sidebar guru membuka `/guru/modul`.
 - AC-9.2: Halaman berisi kotak teks untuk menempelkan teks modul matematika kelas 7, penghitung karakter, dan tombol "Ubah jadi 4 bentuk belajar". Tombol hanya aktif jika panjang teks (tanpa spasi di awal dan akhir) 200–8000 karakter. Tidak ada unggah file.
-- AC-9.3: Setelah berhasil, tampil pratinjau dengan tab Video, Audio, Bacaan, Latihan yang sama dengan halaman "Materi untukmu" (F-7), beserta label "Hasil ini tidak disimpan."
+- AC-9.3: Setelah berhasil, tampil pratinjau dengan tab PPT, Audio, Bacaan, Latihan yang sama dengan halaman "Materi untukmu" (F-7), beserta label "Hasil ini tidak disimpan."
 - AC-9.4: Hasil memakai aturan dan pemeriksaan yang sama dengan F-6 (format, larangan label kelompok, posisi jawaban latihan diacak) dan selesai dalam 60 detik.
 - AC-9.5: Jika gagal → "Materi belum berhasil dibuat." dengan tombol "Coba lagi". Tidak ada materi cadangan untuk fitur ini.
 - AC-9.6: Hasil tidak disimpan ke database dan tidak dibagikan ke siswa. Teks bantuan mengingatkan guru agar tidak menempelkan nama siswa atau data pribadi.

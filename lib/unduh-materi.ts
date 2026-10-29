@@ -17,26 +17,29 @@ function namaBerkas(judul: string, ekstensi: string) {
   return `${dasar}.${ekstensi}`;
 }
 
-export async function unduhPptx(isi: IsiMateri) {
+/** `denganLatihan: false` untuk siswa: hanya slide materi, tanpa soal latihan dan kunci jawabannya. */
+export async function unduhPptx(isi: IsiMateri, opsi: { denganLatihan?: boolean } = {}) {
+  const denganLatihan = opsi.denganLatihan ?? true;
   const { default: Pptx } = await import('pptxgenjs');
   const ppt = new Pptx();
   ppt.layout = 'LAYOUT_16x9';
 
   const judul = ppt.addSlide();
-  judul.addText(isi.judul, { x: 0.7, y: 1.8, w: 8.6, h: 1.4, fontSize: 36, bold: true, color: '1F2937' });
+  judul.addText(isi.slide_ppt.judul, { x: 0.7, y: 1.8, w: 8.6, h: 1.4, fontSize: 36, bold: true, color: '1F2937' });
   judul.addText('Materi belajar matematika kelas 7', { x: 0.7, y: 3.3, w: 8.6, h: 0.6, fontSize: 18, color: '6B7280' });
 
-  const ringkasan = ppt.addSlide();
-  ringkasan.addText('Ringkasan', { x: 0.7, y: 0.4, w: 8.6, h: 0.8, fontSize: 28, bold: true, color: '2563EB' });
-  ringkasan.addText(isi.ringkasan, { x: 0.7, y: 1.3, w: 8.6, h: 3.8, fontSize: 18, color: '1F2937', valign: 'top', fit: 'shrink' });
+  // Satu slide untuk tiap slide di kerangka PPT materi.
+  isi.slide_ppt.slide.forEach((slide, i) => {
+    const s = ppt.addSlide();
+    s.addText(slide.judul, { x: 0.7, y: 0.4, w: 8.6, h: 0.8, fontSize: 28, bold: true, color: '2563EB' });
+    s.addText(
+      slide.poin.map((poin) => ({ text: poin, options: { bullet: true, breakLine: true } })),
+      { x: 0.7, y: 1.4, w: 8.6, h: 3.6, fontSize: 20, color: '1F2937', valign: 'top', fit: 'shrink', paraSpaceAfter: 10 },
+    );
+    s.addText(`${i + 1} / ${isi.slide_ppt.slide.length}`, { x: 8.4, y: 5.0, w: 1.2, h: 0.4, fontSize: 12, color: '6B7280', align: 'right' });
+  });
 
-  const video = ppt.addSlide();
-  video.addText('Ide video', { x: 0.7, y: 0.4, w: 8.6, h: 0.8, fontSize: 28, bold: true, color: '2563EB' });
-  video.addText(isi.ide_video.judul, { x: 0.7, y: 1.3, w: 8.6, h: 0.7, fontSize: 22, bold: true, color: '1F2937' });
-  video.addText(isi.ide_video.deskripsi, { x: 0.7, y: 2.1, w: 8.6, h: 1.8, fontSize: 18, color: '1F2937', valign: 'top' });
-  video.addText(`Kata kunci pencarian: ${isi.ide_video.kata_kunci_pencarian}`, { x: 0.7, y: 4.3, w: 8.6, h: 0.6, fontSize: 16, color: '6B7280' });
-
-  isi.latihan.forEach((soal, i) => {
+  (denganLatihan ? isi.latihan : []).forEach((soal, i) => {
     const s = ppt.addSlide();
     s.addText(`Latihan ${i + 1}`, { x: 0.7, y: 0.4, w: 8.6, h: 0.8, fontSize: 28, bold: true, color: '2563EB' });
     s.addText(soal.soal, { x: 0.7, y: 1.2, w: 8.6, h: 1.2, fontSize: 20, bold: true, color: '1F2937', valign: 'top' });
@@ -66,10 +69,11 @@ export async function unduhDocx(isi: IsiMateri) {
     p(isi.ringkasan),
     h('Naskah audio'),
     p(isi.naskah_audio),
-    h('Ide video'),
-    new Paragraph({ children: [new TextRun({ text: isi.ide_video.judul, bold: true })], spacing: { after: 120 } }),
-    p(isi.ide_video.deskripsi),
-    p(`Kata kunci pencarian: ${isi.ide_video.kata_kunci_pencarian}`),
+    h('Kerangka slide PPT'),
+    ...isi.slide_ppt.slide.flatMap((slide, i) => [
+      new Paragraph({ children: [new TextRun({ text: `Slide ${i + 1}: ${slide.judul}`, bold: true })], spacing: { before: 120, after: 60 } }),
+      ...slide.poin.map((poin) => p(`• ${poin}`)),
+    ]),
     h('Latihan'),
     ...isi.latihan.flatMap((soal, i) => [
       new Paragraph({ children: [new TextRun({ text: `${i + 1}. ${soal.soal}`, bold: true })], spacing: { before: 160, after: 80 } }),
