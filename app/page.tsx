@@ -23,6 +23,7 @@ import {
 import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 import { NavbarLanding } from "@/components/NavbarLanding";
 import { PratinjauDasbor } from "@/components/PratinjauDasbor";
+import { TeksBerputar } from "@/components/TeksBerputar";
 
 export const metadata: Metadata = {
   title: "Guru Pintar: tahu siapa yang tertinggal hari ini",
@@ -237,7 +238,7 @@ export default function Beranda() {
           <div className="flex flex-col items-start gap-6">
             <span className="aura-eyebrow-bagian">
               <Sparkles aria-hidden="true" className="size-3.5" />
-              Guru SMP · Kurikulum Merdeka
+              <TeksBerputar />
             </span>
 
             <h1
