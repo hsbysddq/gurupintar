@@ -121,12 +121,13 @@ const KELOMPOK_PETA = [
 ];
 
 // Bento kecil; peta kelas dan materi AI ditulis terpisah karena isinya berbeda.
-const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string }[] = [
+const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string; tumpuk?: boolean }[] = [
   {
     judul: "Soal paling banyak salah",
     isi: "Lengkap dengan kesalahan pemahaman yang paling sering muncul, jadi guru tahu apa yang perlu diluruskan.",
     ikon: Lightbulb,
     kelas: "lg:col-span-3",
+    tumpuk: true,
   },
   {
     judul: "Perlu pendampingan",
@@ -277,8 +278,8 @@ export default function Beranda() {
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {ALASAN.map(({ judul, isi, ikon: Ikon }) => (
-              <article key={judul} className={`${KARTU} flex h-full flex-col items-center gap-4 p-5 text-center`}>
-                <div className="flex items-center justify-center gap-3">
+              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5`}>
+                <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:text-center md:flex-row md:items-center md:text-left lg:flex-col lg:items-center lg:text-center">
                   <IkonKotak ikon={Ikon} />
                   <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
                     {judul}
@@ -500,10 +501,10 @@ export default function Beranda() {
                 {BENTUK_MATERI.map(({ label, keterangan, ikon: Ikon, aksen }) => (
                   <li
                     key={label}
-                    className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60 p-3 text-center"
+                    className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60 p-3"
                   >
                     <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
-                    <div className="flex items-center justify-center gap-2.5">
+                    <div className="flex items-center gap-2.5">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
                         <Ikon aria-hidden="true" className="size-4" />
                       </span>
@@ -517,9 +518,9 @@ export default function Beranda() {
               </ul>
             </article>
 
-            {FITUR_KECIL.map(({ judul, isi, ikon: Ikon, kelas }) => (
-              <article key={judul} className={`${KARTU} flex h-full flex-col items-center gap-4 p-5 text-center sm:p-6 ${kelas}`}>
-                <div className="flex items-center justify-center gap-3">
+            {FITUR_KECIL.map(({ judul, isi, ikon: Ikon, kelas, tumpuk }) => (
+              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5 sm:p-6 ${kelas}`}>
+                <div className={`flex items-center gap-3 ${tumpuk ? "lg:flex-col lg:items-center lg:text-center" : ""}`}>
                   <IkonKotak ikon={Ikon} />
                   <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
                     {judul}
