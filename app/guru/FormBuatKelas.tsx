@@ -2,8 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
-import { KartuKaca } from '@/components/KartuKaca';
+import { Plus, School } from 'lucide-react';
 import { Tombol } from '@/components/Tombol';
 import { buatKelas, ErrorApi } from '@/lib/api-klien';
 
@@ -29,51 +28,76 @@ export function FormBuatKelas({ pertamaKali = false }: { pertamaKali?: boolean }
   }
 
   return (
-    <KartuKaca as="section" className="flex flex-col gap-4 p-5 sm:p-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-xl leading-snug font-semibold">{pertamaKali ? 'Buat kelas pertamamu' : 'Buat kelas baru'}</h2>
-        <p className="text-tinta-lembut">
-          Siswa mendaftar dengan kode undangan kelas. Setiap kelas punya kuis dan materinya sendiri.
-        </p>
+    <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-aura-primary via-aura-violet to-aura-emerald"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-aura-primary/10 blur-3xl"
+      />
+
+      <div className="relative flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="inline-flex w-fit items-center gap-2 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-aura-primary">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-aura-primary/10 ring-1 ring-white/70">
+              <School aria-hidden="true" className="size-3.5" />
+            </span>
+            Kelas baru
+          </span>
+          <h2 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+            {pertamaKali ? 'Buat kelas pertamamu' : 'Buat kelas baru'}
+          </h2>
+          <p className="font-body text-[13px] leading-[20px] text-aura-muted">
+            Siswa mendaftar dengan kode undangan kelas. Setiap kelas punya kuis dan materinya sendiri.
+          </p>
+        </div>
+
+        <form onSubmit={kirim} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end" noValidate>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="kelas-baru-nama"
+              className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted"
+            >
+              Nama kelas
+            </label>
+            <input
+              id="kelas-baru-nama"
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+              placeholder="Kelas 7B"
+              required
+              className="h-12 rounded-2xl border border-white/70 bg-white/65 px-3.5 font-body text-base text-aura-ink shadow-sm backdrop-blur-sm transition-colors placeholder:text-aura-muted/55 hover:bg-white/75 focus:bg-white/85"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="kelas-baru-mapel"
+              className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted"
+            >
+              Mata pelajaran
+            </label>
+            <input
+              id="kelas-baru-mapel"
+              value={mapel}
+              onChange={(e) => setMapel(e.target.value)}
+              placeholder="Biologi"
+              required
+              className="h-12 rounded-2xl border border-white/70 bg-white/65 px-3.5 font-body text-base text-aura-ink shadow-sm backdrop-blur-sm transition-colors placeholder:text-aura-muted/55 hover:bg-white/75 focus:bg-white/85"
+            />
+          </div>
+          <Tombol varian="utama" type="submit" ikon={Plus} memuat={memuat} disabled={!nama.trim() || !mapel.trim()}>
+            Buat kelas
+          </Tombol>
+        </form>
+
+        {galat && (
+          <p role="alert" className="font-body text-[13px] leading-[20px] font-medium text-[#93000a]">
+            {galat}
+          </p>
+        )}
       </div>
-
-      <form onSubmit={kirim} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end" noValidate>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="kelas-baru-nama" className="text-[13px] leading-normal font-medium text-tinta-lembut">
-            Nama kelas
-          </label>
-          <input
-            id="kelas-baru-nama"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            placeholder="Kelas 7B"
-            required
-            className="h-12 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta placeholder:text-tinta-lembut/60"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="kelas-baru-mapel" className="text-[13px] leading-normal font-medium text-tinta-lembut">
-            Mata pelajaran
-          </label>
-          <input
-            id="kelas-baru-mapel"
-            value={mapel}
-            onChange={(e) => setMapel(e.target.value)}
-            placeholder="Biologi"
-            required
-            className="h-12 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta placeholder:text-tinta-lembut/60"
-          />
-        </div>
-        <Tombol varian="utama" type="submit" ikon={Plus} memuat={memuat} disabled={!nama.trim() || !mapel.trim()}>
-          Buat kelas
-        </Tombol>
-      </form>
-
-      {galat && (
-        <p role="alert" className="font-medium text-belum-teks">
-          {galat}
-        </p>
-      )}
-    </KartuKaca>
+    </section>
   );
 }
