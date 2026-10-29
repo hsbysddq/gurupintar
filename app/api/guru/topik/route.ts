@@ -35,7 +35,7 @@ export async function GET() {
   }
 }
 
-// POST /api/guru/topik (PRD F-10): topik lalu 5 soal dalam satu insert; jika soal gagal, topik dihapus lagi.
+// POST /api/guru/topik (PRD F-10): topik lalu soal-soalnya dalam satu insert; jika soal gagal, topik dihapus lagi.
 export async function POST(request: Request) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       return responsError(PESAN_ERROR_UMUM, 500);
     }
 
-    const respons: TopikRingkas = { id: topik.data.id, nama: topik.data.nama };
+    const respons: TopikRingkas = { id: topik.data.id, nama: topik.data.nama, jumlahSoal: soal.length };
     return responsOk(respons, 201);
   } catch (err) {
     console.error(err);
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PATCH /api/guru/topik: ubah topik + 5 soal sekaligus, hanya jika belum dipakai kuis.
+// PATCH /api/guru/topik: ubah topik + soalnya sekaligus, hanya jika belum dipakai kuis.
 export async function PATCH(request: Request) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;

@@ -77,7 +77,7 @@ describe('samakanTeksPilihan', () => {
 });
 
 describe('susunDaftarTopik', () => {
-  it('hanya topik dengan tepat 5 soal; topik demo di atas, lalu urut nama', () => {
+  it('hanya topik dengan minimal satu soal; topik demo di atas, lalu urut nama', () => {
     const daftar = susunDaftarTopik([
       { id: 'z', nama: 'Zat dan Pecahan', jumlahSoal: 5 },
       { id: 'yatim', nama: 'Aljabar', jumlahSoal: 0 },
@@ -86,9 +86,10 @@ describe('susunDaftarTopik', () => {
       { id: 'kurang', nama: 'Bilangan Bulat', jumlahSoal: 4 },
     ]);
     expect(daftar).toEqual([
-      { id: TOPIK_DEMO_ID, nama: 'Pecahan Senilai' },
-      { id: 'b', nama: 'bangun datar' },
-      { id: 'z', nama: 'Zat dan Pecahan' },
+      { id: TOPIK_DEMO_ID, nama: 'Pecahan Senilai', jumlahSoal: 5 },
+      { id: 'b', nama: 'bangun datar', jumlahSoal: 5 },
+      { id: 'kurang', nama: 'Bilangan Bulat', jumlahSoal: 4 },
+      { id: 'z', nama: 'Zat dan Pecahan', jumlahSoal: 5 },
     ]);
   });
 });

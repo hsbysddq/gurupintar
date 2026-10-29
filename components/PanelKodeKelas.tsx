@@ -84,7 +84,7 @@ export function PanelKodeKelas({
               {kodeKelas}
             </p>
             <p className="mt-2 max-w-prose font-body text-[14px] leading-[22px] text-aura-muted">
-              Bagikan kode atau QR ini. Siswa bergabung dari HP, lalu menjawab 5 soal.
+              Bagikan kode atau QR ini. Siswa bergabung dari HP, lalu menjawab soal.
             </p>
           </div>
 

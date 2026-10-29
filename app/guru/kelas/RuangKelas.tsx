@@ -92,7 +92,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
               Cek pemahaman, tanpa menunggu ulangan.
             </h2>
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-              Buat 5 soal, bagikan kode atau QR, lalu pantau siswa yang sudah menjawab.
+              Buat soal, bagikan kode atau QR, lalu pantau siswa yang sudah menjawab.
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
               <h2 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Kuis masih aktif</h2>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
                 Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong> masih aktif. Untuk
-                membuat kuis baru, kuis ini akan ditutup dan kamu diarahkan membuat 5 soal terlebih dahulu.
+                membuat kuis baru, kuis ini akan ditutup dan kamu diarahkan membuat soal terlebih dahulu.
               </p>
             </div>
           </div>
@@ -278,7 +278,7 @@ function PanelKosong() {
       <div>
         <h3 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Belum ada kuis</h3>
         <p className="mt-1 max-w-sm font-body text-[13px] leading-[20px] text-aura-muted">
-          Tekan Buat kuis baru untuk membuat 5 soal dan membuka kuis.
+          Tekan Buat kuis baru untuk membuat soal dan membuka kuis.
         </p>
       </div>
     </div>

@@ -16,7 +16,7 @@ type BarisSoal = {
   miskonsepsi: unknown;
 };
 
-// GET /api/guru/topik/detail?topik=: topik + 5 soal untuk form edit.
+// GET /api/guru/topik/detail?topik=: topik + soal-soalnya untuk form edit.
 export async function GET(request: NextRequest) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;

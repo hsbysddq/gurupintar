@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
-import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
+import { SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaBodyBukaSesi, skemaQueryKelasOpsional } from '@/lib/skema-api';
 import { bolehPakaiTopik } from '@/lib/topik';
 import { idKelasMilikGuru, kelasMilikGuru, wajibPeranApi } from '@/lib/server/auth';
@@ -10,7 +10,7 @@ import type { SesiBaru, SesiGuru, StatusSesi } from '@/lib/tipe';
 
 const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba buka kuis lagi.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
-const PESAN_JUMLAH_SOAL = `Topik harus punya tepat ${JUMLAH_SOAL_TOPIK} soal.`;
+const PESAN_JUMLAH_SOAL = `Topik harus punya minimal ${SOAL_MINIMAL_TOPIK} soal.`;
 const PESAN_BELUM_PUNYA_KELAS = 'Buat kelas dulu sebelum membuka kuis.';
 
 // GET /api/guru/sesi?kelas=: sesi milik guru, terbaru di atas, beserta jumlah siswa yang menjawab.
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
     }
     const jumlahSoal = (topik.data.soal as { count: number }[])[0]?.count ?? 0;
-    if (jumlahSoal !== JUMLAH_SOAL_TOPIK) return responsError(PESAN_JUMLAH_SOAL, 400);
+    if (jumlahSoal < SOAL_MINIMAL_TOPIK) return responsError(PESAN_JUMLAH_SOAL, 400);
 
     const hasil = await cobaDenganKodeBaru(async (kode): Promise<HasilPercobaan<string>> => {
       const { data, error } = await db.rpc('buka_sesi', {

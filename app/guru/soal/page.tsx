@@ -11,6 +11,7 @@ import {
   Pencil,
   Plus,
   Save,
+  School,
   Sparkles,
   Trash2,
   X,
@@ -24,7 +25,7 @@ import {
   simpanTopik,
   ubahTopik,
 } from "@/lib/api-klien";
-import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from "@/lib/konstanta";
+import { SOAL_AWAL_TOPIK, SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from "@/lib/konstanta";
 import { skemaBodyTopikBaru, skemaBodyUbahTopik } from "@/lib/skema-api";
 import { KODE_PILIHAN, pesanGalatTopik } from "@/lib/soal-guru";
 import type { KelasRingkas, KodePilihan, TopikDetail, TopikRingkas } from "@/lib/tipe";
@@ -56,7 +57,7 @@ const soalKosong = (): IsianSoal => ({
 const isianKosong = (): Isian => ({
   kelasId: "",
   nama: "",
-  soal: Array.from({ length: JUMLAH_SOAL_TOPIK }, soalKosong),
+  soal: Array.from({ length: SOAL_AWAL_TOPIK }, soalKosong),
 });
 
 function isianDariDetail(detail: TopikDetail): Isian {
@@ -69,8 +70,8 @@ function isianDariDetail(detail: TopikDetail): Isian {
       kunci: s.kunci,
       miskonsepsi: KODE_PILIHAN.map((k) => s.miskonsepsi[k] ?? "") as Empat,
     }));
-  while (soal.length < JUMLAH_SOAL_TOPIK) soal.push(soalKosong());
-  return { kelasId: "", nama: "", soal: soal.slice(0, JUMLAH_SOAL_TOPIK) };
+  while (soal.length === 0) soal.push(soalKosong());
+  return { kelasId: "", nama: "", soal };
 }
 
 // PRD F-10, design.md 3.9. Topik yang belum dipakai kuis bisa diubah atau dihapus.
@@ -143,6 +144,18 @@ export default function HalamanBuatSoal() {
 
   function ubahSoal(i: number, ubah: (s: IsianSoal) => IsianSoal) {
     setIsian((lama) => ({ ...lama, soal: lama.soal.map((s, j) => (j === i ? ubah(s) : s)) }));
+  }
+
+  function tambahSoal() {
+    setIsian((lama) => ({ ...lama, soal: [...lama.soal, soalKosong()] }));
+  }
+
+  function hapusSoal(i: number) {
+    setIsian((lama) => {
+      if (lama.soal.length <= SOAL_MINIMAL_TOPIK) return lama;
+      return { ...lama, soal: lama.soal.filter((_, j) => j !== i) };
+    });
+    setGalat({});
   }
 
   function batalUbah() {
@@ -287,31 +300,43 @@ export default function HalamanBuatSoal() {
         <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-aura-primary/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex max-w-2xl flex-col gap-2">
+            {dariKelas && isian.kelasId && (
+              <Link
+                href={`/guru/kelas?kelas=${isian.kelasId}`}
+                className="inline-flex w-fit items-center font-display text-[12px] font-semibold text-aura-muted transition-colors hover:text-aura-primary"
+              >
+                ← Kembali ke kelas
+              </Link>
+            )}
             <span className="aura-eyebrow">
               <Sparkles aria-hidden="true" className="size-3.5" />
-              Bank soal
+              {dariKelas ? "Kuis baru" : "Bank soal"}
             </span>
             <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
-              {mengubah ? "Ubah topik" : "Bank soal"}
+              {mengubah ? "Ubah topik" : dariKelas ? "Buat soal kuis" : "Bank soal"}
             </h1>
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
               {mengubah
-                ? `Perbarui nama topik, capaian, dan tepat ${JUMLAH_SOAL_TOPIK} soal. Menyimpan tidak membuka kuis baru.`
-                : `Tentukan nama topik, pilih kelas, lalu tulis tepat ${JUMLAH_SOAL_TOPIK} soal pilihan ganda. Setelah disimpan, soal langsung menjadi kuis untuk kelas itu.`}
+                ? "Perbarui nama topik, capaian, dan soal. Menyimpan tidak membuka kuis baru."
+                : dariKelas
+                  ? "Tambahkan soal sesuai kebutuhan. Kuis baru terbuka untuk siswa setelah soal disimpan."
+                  : "Tentukan nama topik, pilih kelas, lalu tulis soal pilihan ganda. Tambahkan soal sesuai kebutuhan. Setelah disimpan, soal langsung menjadi kuis untuk kelas itu."}
             </p>
             <div className="mt-1 flex flex-wrap gap-2">
-              <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
-                <BookOpen aria-hidden="true" className="size-4 text-aura-primary" />
-                {daftarTopik ? `${daftarTopik.length} topik` : "Memuat topik"}
-              </span>
+              {!dariKelas && (
+                <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
+                  <BookOpen aria-hidden="true" className="size-4 text-aura-primary" />
+                  {daftarTopik ? `${daftarTopik.length} topik` : "Memuat topik"}
+                </span>
+              )}
               <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
                 <ListChecks aria-hidden="true" className="size-4 text-aura-indigo" />
-                {JUMLAH_SOAL_TOPIK} soal per topik
+                Soal bisa ditambah
               </span>
             </div>
           </div>
 
-          {!mengubah && (
+          {!mengubah && !dariKelas && (
             <a href="#form-soal" className="aura-btn aura-btn-primary h-12 w-full shrink-0 px-5 text-[14px] sm:w-auto">
               <Plus aria-hidden="true" className="size-4" />
               Buat topik
@@ -320,6 +345,7 @@ export default function HalamanBuatSoal() {
         </div>
       </header>
 
+      {!dariKelas && (
       <section aria-labelledby="judul-topik" className="aura-glass rounded-[24px] p-2 sm:p-3">
         <div className="flex flex-wrap items-start justify-between gap-3 px-3 pt-3 sm:px-2">
           <div className="flex flex-col gap-1">
@@ -377,7 +403,7 @@ export default function HalamanBuatSoal() {
                             Topik tersimpan
                           </span>
                         )}
-                        <span className="font-body text-[11px] leading-[16px] text-aura-muted">{JUMLAH_SOAL_TOPIK} soal</span>
+                        <span className="font-body text-[11px] leading-[16px] text-aura-muted">{t.jumlahSoal} soal</span>
                       </div>
                     </div>
                   </div>
@@ -435,6 +461,7 @@ export default function HalamanBuatSoal() {
 
         {pesanAksi && <PesanJenis jenis={pesanAksi.jenis === "gagal" ? "gagal" : "sukses"} teks={pesanAksi.teks} />}
       </section>
+      )}
 
       <form id="form-soal" noValidate onSubmit={(e) => void simpan(e)} className="flex scroll-mt-28 flex-col gap-6">
         {mengubah ? (
@@ -491,7 +518,7 @@ export default function HalamanBuatSoal() {
             <div className="flex flex-col gap-1">
               <span className="aura-eyebrow">Topik baru</span>
               <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-                Tentukan topik dan kelas
+                {dariKelas ? "Topik dan soal" : "Tentukan topik dan kelas"}
               </h2>
               <p className="font-body text-[13px] leading-[20px] text-aura-muted">
                 Nama topik kamu tentukan sendiri. Capaian pembelajaran mengikuti kelas yang dipilih.
@@ -502,7 +529,7 @@ export default function HalamanBuatSoal() {
               <div className="mt-4 flex items-start gap-2 rounded-2xl border border-aura-primary/20 bg-aura-primary/5 px-4 py-3 font-body text-[13px] leading-[20px] text-aura-ink">
                 <Sparkles aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-aura-primary" />
                 <p>
-                  Kuis baru belum bisa diakses siswa. Isi nama topik dan 5 soal di bawah, lalu simpan untuk membuka
+                  Kuis baru belum bisa diakses siswa. Isi nama topik dan soal di bawah, lalu simpan untuk membuka
                   kuis untuk <strong>{namaKelasLengkap(kelasDipilih)}</strong>.
                 </p>
               </div>
@@ -522,24 +549,36 @@ export default function HalamanBuatSoal() {
                 />
               </Kolom>
 
-              <Kolom id={idKolom("kelasId")} label="Kelas dan mata pelajaran" galat={galat.kelasId ?? galatKelas ?? undefined}>
-                <select
-                  id={idKolom("kelasId")}
-                  className={`${KELAS_ISIAN} h-12`}
-                  value={isian.kelasId}
-                  disabled={daftarKelas === null}
-                  aria-invalid={Boolean(galat.kelasId)}
-                  aria-describedby={galat.kelasId ? `${idKolom("kelasId")}-galat` : undefined}
-                  onChange={(e) => setIsian((l) => ({ ...l, kelasId: e.target.value }))}
-                >
-                  <option value="">{daftarKelas === null ? "Memuat kelas…" : "Pilih kelas"}</option>
-                  {daftarKelas?.map((k) => (
-                    <option key={k.id} value={k.id}>
-                      {namaKelasLengkap(k)}
-                    </option>
-                  ))}
-                </select>
-              </Kolom>
+              {dariKelas && kelasDipilih ? (
+                <div className="flex flex-col gap-1.5">
+                  <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                    Kelas dan mata pelajaran
+                  </span>
+                  <div className="flex h-12 items-center gap-2 rounded-2xl border border-white/70 bg-white/45 px-3.5 font-body text-[14px] text-aura-ink">
+                    <School aria-hidden="true" className="size-4 shrink-0 text-aura-primary" />
+                    {namaKelasLengkap(kelasDipilih)}
+                  </div>
+                </div>
+              ) : (
+                <Kolom id={idKolom("kelasId")} label="Kelas dan mata pelajaran" galat={galat.kelasId ?? galatKelas ?? undefined}>
+                  <select
+                    id={idKolom("kelasId")}
+                    className={`${KELAS_ISIAN} h-12`}
+                    value={isian.kelasId}
+                    disabled={daftarKelas === null}
+                    aria-invalid={Boolean(galat.kelasId)}
+                    aria-describedby={galat.kelasId ? `${idKolom("kelasId")}-galat` : undefined}
+                    onChange={(e) => setIsian((l) => ({ ...l, kelasId: e.target.value }))}
+                  >
+                    <option value="">{daftarKelas === null ? "Memuat kelas…" : "Pilih kelas"}</option>
+                    {daftarKelas?.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {namaKelasLengkap(k)}
+                      </option>
+                    ))}
+                  </select>
+                </Kolom>
+              )}
               {daftarKelas?.length === 0 && (
                 <p className="font-body text-[13px] leading-[20px] font-medium text-aura-muted">
                   Kamu belum punya kelas.{" "}
@@ -558,13 +597,20 @@ export default function HalamanBuatSoal() {
             <div>
               <span className="aura-eyebrow">Soal</span>
               <h2 id="judul-soal" className="mt-2 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-                {JUMLAH_SOAL_TOPIK} soal pilihan ganda
+                {isian.soal.length} soal pilihan ganda
               </h2>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
                 Lengkapi teks soal, empat pilihan, kunci jawaban, dan kesalahan pemahaman tiap pengecoh.
               </p>
             </div>
-            <span className="font-body text-[12px] leading-[18px] text-aura-muted">{JUMLAH_SOAL_TOPIK} soal</span>
+            <button
+              type="button"
+              onClick={tambahSoal}
+              className="aura-btn aura-btn-secondary h-10 px-3 text-[12px]"
+            >
+              <Plus aria-hidden="true" className="size-3.5" />
+              Tambah soal
+            </button>
           </div>
 
           {isian.soal.map((s, i) => {
@@ -590,9 +636,16 @@ export default function HalamanBuatSoal() {
                         </span>
                       </span>
                     </span>
-                    <span className="font-body text-[11px] leading-[16px] text-aura-muted">
-                      {JUMLAH_SOAL_TOPIK} soal
-                    </span>
+                    {isian.soal.length > SOAL_MINIMAL_TOPIK && (
+                      <button
+                        type="button"
+                        onClick={() => hapusSoal(i)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-aura-red/20 bg-aura-red/5 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.04em] text-[#93000a] transition-colors hover:bg-aura-red/10"
+                      >
+                        <Trash2 aria-hidden="true" className="size-3" />
+                        Hapus
+                      </button>
+                    )}
                   </legend>
 
                   <Kolom id={idKolom(jalur("teks"))} label="Teks soal" galat={galat[jalur("teks")]}>
@@ -702,6 +755,15 @@ export default function HalamanBuatSoal() {
               </article>
             );
           })}
+
+          <button
+            type="button"
+            onClick={tambahSoal}
+            className="aura-btn aura-btn-secondary mt-1 h-12 w-full px-4 text-[14px] sm:w-auto"
+          >
+            <Plus aria-hidden="true" className="size-4" />
+            Tambah soal
+          </button>
         </section>
 
         <section className="aura-glass rounded-[24px] p-5 sm:p-6">

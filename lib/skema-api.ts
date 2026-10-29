@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PANJANG_SANDI_MAKS, PANJANG_SANDI_MIN, normalisasiEmail } from './auth';
-import { JUMLAH_SOAL_TOPIK, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from './konstanta';
+import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, SOAL_MINIMAL_TOPIK, UKURAN_PDF_MAKS_BYTE } from './konstanta';
 import { samakanTeksPilihan } from './soal-guru';
 
 /** AC-1.2: kode diubah ke huruf kapital dan spasi dihapus. */
@@ -203,7 +203,7 @@ const skemaSoalBaru = z
 export const skemaBodyTopikBaru = z.object({
   nama: z.string().trim().min(3).max(80),
   capaianPembelajaran: z.string().trim().min(10).max(300),
-  soal: z.array(skemaSoalBaru).length(JUMLAH_SOAL_TOPIK),
+  soal: z.array(skemaSoalBaru).min(SOAL_MINIMAL_TOPIK),
 });
 
 // PATCH /api/guru/topik

@@ -1,5 +1,5 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
-import { JUMLAH_SOAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
+import { SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaBodyBukaSesiBanyak } from '@/lib/skema-api';
 import { bolehPakaiTopik } from '@/lib/topik';
 import { wajibPeranApi, kolomArsipBelumAda } from '@/lib/server/auth';
@@ -9,7 +9,7 @@ import type { SesiBanyakBaru } from '@/lib/tipe';
 
 const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba lagi.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
-const PESAN_JUMLAH_SOAL = `Topik harus punya tepat ${JUMLAH_SOAL_TOPIK} soal.`;
+const PESAN_JUMLAH_SOAL = `Topik harus punya minimal ${SOAL_MINIMAL_TOPIK} soal.`;
 const PESAN_KELAS_TIDAK_ADA = 'Sebagian kelas tidak ditemukan.';
 
 // POST /api/guru/sesi/banyak: buka satu topik untuk beberapa kelas sekaligus.
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
     }
     const jumlahSoal = (topik.data.soal as { count: number }[])[0]?.count ?? 0;
-    if (jumlahSoal !== JUMLAH_SOAL_TOPIK) return responsError(PESAN_JUMLAH_SOAL, 400);
+    if (jumlahSoal < SOAL_MINIMAL_TOPIK) return responsError(PESAN_JUMLAH_SOAL, 400);
 
     const respons: SesiBanyakBaru = { sesi: [], gagal: [] };
 

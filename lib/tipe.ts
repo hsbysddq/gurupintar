@@ -135,10 +135,11 @@ export interface SesiGuru {
   jumlahMenjawab: number;
 }
 
-/** GET /api/guru/topik: hanya topik dengan tepat 5 soal */
+/** GET /api/guru/topik: hanya topik dengan minimal satu soal */
 export interface TopikRingkas {
   id: string;
   nama: string;
+  jumlahSoal: number;
 }
 
 /** GET /api/guru/topik/detail */

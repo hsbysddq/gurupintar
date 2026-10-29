@@ -266,8 +266,12 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
     }
   });
 
-  it.each([4, 6])('menolak jika jumlah soal %i (harus tepat 5)', (n) => {
-    expect(dengan((b) => void (b.soal = Array.from({ length: n }, soalValid))).success).toBe(false);
+  it.each([1, 4, 6])('menerima jumlah soal %i', (n) => {
+    expect(dengan((b) => void (b.soal = Array.from({ length: n }, soalValid))).success).toBe(true);
+  });
+
+  it('menolak topik tanpa soal', () => {
+    expect(dengan((b) => void (b.soal = [])).success).toBe(false);
   });
 
   it.each([
@@ -362,14 +366,14 @@ describe('skema ubah/hapus/detail topik', () => {
     soal: Array.from({ length: 5 }, soalUji),
   });
 
-  it('menerima ubah topik dengan id dan 5 soal', () => {
+  it('menerima ubah topik dengan id dan soal', () => {
     expect(skemaBodyUbahTopik.safeParse(bodyUbah()).success).toBe(true);
   });
 
-  it('menolak ubah topik tanpa id atau dengan soal kurang', () => {
+  it('menolak ubah topik tanpa id atau tanpa soal', () => {
     const tanpaId = { ...bodyUbah(), id: undefined };
     expect(skemaBodyUbahTopik.safeParse(tanpaId).success).toBe(false);
-    expect(skemaBodyUbahTopik.safeParse({ ...bodyUbah(), soal: [soalUji()] }).success).toBe(false);
+    expect(skemaBodyUbahTopik.safeParse({ ...bodyUbah(), soal: [] }).success).toBe(false);
   });
 
   it('hapus topik membutuhkan id uuid', () => {
