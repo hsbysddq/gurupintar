@@ -140,6 +140,13 @@ export const skemaBodyUbahMateri = z.object({
   isi: z.unknown(),
 });
 
+// POST /api/guru/pendampingan/tindakan
+export const skemaBodyTindakanPendampingan = z.object({
+  kelasId: z.uuid(),
+  siswaId: z.uuid(),
+  tindakan: z.enum(['pendampingan', 'evaluasi', 'selesai']),
+});
+
 // POST /api/guru/materi-pustaka
 export const skemaBodyMateriPustaka = z.object({
   kelasId: z.uuid(),
@@ -251,6 +258,7 @@ function skemaTeksMiskonsepsi() {
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
+export type BodyTindakanPendampingan = z.infer<typeof skemaBodyTindakanPendampingan>;
 export type BodyMateriPustaka = z.infer<typeof skemaBodyMateriPustaka>;
 export type BodyUbahMateriPustaka = z.infer<typeof skemaBodyUbahMateriPustaka>;
 export type BodyTopikBaru = z.infer<typeof skemaBodyTopikBaru>;

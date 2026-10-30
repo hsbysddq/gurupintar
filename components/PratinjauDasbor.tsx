@@ -15,7 +15,7 @@ import {
 const KELOMPOK: { label: string; jumlah: number; persen: number; warna: string }[] = [
   { label: "Belum Paham", jumlah: 16, persen: 42, warna: "bg-aura-red" },
   { label: "Setengah Paham", jumlah: 12, persen: 32, warna: "bg-aura-amber" },
-  { label: "Sudah Paham", jumlah: 10, persen: 26, warna: "bg-aura-emerald" },
+  { label: "Paham", jumlah: 10, persen: 26, warna: "bg-aura-emerald" },
 ];
 
 const BENTUK: { label: string; ikon: LucideIcon }[] = [
@@ -33,7 +33,7 @@ const REKOMENDASI: { label: string; nilai: string; ikon: LucideIcon }[] = [
 
 /**
  * Pratinjau dasbor di hero landing: ringkasan satu kelas dengan data demo
- * (38 dari 40 siswa menjawab: 16 belum, 12 setengah, 10 sudah paham).
+ * (38 dari 40 siswa menjawab: 16 belum, 12 setengah, 10 paham).
  */
 export function PratinjauDasbor() {
   return (
@@ -103,7 +103,7 @@ export function PratinjauDasbor() {
           <div className="mt-3 flex items-center gap-4">
             <div
               role="img"
-              aria-label="Sebaran pemahaman: 42% belum paham, 32% setengah paham, 26% sudah paham."
+              aria-label="Sebaran pemahaman: 42% belum paham, 32% setengah paham, 26% paham."
               className="relative size-[92px] shrink-0 rounded-full"
               style={{
                 background:

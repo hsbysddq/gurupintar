@@ -30,7 +30,7 @@ export async function ambilRingkasanKelas(db: SupabaseClient, guruId: string): P
       mapel: kelas.mapel,
       jumlahSiswa: kelas.jumlahSiswa,
       kuisAktif: kelas.kuisAktif,
-      jumlahPerluPendampingan: pendampingan[i].perluPendampingan.length,
+      jumlahPerluPendampingan: pendampingan[i].siswa.filter((s) => s.status === 'pendampingan').length,
       jumlahSesi: sesiKelas.length,
       sesiTerakhir: sesiKelas[0]?.dibuat_pada ?? null,
     };

@@ -27,7 +27,22 @@ export async function GET(request: NextRequest) {
       }
     } else {
       const ids = await idKelasMilikGuru(db, auth.profil.id);
-      if (ids.length === 0) return responsOk<DataPendampingan>({ perluPendampingan: [], kemajuan: [] });
+      if (ids.length === 0) {
+        return responsOk<DataPendampingan>({
+          siswa: [],
+          ringkasan: {
+            jumlahSiswa: 0,
+            jumlahSesi: 0,
+            jumlahSesiSelesai: 0,
+            jumlahSesiBerjawaban: 0,
+            butuhSesi: 3,
+            jumlahPaham: 0,
+            jumlahSetengah: 0,
+            jumlahBelum: 0,
+            jumlahTidakMengerjakan: 0,
+          },
+        });
+      }
       kelasId = ids[0];
     }
 

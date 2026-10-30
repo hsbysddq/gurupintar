@@ -118,7 +118,7 @@ const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon; akse
 const KELOMPOK_PETA = [
   { label: "Belum paham", jumlah: 16, lebar: "w-[42%]", warna: "bg-aura-red", garis: "" },
   { label: "Setengah paham", jumlah: 12, lebar: "w-[32%]", warna: "bg-aura-amber", garis: "border-l-2 border-white" },
-  { label: "Sudah paham", jumlah: 10, lebar: "w-[26%]", warna: "bg-aura-emerald", garis: "border-l-2 border-white" },
+  { label: "Paham", jumlah: 10, lebar: "w-[26%]", warna: "bg-aura-emerald", garis: "border-l-2 border-white" },
 ];
 
 // Bento kecil; peta kelas dan materi AI ditulis terpisah karena isinya berbeda.
@@ -450,13 +450,13 @@ export default function Beranda() {
                   </h3>
                 </div>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-                  Siapa yang sudah, setengah, dan belum paham terlihat dalam satu layar, bukan di tumpukan kertas.
+                  Siapa yang paham, setengah, dan belum paham terlihat dalam satu layar, bukan di tumpukan kertas.
                 </p>
               </div>
               <div className="mt-auto flex flex-col gap-4 pt-2">
                 <div
                   role="img"
-                  aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 sudah paham."
+                  aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 paham."
                   className="flex h-2.5 overflow-hidden rounded-full bg-white/70 ring-1 ring-inset ring-white/80"
                 >
                   {KELOMPOK_PETA.map((k) => (

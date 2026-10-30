@@ -232,12 +232,23 @@ describe('api-klien guru', () => {
   });
 
   it('ambilPendampingan memakai query kelas dan signal', async () => {
-    const palsu = stubFetch(async () => Response.json({ perluPendampingan: [], kemajuan: [] }));
+    const kosong = {
+      siswa: [],
+      ringkasan: {
+        jumlahSiswa: 0,
+        jumlahSesi: 0,
+        jumlahSesiSelesai: 0,
+        jumlahSesiBerjawaban: 0,
+        butuhSesi: 3,
+        jumlahPaham: 0,
+        jumlahSetengah: 0,
+        jumlahBelum: 0,
+        jumlahTidakMengerjakan: 0,
+      },
+    };
+    const palsu = stubFetch(async () => Response.json(kosong));
     const pengendali = new AbortController();
-    await expect(ambilPendampingan(undefined, pengendali.signal)).resolves.toEqual({
-      perluPendampingan: [],
-      kemajuan: [],
-    });
+    await expect(ambilPendampingan(undefined, pengendali.signal)).resolves.toEqual(kosong);
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/pendampingan');
     expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
     await ambilPendampingan('k1');

@@ -156,7 +156,7 @@ function FormMasuk() {
 
               <div
                 role="img"
-                aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 sudah paham."
+                aria-label="Contoh: 16 belum paham, 12 setengah paham, 10 paham."
                 className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-aura-primary/10 ring-1 ring-inset ring-white/80"
               >
                 {KELOMPOK.map((k) => (

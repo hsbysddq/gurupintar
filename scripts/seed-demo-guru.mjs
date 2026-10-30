@@ -60,11 +60,11 @@ const TANGGAL_SELESAI = [sekarang - 28 * HARI, sekarang - 21 * HARI, sekarang - 
 const KODE_SESI = ['SMA', 'SMB', 'SMC'];
 
 const POLA = [
-  [1, 1, 2, 1], // belum paham 3x
-  [5, 5, 4, 3], // skor menurun
+  [1, 1, 2, 1], // rata-rata belum paham
+  [2, 3, 4, 3], // rata-rata setengah paham
   [4, 4, null, null], // tidak mengerjakan 2 cek terakhir
-  [5, 5, 2, 4], // kemajuan
-  [5, 4, 5, 4], // baik
+  [5, 5, 2, 4], // rata-rata paham
+  [5, 4, 5, 4], // rata-rata paham
 ];
 
 function polaSiswa(indeks) {
@@ -310,6 +310,7 @@ async function main() {
   console.log(`Kelas  : ${KELAS.map((k) => `${k.mapel} ${k.nama} (${k.kode})`).join(' · ')}`);
   console.log(`Kuis aktif: ${KELAS.map((_, i) => `${KODE_SESI[i]}05`).join(', ')}`);
   console.log(`Data   : ${siswa.length} siswa/kelas, 4 cek selesai + 1 kuis aktif/kelas.`);
+  console.log('Kategori pendampingan: 4 belum, 4 setengah, 4 tidak mengerjakan, sisanya paham.');
 }
 
 main().catch((err) => {

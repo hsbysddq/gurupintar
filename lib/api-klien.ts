@@ -9,6 +9,7 @@ import type {
   BodyJawaban,
   BodyMasuk,
   BodyMateriPustaka,
+  BodyTindakanPendampingan,
   BodyTopikBaru,
   BodyUbahMateriPustaka,
   BodyUbahKelas,
@@ -269,4 +270,8 @@ export function hapusMateriPustaka(id: string): Promise<{ ok: true }> {
 export function ambilPendampingan(kelasId?: string, signal?: AbortSignal): Promise<DataPendampingan> {
   const query = kelasId ? `?kelas=${encodeURIComponent(kelasId)}` : '';
   return minta(`/api/guru/pendampingan${query}`, { signal });
+}
+
+export function simpanTindakanPendampingan(body: BodyTindakanPendampingan): Promise<{ ok: true }> {
+  return minta('/api/guru/pendampingan/tindakan', { method: 'POST', body: JSON.stringify(body) });
 }

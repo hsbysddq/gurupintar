@@ -3,30 +3,33 @@
 import { Suspense, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, ArrowRight, CircleCheck, Clock3, TrendingDown, TrendingUp, Users } from "lucide-react";
-import { DaftarKemajuan } from "@/components/DaftarKemajuan";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  CircleHelp,
+  Clock3,
+  Info,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { LabelHanyaGuru } from "@/components/LabelHanyaGuru";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { TabelPendampingan } from "@/components/TabelPendampingan";
-import { ambilDaftarKelas, ambilPendampingan } from "@/lib/api-klien";
 import {
-  ALASAN_BELUM_PAHAM,
-  ALASAN_MENURUN,
-  ALASAN_TIDAK_MENGERJAKAN,
-  JUMLAH_CEK_TIDAK_MENGERJAKAN,
-  JUMLAH_SESI_JENDELA,
-  SARAN_BELUM_PAHAM,
-  SARAN_MENURUN,
-  SARAN_TIDAK_MENGERJAKAN,
-} from "@/lib/pendampingan";
-import type { DataPendampingan, KelasRingkas } from "@/lib/tipe";
+  ambilDaftarKelas,
+  ambilPendampingan,
+  simpanTindakanPendampingan,
+} from "@/lib/api-klien";
+import { BATAS_PAHAM, BATAS_SETENGAH, JUMLAH_KUIS } from "@/lib/pendampingan";
+import type { DataPendampingan, KelasRingkas, TindakanPendampingan } from "@/lib/tipe";
 
 type Muatan =
   | { status: "memuat" }
   | { status: "gagal"; pesan: string; kelasId: string }
   | { status: "siap"; data: DataPendampingan; kelasId: string };
 
-// PRD F-8, design.md 3.5.
+// Alur: rata-rata 3 kuis selesai terakhir → Paham / Setengah Paham / Belum Paham.
 export default function HalamanPendampingan() {
   return (
     <Suspense fallback={<StatusHalaman jenis="memuat" judul="Memuat daftar pendampingan" />}>
@@ -44,8 +47,9 @@ function IsiPendampingan() {
   const [muatan, setMuatan] = useState<Muatan>({ status: "memuat" });
   const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[] | null>(null);
   const [kelasPilihan, setKelasPilihan] = useState(kelasDariUrl);
+  const [menyimpan, setMenyimpan] = useState<string | null>(null);
+  const [galatAksi, setGalatAksi] = useState<string | null>(null);
 
-  // Pendampingan sekarang selalu dibuka dari tab kelas; tanpa ?kelas= kembali ke daftar.
   useEffect(() => {
     if (!kelasDariUrl) router.replace("/guru");
   }, [kelasDariUrl, router]);
@@ -64,7 +68,6 @@ function IsiPendampingan() {
     };
   }, []);
 
-  // Kelas aktif diturunkan dari URL; jika tidak valid, pakai pilihan terakhir atau kelas pertama.
   const kelasDariDaftar = daftarKelas?.some((k) => k.id === kelasDariUrl) ? kelasDariUrl : null;
   const kelasId =
     kelasDariDaftar ??
@@ -92,10 +95,28 @@ function IsiPendampingan() {
   const dataSiap = muatan.status === "siap" && muatan.kelasId === kelasId ? muatan.data : null;
   const pesanGagal = muatan.status === "gagal" && muatan.kelasId === kelasId ? muatan.pesan : null;
   const ringkasan = dataSiap?.ringkasan;
-  const butuhPola = ringkasan ? Math.max(0, JUMLAH_SESI_JENDELA - ringkasan.jumlahSesiBerjawaban) : 0;
-  const butuhSelesai = ringkasan ? Math.max(0, JUMLAH_CEK_TIDAK_MENGERJAKAN - ringkasan.jumlahSesiSelesai) : 0;
+  const siswa = dataSiap?.siswa ?? [];
+  const menunggu = siswa.filter((s) => s.status === "menunggu");
+  const pendampingan = siswa.filter((s) => s.status === "pendampingan");
+  const evaluasi = siswa.filter((s) => s.status === "evaluasi" || s.status === "selesai");
+  const paham = siswa.filter((s) => s.kategori === "paham");
+  const nonaktif = Boolean(ringkasan?.perluMigrasi) || menyimpan !== null;
   const kelasChip =
     "inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink";
+
+  async function ubahTindakan(siswaId: string, tindakan: TindakanPendampingan) {
+    if (!kelasId) return;
+    setMenyimpan(`${siswaId}:${tindakan}`);
+    setGalatAksi(null);
+    try {
+      await simpanTindakanPendampingan({ kelasId, siswaId, tindakan });
+      setPercobaan((p) => p + 1);
+    } catch (err) {
+      setGalatAksi(err instanceof Error ? err.message : "Tindakan belum berhasil disimpan.");
+    } finally {
+      setMenyimpan(null);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,10 +126,11 @@ function IsiPendampingan() {
             Pendampingan
           </span>
           <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
-            Perlu pendampingan
+            Peta pemahaman & tindakan
           </h1>
           <p className="max-w-2xl font-body text-[14px] leading-[22px] text-aura-muted">
-            Sistem menandai siswa dari pola jawaban beberapa cek terakhir. Sesi tanpa jawaban tidak dihitung.
+            Rata-rata {JUMLAH_KUIS} kuis selesai terakhir di kelas ini menentukan kategori. Setengah paham
+            menunggu keputusan guru; belum paham dan yang tidak mengerjakan langsung masuk pendampingan.
           </p>
         </div>
 
@@ -125,6 +147,7 @@ function IsiPendampingan() {
                   const id = e.target.value;
                   setMuatan({ status: "memuat" });
                   setKelasPilihan(id);
+                  setGalatAksi(null);
                   router.replace(`/guru/pendampingan?kelas=${encodeURIComponent(id)}`);
                 }}
                 className="h-11 rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm"
@@ -155,59 +178,70 @@ function IsiPendampingan() {
               Alur pendampingan
             </span>
             <h2 id="judul-alur-pendampingan" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
-              Kapan siswa masuk daftar?
+              Bagaimana siswa masuk daftar?
             </h2>
             <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-              Setiap siswa dinilai dari maksimal {JUMLAH_SESI_JENDELA} cek terakhir yang ia jawab. Aturan 3x dan tren
-              menurun butuh {JUMLAH_SESI_JENDELA} cek berjawaban; aturan tidak mengerjakan butuh{" "}
-              {JUMLAH_CEK_TIDAK_MENGERJAKAN} cek selesai.
+              Ambil {JUMLAH_KUIS} kuis selesai terakhir, hitung rata-rata, lalu tentukan tindakan. Siswa yang
+              belum mengerjakan ketiganya masuk pendampingan.
             </p>
           </div>
 
           <ul className="grid gap-3 md:grid-cols-3">
             <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-amber/10 text-aura-amber">
-                <AlertTriangle aria-hidden="true" className="size-4" />
-              </span>
-              <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
-                {ALASAN_BELUM_PAHAM}
-              </p>
-              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">{SARAN_BELUM_PAHAM}</p>
-            </li>
-            <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-red/10 text-aura-red">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
                 <Clock3 aria-hidden="true" className="size-4" />
               </span>
               <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
-                {ALASAN_TIDAK_MENGERJAKAN}
+                3 kuis selesai terakhir
               </p>
-              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">{SARAN_TIDAK_MENGERJAKAN}</p>
+              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
+                Diambil dari kelas/mapel yang sedang dipilih.
+              </p>
             </li>
             <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-violet/10 text-aura-violet">
-                <TrendingDown aria-hidden="true" className="size-4" />
+              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-emerald/10 text-[#047857]">
+                <TrendingUp aria-hidden="true" className="size-4" />
               </span>
               <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
-                {ALASAN_MENURUN}
+                Rata-rata nilai
               </p>
-              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">{SARAN_MENURUN}</p>
+              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
+                ≥{BATAS_PAHAM}% Paham · {BATAS_SETENGAH}–&lt;{BATAS_PAHAM}% Setengah Paham · &lt;
+                {BATAS_SETENGAH}% Belum Paham.
+              </p>
+            </li>
+            <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-aura-amber/10 text-[#8A6400]">
+                <CircleHelp aria-hidden="true" className="size-4" />
+              </span>
+              <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
+                Tindakan
+              </p>
+              <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
+                Belum paham dan tidak mengerjakan → pendampingan. Setengah paham → keputusan guru.
+              </p>
             </li>
           </ul>
-
-          <div className="flex items-start gap-2 rounded-2xl border border-aura-emerald/20 bg-aura-emerald/5 px-3 py-2.5">
-            <TrendingUp aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#047857]" />
-            <p className="font-body text-[12px] leading-[18px] text-aura-muted">
-              <strong className="font-semibold text-aura-ink">Kemajuan:</strong> siswa yang sebelumnya belum paham lalu
-              naik ke setengah atau sudah paham.
-            </p>
-          </div>
         </div>
       </section>
+
+      {ringkasan?.perluMigrasi && (
+        <section className="flex items-start gap-2 rounded-2xl border border-aura-amber/25 bg-aura-amber/10 px-4 py-3">
+          <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#8A6400]" />
+          <p className="font-body text-[12px] leading-[18px] font-medium text-aura-ink">
+            Keputusan guru belum bisa disimpan. Jalankan{' '}
+            <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[11px]">
+              supabase/migrasi-tindakan-pendampingan.sql
+            </code>{' '}
+            di Supabase SQL Editor.
+          </p>
+        </section>
+      )}
 
       {ringkasan && (
         <section aria-labelledby="judul-data-pendampingan" className="aura-glass rounded-[24px] p-4 sm:p-5">
           <h2 id="judul-data-pendampingan" className="sr-only">
-            Status data pendampingan
+            Ringkasan kategori pemahaman
           </h2>
           <div className="flex flex-wrap gap-2">
             <span className={kelasChip}>
@@ -215,35 +249,19 @@ function IsiPendampingan() {
               {ringkasan.jumlahSiswa} siswa
             </span>
             <span className={kelasChip}>
-              <CircleCheck aria-hidden="true" className="size-4 text-aura-emerald" />
-              {ringkasan.jumlahSesiBerjawaban} cek berjawaban
+              <CheckCircle2 aria-hidden="true" className="size-4 text-aura-emerald" />
+              {ringkasan.jumlahSesiSelesai} kuis selesai
             </span>
-            <span className={kelasChip}>
-              <Clock3 aria-hidden="true" className="size-4 text-aura-indigo" />
-              {ringkasan.jumlahSesiSelesai} cek selesai
-            </span>
+            <span className={kelasChip}>Paham {ringkasan.jumlahPaham}</span>
+            <span className={kelasChip}>Setengah {ringkasan.jumlahSetengah}</span>
+            <span className={kelasChip}>Belum {ringkasan.jumlahBelum}</span>
+            <span className={kelasChip}>Tidak mengerjakan {ringkasan.jumlahTidakMengerjakan}</span>
           </div>
-          <p className="mt-3 font-body text-[12px] leading-[18px] text-aura-muted">
-            {butuhPola > 0
-              ? `Butuh ${butuhPola} cek berjawaban lagi agar aturan 3x berturut-turut dan tren menurun bisa aktif.`
-              : "Aturan 3x berturut-turut dan tren menurun sudah aktif."}{" "}
-            {butuhSelesai > 0
-              ? `Butuh ${butuhSelesai} cek selesai lagi agar aturan tidak mengerjakan bisa aktif.`
-              : "Aturan tidak mengerjakan sudah aktif."}
-          </p>
-          {butuhPola === 0 && butuhSelesai === 0 && (
-            <p className="mt-2 font-body text-[12px] leading-[18px] text-aura-muted">
-              Semua aturan sudah aktif. Daftar di bawah hanya menampilkan siswa yang memenuhi kriteria.
+          {ringkasan.butuhSesi > 0 && (
+            <p className="mt-3 flex items-start gap-1.5 font-body text-[12px] leading-[18px] text-aura-muted">
+              <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
+              Butuh {ringkasan.butuhSesi} kuis selesai lagi sebelum kategori bisa dihitung.
             </p>
-          )}
-          {ringkasan.jumlahSesiBerjawaban === 0 && (
-            <Link
-              href={`/guru/kelas?kelas=${encodeURIComponent(kelasId)}`}
-              className="mt-3 inline-flex items-center gap-1.5 font-display text-[12px] font-semibold text-aura-primary hover:underline"
-            >
-              Buka kuis pertama
-              <ArrowRight aria-hidden="true" className="size-3.5" />
-            </Link>
           )}
         </section>
       )}
@@ -268,20 +286,134 @@ function IsiPendampingan() {
           }}
         />
       )}
-      {dataSiap && (
+
+      {galatAksi && (
+        <p role="alert" className="rounded-2xl border border-aura-red/20 bg-aura-red/5 px-4 py-3 font-body text-[13px] leading-[20px] font-medium text-aura-red">
+          {galatAksi}
+        </p>
+      )}
+
+      {dataSiap && ringkasan && ringkasan.butuhSesi > 0 && (
+        <section className="aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5 sm:p-6">
+          <span className="flex size-11 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
+            <Clock3 aria-hidden="true" className="size-5" />
+          </span>
+          <div>
+            <h2 className="font-display text-[20px] leading-[28px] font-bold text-aura-ink">
+              Butuh {ringkasan.butuhSesi} kuis selesai lagi
+            </h2>
+            <p className="mt-1 max-w-2xl font-body text-[13px] leading-[20px] text-aura-muted">
+              Saat ini baru {ringkasan.jumlahSesiSelesai} kuis selesai. Kategori baru dihitung setelah{' '}
+              {JUMLAH_KUIS} kuis selesai.
+            </p>
+          </div>
+          {ringkasan.jumlahSesiSelesai === 0 && (
+            <Link
+              href={`/guru/kelas?kelas=${encodeURIComponent(kelasId)}`}
+              className="aura-btn aura-btn-primary h-11 px-4 text-[12px]"
+            >
+              Buka kuis pertama
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
+          )}
+        </section>
+      )}
+
+      {dataSiap && ringkasan && ringkasan.butuhSesi === 0 && (
         <>
-          <section aria-labelledby="judul-pendampingan" className="flex flex-col gap-3">
-            <h2 id="judul-pendampingan" className="sr-only">
-              Daftar perlu pendampingan
-            </h2>
-            <TabelPendampingan data={dataSiap.perluPendampingan} />
-          </section>
-          <section aria-labelledby="judul-kemajuan" className="flex flex-col gap-3">
-            <h2 id="judul-kemajuan" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
-              Mengalami kemajuan
-            </h2>
-            <DaftarKemajuan data={dataSiap.kemajuan} />
-          </section>
+          {menunggu.length > 0 && (
+            <section aria-labelledby="judul-menunggu" className="flex flex-col gap-3">
+              <div>
+                <h2 id="judul-menunggu" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
+                  Menunggu keputusan guru
+                </h2>
+                <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+                  Siswa setengah paham. Pilih pendampingan atau lanjut ke evaluasi berikutnya.
+                </p>
+              </div>
+              <TabelPendampingan
+                data={menunggu}
+                jenis="menunggu"
+                onTindakan={(id, tindakan) => void ubahTindakan(id, tindakan)}
+                menyimpan={menyimpan}
+                nonaktif={nonaktif}
+              />
+            </section>
+          )}
+
+          {pendampingan.length > 0 && (
+            <section aria-labelledby="judul-pendampingan" className="flex flex-col gap-3">
+              <div>
+                <h2 id="judul-pendampingan" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
+                  Perlu pendampingan
+                </h2>
+                <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+                  Siswa belum paham atau belum mengerjakan {JUMLAH_KUIS} kuis selesai terakhir.
+                </p>
+              </div>
+              <TabelPendampingan
+                data={pendampingan}
+                jenis="pendampingan"
+                onTindakan={(id, tindakan) => void ubahTindakan(id, tindakan)}
+                menyimpan={menyimpan}
+                nonaktif={nonaktif}
+              />
+            </section>
+          )}
+
+          {evaluasi.length > 0 && (
+            <section aria-labelledby="judul-evaluasi" className="flex flex-col gap-3">
+              <div>
+                <h2 id="judul-evaluasi" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
+                  Hasil kuis & evaluasi berikutnya
+                </h2>
+                <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+                  Siswa yang tidak perlu pendampingan atau sudah menyelesaikan pendampingan.
+                </p>
+              </div>
+              <TabelPendampingan
+                data={evaluasi}
+                jenis="evaluasi"
+                onTindakan={(id, tindakan) => void ubahTindakan(id, tindakan)}
+                menyimpan={menyimpan}
+                nonaktif={nonaktif}
+              />
+            </section>
+          )}
+
+          {paham.length > 0 && (
+            <section aria-labelledby="judul-paham" className="aura-glass rounded-[24px] p-5 sm:p-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="judul-paham" className="font-display text-[18px] leading-[26px] font-bold text-aura-ink">
+                  Paham
+                </h2>
+                <span className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
+                  {paham.length} siswa
+                </span>
+              </div>
+              <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+                Rata-rata ≥{BATAS_PAHAM}%. Tidak perlu pendampingan.
+              </p>
+              <details className="mt-3">
+                <summary className="cursor-pointer font-display text-[12px] font-semibold text-aura-primary hover:underline">
+                  Lihat nama siswa
+                </summary>
+                <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                  {paham.map((s) => (
+                    <li key={s.siswaId} className="font-body text-[13px] leading-[20px] text-aura-ink">
+                      {s.nama}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </section>
+          )}
+
+          {menunggu.length === 0 && pendampingan.length === 0 && evaluasi.length === 0 && paham.length === 0 && (
+            <p className="aura-glass rounded-[24px] px-5 py-6 font-body text-[13px] leading-[20px] text-aura-muted">
+              Belum ada siswa di kelas ini.
+            </p>
+          )}
         </>
       )}
     </div>

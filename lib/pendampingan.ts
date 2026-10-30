@@ -1,94 +1,141 @@
-import type { DataPendampingan, Kelompok, StatusSesi } from './tipe';
+import type {
+  DataPendampingan,
+  KategoriPemahaman,
+  SiswaPendampingan,
+  StatusPendampingan,
+  StatusSesi,
+  TindakanPendampingan,
+} from './tipe';
 
-// Teks PRD AC-8.3 dan AC-8.4.
-export const ALASAN_BELUM_PAHAM = 'Belum paham 3x berturut-turut';
-export const ALASAN_TIDAK_MENGERJAKAN = 'Tidak mengerjakan 2 cek terakhir';
-export const ALASAN_MENURUN = 'Skor menurun 3 kali berturut-turut';
-export const SARAN_BELUM_PAHAM = 'Beri materi penguatan konsep dan dampingi langsung.';
-export const SARAN_TIDAK_MENGERJAKAN = 'Ajak bicara untuk mengetahui kendalanya.';
-export const SARAN_MENURUN = 'Periksa topik terakhir yang sulit baginya.';
+export const JUMLAH_KUIS = 3;
+export const BATAS_PAHAM = 70;
+export const BATAS_SETENGAH = 50;
 
-export const JUMLAH_SESI_JENDELA = 3;
-export const JUMLAH_CEK_TIDAK_MENGERJAKAN = 2;
+export interface TindakanTersimpan {
+  siswaId: string;
+  sesiTerakhirId: string;
+  kategori: KategoriPemahaman;
+  tindakan: TindakanPendampingan;
+}
 
 export interface InputPendampingan {
   sesi: { id: string; status: StatusSesi; dibuatPada: string }[];
-  hasil: { sesiId: string; siswaId: string; skor: number; kelompok: Kelompok }[];
+  hasil: { sesiId: string; siswaId: string; skor: number; total: number }[];
   siswa: { id: string; nama: string }[];
+  tindakan?: TindakanTersimpan[];
 }
 
-/** Tiga skor terakhir turun ketat (s1 > s2 > s3). Dipakai juga untuk ikon tren di TabelPendampingan. */
-export function trenMenurun(trenSkor: number[]): boolean {
-  if (trenSkor.length < JUMLAH_SESI_JENDELA) return false;
-  const [s1, s2, s3] = trenSkor.slice(-JUMLAH_SESI_JENDELA);
-  return s1 > s2 && s2 > s3;
-}
-
-/** Daftar Perlu Pendampingan dan Mengalami Kemajuan (PRD F-8, architecture.md 8.4). */
+/**
+ * Kategori mengikuti alur: rata-rata 3 kuis selesai terakhir.
+ * >=70 paham, 50–<70 setengah paham, <50 belum paham.
+ * Siswa dengan kurang dari 3 hasil masuk "tidak mengerjakan".
+ */
 export function hitungPendampingan(input: InputPendampingan): DataPendampingan {
-  // 1. Sesi tanpa jawaban sama sekali diabaikan.
   const sesiBerjawaban = new Set(input.hasil.map((h) => h.sesiId));
-  const sesi = input.sesi
-    .filter((s) => sesiBerjawaban.has(s.id))
+  const selesai = input.sesi
+    .filter((s) => s.status === 'selesai' && sesiBerjawaban.has(s.id))
     .sort((a, b) => Date.parse(a.dibuatPada) - Date.parse(b.dibuatPada));
+  const jendela = selesai.slice(-JUMLAH_KUIS);
+  const sesiTerakhirId = jendela.at(-1)?.id ?? null;
 
-  const hasilPerSiswa = new Map<string, Map<string, { skor: number; kelompok: Kelompok }>>();
+  const hasilPerSiswa = new Map<string, Map<string, { skor: number; total: number }>>();
   for (const h of input.hasil) {
     if (!hasilPerSiswa.has(h.siswaId)) hasilPerSiswa.set(h.siswaId, new Map());
-    hasilPerSiswa.get(h.siswaId)!.set(h.sesiId, { skor: h.skor, kelompok: h.kelompok });
+    hasilPerSiswa.get(h.siswaId)!.set(h.sesiId, { skor: h.skor, total: h.total });
   }
 
-  // 5. Dua sesi selesai terakhir (yang berisi jawaban) untuk aturan "tidak mengerjakan".
-  const duaSelesaiTerakhir = sesi.filter((s) => s.status === 'selesai').slice(-JUMLAH_CEK_TIDAK_MENGERJAKAN);
+  const tindakanPerSiswa = new Map((input.tindakan ?? []).map((t) => [t.siswaId, t]));
 
-  const perluPendampingan: DataPendampingan['perluPendampingan'] = [];
-  const kemajuan: DataPendampingan['kemajuan'] = [];
+  const siswa: SiswaPendampingan[] = input.siswa
+    .map(({ id, nama }) => {
+      const milik = hasilPerSiswa.get(id);
+      const diikuti = jendela.flatMap((s) => {
+        const hasil = milik?.get(s.id);
+        return hasil ? [hasil] : [];
+      });
+      const jumlahDikerjakan = diikuti.length;
+      const guru = tindakanPerSiswa.get(id);
+      const guruValid =
+        guru && sesiTerakhirId !== null && guru.sesiTerakhirId === sesiTerakhirId ? guru : null;
 
-  for (const { id: siswaId, nama } of input.siswa) {
-    const milikSiswa = hasilPerSiswa.get(siswaId) ?? new Map<string, { skor: number; kelompok: Kelompok }>();
+      if (jendela.length < JUMLAH_KUIS) {
+        return {
+          siswaId: id,
+          nama,
+          kategori: 'belum-cukup' as const,
+          rataRata: null,
+          jumlahDikerjakan,
+          jumlahKuis: jendela.length,
+          status: 'belum-cukup' as const,
+          sesiTerakhirId,
+        };
+      }
 
-    // 2–3. Jendela per siswa: sesi selesai + sesi aktif yang sudah ia jawab, ambil 3 terakhir.
-    const jendela = sesi
-      .filter((s) => s.status === 'selesai' || milikSiswa.has(s.id))
-      .slice(-JUMLAH_SESI_JENDELA);
-    const diikuti = jendela.flatMap((s) => {
-      const h = milikSiswa.get(s.id);
-      return h ? [h] : [];
-    });
-    const trenSkor = diikuti.map((h) => h.skor);
+      if (jumlahDikerjakan < JUMLAH_KUIS) {
+        const kategori = 'tidak-mengerjakan' as const;
+        const selesaiPendampingan =
+          guruValid?.kategori === kategori && guruValid.tindakan === 'selesai';
+        return {
+          siswaId: id,
+          nama,
+          kategori,
+          rataRata: null,
+          jumlahDikerjakan,
+          jumlahKuis: JUMLAH_KUIS,
+          status: (selesaiPendampingan ? 'selesai' : 'pendampingan') as StatusPendampingan,
+          sesiTerakhirId,
+        };
+      }
 
-    const alasan: string[] = [];
-    const saran: string[] = [];
+      const rataRataMentah =
+        diikuti.reduce((jumlah, h) => jumlah + (h.total > 0 ? (h.skor / h.total) * 100 : 0), 0) /
+        JUMLAH_KUIS;
+      const kategori: KategoriPemahaman =
+        rataRataMentah >= BATAS_PAHAM ? 'paham' : rataRataMentah >= BATAS_SETENGAH ? 'setengah' : 'belum';
+      const rataRata = Math.round(rataRataMentah * 10) / 10;
 
-    // 4. Belum paham di 3 sesi terakhir yang diikuti.
-    if (diikuti.length >= JUMLAH_SESI_JENDELA && diikuti.slice(-JUMLAH_SESI_JENDELA).every((h) => h.kelompok === 'belum')) {
-      alasan.push(ALASAN_BELUM_PAHAM);
-      saran.push(SARAN_BELUM_PAHAM);
-    }
-    // 5. Tidak punya hasil di 2 sesi selesai terakhir.
-    if (duaSelesaiTerakhir.length === JUMLAH_CEK_TIDAK_MENGERJAKAN && duaSelesaiTerakhir.every((s) => !milikSiswa.has(s.id))) {
-      alasan.push(ALASAN_TIDAK_MENGERJAKAN);
-      saran.push(SARAN_TIDAK_MENGERJAKAN);
-    }
-    // 6. Skor turun ketat di 3 sesi terakhir yang diikuti.
-    if (trenMenurun(trenSkor)) {
-      alasan.push(ALASAN_MENURUN);
-      saran.push(SARAN_MENURUN);
-    }
+      let status: StatusPendampingan;
+      if (kategori === 'paham') {
+        status = 'paham';
+      } else if (kategori === 'setengah') {
+        if (guruValid?.kategori !== 'setengah') status = 'menunggu';
+        else if (guruValid.tindakan === 'pendampingan') status = 'pendampingan';
+        else if (guruValid.tindakan === 'evaluasi') status = 'evaluasi';
+        else status = 'selesai';
+      } else {
+        const selesaiPendampingan =
+          guruValid?.kategori === 'belum' && guruValid.tindakan === 'selesai';
+        status = selesaiPendampingan ? 'selesai' : 'pendampingan';
+      }
 
-    if (alasan.length > 0) perluPendampingan.push({ siswaId, nama, alasan, saran, trenSkor });
+      return {
+        siswaId: id,
+        nama,
+        kategori,
+        rataRata,
+        jumlahDikerjakan,
+        jumlahKuis: JUMLAH_KUIS,
+        status,
+        sesiTerakhirId,
+      };
+    })
+    .sort((a, b) => a.nama.localeCompare(b.nama, 'id'));
 
-    // 7. Kemajuan: sebelumnya belum, sesi terakhir yang diikuti naik.
-    const [sebelum, terakhir] = diikuti.slice(-2);
-    if (diikuti.length >= 2 && sebelum.kelompok === 'belum' && terakhir.kelompok !== 'belum') {
-      kemajuan.push({ siswaId, nama, dari: sebelum.kelompok, ke: terakhir.kelompok });
-    }
-  }
+  const jumlahKategori = (kategori: KategoriPemahaman) =>
+    siswa.filter((s) => s.kategori === kategori).length;
 
-  // 8. Urutan: jumlah alasan terbanyak, lalu nama.
-  const urutNama = (a: { nama: string }, b: { nama: string }) => a.nama.localeCompare(b.nama, 'id');
-  perluPendampingan.sort((a, b) => b.alasan.length - a.alasan.length || urutNama(a, b));
-  kemajuan.sort(urutNama);
-
-  return { perluPendampingan, kemajuan };
+  return {
+    siswa,
+    ringkasan: {
+      jumlahSiswa: input.siswa.length,
+      jumlahSesi: input.sesi.length,
+      jumlahSesiSelesai: selesai.length,
+      jumlahSesiBerjawaban: sesiBerjawaban.size,
+      butuhSesi: Math.max(0, JUMLAH_KUIS - jendela.length),
+      jumlahPaham: jumlahKategori('paham'),
+      jumlahSetengah: jumlahKategori('setengah'),
+      jumlahBelum: jumlahKategori('belum'),
+      jumlahTidakMengerjakan: jumlahKategori('tidak-mengerjakan'),
+    },
+  };
 }

@@ -73,7 +73,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
   const bilah = [
     { label: 'Belum Paham', jumlah: materi.belum, warna: 'bg-belum' },
     { label: 'Sedang Belajar', jumlah: materi.sedang, warna: 'bg-setengah' },
-    { label: 'Sudah Paham', jumlah: materi.sudah, warna: 'bg-sudah' },
+    { label: 'Paham', jumlah: materi.sudah, warna: 'bg-sudah' },
   ];
 
   return (

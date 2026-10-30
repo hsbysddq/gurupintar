@@ -2,7 +2,7 @@ import type { Kelompok } from "@/lib/tipe";
 
 /** Label kelompok untuk guru (design.md 2.1). Jangan dipakai di halaman siswa. */
 export const LABEL_KELOMPOK: Record<Kelompok, string> = {
-  sudah: "Sudah Paham",
+  sudah: "Paham",
   setengah: "Setengah Paham",
   belum: "Belum Paham",
 };

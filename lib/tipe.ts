@@ -241,33 +241,48 @@ export type MateriSiswa =
   | { status: 'disiapkan' }
   | { status: 'tersedia'; namaTopik: string; isi: IsiMateri; format: Format | null };
 
-// ===== Perlu pendampingan (architecture.md bagian 6, hanya untuk guru) =====
+// ===== Pendampingan berbasis rata-rata 3 kuis selesai terakhir =====
 
-export interface SiswaPerluPendampingan {
+export type KategoriPemahaman = 'paham' | 'setengah' | 'belum' | 'tidak-mengerjakan' | 'belum-cukup';
+
+export type StatusPendampingan =
+  | 'belum-cukup'
+  | 'paham'
+  | 'menunggu'
+  | 'pendampingan'
+  | 'evaluasi'
+  | 'selesai';
+
+export type TindakanPendampingan = 'pendampingan' | 'evaluasi' | 'selesai';
+
+export interface SiswaPendampingan {
   siswaId: string;
   nama: string;
-  alasan: string[];
-  saran: string[];
-  trenSkor: number[];
-}
-
-export interface SiswaKemajuan {
-  siswaId: string;
-  nama: string;
-  dari: Kelompok;
-  ke: Kelompok;
+  kategori: KategoriPemahaman;
+  /** Rata-rata persentase 3 kuis; null jika belum lengkap. */
+  rataRata: number | null;
+  jumlahDikerjakan: number;
+  jumlahKuis: number;
+  status: StatusPendampingan;
+  sesiTerakhirId: string | null;
 }
 
 /** GET /api/guru/pendampingan */
 export interface RingkasanPendampingan {
   jumlahSiswa: number;
   jumlahSesi: number;
-  jumlahSesiBerjawaban: number;
   jumlahSesiSelesai: number;
+  jumlahSesiBerjawaban: number;
+  butuhSesi: number;
+  jumlahPaham: number;
+  jumlahSetengah: number;
+  jumlahBelum: number;
+  jumlahTidakMengerjakan: number;
+  /** True jika tabel tindakan_pendampingan belum dibuat. */
+  perluMigrasi?: boolean;
 }
 
 export interface DataPendampingan {
-  perluPendampingan: SiswaPerluPendampingan[];
-  kemajuan: SiswaKemajuan[];
-  ringkasan?: RingkasanPendampingan;
+  siswa: SiswaPendampingan[];
+  ringkasan: RingkasanPendampingan;
 }
