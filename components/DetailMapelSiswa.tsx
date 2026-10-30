@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, ClipboardList, History, PlayCircle, type LucideIcon } from 'lucide-react';
+import { BlokPerformaMapel } from '@/components/BlokPerformaMapel';
 import { IKON_MAPEL, kunciIkonMapel, warnaMapel } from '@/components/ikon-mapel';
 import { KartuKaca } from '@/components/KartuKaca';
 import { labelKelas } from '@/lib/beranda-siswa';
@@ -162,7 +163,7 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
   );
 }
 
-function PanelHistori({ detail }: { detail: DetailMapel }) {
+function PanelHistori({ detail, kelas }: { detail: DetailMapel; kelas: KelasDetail }) {
   const { ringkasan, histori } = detail;
   if (histori.length === 0) {
     return <Kosong judul="Belum ada hasil kuis" isi="Hasil kuis yang sudah kamu kerjakan akan tercatat di sini." />;
@@ -185,7 +186,11 @@ function PanelHistori({ detail }: { detail: DetailMapel }) {
             </div>
           ))}
         </dl>
-        <p className={TEKS_REDUP}>{detail.tren}</p>
+      </KartuKaca>
+
+      <KartuKaca as="section" className="flex flex-col gap-3 p-4 md:p-5">
+        <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Perkembangan nilai di {kelas.mapel}</h2>
+        <BlokPerformaMapel riwayat={detail.riwayat} hasil={detail.statusMapel} />
       </KartuKaca>
 
       <ul className="flex flex-col gap-4">
@@ -308,7 +313,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === 'materi' && <PanelMateri daftar={detail.materi} />}
         {tab === 'kuis' && <PanelKuis daftar={detail.kuis} />}
-        {tab === 'histori' && <PanelHistori detail={detail} />}
+        {tab === 'histori' && <PanelHistori detail={detail} kelas={kelas} />}
       </div>
     </div>
   );

@@ -1,23 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Minus, TrendingDown, TrendingUp } from "lucide-react";
-import { GrafikPerforma } from "@/components/GrafikPerforma";
+import { BlokPerformaMapel } from "@/components/BlokPerformaMapel";
 import { KartuKaca } from "@/components/KartuKaca";
 import { KerangkaSiswa } from "@/components/KerangkaSiswa";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { useSesiAktif } from "@/hooks/use-sesi-aktif";
 import { Tombol } from "@/components/Tombol";
-import {
-  formatTanggalPanjang,
-  hitungPersen,
-  kalimatTren,
-  ringkasPerforma,
-  titikGrafik,
-  type RiwayatKuis,
-} from "@/lib/riwayat-siswa";
+import { formatTanggalPanjang, hitungPersen } from "@/lib/riwayat-siswa";
+import { susunPerformaMapel, type ResponsRiwayat } from "@/lib/status-mapel";
 
-type Keadaan = { status: "memuat" } | { status: "gagal"; pesan: string } | { status: "siap"; daftar: RiwayatKuis[] };
+type Keadaan = { status: "memuat" } | { status: "gagal"; pesan: string } | { status: "siap"; data: ResponsRiwayat };
 
 const PESAN_GAGAL = "Riwayat belum bisa dimuat. Periksa koneksi, lalu coba lagi.";
 
@@ -36,9 +29,9 @@ export default function HalamanPerforma() {
     fetch("/api/siswa/riwayat", { cache: "no-store", credentials: "same-origin", signal: pengendali.signal })
       .then((res) => {
         if (!res.ok) throw new Error(PESAN_GAGAL);
-        return res.json() as Promise<RiwayatKuis[]>;
+        return res.json() as Promise<ResponsRiwayat>;
       })
-      .then((daftar) => setKeadaan({ status: "siap", daftar }))
+      .then((data) => setKeadaan({ status: "siap", data }))
       .catch((err: unknown) => {
         if (pengendali.signal.aborted) return;
         setKeadaan({ status: "gagal", pesan: err instanceof Error && err.message ? err.message : PESAN_GAGAL });
@@ -84,7 +77,7 @@ export default function HalamanPerforma() {
     );
   }
 
-  const { daftar } = keadaan;
+  const { riwayat: daftar, mapel } = keadaan.data;
   if (daftar.length === 0) {
     return (
       <KerangkaSiswa aksi={aksi}>
@@ -93,9 +86,7 @@ export default function HalamanPerforma() {
     );
   }
 
-  const ringkas = ringkasPerforma(daftar);
-  const titik = titikGrafik(daftar);
-  const IkonTren = ringkas.perubahan === null || ringkas.perubahan === 0 ? Minus : ringkas.perubahan > 0 ? TrendingUp : TrendingDown;
+  const perMapel = susunPerformaMapel(mapel, daftar);
   // Daftar riwayat: terbaru di atas (API sudah mengurutkan menurun).
   const terbaruDulu = [...daftar].sort((a, b) => b.dikirimPada.localeCompare(a.dikirimPada));
 
@@ -103,29 +94,20 @@ export default function HalamanPerforma() {
     <KerangkaSiswa aksi={aksi}>
       <header className="flex flex-col gap-1">
         <h1 className="text-[28px] leading-tight font-bold">Performa belajarku</h1>
-        <p className="text-tinta-lembut">Lihat naik turunnya nilaimu dari kuis ke kuis.</p>
+        <p className="text-tinta-lembut">Lihat nilaimu naik atau turun di tiap mata pelajaran.</p>
       </header>
 
-      <section aria-label="Ringkasan" className="grid grid-cols-3 gap-2 sm:gap-3">
-        <KartuStat label="Rata-rata" nilai={ringkas.rataRata === null ? "-" : `${ringkas.rataRata}%`} />
-        <KartuStat label="Terbaik" nilai={ringkas.terbaik === null ? "-" : `${ringkas.terbaik}%`} />
-        <KartuStat label="Kuis" nilai={String(ringkas.jumlahKuis)} />
+      <section aria-label="Perkembangan per mata pelajaran" className="flex flex-col gap-4">
+        {perMapel.map((m) => (
+          <KartuKaca key={m.kelasId} as="article" className="flex flex-col gap-3 p-5">
+            <div>
+              <h2 className="text-xl leading-snug font-semibold">{m.namaMapel}</h2>
+              <p className="text-[13px] leading-normal text-tinta-lembut">{m.namaKelas}</p>
+            </div>
+            <BlokPerformaMapel riwayat={m.riwayat} hasil={m.hasil} />
+          </KartuKaca>
+        ))}
       </section>
-
-      <KartuKaca as="section" className="flex flex-col gap-3 p-5">
-        <h2 className="text-xl leading-snug font-semibold">Perkembangan nilai</h2>
-        <p className="flex items-start gap-2 text-[15px] leading-snug text-tinta-lembut">
-          <IkonTren aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primer" />
-          {kalimatTren(ringkas.perubahan)}
-        </p>
-        {titik.length >= 2 ? (
-          <GrafikPerforma titik={titik} />
-        ) : (
-          <p className="rounded-kecil bg-primer-lembut p-4 text-[15px] text-tinta-lembut">
-            Grafik muncul setelah kamu mengerjakan minimal dua kuis.
-          </p>
-        )}
-      </KartuKaca>
 
       <section aria-labelledby="judul-riwayat" className="flex flex-col gap-3">
         <h2 id="judul-riwayat" className="text-xl leading-snug font-semibold">
@@ -138,7 +120,7 @@ export default function HalamanPerforma() {
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{k.namaTopik}</p>
                   <p className="text-[13px] leading-normal text-tinta-lembut">
-                    {k.namaKelas} · {formatTanggalPanjang(k.dikirimPada)}
+                    {k.namaMapel ? `${k.namaMapel} · ` : ""}{k.namaKelas} · {formatTanggalPanjang(k.dikirimPada)}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
@@ -153,14 +135,5 @@ export default function HalamanPerforma() {
         </ul>
       </section>
     </KerangkaSiswa>
-  );
-}
-
-function KartuStat({ label, nilai }: { label: string; nilai: string }) {
-  return (
-    <KartuKaca className="flex min-w-0 flex-col items-center gap-1 p-2 text-center sm:p-3">
-      <p className="text-xl leading-none font-bold sm:text-2xl">{nilai}</p>
-      <p className="text-[11px] leading-normal text-tinta-lembut sm:text-[13px]">{label}</p>
-    </KartuKaca>
   );
 }
