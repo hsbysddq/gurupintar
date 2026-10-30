@@ -328,7 +328,7 @@ function IsiPendampingan() {
                   Menunggu keputusan guru
                 </h2>
                 <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                  Siswa setengah paham. Pilih pendampingan atau lanjut ke evaluasi berikutnya.
+                  Siswa setengah paham. Masukkan ke daftar pendampingan atau lanjut evaluasi.
                 </p>
               </div>
               <TabelPendampingan

@@ -1,4 +1,4 @@
-import { CheckCircle2, CircleHelp, Loader2, PlayCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, CircleHelp, ListPlus, Loader2 } from "lucide-react";
 import type {
   KategoriPemahaman,
   SiswaPendampingan,
@@ -68,9 +68,9 @@ function TombolAksi({
           {memuatPendampingan ? (
             <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
           ) : (
-            <PlayCircle aria-hidden="true" className="size-3.5" />
+            <ListPlus aria-hidden="true" className="size-3.5" />
           )}
-          Lakukan pendampingan
+          Masukkan ke pendampingan
         </button>
         <button
           type="button"
@@ -78,8 +78,12 @@ function TombolAksi({
           onClick={() => onTindakan(siswa.siswaId, "evaluasi")}
           className="aura-btn aura-btn-secondary h-10 px-3 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {memuatEvaluasi && <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />}
-          Tidak perlu
+          {memuatEvaluasi ? (
+            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+          ) : (
+            <ArrowRight aria-hidden="true" className="size-3.5" />
+          )}
+          Lanjut evaluasi
         </button>
       </div>
     );
