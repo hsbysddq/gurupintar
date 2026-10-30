@@ -12,14 +12,15 @@ import {
 } from '@/lib/server/respons';
 
 const PESAN_KELAS_TIDAK_ADA = 'Kelas tidak ditemukan.';
+const PESAN_KUIS_TIDAK_ADA = 'Kuis selesai tidak ditemukan.';
 const PESAN_SISWA_TIDAK_ADA = 'Siswa tidak ditemukan di kelas ini.';
 const PESAN_TIDAK_PERLU = 'Siswa ini tidak memerlukan tindakan pendampingan.';
 const PESAN_EVALUASI = 'Evaluasi tanpa pendampingan hanya untuk siswa setengah paham.';
 const PESAN_SELESAI = 'Pendampingan belum dimulai untuk siswa ini.';
 const PESAN_MIGRASI =
-  'Fitur tindakan pendampingan belum aktif. Jalankan supabase/migrasi-tindakan-pendampingan.sql di Supabase SQL Editor.';
+  'Fitur tindakan pendampingan belum aktif. Jalankan supabase/migrasi-tindakan-pendampingan-kuis.sql di Supabase SQL Editor.';
 
-// POST /api/guru/pendampingan/tindakan: keputusan guru dan status pendampingan.
+// POST /api/guru/pendampingan/tindakan: keputusan guru untuk satu kuis.
 export async function POST(request: Request) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
@@ -27,13 +28,22 @@ export async function POST(request: Request) {
   const input = skemaBodyTindakanPendampingan.safeParse(await bacaBodyJson(request));
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
 
-  const { kelasId, siswaId, tindakan } = input.data;
+  const { kelasId, sesiId, siswaId, tindakan } = input.data;
 
   try {
     const db = ambilSupabase();
     if (!(await kelasMilikGuru(db, auth.profil.id, kelasId))) {
       return responsError(PESAN_KELAS_TIDAK_ADA, 404);
     }
+
+    const sesi = await db
+      .from('sesi_kuis')
+      .select('id, status')
+      .eq('id', sesiId)
+      .eq('kelas_id', kelasId)
+      .maybeSingle();
+    if (sesi.error) return petakanErrorDb(sesi.error);
+    if (!sesi.data || sesi.data.status !== 'selesai') return responsError(PESAN_KUIS_TIDAK_ADA, 404);
 
     const anggota = await db
       .from('keanggotaan_kelas')
@@ -44,7 +54,8 @@ export async function POST(request: Request) {
     if (anggota.error) return petakanErrorDb(anggota.error);
     if (!anggota.data) return responsError(PESAN_SISWA_TIDAK_ADA, 404);
 
-    const data = await dataPendampinganKelas(db, kelasId);
+    const data = await dataPendampinganKelas(db, kelasId, sesiId);
+    if (!data) return responsError(PESAN_KUIS_TIDAK_ADA, 404);
     if (data.ringkasan.perluMigrasi) return responsError(PESAN_MIGRASI, 503);
 
     const siswa = data.siswa.find((s) => s.siswaId === siswaId);
@@ -60,18 +71,17 @@ export async function POST(request: Request) {
     if (tindakan === 'pendampingan' && siswa.status !== 'menunggu' && siswa.status !== 'pendampingan') {
       return responsError(PESAN_TIDAK_PERLU, 409);
     }
-    if (!siswa.sesiTerakhirId) return responsError(PESAN_TIDAK_PERLU, 409);
 
-    const { error } = await db.from('tindakan_pendampingan').upsert(
+    const { error } = await db.from('tindakan_pendampingan_kuis').upsert(
       {
-        kelas_id: kelasId,
+        sesi_id: sesiId,
         siswa_id: siswaId,
-        sesi_terakhir_id: siswa.sesiTerakhirId,
+        kelas_id: kelasId,
         kategori: siswa.kategori,
         tindakan,
         diperbarui_pada: new Date().toISOString(),
       },
-      { onConflict: 'kelas_id,siswa_id' },
+      { onConflict: 'sesi_id,siswa_id' },
     );
     if (error) {
       if (tabelBelumAda(error)) return responsError(PESAN_MIGRASI, 503);

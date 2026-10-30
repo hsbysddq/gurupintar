@@ -140,9 +140,16 @@ export const skemaBodyUbahMateri = z.object({
   isi: z.unknown(),
 });
 
+// GET /api/guru/pendampingan?kelas=&sesi=
+export const skemaQueryPendampingan = z.object({
+  kelas: z.uuid().optional(),
+  sesi: z.uuid().optional(),
+});
+
 // POST /api/guru/pendampingan/tindakan
 export const skemaBodyTindakanPendampingan = z.object({
   kelasId: z.uuid(),
+  sesiId: z.uuid(),
   siswaId: z.uuid(),
   tindakan: z.enum(['pendampingan', 'evaluasi', 'selesai']),
 });

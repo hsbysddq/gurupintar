@@ -255,30 +255,35 @@ export type StatusPendampingan =
 
 export type TindakanPendampingan = 'pendampingan' | 'evaluasi' | 'selesai';
 
+export interface SesiPendampingan {
+  id: string;
+  kodeKelas: string;
+  dibuatPada: string;
+  namaTopik: string;
+}
+
 export interface SiswaPendampingan {
   siswaId: string;
   nama: string;
   kategori: KategoriPemahaman;
-  /** Rata-rata persentase 3 kuis; null jika belum lengkap. */
-  rataRata: number | null;
-  jumlahDikerjakan: number;
-  jumlahKuis: number;
+  /** Persentase nilai pada kuis terpilih; null jika tidak mengerjakan. */
+  nilai: number | null;
   status: StatusPendampingan;
-  sesiTerakhirId: string | null;
+  sesiId: string | null;
 }
 
 /** GET /api/guru/pendampingan */
 export interface RingkasanPendampingan {
   jumlahSiswa: number;
-  jumlahSesi: number;
   jumlahSesiSelesai: number;
-  jumlahSesiBerjawaban: number;
-  butuhSesi: number;
+  jumlahMenjawab: number;
+  sesiTerpilihId: string | null;
+  daftarSesi: SesiPendampingan[];
   jumlahPaham: number;
   jumlahSetengah: number;
   jumlahBelum: number;
   jumlahTidakMengerjakan: number;
-  /** True jika tabel tindakan_pendampingan belum dibuat. */
+  /** True jika tabel tindakan_pendampingan_kuis belum dibuat. */
   perluMigrasi?: boolean;
 }
 

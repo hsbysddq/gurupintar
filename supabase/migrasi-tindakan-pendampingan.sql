@@ -1,5 +1,6 @@
+-- DIGANTIKAN oleh supabase/migrasi-tindakan-pendampingan-kuis.sql.
+-- Tabel lama ini tidak dipakai lagi oleh aplikasi; simpan hanya sebagai riwayat.
 -- Keputusan guru dan status pendampingan per siswa/kelas.
--- Jalankan file ini sekali di Supabase SQL Editor sebelum memakai tombol tindakan.
 
 create table if not exists tindakan_pendampingan (
   kelas_id uuid not null references kelas(id) on delete cascade,

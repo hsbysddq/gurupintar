@@ -236,10 +236,10 @@ describe('api-klien guru', () => {
       siswa: [],
       ringkasan: {
         jumlahSiswa: 0,
-        jumlahSesi: 0,
         jumlahSesiSelesai: 0,
-        jumlahSesiBerjawaban: 0,
-        butuhSesi: 3,
+        jumlahMenjawab: 0,
+        sesiTerpilihId: null,
+        daftarSesi: [],
         jumlahPaham: 0,
         jumlahSetengah: 0,
         jumlahBelum: 0,
@@ -248,11 +248,13 @@ describe('api-klien guru', () => {
     };
     const palsu = stubFetch(async () => Response.json(kosong));
     const pengendali = new AbortController();
-    await expect(ambilPendampingan(undefined, pengendali.signal)).resolves.toEqual(kosong);
+    await expect(ambilPendampingan(undefined, undefined, pengendali.signal)).resolves.toEqual(kosong);
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/pendampingan');
     expect(palsu.mock.calls[0][1]?.signal).toBe(pengendali.signal);
     await ambilPendampingan('k1');
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/pendampingan?kelas=k1');
+    await ambilPendampingan('k1', 's1');
+    expect(palsu.mock.calls[2][0]).toBe('/api/guru/pendampingan?kelas=k1&sesi=s1');
   });
 });
 

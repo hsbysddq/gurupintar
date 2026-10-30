@@ -140,8 +140,7 @@ export function TabelPendampingan({
               <div className="min-w-0">
                 <p className="font-display text-[14px] leading-[20px] font-semibold text-aura-ink">{siswa.nama}</p>
                 <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
-                  {siswa.rataRata === null ? "Rata-rata belum ada" : `Rata-rata ${siswa.rataRata}%`} ·{" "}
-                  {siswa.jumlahDikerjakan}/{siswa.jumlahKuis} kuis
+                  {siswa.nilai === null ? "Tidak mengerjakan kuis ini" : `Nilai ${siswa.nilai}%`}
                 </p>
               </div>
               <KategoriBadge kategori={siswa.kategori} />
@@ -159,12 +158,11 @@ export function TabelPendampingan({
 
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[720px] border-collapse text-left">
-          <caption className="sr-only">Daftar siswa, kategori pemahaman, rata-rata nilai, dan tindakan</caption>
+          <caption className="sr-only">Daftar siswa, nilai kuis, kategori pemahaman, dan tindakan</caption>
           <thead>
             <tr className="border-b border-white/60 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
               <th scope="col" className="px-4 py-3">Nama</th>
-              <th scope="col" className="px-4 py-3">Rata-rata</th>
-              <th scope="col" className="px-4 py-3">Kuis</th>
+              <th scope="col" className="px-4 py-3">Nilai</th>
               <th scope="col" className="px-4 py-3">Kategori</th>
               <th scope="col" className="px-4 py-3">Tindakan</th>
             </tr>
@@ -176,10 +174,7 @@ export function TabelPendampingan({
                   {siswa.nama}
                 </th>
                 <td className="px-4 py-3 font-body text-[13px] text-aura-muted">
-                  {siswa.rataRata === null ? "—" : `${siswa.rataRata}%`}
-                </td>
-                <td className="px-4 py-3 font-body text-[13px] text-aura-muted">
-                  {siswa.jumlahDikerjakan}/{siswa.jumlahKuis}
+                  {siswa.nilai === null ? "—" : `${siswa.nilai}%`}
                 </td>
                 <td className="px-4 py-3">
                   <KategoriBadge kategori={siswa.kategori} />

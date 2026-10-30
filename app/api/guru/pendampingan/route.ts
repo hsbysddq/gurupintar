@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { skemaQueryKelasOpsional } from '@/lib/skema-api';
+import { skemaQueryPendampingan } from '@/lib/skema-api';
 import { idKelasMilikGuru, kelasMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { dataPendampinganKelas } from '@/lib/server/pendampingan-kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -7,14 +7,16 @@ import { petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from
 import type { DataPendampingan } from '@/lib/tipe';
 
 const PESAN_KELAS_TIDAK_ADA = 'Kelas tidak ditemukan.';
+const PESAN_KUIS_TIDAK_ADA = 'Kuis selesai tidak ditemukan.';
 
-// GET /api/guru/pendampingan?kelas= (PRD F-8, architecture.md 8.4). Hanya guru pemilik kelas.
+// GET /api/guru/pendampingan?kelas=&sesi=; tanpa sesi memakai kuis selesai terbaru.
 export async function GET(request: NextRequest) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
 
-  const input = skemaQueryKelasOpsional.safeParse({
+  const input = skemaQueryPendampingan.safeParse({
     kelas: request.nextUrl.searchParams.get('kelas') ?? undefined,
+    sesi: request.nextUrl.searchParams.get('sesi') ?? undefined,
   });
   if (!input.success) return responsError(PESAN_INPUT_TIDAK_VALID, 400);
 
@@ -32,10 +34,10 @@ export async function GET(request: NextRequest) {
           siswa: [],
           ringkasan: {
             jumlahSiswa: 0,
-            jumlahSesi: 0,
             jumlahSesiSelesai: 0,
-            jumlahSesiBerjawaban: 0,
-            butuhSesi: 3,
+            jumlahMenjawab: 0,
+            sesiTerpilihId: null,
+            daftarSesi: [],
             jumlahPaham: 0,
             jumlahSetengah: 0,
             jumlahBelum: 0,
@@ -46,7 +48,9 @@ export async function GET(request: NextRequest) {
       kelasId = ids[0];
     }
 
-    return responsOk(await dataPendampinganKelas(db, kelasId));
+    const data = await dataPendampinganKelas(db, kelasId, input.data.sesi);
+    if (!data) return responsError(PESAN_KUIS_TIDAK_ADA, 404);
+    return responsOk(data);
   } catch (err) {
     console.error(err);
     return petakanErrorDb(err);

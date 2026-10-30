@@ -21,7 +21,7 @@ import {
   ambilPendampingan,
   simpanTindakanPendampingan,
 } from "@/lib/api-klien";
-import { BATAS_PAHAM, BATAS_SETENGAH, JUMLAH_KUIS } from "@/lib/pendampingan";
+import { BATAS_PAHAM, BATAS_SETENGAH } from "@/lib/pendampingan";
 import type {
   DataPendampingan,
   KelasRingkas,
@@ -29,12 +29,18 @@ import type {
   TindakanPendampingan,
 } from "@/lib/tipe";
 
+const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 type Muatan =
   | { status: "memuat" }
   | { status: "gagal"; pesan: string; kelasId: string }
   | { status: "siap"; data: DataPendampingan; kelasId: string };
 
-// Alur: rata-rata 3 kuis selesai terakhir → Paham / Setengah Paham / Belum Paham.
+// Alur: satu kuis selesai terpilih → Paham / Setengah Paham / Belum Paham.
 export default function HalamanPendampingan() {
   return (
     <Suspense fallback={<StatusHalaman jenis="memuat" judul="Memuat daftar pendampingan" />}>
@@ -47,11 +53,14 @@ function IsiPendampingan() {
   const router = useRouter();
   const params = useSearchParams();
   const kelasDariUrl = params.get("kelas") ?? "";
+  const sesiDariUrl = params.get("sesi") ?? "";
   const idKelas = useId();
+  const idSesi = useId();
   const [percobaan, setPercobaan] = useState(0);
   const [muatan, setMuatan] = useState<Muatan>({ status: "memuat" });
   const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[] | null>(null);
   const [kelasPilihan, setKelasPilihan] = useState(kelasDariUrl);
+  const [sesiPilihan, setSesiPilihan] = useState(sesiDariUrl);
   const [menyimpan, setMenyimpan] = useState<string | null>(null);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
 
@@ -84,7 +93,7 @@ function IsiPendampingan() {
     if (!kelasId) return;
     const idKelasAktif = kelasId;
     const pengendali = new AbortController();
-    ambilPendampingan(idKelasAktif, pengendali.signal)
+    ambilPendampingan(idKelasAktif, sesiPilihan || undefined, pengendali.signal)
       .then((data) => setMuatan({ status: "siap", data, kelasId: idKelasAktif }))
       .catch((err: unknown) => {
         if (pengendali.signal.aborted) return;
@@ -95,7 +104,7 @@ function IsiPendampingan() {
         });
       });
     return () => pengendali.abort();
-  }, [percobaan, kelasId]);
+  }, [percobaan, kelasId, sesiPilihan]);
 
   const dataSiap = muatan.status === "siap" && muatan.kelasId === kelasId ? muatan.data : null;
   const pesanGagal = muatan.status === "gagal" && muatan.kelasId === kelasId ? muatan.pesan : null;
@@ -108,11 +117,12 @@ function IsiPendampingan() {
   const nonaktif = Boolean(ringkasan?.perluMigrasi) || menyimpan !== null;
 
   async function ubahTindakan(siswaId: string, tindakan: TindakanPendampingan) {
-    if (!kelasId) return;
+    const sesiId = ringkasan?.sesiTerpilihId;
+    if (!kelasId || !sesiId) return;
     setMenyimpan(`${siswaId}:${tindakan}`);
     setGalatAksi(null);
     try {
-      await simpanTindakanPendampingan({ kelasId, siswaId, tindakan });
+      await simpanTindakanPendampingan({ kelasId, sesiId, siswaId, tindakan });
       setPercobaan((p) => p + 1);
     } catch (err) {
       setGalatAksi(err instanceof Error ? err.message : "Tindakan belum berhasil disimpan.");
@@ -132,8 +142,8 @@ function IsiPendampingan() {
             Peta pemahaman & tindakan
           </h1>
           <p className="max-w-2xl font-body text-[14px] leading-[22px] text-aura-muted">
-            Rata-rata {JUMLAH_KUIS} kuis selesai terakhir di kelas ini menentukan kategori. Setengah paham
-            menunggu keputusan guru; belum paham dan yang tidak mengerjakan langsung masuk pendampingan.
+            Nilai satu kuis selesai menentukan kategori. Setengah paham menunggu keputusan guru; belum paham
+            dan yang tidak mengerjakan kuis itu langsung masuk pendampingan.
           </p>
         </div>
 
@@ -150,6 +160,7 @@ function IsiPendampingan() {
                   const id = e.target.value;
                   setMuatan({ status: "memuat" });
                   setKelasPilihan(id);
+                  setSesiPilihan("");
                   setGalatAksi(null);
                   router.replace(`/guru/pendampingan?kelas=${encodeURIComponent(id)}`);
                 }}
@@ -158,6 +169,33 @@ function IsiPendampingan() {
                 {daftarKelas.map((k) => (
                   <option key={k.id} value={k.id}>
                     {k.mapel} · {k.nama}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {dataSiap && dataSiap.ringkasan.daftarSesi.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label htmlFor={idSesi} className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                Kuis
+              </label>
+              <select
+                id={idSesi}
+                value={sesiPilihan || dataSiap.ringkasan.sesiTerpilihId || ""}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setMuatan({ status: "memuat" });
+                  setSesiPilihan(id);
+                  setGalatAksi(null);
+                  router.replace(
+                    `/guru/pendampingan?kelas=${encodeURIComponent(kelasId)}&sesi=${encodeURIComponent(id)}`,
+                  );
+                }}
+                className="h-11 rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm"
+              >
+                {dataSiap.ringkasan.daftarSesi.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {FORMAT_TANGGAL.format(new Date(s.dibuatPada))} · {s.namaTopik || s.kodeKelas}
                   </option>
                 ))}
               </select>
@@ -184,8 +222,8 @@ function IsiPendampingan() {
               Bagaimana siswa masuk daftar?
             </h2>
             <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-              Ambil {JUMLAH_KUIS} kuis selesai terakhir, hitung rata-rata, lalu tentukan tindakan. Siswa yang
-              belum mengerjakan ketiganya masuk pendampingan.
+              Pilih satu kuis selesai, lihat nilai tiap siswa, lalu tentukan tindakan. Siswa tanpa nilai di
+              kuis itu masuk pendampingan.
             </p>
           </div>
 
@@ -195,10 +233,10 @@ function IsiPendampingan() {
                 <Clock3 aria-hidden="true" className="size-4" />
               </span>
               <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
-                3 kuis selesai terakhir
+                Kuis selesai
               </p>
               <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
-                Diambil dari kelas/mapel yang sedang dipilih.
+                Pilih kuis dari dropdown di atas.
               </p>
             </li>
             <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
@@ -206,7 +244,7 @@ function IsiPendampingan() {
                 <TrendingUp aria-hidden="true" className="size-4" />
               </span>
               <p className="mt-2 font-display text-[13px] leading-[20px] font-semibold text-aura-ink">
-                Rata-rata nilai
+                Nilai kuis
               </p>
               <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
                 ≥{BATAS_PAHAM}% Paham · {BATAS_SETENGAH}–&lt;{BATAS_PAHAM}% Setengah Paham · &lt;
@@ -234,14 +272,16 @@ function IsiPendampingan() {
           <p className="font-body text-[12px] leading-[18px] font-medium text-aura-ink">
             Keputusan guru belum bisa disimpan. Jalankan{' '}
             <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[11px]">
-              supabase/migrasi-tindakan-pendampingan.sql
+              supabase/migrasi-tindakan-pendampingan-kuis.sql
             </code>{' '}
             di Supabase SQL Editor.
           </p>
         </section>
       )}
 
-      {ringkasan && <RingkasanPemahaman ringkasan={ringkasan} />}
+      {ringkasan && ringkasan.sesiTerpilihId && ringkasan.jumlahMenjawab > 0 && (
+        <RingkasanPemahaman ringkasan={ringkasan} />
+      )}
 
       {daftarKelas && daftarKelas.length === 0 && (
         <StatusHalaman jenis="kosong" judul="Belum ada kelas" pesan="Buat kelas di dashboard sebelum melihat pendampingan." />
@@ -270,33 +310,46 @@ function IsiPendampingan() {
         </p>
       )}
 
-      {dataSiap && ringkasan && ringkasan.butuhSesi > 0 && (
+      {dataSiap && ringkasan && !ringkasan.sesiTerpilihId && (
         <section className="aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5 sm:p-6">
           <span className="flex size-11 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
             <Clock3 aria-hidden="true" className="size-5" />
           </span>
           <div>
             <h2 className="font-display text-[20px] leading-[28px] font-bold text-aura-ink">
-              Butuh {ringkasan.butuhSesi} kuis selesai lagi
+              Belum ada kuis selesai
             </h2>
             <p className="mt-1 max-w-2xl font-body text-[13px] leading-[20px] text-aura-muted">
-              Saat ini baru {ringkasan.jumlahSesiSelesai} kuis selesai. Kategori baru dihitung setelah{' '}
-              {JUMLAH_KUIS} kuis selesai.
+              Pendampingan dihitung dari satu kuis selesai. Tutup kuis terlebih dahulu untuk melihat kategori.
             </p>
           </div>
-          {ringkasan.jumlahSesiSelesai === 0 && (
-            <Link
-              href={`/guru/kelas?kelas=${encodeURIComponent(kelasId)}`}
-              className="aura-btn aura-btn-primary h-11 px-4 text-[12px]"
-            >
-              Buka kuis pertama
-              <ArrowRight aria-hidden="true" className="size-3.5" />
-            </Link>
-          )}
+          <Link
+            href={`/guru/kelas?kelas=${encodeURIComponent(kelasId)}`}
+            className="aura-btn aura-btn-primary h-11 px-4 text-[12px]"
+          >
+            Buka kuis
+            <ArrowRight aria-hidden="true" className="size-3.5" />
+          </Link>
         </section>
       )}
 
-      {dataSiap && ringkasan && ringkasan.butuhSesi === 0 && (
+      {dataSiap && ringkasan && ringkasan.sesiTerpilihId && ringkasan.jumlahMenjawab === 0 && (
+        <section className="aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5 sm:p-6">
+          <span className="flex size-11 items-center justify-center rounded-2xl bg-aura-amber/10 text-[#8A6400] ring-1 ring-white/70">
+            <Info aria-hidden="true" className="size-5" />
+          </span>
+          <div>
+            <h2 className="font-display text-[20px] leading-[28px] font-bold text-aura-ink">
+              Belum ada yang mengerjakan kuis ini
+            </h2>
+            <p className="mt-1 max-w-2xl font-body text-[13px] leading-[20px] text-aura-muted">
+              Pilih kuis lain di dropdown, atau tunggu siswa mengerjakan kuis ini.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {dataSiap && ringkasan && ringkasan.sesiTerpilihId && ringkasan.jumlahMenjawab > 0 && (
         <>
           {menunggu.length > 0 && (
             <section aria-labelledby="judul-menunggu" className="flex flex-col gap-3">
@@ -325,7 +378,7 @@ function IsiPendampingan() {
                   Perlu pendampingan
                 </h2>
                 <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                  Siswa belum paham atau belum mengerjakan {JUMLAH_KUIS} kuis selesai terakhir.
+                  Siswa belum paham atau tidak mengerjakan kuis ini.
                 </p>
               </div>
               <TabelPendampingan
@@ -369,7 +422,7 @@ function IsiPendampingan() {
                 </span>
               </div>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                Rata-rata ≥{BATAS_PAHAM}%. Tidak perlu pendampingan.
+                Nilai ≥{BATAS_PAHAM}% pada kuis ini. Tidak perlu pendampingan.
               </p>
               <details className="mt-3">
                 <summary className="cursor-pointer font-display text-[12px] font-semibold text-aura-primary hover:underline">
@@ -433,6 +486,10 @@ function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan })
     },
   ];
   const total = kategori.reduce((jumlah, k) => jumlah + k.jumlah, 0);
+  const sesi = ringkasan.daftarSesi.find((s) => s.id === ringkasan.sesiTerpilihId);
+  const labelSesi = sesi
+    ? `${FORMAT_TANGGAL.format(new Date(sesi.dibuatPada))} · ${sesi.namaTopik || sesi.kodeKelas}`
+    : "Kuis terpilih";
 
   return (
     <section
@@ -457,16 +514,19 @@ function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan })
               {ringkasan.jumlahSiswa} siswa
             </h2>
             <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-              Sebaran kategori dari rata-rata {JUMLAH_KUIS} kuis selesai terakhir.
+              Sebaran kategori dari hasil kuis terpilih.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
               <CheckCircle2 aria-hidden="true" className="size-4 text-aura-emerald" />
-              {ringkasan.jumlahSesiSelesai} kuis selesai
+              {ringkasan.jumlahMenjawab} menjawab
+            </span>
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-muted backdrop-blur-sm">
+              <span className="truncate">{labelSesi}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-muted backdrop-blur-sm">
-              Dari {JUMLAH_KUIS} kuis terakhir
+              {ringkasan.jumlahSesiSelesai} kuis selesai
             </span>
           </div>
         </div>
@@ -509,12 +569,6 @@ function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan })
               ) : null,
             )}
           </div>
-          {ringkasan.butuhSesi > 0 && (
-            <p className="mt-3 flex items-start gap-1.5 font-body text-[12px] leading-[18px] text-aura-muted">
-              <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
-              Butuh {ringkasan.butuhSesi} kuis selesai lagi sebelum kategori bisa dihitung.
-            </p>
-          )}
         </div>
       </div>
     </section>

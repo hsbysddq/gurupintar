@@ -24,13 +24,18 @@ export async function ambilRingkasanKelas(db: SupabaseClient, guruId: string): P
 
   return daftar.map((kelas, i) => {
     const sesiKelas = barisSesi.filter((s) => s.kelas_id === kelas.id);
+    const data = pendampingan[i];
+    const perlu =
+      data && data.ringkasan.jumlahMenjawab > 0
+        ? data.siswa.filter((s) => s.status === 'pendampingan').length
+        : 0;
     return {
       id: kelas.id,
       nama: kelas.nama,
       mapel: kelas.mapel,
       jumlahSiswa: kelas.jumlahSiswa,
       kuisAktif: kelas.kuisAktif,
-      jumlahPerluPendampingan: pendampingan[i].siswa.filter((s) => s.status === 'pendampingan').length,
+      jumlahPerluPendampingan: perlu,
       jumlahSesi: sesiKelas.length,
       sesiTerakhir: sesiKelas[0]?.dibuat_pada ?? null,
     };

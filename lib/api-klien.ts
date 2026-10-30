@@ -267,9 +267,16 @@ export function hapusMateriPustaka(id: string): Promise<{ ok: true }> {
   return minta(`/api/guru/materi-pustaka?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
-export function ambilPendampingan(kelasId?: string, signal?: AbortSignal): Promise<DataPendampingan> {
-  const query = kelasId ? `?kelas=${encodeURIComponent(kelasId)}` : '';
-  return minta(`/api/guru/pendampingan${query}`, { signal });
+export function ambilPendampingan(
+  kelasId?: string,
+  sesiId?: string,
+  signal?: AbortSignal,
+): Promise<DataPendampingan> {
+  const query = new URLSearchParams();
+  if (kelasId) query.set('kelas', kelasId);
+  if (sesiId) query.set('sesi', sesiId);
+  const akhiran = query.toString();
+  return minta(`/api/guru/pendampingan${akhiran ? `?${akhiran}` : ''}`, { signal });
 }
 
 export function simpanTindakanPendampingan(body: BodyTindakanPendampingan): Promise<{ ok: true }> {

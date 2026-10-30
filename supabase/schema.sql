@@ -128,17 +128,17 @@ create table materi_pustaka (
 );
 create index materi_pustaka_kelas_waktu on materi_pustaka (kelas_id, diperbarui_pada desc);
 
--- Keputusan guru dan status pendampingan per siswa/kelas.
-create table tindakan_pendampingan (
-  kelas_id uuid not null references kelas(id) on delete cascade,
+-- Keputusan guru dan status pendampingan per siswa untuk satu kuis selesai.
+create table tindakan_pendampingan_kuis (
+  sesi_id uuid not null references sesi_kuis(id) on delete cascade,
   siswa_id uuid not null references pengguna(id) on delete cascade,
-  sesi_terakhir_id uuid not null references sesi_kuis(id) on delete cascade,
+  kelas_id uuid not null references kelas(id) on delete cascade,
   kategori text not null check (kategori in ('setengah','belum','tidak-mengerjakan')),
   tindakan text not null check (tindakan in ('pendampingan','evaluasi','selesai')),
   diperbarui_pada timestamptz not null default now(),
-  primary key (kelas_id, siswa_id)
+  primary key (sesi_id, siswa_id)
 );
-create index tindakan_pendampingan_waktu on tindakan_pendampingan (kelas_id, diperbarui_pada desc);
+create index tindakan_pendampingan_kuis_waktu on tindakan_pendampingan_kuis (sesi_id, diperbarui_pada desc);
 
 alter table pengguna enable row level security;
 alter table kelas enable row level security;
@@ -151,7 +151,7 @@ alter table hasil_siswa enable row level security;
 alter table percobaan_kuis enable row level security;
 alter table materi enable row level security;
 alter table materi_pustaka enable row level security;
-alter table tindakan_pendampingan enable row level security;
+alter table tindakan_pendampingan_kuis enable row level security;
 -- Sengaja TANPA policy: hanya service role (server) yang bisa mengakses (AD-3).
 -- Otorisasi per pengguna dilakukan di API route setelah sesi Supabase diverifikasi.
 
