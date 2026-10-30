@@ -190,3 +190,19 @@ describe('formatTanggalKartu', () => {
     expect(hasil).toMatch(/2024$/);
   });
 });
+
+describe('susunDetailMapel: grafik dan status per mapel', () => {
+  const tiga = [sesi('s1', '2026-10-01T03:00:00Z'), sesi('s2', '2026-10-02T03:00:00Z'), sesi('s3', '2026-10-03T03:00:00Z')];
+  const hasil = (sesiId: string, skor: number) => ({ sesiId, skor, total: 5, dikirimPada: `2026-10-0${sesiId.slice(1)}T05:00:00Z` });
+
+  it('menyertakan riwayat mapel untuk grafik dan status dari 3 kuis terakhir', () => {
+    const d = susunDetailMapel({ kelas: KELAS, sesi: tiga, hasil: [hasil('s1', 5), hasil('s2', 4), hasil('s3', 4)] });
+    expect(d.riwayat).toHaveLength(3);
+    expect(d.statusMapel).toMatchObject({ status: 'aman', rataRata: 87 });
+  });
+
+  it('belum cukup data bila kuis di mapel kurang dari 3', () => {
+    const d = susunDetailMapel({ kelas: KELAS, sesi: tiga.slice(0, 2), hasil: [hasil('s1', 5)] });
+    expect(d.statusMapel.status).toBe('belum-cukup');
+  });
+});

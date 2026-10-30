@@ -8,6 +8,7 @@ import {
   type RiwayatKuis,
   type RingkasanPerforma,
 } from './riwayat-siswa';
+import { hitungStatusMapel, type HasilStatusMapel } from './status-mapel';
 import type { StatusMateriSiswa, StatusSesi } from './tipe';
 
 export interface KelasDetail {
@@ -97,6 +98,10 @@ export interface DetailMapel {
   histori: ItemHistori[];
   ringkasan: RingkasanPerforma;
   tren: string;
+  /** Pengerjaan kuis mapel ini (terlama dulu tidak dijamin), untuk grafik perkembangan nilai. */
+  riwayat: RiwayatKuis[];
+  /** Status 3 kuis terakhir di mapel ini. */
+  statusMapel: HasilStatusMapel;
   /** Kuis aktif terbaru yang belum dikerjakan siswa, atau null. */
   kuisAktif: { sesiId: string; judul: string; href: string } | null;
 }
@@ -188,7 +193,12 @@ export function susunDetailMapel(data: DataDetailMapel): DetailMapel {
       ? { sesiId: belumDikerjakan.sesiId, judul: belumDikerjakan.judul, href: belumDikerjakan.hrefKerjakan }
       : null;
 
-  return { materi, kuis, histori, ringkasan, tren: kalimatTren(ringkasan.perubahan), kuisAktif };
+  const statusMapel = hitungStatusMapel(
+    data.sesi.map((s) => ({ sesiId: s.id, dibuatPada: s.dibuatPada })),
+    data.hasil,
+  );
+
+  return { materi, kuis, histori, ringkasan, tren: kalimatTren(ringkasan.perubahan), riwayat, statusMapel, kuisAktif };
 }
 
 /** Tanggal kartu ala Classroom, mis. "6 Jan 2024", menurut waktu Indonesia Barat. */
