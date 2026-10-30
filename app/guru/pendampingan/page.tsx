@@ -22,7 +22,12 @@ import {
   simpanTindakanPendampingan,
 } from "@/lib/api-klien";
 import { BATAS_PAHAM, BATAS_SETENGAH, JUMLAH_KUIS } from "@/lib/pendampingan";
-import type { DataPendampingan, KelasRingkas, TindakanPendampingan } from "@/lib/tipe";
+import type {
+  DataPendampingan,
+  KelasRingkas,
+  RingkasanPendampingan,
+  TindakanPendampingan,
+} from "@/lib/tipe";
 
 type Muatan =
   | { status: "memuat" }
@@ -101,8 +106,6 @@ function IsiPendampingan() {
   const evaluasi = siswa.filter((s) => s.status === "evaluasi" || s.status === "selesai");
   const paham = siswa.filter((s) => s.kategori === "paham");
   const nonaktif = Boolean(ringkasan?.perluMigrasi) || menyimpan !== null;
-  const kelasChip =
-    "inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink";
 
   async function ubahTindakan(siswaId: string, tindakan: TindakanPendampingan) {
     if (!kelasId) return;
@@ -238,33 +241,7 @@ function IsiPendampingan() {
         </section>
       )}
 
-      {ringkasan && (
-        <section aria-labelledby="judul-data-pendampingan" className="aura-glass rounded-[24px] p-4 sm:p-5">
-          <h2 id="judul-data-pendampingan" className="sr-only">
-            Ringkasan kategori pemahaman
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <span className={kelasChip}>
-              <Users aria-hidden="true" className="size-4 text-aura-primary" />
-              {ringkasan.jumlahSiswa} siswa
-            </span>
-            <span className={kelasChip}>
-              <CheckCircle2 aria-hidden="true" className="size-4 text-aura-emerald" />
-              {ringkasan.jumlahSesiSelesai} kuis selesai
-            </span>
-            <span className={kelasChip}>Paham {ringkasan.jumlahPaham}</span>
-            <span className={kelasChip}>Setengah {ringkasan.jumlahSetengah}</span>
-            <span className={kelasChip}>Belum {ringkasan.jumlahBelum}</span>
-            <span className={kelasChip}>Tidak mengerjakan {ringkasan.jumlahTidakMengerjakan}</span>
-          </div>
-          {ringkasan.butuhSesi > 0 && (
-            <p className="mt-3 flex items-start gap-1.5 font-body text-[12px] leading-[18px] text-aura-muted">
-              <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
-              Butuh {ringkasan.butuhSesi} kuis selesai lagi sebelum kategori bisa dihitung.
-            </p>
-          )}
-        </section>
-      )}
+      {ringkasan && <RingkasanPemahaman ringkasan={ringkasan} />}
 
       {daftarKelas && daftarKelas.length === 0 && (
         <StatusHalaman jenis="kosong" judul="Belum ada kelas" pesan="Buat kelas di dashboard sebelum melihat pendampingan." />
@@ -417,5 +394,129 @@ function IsiPendampingan() {
         </>
       )}
     </div>
+  );
+}
+
+function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan }) {
+  const kategori = [
+    {
+      label: "Paham",
+      jumlah: ringkasan.jumlahPaham,
+      ikon: CheckCircle2,
+      warna: "text-[#047857]",
+      latar: "bg-aura-emerald/10",
+      bar: "bg-aura-emerald",
+    },
+    {
+      label: "Setengah Paham",
+      jumlah: ringkasan.jumlahSetengah,
+      ikon: TrendingUp,
+      warna: "text-[#8A6400]",
+      latar: "bg-aura-amber/10",
+      bar: "bg-aura-amber",
+    },
+    {
+      label: "Belum Paham",
+      jumlah: ringkasan.jumlahBelum,
+      ikon: AlertTriangle,
+      warna: "text-[#B4432B]",
+      latar: "bg-aura-red/10",
+      bar: "bg-aura-red",
+    },
+    {
+      label: "Tidak mengerjakan",
+      jumlah: ringkasan.jumlahTidakMengerjakan,
+      ikon: CircleHelp,
+      warna: "text-aura-indigo",
+      latar: "bg-aura-indigo/10",
+      bar: "bg-aura-indigo",
+    },
+  ];
+  const total = kategori.reduce((jumlah, k) => jumlah + k.jumlah, 0);
+
+  return (
+    <section
+      aria-labelledby="judul-data-pendampingan"
+      className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-aura-emerald/10 blur-3xl"
+      />
+      <div className="relative flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="aura-eyebrow">
+              <Users aria-hidden="true" className="size-3.5" />
+              Ringkasan kelas
+            </span>
+            <h2
+              id="judul-data-pendampingan"
+              className="mt-2 font-display text-[26px] leading-[34px] font-extrabold tracking-[-0.02em] text-aura-ink"
+            >
+              {ringkasan.jumlahSiswa} siswa
+            </h2>
+            <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
+              Sebaran kategori dari rata-rata {JUMLAH_KUIS} kuis selesai terakhir.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
+              <CheckCircle2 aria-hidden="true" className="size-4 text-aura-emerald" />
+              {ringkasan.jumlahSesiSelesai} kuis selesai
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-muted backdrop-blur-sm">
+              Dari {JUMLAH_KUIS} kuis terakhir
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+          {kategori.map(({ label, jumlah, ikon: Ikon, warna, latar }) => {
+            const persen = total > 0 ? Math.round((jumlah / total) * 100) : 0;
+            return (
+              <div
+                key={label}
+                className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/45 p-3"
+              >
+                <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${latar} ${warna}`}>
+                  <Ikon aria-hidden="true" className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[22px] leading-[26px] font-extrabold text-aura-ink">{jumlah}</p>
+                  <p className="truncate font-body text-[11px] leading-[16px] font-medium text-aura-muted">
+                    {label} · {persen}%
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div>
+          <div
+            role="img"
+            aria-label={`Sebaran: ${ringkasan.jumlahPaham} paham, ${ringkasan.jumlahSetengah} setengah paham, ${ringkasan.jumlahBelum} belum paham, ${ringkasan.jumlahTidakMengerjakan} tidak mengerjakan.`}
+            className="flex h-3 overflow-hidden rounded-full bg-white/70 ring-1 ring-inset ring-white/80"
+          >
+            {kategori.map(({ label, jumlah, bar }) =>
+              jumlah > 0 ? (
+                <span
+                  key={label}
+                  className={`h-full ${bar}`}
+                  style={{ width: `${total > 0 ? (jumlah / total) * 100 : 0}%` }}
+                />
+              ) : null,
+            )}
+          </div>
+          {ringkasan.butuhSesi > 0 && (
+            <p className="mt-3 flex items-start gap-1.5 font-body text-[12px] leading-[18px] text-aura-muted">
+              <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
+              Butuh {ringkasan.butuhSesi} kuis selesai lagi sebelum kategori bisa dihitung.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
