@@ -58,11 +58,13 @@ const HARI = 86_400_000;
 const sekarang = Date.now();
 const TANGGAL_SELESAI = [sekarang - 28 * HARI, sekarang - 21 * HARI, sekarang - 14 * HARI, sekarang - 7 * HARI];
 const KODE_SESI = ['SMA', 'SMB', 'SMC'];
+// 7C (indeks 2) sengaja tidak punya jawaban agar grafik kelas kosong.
+const KELAS_TANPA_JAWABAN = 2;
 
 const POLA = [
   [1, 1, 2, 1], // rata-rata belum paham
   [2, 3, 4, 3], // rata-rata setengah paham
-  [4, 4, null, null], // tidak mengerjakan 2 cek terakhir
+  [4, 3, 4, 3], // rata-rata setengah paham
   [5, 5, 2, 4], // rata-rata paham
   [5, 4, 5, 4], // rata-rata paham
 ];
@@ -264,6 +266,7 @@ async function main() {
 
   const hasil = [];
   KELAS.forEach((_, ki) => {
+    if (ki === KELAS_TANPA_JAWABAN) return;
     siswa.forEach((s, si) => {
       const pola = polaSiswa(si);
       pola.forEach((skor, sesiKe) => {
@@ -276,6 +279,16 @@ async function main() {
           kelompok: kelompok(skor),
           dikirim_pada: new Date(TANGGAL_SELESAI[sesiKe] + 30 * 60 * 1000).toISOString(),
         });
+      });
+      // Kuis aktif juga diisi semua siswa di dua kelas penuh.
+      const skorAktif = pola[3] ?? 4;
+      hasil.push({
+        sesi_id: idSesi(ki, 4),
+        siswa_id: s.id,
+        skor: skorAktif,
+        total: 5,
+        kelompok: kelompok(skorAktif),
+        dikirim_pada: new Date(sekarang - 60 * 60 * 1000).toISOString(),
       });
     });
   });
@@ -309,8 +322,10 @@ async function main() {
   console.log(`Siswa  : murid1@${SISWA_DOMAIN} ... murid40@${SISWA_DOMAIN} / ${SISWA_PASSWORD}`);
   console.log(`Kelas  : ${KELAS.map((k) => `${k.mapel} ${k.nama} (${k.kode})`).join(' · ')}`);
   console.log(`Kuis aktif: ${KELAS.map((_, i) => `${KODE_SESI[i]}05`).join(', ')}`);
-  console.log(`Data   : ${siswa.length} siswa/kelas, 4 cek selesai + 1 kuis aktif/kelas.`);
-  console.log('Kategori pendampingan: 4 belum, 4 setengah, 4 tidak mengerjakan, sisanya paham.');
+  console.log(
+    `Data   : ${siswa.length} siswa/kelas; 7A & 7B mengerjakan 4 cek selesai + kuis aktif, 7C belum ada jawaban.`,
+  );
+  console.log('Kategori pendampingan 7A/7B: 4 belum, 8 setengah, 28 paham; 7C belum punya data.');
 }
 
 main().catch((err) => {
