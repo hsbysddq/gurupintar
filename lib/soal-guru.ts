@@ -1,4 +1,4 @@
-import { SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from './konstanta';
+import { PANJANG_MISKONSEPSI_MAKS, SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from './konstanta';
 import type { KodePilihan, PilihanSoal, TopikRingkas } from './tipe';
 
 export const KODE_PILIHAN: readonly KodePilihan[] = ['A', 'B', 'C', 'D'];
@@ -73,7 +73,7 @@ function pesanUntukKolom(jalur: string[], code: string, message: string): string
   // Pesan pilihan kembar ditulis sendiri di skema (bahasa Indonesia).
   if (kolom === 'pilihan') return code === 'custom' ? message : 'Pilihan harus diisi, maksimal 100 karakter.';
   if (kolom === 'kunci') return 'Pilih kunci jawaban.';
-  if (kolom === 'miskonsepsi') return 'Miskonsepsi maksimal 200 karakter.';
+  if (kolom === 'miskonsepsi') return `Miskonsepsi maksimal ${PANJANG_MISKONSEPSI_MAKS} karakter.`;
   return 'Isian belum sesuai.';
 }
 

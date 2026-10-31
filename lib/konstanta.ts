@@ -5,6 +5,7 @@ export const INTERVAL_POLLING_SISWA_MS = 5000;
 export const BATAS_WAKTU_AI_MS = 60000;
 export const SOAL_AWAL_TOPIK = 5;          // jumlah soal awal di form, bisa ditambah
 export const SOAL_MINIMAL_TOPIK = 1;       // minimal soal agar topik bisa dipakai kuis
+export const PANJANG_MISKONSEPSI_MAKS = 500; // penjelasan opsi jawaban salah
 export const PANJANG_MODUL_MIN = 200;      // PRD F-9
 export const PANJANG_MODUL_MAKS = 8000;
 export const UKURAN_PDF_MAKS_BYTE = 5 * 1024 * 1024; // unggah modul PDF

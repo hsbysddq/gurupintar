@@ -25,7 +25,12 @@ import {
   simpanTopik,
   ubahTopik,
 } from "@/lib/api-klien";
-import { SOAL_AWAL_TOPIK, SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from "@/lib/konstanta";
+import {
+  PANJANG_MISKONSEPSI_MAKS,
+  SOAL_AWAL_TOPIK,
+  SOAL_MINIMAL_TOPIK,
+  TOPIK_DEMO_ID,
+} from "@/lib/konstanta";
 import { skemaBodyTopikBaru, skemaBodyUbahTopik } from "@/lib/skema-api";
 import { KODE_PILIHAN, pesanGalatTopik } from "@/lib/soal-guru";
 import type { KelasRingkas, KodePilihan, TopikDetail, TopikRingkas } from "@/lib/tipe";
@@ -734,7 +739,8 @@ export default function HalamanBuatSoal() {
 
                   <div className="flex flex-col gap-3 rounded-2xl border border-white/60 bg-white/35 p-3">
                     <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-                      Kesalahan pemahaman jika siswa memilih jawaban salah (opsional). Dipakai untuk menyusun materi lanjutan.
+                      Kesalahan pemahaman jika siswa memilih jawaban salah (opsional, maksimal {PANJANG_MISKONSEPSI_MAKS}{" "}
+                      karakter). Dipakai untuk menyusun materi lanjutan.
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                       {KODE_PILIHAN.map((kode, j) =>
@@ -745,9 +751,11 @@ export default function HalamanBuatSoal() {
                             label={`Jika memilih ${kode}`}
                             galat={galat[jalur(`miskonsepsi.${j}`)]}
                           >
-                            <input
+                            <textarea
                               id={idKolom(jalur(`miskonsepsi.${j}`))}
-                              className={KELAS_ISIAN}
+                              rows={3}
+                              maxLength={PANJANG_MISKONSEPSI_MAKS}
+                              className={`${KELAS_ISIAN} min-h-[84px] resize-y`}
                               value={s.miskonsepsi[j]}
                               {...propsGalat(`miskonsepsi.${j}`)}
                               onChange={(e) =>

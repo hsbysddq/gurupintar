@@ -241,7 +241,7 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
     ['pilihan hanya spasi', (b: Body) => void (b.soal[1].pilihan[3] = '   ')],
     ['pilihan 101 karakter', (b: Body) => void (b.soal[1].pilihan[0] = 'a'.repeat(101))],
     ['kunci E', (b: Body) => void (b.soal[0].kunci = 'E')],
-    ['miskonsepsi 201 karakter', (b: Body) => void (b.soal[4].miskonsepsi[1] = 'a'.repeat(201))],
+    ['miskonsepsi 501 karakter', (b: Body) => void (b.soal[4].miskonsepsi[1] = 'a'.repeat(501))],
     ['hanya 3 pilihan', (b: Body) => void b.soal[0].pilihan.pop()],
   ])('menolak %s', (_, ubah) => {
     expect(dengan(ubah).success).toBe(false);
@@ -251,7 +251,7 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
     expect(dengan((b) => void (b.soal[0].pilihan[0] = 'x'.repeat(n))).success).toBe(true);
   });
 
-  it('menerima batas: nama 3 dan 80, capaian 10 dan 300, teks soal 5 dan 300, miskonsepsi 200', () => {
+  it('menerima batas: nama 3 dan 80, capaian 10 dan 300, teks soal 5 dan 300, miskonsepsi 500', () => {
     for (const [nama, capaian, teks] of [
       ['abc', 'a'.repeat(10), 'abcde'],
       ['a'.repeat(80), 'a'.repeat(300), 'a'.repeat(300)],
@@ -260,7 +260,7 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
         b.nama = nama;
         b.capaianPembelajaran = capaian;
         b.soal[0].teks = teks;
-        b.soal[0].miskonsepsi[1] = 'a'.repeat(200);
+        b.soal[0].miskonsepsi[1] = 'a'.repeat(500);
       });
       expect(hasil.success).toBe(true);
     }

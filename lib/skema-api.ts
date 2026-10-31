@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { PANJANG_SANDI_MAKS, PANJANG_SANDI_MIN, normalisasiEmail } from './auth';
-import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, SOAL_MINIMAL_TOPIK, UKURAN_PDF_MAKS_BYTE } from './konstanta';
+import {
+  PANJANG_MISKONSEPSI_MAKS,
+  PANJANG_MODUL_MAKS,
+  PANJANG_MODUL_MIN,
+  SOAL_MINIMAL_TOPIK,
+  UKURAN_PDF_MAKS_BYTE,
+} from './konstanta';
 import { samakanTeksPilihan } from './soal-guru';
 import { skemaIsiMateri } from './validasi-materi';
 
@@ -271,7 +277,7 @@ function skemaTeksPilihan() {
 }
 
 function skemaTeksMiskonsepsi() {
-  return z.string().trim().max(200);
+  return z.string().trim().max(PANJANG_MISKONSEPSI_MAKS);
 }
 
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;

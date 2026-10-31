@@ -118,7 +118,7 @@ describe('pesanGalatTopik', () => {
     b.soal[1].pilihan[2] = '';
     b.soal[2].pilihan[3] = '2/6';
     b.soal[3].kunci = '';
-    b.soal[4].miskonsepsi[1] = 'a'.repeat(201);
+    b.soal[4].miskonsepsi[1] = 'a'.repeat(501);
 
     expect(pesanGalatTopik(skemaBodyTopikBaru.safeParse(b))).toEqual({
       nama: 'Nama topik harus 3–80 karakter.',
@@ -127,7 +127,7 @@ describe('pesanGalatTopik', () => {
       'soal.1.pilihan.2': 'Pilihan harus diisi, maksimal 100 karakter.',
       'soal.2.pilihan.3': 'Pilihan tidak boleh sama dengan pilihan lain.',
       'soal.3.kunci': 'Pilih kunci jawaban.',
-      'soal.4.miskonsepsi.1': 'Miskonsepsi maksimal 200 karakter.',
+      'soal.4.miskonsepsi.1': 'Miskonsepsi maksimal 500 karakter.',
     });
   });
 });
