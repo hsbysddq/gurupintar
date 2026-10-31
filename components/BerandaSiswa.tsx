@@ -169,7 +169,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                 <div
                   role="img"
                   aria-label={`${label}: ${jumlah} dari ${totalMateri} materi`}
-                  className="mt-0.5 h-2.5 overflow-hidden rounded-full bg-tinta/10"
+                  className="mt-0.5 h-2.5 overflow-hidden rounded-full bg-aura-ink/10"
                 >
                   <div className={`h-full rounded-full ${warna}`} style={{ width: `${hitungPersen(jumlah, totalMateri)}%` }} />
                 </div>
@@ -230,7 +230,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
               </p>
             ) : (
               <ul className="flex flex-col gap-3">
-                {ringkasan.kelas.map((k, i) => {
+                {ringkasan.kelas.map((k) => {
                   const Ikon = ikonMapel(k.mapel);
                   const warna = warnaMapel(k.id);
                   return (
@@ -255,20 +255,16 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                         <div
                           role="img"
                           aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
-                          className="h-2 overflow-hidden rounded-full bg-tinta/10"
+                          className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
                         >
                           <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
                         </div>
                       </div>
                       <Link
                         href={`/siswa/kelas/detail?kelas=${k.id}`}
-                        className={`col-span-2 inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-[13px] font-semibold sm:col-span-1 ${
-                          i === 0
-                            ? 'bg-aura-primary text-white hover:bg-aura-primary-deep'
-                            : 'bg-aura-primary/10 text-aura-primary hover:bg-aura-primary/20'
-                        }`}
+                        className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-xl bg-aura-primary/10 px-4 text-[13px] font-semibold text-aura-primary transition-colors hover:bg-aura-primary/20 sm:col-span-1"
                       >
-                        Buka Kelas
+                        Buka mapel
                       </Link>
                     </li>
                   );
@@ -297,8 +293,8 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                 <Plus aria-hidden="true" className="size-5" />
               </span>
               <div>
-                <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Masukkan Kode Quiz</h2>
-                <p className="text-[13px] leading-normal text-aura-muted">Masukkan kode quiz dari gurumu untuk mulai mengerjakan.</p>
+                <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Masukkan kode kuis</h2>
+                <p className="text-[13px] leading-normal text-aura-muted">Masukkan kode kuis dari gurumu untuk mulai mengerjakan.</p>
               </div>
             </div>
             <FormGabungKuis />

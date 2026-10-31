@@ -68,7 +68,7 @@ function IsiMateriSiswa() {
 
   const aksiKembali = (
     <Tombol varian="sekunder" ukuran="besar" lebarPenuh href="/siswa/kelas">
-      Kembali ke kelas
+      Kembali ke mata pelajaran
     </Tombol>
   );
 
@@ -86,8 +86,11 @@ function IsiMateriSiswa() {
         }
       >
         <KartuKaca as="section" className="flex flex-col gap-2 p-6">
-          <h1 className="text-[28px] leading-tight font-bold">Kamu belum mengerjakan kuis ini.</h1>
-          <p className="text-tinta-lembut">Kerjakan kuisnya dulu, ya. Setelah itu gurumu akan membagikan materi untukmu.</p>
+          <span className="aura-eyebrow">Materi kelas</span>
+          <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
+            Kamu belum mengerjakan kuis ini.
+          </h1>
+          <p className="text-aura-muted">Kerjakan kuisnya dulu, ya. Setelah itu gurumu akan membagikan materi untukmu.</p>
         </KartuKaca>
       </KerangkaSiswa>
     );
@@ -97,11 +100,11 @@ function IsiMateriSiswa() {
     return (
       <KerangkaSiswa aksi={dariRiwayat ? aksiKembali : undefined}>
         <KartuKaca as="section" className="flex flex-col items-center gap-4 p-8 text-center">
-          <Hourglass aria-hidden="true" className="size-12 text-primer" />
-          <h1 role="status" aria-live="polite" className="text-[28px] leading-tight font-bold">
+          <Hourglass aria-hidden="true" className="size-12 text-aura-primary" />
+          <h1 role="status" aria-live="polite" className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
             Materimu sedang disiapkan gurumu.
           </h1>
-          <p className="text-tinta-lembut">Halaman ini akan diperbarui sendiri. Kamu tidak perlu memuat ulang.</p>
+          <p className="text-aura-muted">Halaman ini akan diperbarui sendiri. Kamu tidak perlu memuat ulang.</p>
         </KartuKaca>
       </KerangkaSiswa>
     );
@@ -109,7 +112,12 @@ function IsiMateriSiswa() {
 
   return (
     <KerangkaSiswa aksi={dariRiwayat ? aksiKembali : undefined}>
-      <h1 className="text-[28px] leading-tight font-bold">Materi untukmu: {data.namaTopik}</h1>
+      <header className="flex flex-col gap-1.5">
+        <span className="aura-eyebrow">Materi kelas</span>
+        <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink md:text-[32px]">
+          Materi untukmu: {data.namaTopik}
+        </h1>
+      </header>
       <TabMateriSiswa isi={data.isi} formatAwal={data.format} />
     </KerangkaSiswa>
   );

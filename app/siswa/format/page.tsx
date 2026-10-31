@@ -54,7 +54,7 @@ export default function HalamanPilihFormat() {
       aksi={
         <>
           {galat && (
-            <p role="alert" className="text-belum-teks">
+            <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
               {galat}
             </p>
           )}
@@ -64,12 +64,15 @@ export default function HalamanPilihFormat() {
         </>
       }
     >
-      <header className="flex flex-col gap-2">
-        <p className="text-[13px] leading-normal font-medium text-tinta-lembut">Halo, {profil.nama}</p>
-        <h1 className="text-[28px] leading-tight font-bold">Kamu lebih suka belajar lewat apa?</h1>
+      <header className="flex flex-col gap-1.5">
+        <span className="aura-eyebrow">Ruang siswa</span>
+        <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink md:text-[32px]">
+          Kamu lebih suka belajar lewat apa?
+        </h1>
+        <p className="text-aura-muted">Halo, {profil.nama}. Pilih bentuk materi yang paling nyaman untukmu.</p>
       </header>
       <PilihanFormat nilai={nilai} onPilih={setPilihan} />
-      <p className="text-tinta-lembut">Kamu bisa ganti kapan saja.</p>
+      <p className="text-[13px] leading-normal text-aura-muted">Kamu bisa ganti kapan saja.</p>
     </KerangkaSiswa>
   );
 }

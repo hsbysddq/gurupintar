@@ -44,7 +44,7 @@ export function FormGabungKuis() {
         />
       </div>
       <Tombol varian="utama" type="submit" lebarPenuh disabled={kode.length === 0}>
-        Masuk ke Kuis
+        Masuk ke kuis
       </Tombol>
     </form>
   );

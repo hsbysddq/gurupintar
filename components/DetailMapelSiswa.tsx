@@ -28,6 +28,7 @@ const IKON_TAB: Record<TabMapel, LucideIcon> = {
 
 const LINK_AKSI = 'inline-flex min-h-11 items-center text-[14px] leading-normal font-semibold text-aura-primary hover:underline';
 const TEKS_REDUP = 'text-[14px] leading-normal text-aura-muted';
+const LABEL_KECIL = 'font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-muted';
 
 function Kosong({ judul, isi }: { judul: string; isi: string }) {
   return (
@@ -55,7 +56,7 @@ function KartuFeed({
   return (
     <KartuKaca as="article" className="overflow-hidden">
       <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:gap-4 md:p-5">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primer-lembut text-primer-hover">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-aura-primary/10 text-aura-primary">
           <Ikon aria-hidden="true" className="size-6" />
         </span>
         <div className="min-w-0 flex-1">
@@ -64,7 +65,7 @@ function KartuFeed({
         </div>
         {lencana}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 border-t border-tinta/10 px-4 md:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 border-t border-aura-ink/10 px-4 md:px-5">
         {children}
       </div>
     </KartuKaca>
@@ -75,7 +76,7 @@ function Lencana({ aktif, children }: { aktif?: boolean; children: ReactNode }) 
   return (
     <span
       className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[12px] leading-normal font-semibold ${
-        aktif ? 'bg-primer-lembut text-primer' : 'bg-tinta/5 text-tinta-lembut'
+        aktif ? 'bg-aura-primary/10 text-aura-primary' : 'bg-aura-ink/5 text-aura-muted'
       }`}
     >
       {children}
@@ -124,7 +125,7 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
     <ul className="flex flex-col gap-4">
       {daftar.map((k) => {
         const skorTerakhir = k.skor !== null && k.total !== null ? `${k.skor} dari ${k.total} soal benar` : '';
-        // Kuis yang dikerjakan ulang menampilkan jumlah pengerjaan; semua hasilnya ada di tab Histori.
+        // Kuis yang dikerjakan ulang menampilkan jumlah pengerjaan; semua hasilnya ada di tab Riwayat Kuis.
         const skor =
           k.jumlahPengerjaan > 1 ? `Dikerjakan ${k.jumlahPengerjaan}× · terakhir ${skorTerakhir}` : `Sudah dikerjakan · ${skorTerakhir}`;
         const aktif = k.status === 'aktif-belum' || k.status === 'aktif-selesai';
@@ -209,7 +210,7 @@ function PanelHistori({ detail, kelas }: { detail: DetailMapel; kelas: KelasDeta
                 <div
                   role="img"
                   aria-label={`Nilai ${h.persen} persen`}
-                  className="h-2 overflow-hidden rounded-full bg-tinta/10"
+                  className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
                 >
                   <div className="h-full rounded-full bg-aura-primary" style={{ width: `${h.persen}%` }} />
                 </div>
@@ -268,53 +269,101 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
       {detail.kuisAktif && (
         <Link
           href={detail.kuisAktif.href}
-          className="flex min-h-14 items-center justify-center gap-2 rounded-full bg-primer-lembut px-6 text-[15px] font-semibold text-primer-hover hover:bg-primer/20"
+          className="flex min-h-14 items-center justify-center gap-2 rounded-full bg-aura-primary/10 px-6 text-[15px] font-semibold text-aura-primary transition-colors hover:bg-aura-primary/15 xl:hidden"
         >
           <PlayCircle aria-hidden="true" className="size-5 shrink-0" />
           <span className="min-w-0 truncate">Kerjakan kuis aktif: {detail.kuisAktif.judul}</span>
         </Link>
       )}
 
-      <nav
-        aria-label="Bagian mata pelajaran"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-white/90 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none"
-      >
-        <div role="tablist" className="mx-auto grid max-w-md grid-cols-3 md:mx-0 md:flex md:max-w-none md:gap-2">
-          {DAFTAR_TAB.map(({ id, label }) => {
-            const aktif = tab === id;
-            const IkonTab = IKON_TAB[id];
-            return (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                id={`tab-${id}`}
-                aria-selected={aktif}
-                aria-controls={`panel-${id}`}
-                onClick={() => setTab(id)}
-                className={`flex min-h-12 flex-col items-center gap-1 text-[13px] leading-tight font-semibold transition-colors md:flex-row md:gap-2 md:rounded-full md:px-5 md:text-[15px] ${
-                  aktif ? 'text-aura-ink md:bg-primer-lembut' : 'text-aura-muted md:hover:bg-white/70'
-                }`}
-              >
-                <span
-                  className={`flex h-8 w-16 items-center justify-center rounded-full md:h-auto md:w-auto ${
-                    aktif ? 'bg-primer-lembut text-primer-hover md:bg-transparent' : ''
-                  }`}
-                >
-                  <IkonTab aria-hidden="true" className="size-6 md:size-5" />
-                </span>
-                <span className="md:hidden">{label.split(' ')[0]}</span>
-                <span className="hidden md:inline">{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
+        <div className="flex min-w-0 flex-col gap-4">
+          <nav
+            aria-label="Bagian mata pelajaran"
+            className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-white/90 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none"
+          >
+            <div role="tablist" className="mx-auto grid max-w-md grid-cols-3 md:mx-0 md:flex md:max-w-none md:gap-2">
+              {DAFTAR_TAB.map(({ id, label }) => {
+                const aktif = tab === id;
+                const IkonTab = IKON_TAB[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    id={`tab-${id}`}
+                    aria-selected={aktif}
+                    aria-controls={`panel-${id}`}
+                    onClick={() => setTab(id)}
+                    className={`flex min-h-12 flex-col items-center gap-1 text-[13px] leading-tight font-semibold transition-colors md:flex-row md:gap-2 md:rounded-full md:px-5 md:text-[15px] ${
+                      aktif ? 'text-aura-ink md:bg-aura-primary/10' : 'text-aura-muted md:hover:bg-white/70'
+                    }`}
+                  >
+                    <span
+                      className={`flex h-8 w-16 items-center justify-center rounded-full md:h-auto md:w-auto ${
+                        aktif ? 'bg-aura-primary/10 text-aura-primary md:bg-transparent' : ''
+                      }`}
+                    >
+                      <IkonTab aria-hidden="true" className="size-6 md:size-5" />
+                    </span>
+                    <span className="md:hidden">{label.split(' ')[0]}</span>
+                    <span className="hidden md:inline">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
 
-      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-        {tab === 'materi' && <PanelMateri daftar={detail.materi} />}
-        {tab === 'kuis' && <PanelKuis daftar={detail.kuis} />}
-        {tab === 'histori' && <PanelHistori detail={detail} kelas={kelas} />}
+          <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+            {tab === 'materi' && <PanelMateri daftar={detail.materi} />}
+            {tab === 'kuis' && <PanelKuis daftar={detail.kuis} />}
+            {tab === 'histori' && <PanelHistori detail={detail} kelas={kelas} />}
+          </div>
+        </div>
+
+        <aside className="hidden xl:sticky xl:top-6 xl:block">
+          <KartuKaca as="section" className="flex flex-col gap-4 p-5">
+            <div>
+              <p className={LABEL_KECIL}>Ringkasan mapel</p>
+              <h2 className="mt-1 font-display text-[20px] leading-snug font-bold text-aura-ink">{kelas.mapel}</h2>
+              <p className="text-[13px] leading-normal text-aura-muted">
+                {labelKelas(kelas.nama)}
+                {kelas.namaGuru ? ` · ${kelas.namaGuru}` : ''}
+              </p>
+            </div>
+
+            <dl className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-white/55 p-3">
+                <dt className="text-[12px] leading-normal text-aura-muted">Materi</dt>
+                <dd className="font-display text-[24px] leading-tight font-extrabold text-aura-ink">{detail.materi.length}</dd>
+              </div>
+              <div className="rounded-2xl bg-white/55 p-3">
+                <dt className="text-[12px] leading-normal text-aura-muted">Kuis</dt>
+                <dd className="font-display text-[24px] leading-tight font-extrabold text-aura-ink">{detail.kuis.length}</dd>
+              </div>
+              <div className="rounded-2xl bg-white/55 p-3">
+                <dt className="text-[12px] leading-normal text-aura-muted">Dikerjakan</dt>
+                <dd className="font-display text-[24px] leading-tight font-extrabold text-aura-ink">{detail.ringkasan.jumlahKuis}</dd>
+              </div>
+              <div className="rounded-2xl bg-white/55 p-3">
+                <dt className="text-[12px] leading-normal text-aura-muted">Rata-rata</dt>
+                <dd className="font-display text-[24px] leading-tight font-extrabold text-aura-ink">
+                  {detail.ringkasan.rataRata === null ? '–' : `${detail.ringkasan.rataRata}%`}
+                </dd>
+              </div>
+            </dl>
+
+            {detail.kuisAktif ? (
+              <Link href={detail.kuisAktif.href} className="aura-btn aura-btn-primary min-h-12 px-4 text-[13px]">
+                Kerjakan kuis aktif
+              </Link>
+            ) : (
+              <p className="rounded-2xl bg-aura-primary/5 p-3 text-[13px] leading-normal text-aura-muted">
+                Tidak ada kuis aktif saat ini.
+              </p>
+            )}
+          </KartuKaca>
+        </aside>
       </div>
     </div>
   );

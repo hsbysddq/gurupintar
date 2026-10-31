@@ -13,14 +13,14 @@ export function GrafikPerforma({ titik }: GrafikPerformaProps) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={titik} margin={{ top: 12, right: 12, bottom: 4, left: -16 }} accessibilityLayer={false}>
           <CartesianGrid stroke="rgb(26 29 41 / 0.08)" vertical={false} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "var(--color-tinta-lembut)" }} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "var(--color-aura-muted)" }} />
           <YAxis
             domain={[0, 100]}
             ticks={[0, 25, 50, 75, 100]}
             tickFormatter={(v: number) => `${v}%`}
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 12, fill: "var(--color-tinta-lembut)" }}
+            tick={{ fontSize: 12, fill: "var(--color-aura-muted)" }}
           />
           <Tooltip
             formatter={(nilai) => [`${String(nilai)}%`, "Nilai"]}
@@ -32,9 +32,9 @@ export function GrafikPerforma({ titik }: GrafikPerformaProps) {
           <Line
             type="monotone"
             dataKey="persen"
-            stroke="var(--color-primer)"
+            stroke="var(--color-aura-primary)"
             strokeWidth={3}
-            dot={{ r: 4, fill: "var(--color-primer)", strokeWidth: 0 }}
+            dot={{ r: 4, fill: "var(--color-aura-primary)", strokeWidth: 0 }}
             activeDot={{ r: 6 }}
             isAnimationActive={false}
           />

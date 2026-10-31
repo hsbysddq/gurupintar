@@ -98,7 +98,7 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
             >
               <Bell aria-hidden="true" className="size-5" />
             </summary>
-            <div className="kaca-pekat absolute top-full right-0 z-30 mt-2 w-64 p-4 text-[13px] leading-normal text-aura-muted">
+            <div className="aura-glass-strong absolute top-full right-0 z-30 mt-2 w-64 rounded-2xl p-4 text-[13px] leading-normal text-aura-muted">
               Belum ada notifikasi.
             </div>
           </details>
@@ -116,7 +116,7 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
               </span>
               <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-aura-muted" />
             </summary>
-            <div className="kaca-pekat absolute top-full right-0 z-30 mt-2 w-48 p-2">
+            <div className="aura-glass-strong absolute top-full right-0 z-30 mt-2 w-48 rounded-2xl p-2">
               <button
                 type="button"
                 onClick={keluarAkun}

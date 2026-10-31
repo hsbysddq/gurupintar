@@ -68,15 +68,17 @@ function GabungKelas() {
 
   return (
     <KerangkaSiswa>
-      <header className="flex flex-col gap-2">
-        <p className="text-[13px] leading-normal font-medium text-primer">Halo, {profil.nama}</p>
-        <h1 className="text-[28px] leading-tight font-bold">Masukkan kode kuis</h1>
-        <p className="text-tinta-lembut">Kode kuis ada di layar gurumu.</p>
+      <header className="flex flex-col gap-1.5">
+        <span className="aura-eyebrow">Ruang siswa</span>
+        <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink md:text-[32px]">
+          Masukkan kode kuis
+        </h1>
+        <p className="text-aura-muted">Halo, {profil.nama}. Kode kuis ada di layar gurumu.</p>
       </header>
 
-      <form onSubmit={cariKelas} className="flex flex-col gap-4" noValidate>
+      <form onSubmit={cariKelas} className="aura-glass flex max-w-xl flex-col gap-4 rounded-[24px] p-5 sm:p-6" noValidate>
         <div className="flex flex-col gap-2">
-          <label htmlFor="kode" className="text-[13px] leading-normal font-medium text-tinta-lembut">
+          <label htmlFor="kode" className="text-[13px] leading-normal font-semibold text-aura-ink">
             Kode kuis
           </label>
           <input
@@ -91,10 +93,10 @@ function GabungKelas() {
             placeholder="A7K2P"
             aria-invalid={galat ? true : undefined}
             aria-describedby={galat ? 'galat-kode' : undefined}
-            className="kaca h-13 rounded-tombol px-4 text-2xl font-bold tracking-[0.3em] placeholder:text-tinta-lembut/50"
+            className="h-14 rounded-2xl border border-white/70 bg-white/75 px-4 text-2xl font-display font-extrabold tracking-[0.3em] text-aura-ink placeholder:text-aura-muted/45 focus:border-aura-primary focus:outline-none focus:ring-2 focus:ring-aura-primary/20"
           />
           {galat && (
-            <p id="galat-kode" role="alert" className="text-belum-teks">
+            <p id="galat-kode" role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
               {galat}
             </p>
           )}
@@ -104,18 +106,20 @@ function GabungKelas() {
         </Tombol>
       </form>
 
-      <Tombol varian="teks" lebarPenuh href="/siswa/performa">
-        Lihat performa dan riwayatku
-      </Tombol>
-      <p className="text-center text-tinta-lembut">
-        Sudah punya kelas?{' '}
-        <Link href="/siswa/kelas" className="font-semibold text-primer hover:underline">
-          Lihat kelas saya
-        </Link>
-      </p>
-      <Tombol varian="teks" lebarPenuh href="/siswa">
-        Kembali ke beranda
-      </Tombol>
+      <div className="flex max-w-xl flex-col gap-1 border-t border-white/60 pt-4">
+        <Tombol varian="teks" lebarPenuh href="/siswa/performa">
+          Lihat performa dan riwayatku
+        </Tombol>
+        <p className="text-center text-[13px] leading-normal text-aura-muted">
+          Sudah punya mata pelajaran?{' '}
+          <Link href="/siswa/kelas" className="font-semibold text-aura-primary hover:underline">
+            Lihat mata pelajaran
+          </Link>
+        </p>
+        <Tombol varian="teks" lebarPenuh href="/siswa">
+          Kembali ke beranda
+        </Tombol>
+      </div>
     </KerangkaSiswa>
   );
 }

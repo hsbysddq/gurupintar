@@ -43,7 +43,7 @@ export default function HalamanSelesai() {
     );
   }
 
-  // Kembali ke halaman mata pelajaran kuis ini (tab Quiz); data lama tanpa kelas jatuh ke daftar mata pelajaran.
+  // Kembali ke halaman mata pelajaran kuis ini (tab Kuis); data lama tanpa kelas jatuh ke daftar mata pelajaran.
   const hrefMapel = sesi.kelasId
     ? `/siswa/kelas/detail?kelas=${encodeURIComponent(sesi.kelasId)}&tab=kuis`
     : '/siswa/kelas';
@@ -73,12 +73,15 @@ export default function HalamanSelesai() {
     >
       <KartuKaca as="section" className="flex flex-col items-center gap-4 p-8 text-center">
         <CircleCheck aria-hidden="true" className="size-12 text-sudah-teks" />
-        <h1 className="text-[28px] leading-tight font-bold">Jawabanmu sudah terkirim.</h1>
+        <span className="aura-eyebrow">Kuis selesai</span>
+        <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
+          Jawabanmu sudah terkirim.
+        </h1>
 
         {hasil && (
           <div className="flex w-full flex-col gap-4">
             <div>
-              <div className="mb-1 flex justify-between text-sm font-semibold text-tinta-lembut">
+              <div className="mb-1 flex justify-between text-sm font-semibold text-aura-muted">
                 <span>Akurasi</span>
                 <span>{persen}%</span>
               </div>
@@ -88,25 +91,25 @@ export default function HalamanSelesai() {
                 aria-valuenow={persen}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                className="h-3 w-full overflow-hidden rounded-full bg-red-200"
+                className="h-3 w-full overflow-hidden rounded-full bg-belum-latar"
               >
-                <div className="h-full rounded-full bg-green-600" style={{ width: `${persen}%` }} />
+                <div className="h-full rounded-full bg-sudah" style={{ width: `${persen}%` }} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-green-50 p-4">
-                <p className="text-3xl font-bold text-green-700">{hasil.skor}</p>
-                <p className="text-sm text-tinta-lembut">Benar</p>
+              <div className="rounded-2xl bg-sudah-latar p-4">
+                <p className="font-display text-3xl font-extrabold text-sudah-teks">{hasil.skor}</p>
+                <p className="text-sm text-aura-muted">Benar</p>
               </div>
-              <div className="rounded-2xl bg-red-50 p-4">
-                <p className="text-3xl font-bold text-red-700">{hasil.total - hasil.skor}</p>
-                <p className="text-sm text-tinta-lembut">Salah</p>
+              <div className="rounded-2xl bg-belum-latar p-4">
+                <p className="font-display text-3xl font-extrabold text-belum-teks">{hasil.total - hasil.skor}</p>
+                <p className="text-sm text-aura-muted">Salah</p>
               </div>
             </div>
           </div>
         )}
 
-        <p className="text-tinta-lembut">Tunggu gurumu membagikan materi untukmu.</p>
+        <p className="text-aura-muted">Tunggu gurumu membagikan materi untukmu.</p>
       </KartuKaca>
     </KerangkaSiswa>
   );

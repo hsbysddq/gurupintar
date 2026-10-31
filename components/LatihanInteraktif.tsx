@@ -25,10 +25,10 @@ export function LatihanInteraktif({ latihan }: LatihanInteraktifProps) {
 
   return (
     <section className="flex flex-col gap-4">
-      <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
+      <p className="text-[13px] leading-normal font-medium text-aura-muted">
         Soal {indeks + 1} dari {latihan.length}
       </p>
-      <h2 id={idSoal} className="text-xl leading-snug font-semibold">
+      <h2 id={idSoal} className="font-display text-xl leading-snug font-bold text-aura-ink">
         {soal.soal}
       </h2>
 
@@ -44,11 +44,15 @@ export function LatihanInteraktif({ latihan }: LatihanInteraktifProps) {
               aria-checked={dipilih}
               disabled={sudahMenjawab}
               onClick={() => setPilihan(kode)}
-              className={`kaca flex min-h-13 w-full items-center gap-3 px-4 py-3 text-left transition-colors disabled:cursor-default ${
-                dipilih ? "border-2 border-primer bg-primer-lembut" : sudahMenjawab ? "" : "hover:bg-primer-lembut"
+              className={`flex min-h-13 w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors disabled:cursor-default ${
+                dipilih
+                  ? "border-aura-primary bg-aura-primary/10"
+                  : sudahMenjawab
+                    ? "border-white/60 bg-white/50"
+                    : "border-white/65 bg-white/55 hover:bg-aura-primary/5"
               }`}
             >
-              <span className="font-semibold text-primer">{kode}.</span>
+              <span className="font-display font-bold text-aura-primary">{kode}.</span>
               <span>{teks}</span>
             </button>
           );
@@ -57,7 +61,7 @@ export function LatihanInteraktif({ latihan }: LatihanInteraktifProps) {
 
       <div aria-live="polite">
         {sudahMenjawab && (
-          <div className={`kaca-pekat flex flex-col gap-2 p-4 ${benar ? "bg-sudah-latar" : "bg-belum-latar"}`}>
+          <div className={`flex flex-col gap-2 rounded-2xl p-4 ${benar ? "bg-sudah-latar" : "bg-belum-latar"}`}>
             <p className={`inline-flex items-center gap-2 font-semibold ${benar ? "text-sudah-teks" : "text-belum-teks"}`}>
               {benar ? (
                 <CircleCheck aria-hidden="true" className="size-5" />
@@ -67,7 +71,7 @@ export function LatihanInteraktif({ latihan }: LatihanInteraktifProps) {
               {benar ? "Benar" : "Belum tepat"}
             </p>
             {!benar && <p className="font-medium">Jawaban yang tepat: {soal.kunci}.</p>}
-            <p>{soal.pembahasan}</p>
+            <p className="text-aura-ink">{soal.pembahasan}</p>
           </div>
         )}
       </div>

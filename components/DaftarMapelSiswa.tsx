@@ -13,7 +13,8 @@ import { labelKelas, type ProgresKelas } from '@/lib/beranda-siswa';
 export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1.5">
+        <span className="aura-eyebrow">Ruang siswa</span>
         <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-tight text-aura-ink md:text-[32px]">
           Mata Pelajaran
         </h1>
@@ -26,9 +27,9 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
 
       <KartuKaca as="section" className="flex flex-col gap-3 p-5">
         <div className="flex flex-col gap-0.5">
-          <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Gabung kode mapel</h2>
+          <h2 className="font-display text-[16px] leading-snug font-bold text-aura-ink">Gabung mata pelajaran</h2>
           <p className="text-[13px] leading-normal text-aura-muted">
-            Masukkan kode undangan kelas dari gurumu. Kode ini berbeda dari kode kuis.
+            Masukkan kode undangan mata pelajaran dari gurumu. Kode ini berbeda dari kode kuis.
           </p>
         </div>
         <FormGabungMapel tata="baris" />
@@ -39,7 +40,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
           <h2 className="font-display text-[18px] leading-snug font-bold text-aura-ink">
             Belum tergabung di mata pelajaran mana pun
           </h2>
-          <p className="text-aura-muted">Minta kode undangan kelas kepada gurumu, lalu masukkan di kolom di atas.</p>
+          <p className="text-aura-muted">Minta kode undangan mata pelajaran kepada gurumu, lalu masukkan di kolom di atas.</p>
         </KartuKaca>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -70,7 +71,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                         Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                       </p>
                       {k.kodeKuisAktif && (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primer-lembut px-2.5 py-0.5 text-[12px] leading-normal font-semibold text-primer">
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-aura-primary/10 px-2.5 py-1 text-[12px] leading-normal font-semibold text-aura-primary">
                           <PlayCircle aria-hidden="true" className="size-3.5" />
                           Kuis aktif
                         </span>
@@ -79,7 +80,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                     <div
                       role="img"
                       aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
-                      className="h-2 overflow-hidden rounded-full bg-tinta/10"
+                      className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
                     >
                       <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
                     </div>
@@ -96,9 +97,9 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                     )}
                     <Link
                       href={`/siswa/kelas/detail?kelas=${k.id}`}
-                      className="inline-flex min-h-12 items-center justify-center rounded-xl bg-aura-primary px-4 text-[15px] font-semibold text-white hover:bg-aura-primary-deep"
+                      className="aura-btn aura-btn-primary min-h-12 px-4 text-[14px]"
                     >
-                      Buka Mapel
+                      Buka mapel
                     </Link>
                     <TombolHapusKelas kelasId={k.id} mapel={k.mapel} />
                   </div>

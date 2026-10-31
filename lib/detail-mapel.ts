@@ -47,8 +47,8 @@ export type TabMapel = 'materi' | 'kuis' | 'histori';
 
 export const DAFTAR_TAB: { id: TabMapel; label: string }[] = [
   { id: 'materi', label: 'Materi Kelas' },
-  { id: 'kuis', label: 'Quiz' },
-  { id: 'histori', label: 'Histori Hasil Quiz' },
+  { id: 'kuis', label: 'Kuis' },
+  { id: 'histori', label: 'Riwayat Kuis' },
 ];
 
 /** Nilai `?tab=` yang tidak dikenal jatuh ke tab pertama. */

@@ -144,7 +144,7 @@ export default function HalamanKuis() {
       aksi={
         <>
           {kiriman.status === "gagal" && (
-            <p role="alert" className="text-belum-teks">
+            <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
               {kiriman.pesan}
             </p>
           )}
@@ -158,33 +158,24 @@ export default function HalamanKuis() {
           >
             {labelUtama}
           </Tombol>
-          <div className="sm:hidden">
-            <Tombol
-              varian="sekunder"
-              ukuran="besar"
-              lebarPenuh
-              disabled={indeks === 0 || mengirim}
-              onClick={() => setIndeks((i) => i - 1)}
-            >
-              Sebelumnya
-            </Tombol>
-          </div>
-          {indeks > 0 && (
-            <div className="hidden sm:block">
-              <Tombol
-                varian="sekunder"
-                ukuran="besar"
-                lebarPenuh
-                disabled={mengirim}
-                onClick={() => setIndeks((i) => i - 1)}
-              >
-                Sebelumnya
-              </Tombol>
-            </div>
-          )}
+          <Tombol
+            varian="sekunder"
+            ukuran="besar"
+            lebarPenuh
+            disabled={indeks === 0 || mengirim}
+            onClick={() => setIndeks((i) => i - 1)}
+          >
+            Sebelumnya
+          </Tombol>
         </>
       }
     >
+      <header className="flex flex-col gap-1.5">
+        <span className="aura-eyebrow">Kuis</span>
+        <h1 className="font-display text-[24px] leading-[32px] font-extrabold tracking-[-0.02em] text-aura-ink md:text-[28px]">
+          Jawab soal berikut
+        </h1>
+      </header>
       <ProgressKuis saatIni={indeks + 1} total={soal.length} />
       <KartuSoalKuis
         key={soalIni.id}

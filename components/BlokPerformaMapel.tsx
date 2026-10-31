@@ -8,7 +8,7 @@ const WARNA_STATUS: Record<StatusMapel, string> = {
   "batas-aman": "bg-setengah-latar text-setengah-teks",
   "tidak-aman": "bg-belum-latar text-belum-teks",
   "tidak-mengerjakan": "bg-belum-latar text-belum-teks",
-  "belum-cukup": "bg-tinta/5 text-tinta-lembut",
+  "belum-cukup": "bg-aura-ink/5 text-aura-muted",
 };
 
 export function LencanaStatusMapel({ status }: { status: StatusMapel }) {
@@ -34,19 +34,19 @@ export function BlokPerformaMapel({ riwayat, hasil }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <LencanaStatusMapel status={hasil.status} />
           {hasil.rataRata !== null && (
-            <span className="text-[13px] leading-normal text-tinta-lembut">Rata-rata 3 kuis terakhir: {hasil.rataRata}%</span>
+            <span className="text-[13px] leading-normal text-aura-muted">Rata-rata 3 kuis terakhir: {hasil.rataRata}%</span>
           )}
         </div>
-        <p className="text-[14px] leading-snug text-tinta-lembut">{info.pesan}</p>
+        <p className="text-[14px] leading-snug text-aura-muted">{info.pesan}</p>
       </div>
-      <p className="flex items-start gap-2 text-[15px] leading-snug text-tinta-lembut">
-        <IkonTren aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primer" />
+      <p className="flex items-start gap-2 text-[15px] leading-snug text-aura-muted">
+        <IkonTren aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-aura-primary" />
         {kalimatTren(ringkas.perubahan)}
       </p>
       {titik.length >= 2 ? (
         <GrafikPerforma titik={titik} />
       ) : (
-        <p className="rounded-kecil bg-primer-lembut p-4 text-[15px] text-tinta-lembut">
+        <p className="rounded-2xl bg-aura-primary/5 p-4 text-[15px] text-aura-muted">
           Grafik muncul setelah kamu mengerjakan minimal dua kuis di mapel ini.
         </p>
       )}

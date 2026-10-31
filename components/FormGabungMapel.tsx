@@ -63,7 +63,7 @@ export function FormGabungMapel({ tata = 'tumpuk' }: { tata?: 'tumpuk' | 'baris'
         </div>
         <div className={tata === 'baris' ? 'sm:w-48 sm:shrink-0' : ''}>
           <Tombol varian="utama" type="submit" lebarPenuh memuat={memuat} disabled={kode.length === 0}>
-            Gabung Kelas
+            Gabung mapel
           </Tombol>
         </div>
       </div>

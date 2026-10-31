@@ -8,6 +8,6 @@ interface KartuKacaProps {
 }
 
 export function KartuKaca({ varian = "standar", as: Elemen = "div", className, children }: KartuKacaProps) {
-  const kelasKaca = varian === "pekat" ? "kaca-pekat" : "kaca";
+  const kelasKaca = varian === "pekat" ? "aura-glass-strong" : "aura-glass";
   return <Elemen className={className ? `${kelasKaca} ${className}` : kelasKaca}>{children}</Elemen>;
 }

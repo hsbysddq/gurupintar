@@ -19,10 +19,10 @@ interface TombolProps {
 }
 
 const KELAS_VARIAN: Record<TombolProps["varian"], string> = {
-  utama: "px-6 rounded-tombol bg-primer text-white hover:bg-primer-hover",
-  sekunder: "kaca px-6 rounded-tombol text-primer hover:bg-primer-lembut",
-  teks: "px-2 text-primer hover:underline",
-  terang: "px-6 rounded-tombol bg-white text-primer hover:bg-primer-lembut",
+  utama: "aura-btn aura-btn-primary px-6",
+  sekunder: "aura-btn aura-btn-secondary px-6",
+  teks: "px-2 text-aura-primary hover:underline",
+  terang: "aura-btn aura-btn-light px-6",
 };
 
 export function Tombol({

@@ -27,7 +27,7 @@ const MENU: Menu[] = [
   },
   {
     href: '/siswa/performa',
-    label: 'Hasil Belajar',
+    label: 'Performa',
     ikon: ChartLine,
     aktif: (path) => path.startsWith('/siswa/performa'),
   },
