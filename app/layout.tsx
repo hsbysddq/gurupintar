@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/plus-jakarta-sans/wght.css";
 import "@fontsource-variable/inter/wght.css";
 import { LatarPastel } from "@/components/LatarPastel";
+import { PenjagaVersi } from "@/components/PenjagaVersi";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <LatarPastel />
         {children}
+        <PenjagaVersi />
       </body>
     </html>
   );
