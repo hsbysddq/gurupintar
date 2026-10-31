@@ -15,7 +15,7 @@ export function normalisasiKode(kode: string): string {
   return kode.replace(/\s+/g, '').toUpperCase();
 }
 
-const skemaFormat = z.enum(['ppt', 'audio', 'bacaan', 'latihan']);
+const skemaFormat = z.enum(['video', 'audio', 'bacaan', 'latihan', 'ppt']);
 const skemaKodePilihan = z.enum(['A', 'B', 'C', 'D']);
 const skemaEmail = z.string().trim().max(254).pipe(z.email()).transform(normalisasiEmail);
 const skemaSandi = z.string().min(PANJANG_SANDI_MIN).max(PANJANG_SANDI_MAKS);

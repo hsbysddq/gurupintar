@@ -31,7 +31,7 @@ create table keanggotaan_kelas (
   kelas_id uuid not null references kelas(id) on delete cascade,
   siswa_id uuid not null references pengguna(id) on delete cascade,
   nama_tampil text,
-  preferensi_format text check (preferensi_format in ('ppt','audio','bacaan','latihan')),
+  preferensi_format text check (preferensi_format in ('video','audio','bacaan','latihan','ppt')),
   gabung_pada timestamptz not null default now(),
   primary key (kelas_id, siswa_id)
 );

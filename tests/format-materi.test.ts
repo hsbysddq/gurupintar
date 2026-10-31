@@ -2,12 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { normalisasiFormat } from '@/lib/format-materi';
 
 describe('normalisasiFormat', () => {
-  it('mengenali keempat format', () => {
-    for (const f of ['ppt', 'audio', 'bacaan', 'latihan']) expect(normalisasiFormat(f)).toBe(f);
-  });
-
-  it('pilihan lama video terbaca sebagai ppt', () => {
-    expect(normalisasiFormat('video')).toBe('ppt');
+  it('mengenali kelima format', () => {
+    for (const f of ['video', 'audio', 'bacaan', 'latihan', 'ppt']) expect(normalisasiFormat(f)).toBe(f);
   });
 
   it('nilai kosong atau tidak dikenal menjadi null', () => {

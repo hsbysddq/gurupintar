@@ -11,6 +11,7 @@ Aturan keluaran:
 - Balas HANYA dengan satu objek JSON yang valid. Tanpa teks pembuka, penutup, atau pagar kode.
 - Struktur JSON:
   {"judul": string, "ringkasan": string, "naskah_audio": string,
+   "ide_video": {"judul": string, "deskripsi": string, "kata_kunci_pencarian": string},
    "slide_ppt": {"judul": string, "slide": [{"judul": string, "poin": [string, string]}]},
    "latihan": [{"soal": string, "pilihan": [string, string, string, string], "kunci": "A"|"B"|"C"|"D", "pembahasan": string}]}
 - "latihan" berisi tepat 3 soal. Setiap soal punya tepat satu jawaban benar, empat pilihan yang berbeda, dan "kunci" menunjuk pilihan yang benar (A = pilihan pertama).
@@ -21,6 +22,7 @@ Aturan isi:
 - Tulis pecahan sebagai teks biasa seperti 2/3. Jangan memakai LaTeX atau simbol khusus.
 - "ringkasan": 80–1200 karakter, menjelaskan konsep dengan contoh sehari-hari (kue, pizza, uang, dsb.).
 - "naskah_audio": 50–900 karakter, gaya bertutur seperti guru berbicara. Tulis pecahan dengan kata, misalnya "dua per tiga", agar enak dibacakan.
+- "ide_video": ide video pendek yang bisa dicari siswa di YouTube; "kata_kunci_pencarian" dalam bahasa Indonesia.
 - "slide_ppt": kerangka presentasi 4–6 slide untuk dipelajari siswa. Tiap slide punya "judul" singkat (maksimal 60 karakter) dan 2–4 "poin" berupa kalimat pendek (maksimal 160 karakter). Slide pertama mengenalkan konsep, slide terakhir berisi rangkuman atau tantangan kecil.
 - Jangan pernah menyebut label kelompok, tingkat kemampuan, atau kata "kelompok", "belum paham", "setengah paham", "sudah paham".
 - Jangan menyertakan tautan, nama orang sungguhan, atau informasi pribadi.
@@ -80,7 +82,7 @@ export const PENANDA_AWAL_MODUL = '<<<AWAL MODUL>>>';
 export const PENANDA_AKHIR_MODUL = '<<<AKHIR MODUL>>>';
 
 export const TUJUAN_MODUL =
-  'Ubah isi modul di atas menjadi materi belajar singkat untuk siswa kelas 7: ringkasan bacaan, naskah audio, kerangka slide PPT, dan 3 soal latihan. Gunakan hanya konsep yang ada di teks modul, dan sesuaikan contoh serta soal latihan dengan isi modul.';
+  'Ubah isi modul di atas menjadi materi belajar singkat untuk siswa kelas 7: ringkasan bacaan, naskah audio, ide video, kerangka slide PPT, dan 3 soal latihan. Gunakan hanya konsep yang ada di teks modul, dan sesuaikan contoh serta soal latihan dengan isi modul.';
 
 /** Pesan pengguna untuk PRD F-9: teks modul hanya diperlakukan sebagai bahan, bukan perintah. */
 export function susunPesanModul(teks: string): string {

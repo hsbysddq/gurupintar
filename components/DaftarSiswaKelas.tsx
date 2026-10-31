@@ -5,10 +5,11 @@ import { TombolSalinKode } from '@/components/TombolSalinKode';
 import type { Format, SiswaKelas } from '@/lib/tipe';
 
 const LABEL_FORMAT: Record<Format, string> = {
-  ppt: 'PPT',
+  video: 'Video',
   audio: 'Audio',
   bacaan: 'Bacaan',
   latihan: 'Latihan',
+  ppt: 'PPT',
 };
 
 export function DaftarSiswaKelas({

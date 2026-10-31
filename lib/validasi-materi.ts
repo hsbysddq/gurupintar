@@ -5,6 +5,11 @@ export const skemaIsiMateri = z.object({
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
   naskah_audio: z.string().min(50).max(900),
+  ide_video: z.object({
+    judul: z.string().min(5).max(80),
+    deskripsi: z.string().min(20).max(300),
+    kata_kunci_pencarian: z.string().min(3).max(80),
+  }),
   slide_ppt: z.object({
     judul: z.string().min(5).max(80),
     slide: z.array(z.object({
@@ -57,6 +62,9 @@ function semuaTeks(isi: IsiMateri): string[] {
     isi.judul,
     isi.ringkasan,
     isi.naskah_audio,
+    isi.ide_video.judul,
+    isi.ide_video.deskripsi,
+    isi.ide_video.kata_kunci_pencarian,
     isi.slide_ppt.judul,
     ...isi.slide_ppt.slide.flatMap((s) => [s.judul, ...s.poin]),
     ...isi.latihan.flatMap((l) => [l.soal, ...l.pilihan, l.pembahasan]),
@@ -113,31 +121,45 @@ function kalimatDari(teks: string): string[] {
 }
 
 /**
- * Materi lama (dibuat sebelum opsi Video diganti PPT) punya `ide_video` dan belum punya `slide_ppt`.
- * Fungsi ini melengkapinya saat dibaca: slide disusun dari ringkasan, naskah, dan soal latihan yang sudah ada,
- * supaya tab PPT tidak kosong dan guru tetap bisa menyimpan perubahan. Materi baru dikembalikan apa adanya.
+ * Melengkapi materi yang dibuat sebelum bentuk Video dan PPT sama-sama ada.
+ * - Materi tanpa `slide_ppt` (dibuat sebelum PPT): slide disusun dari ringkasan, naskah, dan soal latihan.
+ * - Materi tanpa `ide_video` (dibuat saat Video sempat dihapus): ide video disusun dari judul dan ringkasan.
+ * Materi yang sudah lengkap dikembalikan apa adanya (objek yang sama).
  */
 export function lengkapiIsiMateri(data: unknown): IsiMateri {
   if (typeof data !== 'object' || data === null) return data as IsiMateri;
   const mentah = data as Record<string, unknown>;
-  if ('slide_ppt' in mentah) return data as IsiMateri;
+  const adaSlide = 'slide_ppt' in mentah;
+  const adaVideo = 'ide_video' in mentah;
+  if (adaSlide && adaVideo) return data as IsiMateri;
   if (typeof mentah.judul !== 'string' || typeof mentah.ringkasan !== 'string' || typeof mentah.naskah_audio !== 'string' || !Array.isArray(mentah.latihan)) {
     return data as IsiMateri;
   }
 
-  const kumpulan = [...kalimatDari(mentah.ringkasan), ...kalimatDari(mentah.naskah_audio)];
-  const soal = (mentah.latihan as { soal?: unknown }[])
-    .map((l) => (typeof l.soal === 'string' ? kalimatDari(l.soal)[0] ?? l.soal : ''))
-    .filter((t) => t.length >= 5);
-  const slide = [
-    { judul: 'Ringkasan materi', poin: kumpulan.slice(0, 3) },
-    { judul: 'Penjelasan', poin: kumpulan.length >= 5 ? kumpulan.slice(3, 6) : kumpulan.slice(-2) },
-    { judul: 'Latihan', poin: soal.slice(0, 4) },
-  ].filter((s) => s.poin.length >= 2);
+  const hasil: Record<string, unknown> = { ...mentah };
 
-  const { ide_video: _lama, ...sisanya } = mentah;
-  void _lama;
-  return { ...sisanya, slide_ppt: { judul: mentah.judul.slice(0, 80), slide } } as IsiMateri;
+  if (!adaSlide) {
+    const kumpulan = [...kalimatDari(mentah.ringkasan), ...kalimatDari(mentah.naskah_audio)];
+    const soal = (mentah.latihan as { soal?: unknown }[])
+      .map((l) => (typeof l.soal === 'string' ? kalimatDari(l.soal)[0] ?? l.soal : ''))
+      .filter((t) => t.length >= 5);
+    const slide = [
+      { judul: 'Ringkasan materi', poin: kumpulan.slice(0, 3) },
+      { judul: 'Penjelasan', poin: kumpulan.length >= 5 ? kumpulan.slice(3, 6) : kumpulan.slice(-2) },
+      { judul: 'Latihan', poin: soal.slice(0, 4) },
+    ].filter((s) => s.poin.length >= 2);
+    hasil.slide_ppt = { judul: mentah.judul.slice(0, 80), slide };
+  }
+
+  if (!adaVideo) {
+    hasil.ide_video = {
+      judul: mentah.judul.slice(0, 80),
+      deskripsi: mentah.ringkasan.slice(0, 300).trim(),
+      kata_kunci_pencarian: mentah.judul.slice(0, 80),
+    };
+  }
+
+  return hasil as IsiMateri;
 }
 
 /**
