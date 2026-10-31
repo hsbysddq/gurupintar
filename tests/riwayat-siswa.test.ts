@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { hitungPersen, kalimatTren, ringkasPerforma, titikGrafik, urutkanLama, type RiwayatKuis } from '@/lib/riwayat-siswa';
+import {
+  hitungPersen,
+  kalimatTren,
+  petaJudulKuis,
+  ringkasPerforma,
+  titikGrafik,
+  urutkanLama,
+  type RiwayatKuis,
+} from '@/lib/riwayat-siswa';
 
 const kuis = (id: string, tanggal: string, skor: number, total = 5): RiwayatKuis => ({
   sesiId: id,
@@ -53,6 +61,26 @@ describe('urutkanLama dan titikGrafik', () => {
     const titik = titikGrafik([kuis('a', '2026-10-01T08:00:00Z', 4)]);
     expect(titik).toHaveLength(1);
     expect(titik[0]).toMatchObject({ persen: 80, judul: 'Topik a', skor: 4, total: 5 });
+  });
+
+  it('memakai nama kuis per mapel dan menghitung sesi unik', () => {
+    const daftar: RiwayatKuis[] = [
+      { ...kuis('m1', '2026-10-01T08:00:00Z', 3), namaMapel: 'Matematika' },
+      { ...kuis('m1', '2026-10-02T08:00:00Z', 4), namaMapel: 'Matematika' },
+      { ...kuis('m2', '2026-10-03T08:00:00Z', 5), namaMapel: 'Matematika' },
+      { ...kuis('b1', '2026-10-04T08:00:00Z', 2), namaMapel: 'Bahasa Indonesia' },
+    ];
+    const judul = petaJudulKuis(daftar);
+    expect(judul.get('m1-2026-10-01T08:00:00Z')).toBe('Kuis Matematika Sesi 1');
+    expect(judul.get('m1-2026-10-02T08:00:00Z')).toBe('Kuis Matematika Sesi 1');
+    expect(judul.get('m2-2026-10-03T08:00:00Z')).toBe('Kuis Matematika Sesi 2');
+    expect(judul.get('b1-2026-10-04T08:00:00Z')).toBe('Kuis Bahasa Indonesia Sesi 1');
+    expect(titikGrafik(daftar).map((t) => t.judul)).toEqual([
+      'Kuis Matematika Sesi 1',
+      'Kuis Matematika Sesi 1',
+      'Kuis Matematika Sesi 2',
+      'Kuis Bahasa Indonesia Sesi 1',
+    ]);
   });
 });
 

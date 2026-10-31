@@ -22,6 +22,7 @@ import {
   formatTanggalPanjang,
   hitungPersen,
   kalimatTren,
+  petaJudulKuis,
   ringkasPerforma,
   titikGrafik,
 } from "@/lib/riwayat-siswa";
@@ -106,6 +107,7 @@ export default function HalamanPerforma() {
   const perMapel = susunPerformaMapel(mapel, daftar);
   const ringkas = ringkasPerforma(daftar);
   const titik = titikGrafik(daftar);
+  const judulKuis = petaJudulKuis(daftar);
   const terbaruDulu = [...daftar].sort((a, b) => b.dikirimPada.localeCompare(a.dikirimPada));
   const IkonPerubahan =
     ringkas.perubahan === null || ringkas.perubahan === 0
@@ -243,7 +245,7 @@ export default function HalamanPerforma() {
                 <article className="aura-glass flex items-start justify-between gap-3 rounded-[20px] p-4">
                   <div className="min-w-0">
                     <p className="line-clamp-2 font-display text-[14px] leading-[20px] font-semibold text-aura-ink">
-                      {k.namaTopik}
+                      {judulKuis.get(`${k.sesiId}-${k.dikirimPada}`) ?? k.namaTopik}
                     </p>
                     <p className="mt-1 font-body text-[12px] leading-[18px] text-aura-muted">
                       {k.namaMapel ? `${k.namaMapel} · ` : ""}

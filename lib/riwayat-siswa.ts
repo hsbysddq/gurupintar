@@ -60,11 +60,41 @@ export function formatTanggalPanjang(iso: string): string {
   return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+function kunciRiwayat(k: RiwayatKuis): string {
+  return `${k.sesiId}-${k.dikirimPada}`;
+}
+
+/**
+ * Judul ramah untuk grafik dan riwayat: "Kuis Matematika Sesi 1".
+ * Nomor sesi dihitung per mapel berdasarkan urutan waktu dan sesi unik,
+ * bukan per pengerjaan ulang.
+ */
+export function petaJudulKuis(daftar: RiwayatKuis[]): Map<string, string> {
+  const urut = urutkanLama(daftar);
+  const nomorSesi = new Map<string, Map<string, number>>();
+  const peta = new Map<string, string>();
+
+  for (const k of urut) {
+    const mapel = k.namaMapel?.trim();
+    if (!mapel) {
+      peta.set(kunciRiwayat(k), k.namaTopik);
+      continue;
+    }
+    const sesi = nomorSesi.get(mapel) ?? new Map<string, number>();
+    if (!sesi.has(k.sesiId)) sesi.set(k.sesiId, sesi.size + 1);
+    nomorSesi.set(mapel, sesi);
+    peta.set(kunciRiwayat(k), `Kuis ${mapel} Sesi ${sesi.get(k.sesiId)}`);
+  }
+
+  return peta;
+}
+
 export function titikGrafik(daftar: RiwayatKuis[]): TitikGrafik[] {
+  const judul = petaJudulKuis(daftar);
   return urutkanLama(daftar).map((k) => ({
     label: formatTanggalPendek(k.dikirimPada),
     persen: hitungPersen(k.skor, k.total),
-    judul: k.namaTopik,
+    judul: judul.get(kunciRiwayat(k)) ?? k.namaTopik,
     skor: k.skor,
     total: k.total,
   }));

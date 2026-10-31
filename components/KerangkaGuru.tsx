@@ -53,9 +53,6 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
           <LogoGuruPintar className="h-9 w-auto shrink-0 xl:hidden" />
           <span className="hidden min-w-0 flex-col gap-0.5 xl:flex">
             <TulisanGuruPintar className="h-5 w-auto" />
-            <span className="font-body text-[11px] leading-[16px] font-semibold text-aura-muted">
-              Kurikulum Merdeka
-            </span>
           </span>
         </Link>
 

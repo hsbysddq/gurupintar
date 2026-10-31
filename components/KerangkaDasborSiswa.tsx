@@ -48,11 +48,6 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
           className="flex min-h-12 shrink-0 items-center gap-2 px-0.5 md:justify-center xl:justify-start xl:gap-3 xl:px-1"
         >
           <TulisanGuruPintar className="h-5 w-auto shrink-0 sm:h-6 xl:h-7" />
-          <span className="hidden min-w-0 flex-col xl:flex">
-            <span className="font-body text-[11px] leading-[16px] font-semibold text-aura-muted">
-              Kurikulum Merdeka
-            </span>
-          </span>
         </Link>
 
         <nav aria-label="Menu siswa" className="flex min-w-0 flex-1">
