@@ -63,6 +63,17 @@ export async function ambilKelasGuru(
   const daftar = hasil.data as BarisKelas[];
   const ids = daftar.map((k) => k.id);
 
+  // Warna/foto opsional; jika migrasi belum dijalankan, kartu memakai warna default.
+  const tampilan = new Map<string, { warna: string | null; sampul: string | null }>();
+  if (ids.length > 0) {
+    const r = await db.from('kelas').select('id, warna, sampul').in('id', ids);
+    if (!r.error) {
+      for (const baris of r.data as { id: string; warna: string | null; sampul: string | null }[]) {
+        tampilan.set(baris.id, baris);
+      }
+    }
+  }
+
   let sesiAktif: BarisSesiAktif[] = [];
   if (ids.length > 0) {
     const sesi = await db
@@ -82,6 +93,8 @@ export async function ambilKelasGuru(
       mapel: k.mapel,
       kodeUndangan: k.kode_undangan,
       jumlahSiswa: k.keanggotaan_kelas[0]?.count ?? 0,
+      warna: tampilan.get(k.id)?.warna ?? null,
+      sampul: tampilan.get(k.id)?.sampul ?? null,
       kuisAktif: aktif
         ? {
             id: aktif.id,

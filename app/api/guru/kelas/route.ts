@@ -33,14 +33,35 @@ export async function POST(request: Request) {
 
   try {
     const db = ambilSupabase();
+
+    // Kolom warna/foto hanya diperlukan bila guru mengisinya. Tanpa migrasi,
+    // pembuatan kelas biasa tetap berjalan.
+    const adaTampilan = Boolean(input.data.warna || input.data.sampul);
+    if (adaTampilan) {
+      const cek = await db.from('kelas').select('warna, sampul').limit(1);
+      if (cek.error) {
+        return responsError(
+          'Fitur warna/foto kelas belum aktif. Jalankan supabase/migrasi-sampul-kelas.sql di Supabase.',
+          503,
+        );
+      }
+    }
+
+    const isian: Record<string, unknown> = {
+      guru_id: auth.profil.id,
+      nama: input.data.nama,
+      mapel: input.data.mapel,
+      kode_undangan: '',
+    };
+
     const hasil = await cobaDenganKodeBaru(async (kode): Promise<HasilPercobaan<string>> => {
       const { data, error } = await db
         .from('kelas')
         .insert({
-          guru_id: auth.profil.id,
-          nama: input.data.nama,
-          mapel: input.data.mapel,
+          ...isian,
           kode_undangan: kode,
+          ...(input.data.warna ? { warna: input.data.warna } : {}),
+          ...(input.data.sampul ? { sampul: input.data.sampul } : {}),
         })
         .select('id')
         .single();
@@ -57,6 +78,8 @@ export async function POST(request: Request) {
       mapel: input.data.mapel,
       kodeUndangan: hasil.kode,
       jumlahSiswa: 0,
+      warna: input.data.warna ?? null,
+      sampul: input.data.sampul ?? null,
       kuisAktif: null,
     };
     return responsOk(respons, 201);

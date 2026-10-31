@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Archive, ArrowRight, KeyRound, PlayCircle, School, Users } from 'lucide-react';
 import { KartuKaca } from '@/components/KartuKaca';
 import { PulihkanKelas } from '@/components/PulihkanKelas';
@@ -7,6 +8,20 @@ import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { FormBuatKelas } from './FormBuatKelas';
 import { FormKuisBanyak } from './FormKuisBanyak';
+
+const WARNA_MAPEL: Record<string, string> = {
+  matematika: '#2563EB',
+  'bahasa indonesia': '#7C3AED',
+  ipa: '#059669',
+  ips: '#E11D48',
+  'bahasa inggris': '#D97706',
+};
+
+const WARNA_CADANGAN = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#E11D48', '#0F172A'];
+
+function warnaKelas(kelas: { mapel: string; warna: string | null }, indeks: number) {
+  return kelas.warna ?? WARNA_MAPEL[kelas.mapel.trim().toLowerCase()] ?? WARNA_CADANGAN[indeks % WARNA_CADANGAN.length];
+}
 
 // Daftar kelas milik guru. Satu kartu per kelas, dengan status kuis aktifnya.
 export default async function HalamanDaftarKelas({
@@ -111,15 +126,29 @@ export default async function HalamanDaftarKelas({
                 Klik kartu untuk masuk ke ruang kelas.
               </p>
             </div>
-            <span className="font-body text-[12px] leading-[18px] text-aura-muted">{daftar.length} kelas</span>
+            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/60 bg-white/55 px-3 py-2 backdrop-blur-sm">
+              <span className="relative flex size-9 items-center justify-center" aria-hidden="true">
+                <span className="absolute inset-0 translate-x-1 translate-y-1 rounded-xl bg-aura-primary/10" />
+                <span className="relative flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-aura-primary to-aura-violet text-white shadow-sm">
+                  <School className="size-4" />
+                </span>
+              </span>
+              <span className="flex flex-col">
+                <span className="font-display text-[14px] leading-[18px] font-bold text-aura-ink">
+                  {daftar.length} kelas
+                </span>
+                <span className="font-body text-[11px] leading-[14px] text-aura-muted">{totalSiswa} siswa</span>
+              </span>
+            </div>
           </div>
 
           <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {daftar.map((kelas) => {
+            {daftar.map((kelas, indeks) => {
               const progres =
                 kelas.kuisAktif && kelas.jumlahSiswa > 0
                   ? Math.round((kelas.kuisAktif.jumlahMenjawab / kelas.jumlahSiswa) * 100)
                   : 0;
+              const warna = warnaKelas(kelas, indeks);
 
               return (
                 <li key={kelas.id} className="h-full">
@@ -127,23 +156,44 @@ export default async function HalamanDaftarKelas({
                     <article className="aura-glass relative flex h-full flex-col gap-4 overflow-hidden rounded-[24px] p-5 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-white/90 group-hover:shadow-[0_24px_48px_-24px_rgba(37,99,235,0.35)]">
                       <span
                         aria-hidden="true"
-                        className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-aura-primary via-aura-violet to-aura-emerald"
+                        className="absolute inset-x-0 top-0 h-1"
+                        style={{ background: `linear-gradient(90deg, ${warna}, ${warna}66 55%, #10B981)` }}
                       />
                       <span
                         aria-hidden="true"
-                        className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-aura-primary/10 blur-2xl"
+                        className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full blur-2xl"
+                        style={{ backgroundColor: `${warna}1A` }}
                       />
+
+                      {kelas.sampul && (
+                        <div className="relative -mx-5 -mt-5 mb-1 h-20 overflow-hidden">
+                          <Image
+                            src={kelas.sampul}
+                            alt=""
+                            fill
+                            unoptimized
+                            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                            className="object-cover"
+                          />
+                          <span className="absolute inset-0 bg-gradient-to-t from-white/85 via-white/15 to-transparent" />
+                        </div>
+                      )}
 
                       <div className="relative flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-start gap-3">
-                          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-aura-primary/15 via-aura-primary/5 to-aura-violet/15 text-aura-primary ring-1 ring-white/70">
+                          <span
+                            className="flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ring-white/70"
+                            style={{ backgroundColor: `${warna}14`, color: warna, boxShadow: `inset 0 0 0 1px ${warna}24` }}
+                          >
                             <School aria-hidden="true" className="size-5" />
                           </span>
                           <div className="min-w-0">
-                            <h3 className="break-words font-display text-[18px] leading-[24px] font-bold tracking-[-0.015em] text-aura-ink">
+                            <h3 className="break-words font-display text-[15px] leading-[20px] font-semibold tracking-[-0.01em] text-aura-ink">
                               {kelas.mapel}
                             </h3>
-                            <p className="font-body text-[13px] leading-[20px] text-aura-muted">{kelas.nama}</p>
+                            <p className="mt-0.5 font-body text-[12px] leading-[18px] font-semibold" style={{ color: warna }}>
+                              {kelas.nama}
+                            </p>
                           </div>
                         </div>
                         {kelas.kuisAktif ? (
@@ -205,8 +255,8 @@ export default async function HalamanDaftarKelas({
                             className="h-1.5 overflow-hidden rounded-full bg-aura-primary/10"
                           >
                             <span
-                              className="block h-full rounded-full bg-gradient-to-r from-aura-primary to-aura-violet"
-                              style={{ width: `${progres}%` }}
+                              className="block h-full rounded-full"
+                              style={{ width: `${progres}%`, background: `linear-gradient(90deg, ${warna}, ${warna}AA)` }}
                             />
                           </div>
                         </div>
@@ -216,7 +266,10 @@ export default async function HalamanDaftarKelas({
                         </p>
                       )}
 
-                      <span className="relative mt-auto inline-flex items-center gap-1.5 font-display text-[13px] font-semibold text-aura-primary">
+                      <span
+                        className="relative mt-auto inline-flex items-center gap-1.5 font-display text-[13px] font-semibold"
+                        style={{ color: warna }}
+                      >
                         Kelola kelas
                         <ArrowRight
                           aria-hidden="true"

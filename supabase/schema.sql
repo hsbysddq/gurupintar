@@ -19,6 +19,8 @@ create table kelas (
   nama text not null,
   mapel text not null,
   kode_undangan text not null unique check (kode_undangan ~ '^[A-Z0-9]{5,6}$'),
+  warna text check (warna is null or warna ~ '^#[0-9A-Fa-f]{6}$'),
+  sampul text,
   diarsipkan_pada timestamptz,
   dibuat_pada timestamptz not null default now()
 );

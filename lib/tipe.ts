@@ -63,6 +63,9 @@ export interface KelasRingkas {
   mapel: string;
   kodeUndangan: string;
   jumlahSiswa: number;
+  /** Warna aksen kartu (hex) dan foto sampul (data URL), opsional. */
+  warna: string | null;
+  sampul: string | null;
   /** Sesi aktif kelas ini, jika ada. */
   kuisAktif: KuisAktifRingkas | null;
 }

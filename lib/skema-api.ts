@@ -52,6 +52,18 @@ export const skemaBodyDaftarGuru = z.object({
 export const skemaBodyBuatKelas = z.object({
   nama: z.string().trim().min(3).max(80),
   mapel: z.string().trim().min(3).max(40),
+  warna: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Warna harus berupa kode hex seperti #2563EB.')
+    .optional(),
+  sampul: z
+    .string()
+    .max(900_000, 'Foto sampul terlalu besar.')
+    .refine(
+      (nilai) => /^data:image\/(jpeg|png|webp);base64,/.test(nilai),
+      'Foto sampul harus berupa gambar JPEG, PNG, atau WebP.',
+    )
+    .optional(),
 });
 
 // PATCH /api/guru/kelas: ubah nama/mapel atau arsipkan/pulihkan kelas.
