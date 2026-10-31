@@ -78,9 +78,30 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
   ];
 
   const bilah = [
-    { label: 'Belum Paham', jumlah: materi.belum, warna: 'bg-belum' },
-    { label: 'Sedang Belajar', jumlah: materi.sedang, warna: 'bg-setengah' },
-    { label: 'Paham', jumlah: materi.sudah, warna: 'bg-sudah' },
+    {
+      label: 'Paham',
+      jumlah: materi.sudah,
+      warna: 'bg-sudah',
+      keterangan: 'Sudah menguasai materi.',
+    },
+    {
+      label: 'Sedang Belajar',
+      jumlah: materi.sedang,
+      warna: 'bg-setengah',
+      keterangan: 'Sudah mulai paham, masih perlu latihan.',
+    },
+    {
+      label: 'Belum Paham',
+      jumlah: materi.belum,
+      warna: 'bg-belum',
+      keterangan: 'Sudah mengerjakan, tetapi masih perlu bantuan.',
+    },
+    {
+      label: 'Belum Mengerjakan',
+      jumlah: materi.belumMengerjakan,
+      warna: 'bg-aura-muted/35',
+      keterangan: 'Kuis ini belum kamu kerjakan.',
+    },
   ];
 
   return (
@@ -131,30 +152,30 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
               <Brain aria-hidden="true" className="size-5" />
             </span>
             <div>
-              <h2 className="font-display text-[18px] leading-snug font-bold text-aura-ink">Progres Pemahaman Materi</h2>
-              <p className="text-[13px] leading-normal text-aura-muted">Tingkat pemahamanmu di setiap materi kuis.</p>
+              <h2 className="font-display text-[18px] leading-snug font-bold text-aura-ink">Progres Belajar Materi</h2>
+              <p className="text-[13px] leading-normal text-aura-muted">
+                Dari yang sudah paham sampai yang belum kamu kerjakan.
+              </p>
             </div>
           </div>
           <ul className="flex flex-col gap-4">
-            {bilah.map(({ label, jumlah, warna }) => (
-              <li key={label} className="flex flex-col gap-1.5">
+            {bilah.map(({ label, jumlah, warna, keterangan }) => (
+              <li key={label} className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-[13px] leading-normal">
                   <span className="font-semibold text-aura-ink">{label}</span>
                   <span className="text-aura-muted">{jumlah} materi</span>
                 </div>
+                <p className="text-[11px] leading-[16px] text-aura-muted">{keterangan}</p>
                 <div
                   role="img"
                   aria-label={`${label}: ${jumlah} dari ${totalMateri} materi`}
-                  className="h-2.5 overflow-hidden rounded-full bg-tinta/10"
+                  className="mt-0.5 h-2.5 overflow-hidden rounded-full bg-tinta/10"
                 >
                   <div className={`h-full rounded-full ${warna}`} style={{ width: `${hitungPersen(jumlah, totalMateri)}%` }} />
                 </div>
               </li>
             ))}
           </ul>
-          <p className="text-[12px] leading-normal text-aura-muted">
-            Kuis yang belum kamu kerjakan dihitung sebagai Belum Paham.
-          </p>
         </KartuKaca>
 
         <KartuKaca as="section" className="flex flex-col gap-5 p-6">

@@ -66,7 +66,7 @@ export interface RingkasanBeranda {
   totalMapel: number;
   /** Satu materi = satu kuis (topik) di kelas yang diikuti. */
   totalMateri: number;
-  materi: { belum: number; sedang: number; sudah: number };
+  materi: { belum: number; sedang: number; sudah: number; belumMengerjakan: number };
   soal: { benar: number; salah: number; total: number };
   /** Persen 0–100 dibulatkan; 0 jika belum ada soal yang dijawab. */
   akurasi: number;
@@ -84,8 +84,9 @@ export function hitungPersen(bagian: number, total: number): number {
 
 /**
  * Meringkas beranda siswa.
- * - Belum Paham: kuis yang hasilnya kelompok "belum" ditambah kuis yang belum dikerjakan.
- * - Sedang Belajar: hasil kelompok "setengah". Sudah Paham: hasil kelompok "sudah".
+ * - Paham: hasil kelompok "sudah". Sedang Belajar: hasil kelompok "setengah".
+ * - Belum Paham: kuis yang sudah dikerjakan dengan hasil kelompok "belum".
+ * - Belum Mengerjakan: kuis yang belum punya hasil pengerjaan.
  * - Kuis yang dikerjakan ulang: kelompok dan status dikerjakan mengikuti pengerjaan terakhir, sedangkan soal
  *   benar dan salah dijumlahkan dari semua pengerjaan, jadi hasil pertama tetap terhitung.
  */
@@ -109,7 +110,7 @@ export function hitungBeranda(data: DataBeranda, kelasId?: string | null): Ringk
   const sudah = terakhir.filter((h) => h.kelompok === 'sudah').length;
   const sedang = terakhir.filter((h) => h.kelompok === 'setengah').length;
   const belumMengerjakan = Math.max(0, sesi.length - terakhir.length);
-  const belum = terakhir.filter((h) => h.kelompok === 'belum').length + belumMengerjakan;
+  const belum = terakhir.filter((h) => h.kelompok === 'belum').length;
 
   const benar = hasil.reduce((jumlah, h) => jumlah + h.skor, 0);
   const totalSoal = hasil.reduce((jumlah, h) => jumlah + h.total, 0);
@@ -140,7 +141,7 @@ export function hitungBeranda(data: DataBeranda, kelasId?: string | null): Ringk
     jumlahKelas: kelas.length,
     totalMapel: new Set(kelas.map((k) => k.mapel.trim().toLowerCase())).size,
     totalMateri: sesi.length,
-    materi: { belum, sedang, sudah },
+    materi: { belum, sedang, sudah, belumMengerjakan },
     soal: { benar, salah: totalSoal - benar, total: totalSoal },
     akurasi: hitungPersen(benar, totalSoal),
     kelas: kelas.map((k) => {

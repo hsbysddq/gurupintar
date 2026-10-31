@@ -51,19 +51,19 @@ describe('hitungBeranda', () => {
     expect(r.totalMapel).toBe(0);
     expect(r.jumlahKelas).toBe(0);
     expect(r.totalMateri).toBe(0);
-    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 0 });
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 0, belumMengerjakan: 0 });
     expect(r.soal).toEqual({ benar: 0, salah: 0, total: 0 });
     expect(r.akurasi).toBe(0);
     expect(r.kelas).toEqual([]);
     expect(r.aktivitas).toEqual([]);
   });
 
-  it('belum paham = kelompok belum + kuis yang belum dikerjakan', () => {
+  it('memisahkan belum paham dari kuis yang belum dikerjakan', () => {
     const r = hitungBeranda(DATA);
     expect(r.totalMateri).toBe(6);
-    // belum: s2 (kelompok belum) + s3, s5, s6 (belum dikerjakan)
-    expect(r.materi).toEqual({ belum: 4, sedang: 1, sudah: 1 });
-    expect(r.materi.belum + r.materi.sedang + r.materi.sudah).toBe(r.totalMateri);
+    // s2 sudah dikerjakan dengan kelompok belum; s3, s5, s6 belum dikerjakan.
+    expect(r.materi).toEqual({ belum: 1, sedang: 1, sudah: 1, belumMengerjakan: 3 });
+    expect(r.materi.belum + r.materi.sedang + r.materi.sudah + r.materi.belumMengerjakan).toBe(r.totalMateri);
   });
 
   it('belum paham 0 bila semua kuis sudah dikerjakan dan tidak ada kelompok belum', () => {
@@ -72,7 +72,7 @@ describe('hitungBeranda', () => {
       sesi: [{ id: 's1', kelasId: 'k1' }],
       hasil: [hasil('s1', 'sudah', 5, '2026-10-20T03:00:00Z')],
     });
-    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1 });
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1, belumMengerjakan: 0 });
   });
 
   it('menjumlahkan soal benar dan salah dari skor dan total', () => {
@@ -127,7 +127,7 @@ describe('hitungBeranda', () => {
     });
     // Satu kuis, jadi hanya satu materi dan statusnya mengikuti percobaan terakhir (sudah).
     expect(r.totalMateri).toBe(1);
-    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1 });
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1, belumMengerjakan: 0 });
     // Percobaan pertama (1 benar) tetap terhitung: 1 + 5 benar dari 10 soal.
     expect(r.soal).toEqual({ benar: 6, salah: 4, total: 10 });
     expect(r.akurasi).toBe(60);
@@ -142,7 +142,7 @@ describe('hitungBeranda', () => {
       sesi: [{ id: 's1', kelasId: 'k1' }],
       hasil: [hasil('s1', 'sudah', 5, '2026-10-21T03:00:00Z'), hasil('s1', 'belum', 1, '2026-10-20T03:00:00Z')],
     });
-    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1 });
+    expect(r.materi).toEqual({ belum: 0, sedang: 0, sudah: 1, belumMengerjakan: 0 });
   });
 
   it('memfilter satu kelas bila kelasId valid', () => {
@@ -150,7 +150,7 @@ describe('hitungBeranda', () => {
     expect(r.kelasId).toBe('k2');
     expect(r.jumlahKelas).toBe(1);
     expect(r.totalMateri).toBe(2);
-    expect(r.materi).toEqual({ belum: 1, sedang: 1, sudah: 0 });
+    expect(r.materi).toEqual({ belum: 0, sedang: 1, sudah: 0, belumMengerjakan: 1 });
     expect(r.soal).toEqual({ benar: 3, salah: 2, total: 5 });
     expect(r.akurasi).toBe(60);
     expect(r.kelas.map((k) => k.id)).toEqual(['k2']);
