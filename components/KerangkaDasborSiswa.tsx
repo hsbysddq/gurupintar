@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, Loader2, LogOut } from "lucide-react";
-import { LogoGuruPintar } from "@/components/LogoGuruPintar";
+import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 import { NavigasiSiswa } from "@/components/NavigasiSiswa";
 import { useSiswa } from "@/components/PenyediaSiswa";
 import { keluar } from "@/lib/api-klien";
@@ -47,11 +47,8 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
           aria-label="Guru Pintarku, ke beranda"
           className="flex min-h-12 shrink-0 items-center gap-2 px-0.5 md:justify-center xl:justify-start xl:gap-3 xl:px-1"
         >
-          <LogoGuruPintar className="h-7 w-auto shrink-0 xl:h-10" />
+          <TulisanGuruPintar className="h-5 w-auto shrink-0 sm:h-6 xl:h-7" />
           <span className="hidden min-w-0 flex-col xl:flex">
-            <span className="truncate font-display text-[18px] leading-[24px] font-bold tracking-tight text-aura-ink">
-              Guru Pintarku
-            </span>
             <span className="font-body text-[11px] leading-[16px] font-semibold text-aura-muted">
               Kurikulum Merdeka
             </span>

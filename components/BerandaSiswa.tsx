@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Brain, CheckCircle2, ChevronRight, Clock, FileText, Library, Plus, Target } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, CheckCircle2, ChevronRight, Clock, FileText, Library, Plus, Target } from 'lucide-react';
 import { FormGabungKuis } from '@/components/FormGabungKuis';
 import { IlustrasiBelajar } from '@/components/IlustrasiBelajar';
 import { KartuKaca } from '@/components/KartuKaca';
@@ -68,6 +68,13 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
       ikon: Target,
       warna: 'bg-aura-violet',
     },
+    {
+      judul: 'Mata Pelajaran',
+      nilai: String(ringkasan.totalMapel),
+      keterangan: `${ringkasan.jumlahKelas} kelas diikuti`,
+      ikon: BookOpen,
+      warna: 'bg-aura-indigo',
+    },
   ];
 
   const bilah = [
@@ -80,15 +87,25 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
+          <span className="font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-primary">
+            Ruang siswa
+          </span>
           <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-tight text-aura-ink md:text-[32px]">
             Halo, {namaDepan(nama)}!
           </h1>
           <p className="text-aura-muted">Yuk, lanjutkan belajar dan pantau progresmu hari ini.</p>
+          <Link
+            href="/siswa/performa"
+            className="aura-btn aura-btn-secondary mt-2 inline-flex h-10 w-fit items-center gap-1.5 px-3 text-[12px]"
+          >
+            Lihat performa
+            <ArrowRight aria-hidden="true" className="size-3.5" />
+          </Link>
         </div>
         <IlustrasiBelajar className="hidden h-28 w-auto shrink-0 sm:block" />
       </header>
 
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {kartu.map(({ judul, nilai, keterangan, ikon: Ikon, warna }) => (
           <li key={judul}>
             <KartuKaca className="flex h-full items-center gap-4 p-5">
