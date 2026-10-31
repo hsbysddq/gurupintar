@@ -184,6 +184,8 @@
 
 .aura-eyebrow {
   display: inline-flex;
+  width: fit-content;
+  align-self: flex-start;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;

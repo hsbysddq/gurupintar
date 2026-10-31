@@ -63,12 +63,6 @@ export function NavigasiSiswa() {
                 <Ikon aria-hidden="true" className="size-5" />
               </span>
               <span className="sr-only xl:not-sr-only">{label}</span>
-              {sedangAktif && (
-                <span
-                  aria-hidden="true"
-                  className="ml-auto hidden size-2 rounded-full bg-white shadow-sm ring-4 ring-white/25 xl:block"
-                />
-              )}
             </Link>
           </li>
         );

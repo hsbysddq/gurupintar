@@ -178,7 +178,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
           </ul>
         </KartuKaca>
 
-        <KartuKaca as="section" className="flex flex-col gap-5 p-6">
+        <KartuKaca as="section" className="flex h-full flex-col gap-5 p-6">
           <div>
             <h2 className="font-display text-[18px] leading-snug font-bold text-aura-ink">Rangkuman Hasil Kuis</h2>
             <p className="text-[13px] leading-normal text-aura-muted">Perbandingan jawaban benar dan salah.</p>
@@ -201,6 +201,15 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                 </span>
               </li>
             </ul>
+          </div>
+          <div className="mt-auto flex items-center justify-between gap-3 rounded-2xl border border-white/60 bg-white/45 p-3">
+            <div>
+              <p className="font-display text-[12px] font-semibold text-aura-ink">Akurasi total</p>
+              <p className="text-[12px] leading-normal text-aura-muted">dari {soal.total} soal yang dijawab</p>
+            </div>
+            <p className="font-display text-[24px] leading-none font-extrabold text-aura-primary">
+              {ringkasan.akurasi}%
+            </p>
           </div>
         </KartuKaca>
       </div>
@@ -236,20 +245,20 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                   return (
                     <li
                       key={k.id}
-                      className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 rounded-2xl border border-white/60 bg-white/40 p-3 sm:grid-cols-[auto_1fr_minmax(0,11rem)_auto]"
+                      className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-2xl border border-white/60 bg-white/40 p-3 sm:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_auto]"
                     >
                       <span className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${warna.ikon}`}>
                         <Ikon aria-hidden="true" className="size-6" />
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate font-display text-[15px] leading-snug font-bold text-aura-ink">{k.mapel}</p>
+                        <p className="break-words font-display text-[15px] leading-snug font-bold text-aura-ink">{k.mapel}</p>
                         <p className="truncate text-[13px] leading-normal text-aura-muted">
                           {labelKelas(k.nama)}
                           {k.namaGuru ? ` · ${k.namaGuru}` : ''}
                         </p>
                       </div>
                       <div className="order-last col-span-2 flex flex-col gap-1 sm:order-none sm:col-span-1">
-                        <p className={`text-[12px] leading-normal font-semibold ${warna.teks}`}>
+                        <p className={`whitespace-nowrap text-[11px] leading-normal font-semibold ${warna.teks}`}>
                           Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                         </p>
                         <div
@@ -327,7 +336,9 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                         <FileText aria-hidden="true" className="size-5" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14px] leading-snug font-semibold text-aura-ink">Kuis: {a.namaTopik}</p>
+                        <p className="truncate text-[14px] leading-snug font-semibold text-aura-ink">
+                          Kuis: {a.namaTopik.replace(/^Kuis\s+/i, '')}
+                        </p>
                         <p className="truncate text-[12px] leading-normal text-aura-muted">
                           {a.mapel} · {a.skor} dari {a.total} soal benar
                         </p>

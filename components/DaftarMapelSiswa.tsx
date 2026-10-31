@@ -43,7 +43,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
           <p className="text-aura-muted">Minta kode undangan mata pelajaran kepada gurumu, lalu masukkan di kolom di atas.</p>
         </KartuKaca>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {kelas.map((k) => {
             const Ikon = ikonMapel(k.mapel);
             const warna = warnaMapel(k.id);
@@ -65,24 +65,24 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className={`text-[12px] leading-normal font-semibold ${warna.teks}`}>
+                  <div className="flex flex-col gap-2">
+                    {k.kodeKuisAktif && (
+                      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-aura-primary/10 px-2.5 py-1 text-[11px] leading-normal font-semibold text-aura-primary">
+                        <PlayCircle aria-hidden="true" className="size-3.5" />
+                        Kuis aktif
+                      </span>
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <p className={`text-[11px] leading-normal font-semibold ${warna.teks}`}>
                         Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                       </p>
-                      {k.kodeKuisAktif && (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-aura-primary/10 px-2.5 py-1 text-[12px] leading-normal font-semibold text-aura-primary">
-                          <PlayCircle aria-hidden="true" className="size-3.5" />
-                          Kuis aktif
-                        </span>
-                      )}
-                    </div>
-                    <div
-                      role="img"
-                      aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
-                      className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
-                    >
-                      <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
+                      <div
+                        role="img"
+                        aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
+                        className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
+                      >
+                        <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
+                      </div>
                     </div>
                   </div>
 

@@ -57,18 +57,6 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="mt-auto flex flex-col gap-2 xl:border-t xl:border-white/60 xl:pt-3">
-          <div className="hidden items-center gap-3 rounded-2xl border border-white/60 bg-white/45 p-2.5 xl:flex">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-aura-amber via-aura-red to-aura-violet p-0.5">
-              <span className="flex size-full items-center justify-center rounded-full bg-white font-display text-[11px] font-extrabold tracking-tight text-aura-indigo">
-                {inisial(profil.nama)}
-              </span>
-            </span>
-            <div className="min-w-0">
-              <p className="truncate font-display text-[14px] leading-[20px] font-semibold text-aura-ink">{profil.nama}</p>
-              <p className="font-body text-[11px] leading-[16px] text-aura-muted">Siswa</p>
-            </div>
-          </div>
-
           <button
             type="button"
             onClick={keluarAkun}

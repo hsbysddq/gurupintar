@@ -210,9 +210,9 @@ export default function HalamanPerforma() {
               Lihat status dan tren tiga kuis terakhir di tiap mapel.
             </p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="columns-1 gap-4 lg:columns-2">
             {perMapel.map((m) => (
-              <section key={m.kelasId} className="aura-glass flex flex-col gap-4 rounded-[24px] p-5 sm:p-6">
+              <section key={m.kelasId} className="aura-glass mb-4 flex break-inside-avoid flex-col gap-4 rounded-[24px] p-5 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h3 className="break-words font-display text-[18px] leading-[26px] font-bold text-aura-ink">{m.namaMapel}</h3>
