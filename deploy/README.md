@@ -95,7 +95,7 @@ sudo -u gurupintar git clone https://github.com/hsbysddq/gurupintar.git /var/www
 Izinkan pengguna aplikasi menjalankan ulang layanan tanpa sandi:
 
 ```bash
-echo 'gurupintar ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart gurupintar, /usr/bin/systemctl status gurupintar' > /etc/sudoers.d/gurupintar
+echo 'gurupintar ALL=(ALL) NOPASSWD: /usr/bin/systemctl start gurupintar, /usr/bin/systemctl stop gurupintar, /usr/bin/systemctl restart gurupintar, /usr/bin/systemctl status gurupintar' > /etc/sudoers.d/gurupintar
 chmod 440 /etc/sudoers.d/gurupintar
 visudo -c
 ```
@@ -237,9 +237,20 @@ sudo -u gurupintar -H bash -lc 'cd /var/www/gurupintar && chmod +x deploy/deploy
 Atau manual:
 
 ```bash
-sudo -u gurupintar -H bash -lc 'cd /var/www/gurupintar && git pull origin master && npm ci && npm run build'
-systemctl restart gurupintar
+sudo -u gurupintar -H bash -lc 'cd /var/www/gurupintar && git pull origin master && npm ci'
+sudo systemctl stop gurupintar
+sudo -u gurupintar -H bash -lc 'cd /var/www/gurupintar && npm run build'
+sudo systemctl start gurupintar
 ```
+
+Jangan menjalankan `npm run build` saat layanan masih hidup. Build menulis ulang folder `.next` yang sedang dipakai proses `next start`, sehingga halaman bisa error atau mendeteksi versi build yang belum selesai.
+
+Modal maintenance hanya muncul jika:
+
+- `MAINTENANCE_MODE=1` di environment, atau
+- server sudah menjalankan build baru setelah restart.
+
+Jaringan lambat, timeout, atau server mati sebentar **tidak** memunculkan modal maintenance. Kalau ingin menampilkan maintenance terjadwal, set `MAINTENANCE_MODE=1` lalu restart layanan sebelum maintenance, dan hapus variabel itu setelah selesai.
 
 ## 14. Masalah umum
 

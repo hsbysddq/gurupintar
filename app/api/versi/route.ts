@@ -5,13 +5,16 @@ export const dynamic = 'force-dynamic';
 
 let versiCache: string | null = null;
 
-function versiBuild(): string {
+function versiBuild(): string | null {
   if (process.env.NODE_ENV !== 'production') return 'dev';
   if (versiCache) return versiCache;
   try {
-    versiCache = readFileSync(join(process.cwd(), '.next', 'BUILD_ID'), 'utf8').trim();
+    // Saat build sedang berjalan, BUILD_ID bisa sementara tidak ada.
+    // Kembalikan null agar klien tidak menganggapnya sebagai versi baru.
+    const isi = readFileSync(join(process.cwd(), '.next', 'BUILD_ID'), 'utf8').trim();
+    versiCache = isi || null;
   } catch {
-    versiCache = process.env.NEXT_PUBLIC_VERSI_APLIKASI ?? 'dev';
+    return null;
   }
   return versiCache;
 }

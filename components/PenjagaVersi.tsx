@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { RefreshCw, Wrench } from "lucide-react";
 
 const INTERVAL_MS = 30_000;
-const BATAS_GAGAL = 3;
+const BATAS_CEK_MS = 8_000;
 
-type ResponsVersi = { versi?: string; maintenance?: boolean };
+type ResponsVersi = { versi?: string | null; maintenance?: boolean };
 
 /** Memunculkan modal saat server sudah memakai build baru atau sedang maintenance. */
 export function PenjagaVersi() {
@@ -15,32 +15,40 @@ export function PenjagaVersi() {
 
   useEffect(() => {
     let aktif = true;
-    let gagal = 0;
+    let sedangCek = false;
 
     async function cek() {
+      // Jangan menumpuk request saat jaringan lambat atau tab baru kembali aktif.
+      if (sedangCek) return;
+      sedangCek = true;
+      const pengendali = new AbortController();
+      const batas = setTimeout(() => pengendali.abort(), BATAS_CEK_MS);
+
       try {
         const res = await fetch("/api/versi", {
           cache: "no-store",
           credentials: "same-origin",
+          signal: pengendali.signal,
         });
-        if (!res.ok) throw new Error("Versi tidak tersedia.");
+        if (!res.ok) return;
         const data = (await res.json()) as ResponsVersi;
         if (!aktif) return;
-        gagal = 0;
         if (data.maintenance) {
           setTampil(true);
           return;
         }
-        if (!data.versi) return;
+        // Jaringan lambat, server mati, atau BUILD_ID belum tersedia bukan maintenance.
+        if (!data.versi || data.versi === "dev") return;
         if (!versiAwal.current) {
           versiAwal.current = data.versi;
           return;
         }
         if (data.versi !== versiAwal.current) setTampil(true);
       } catch {
-        if (!aktif) return;
-        gagal += 1;
-        if (gagal >= BATAS_GAGAL) setTampil(true);
+        // Timeout/offline bukan tanda maintenance. Cek berikutnya akan mencoba lagi.
+      } finally {
+        clearTimeout(batas);
+        sedangCek = false;
       }
     }
 
