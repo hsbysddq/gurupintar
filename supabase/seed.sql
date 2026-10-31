@@ -1,4 +1,4 @@
--- Data demo Guru Pintar (PRD.md bagian 8). Boleh dijalankan ulang untuk mereset demo.
+-- Data demo Guru Pintarku (PRD.md bagian 8). Boleh dijalankan ulang untuk mereset demo.
 --
 -- Akun demo:
 --   Guru  : guru@demo.gurupintar.id / GuruPintar123!

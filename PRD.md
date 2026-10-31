@@ -1,4 +1,4 @@
-# PRD: Guru Pintar
+# PRD: Guru Pintarku
 
 | Atribut | Isi |
 | --- | --- |
@@ -29,7 +29,7 @@
 
 ## 1. Ringkasan
 
-Guru Pintar membantu guru SMP mengetahui siswa mana yang belum paham **pada hari yang sama**, lalu menyiapkan materi lanjutan yang berbeda untuk setiap kelompok dengan bantuan AI.
+Guru Pintarku membantu guru SMP mengetahui siswa mana yang belum paham **pada hari yang sama**, lalu menyiapkan materi lanjutan yang berbeda untuk setiap kelompok dengan bantuan AI.
 
 Alur inti:
 
@@ -342,7 +342,7 @@ Nilai ini sudah dipakai sebagai **nilai bawaan**. Ubah sebelum fase terkait di `
 | A-1 | Jenjang dan mata pelajaran demo | SMP kelas 7, Matematika, Pecahan Senilai |
 | A-2 | Batas kelompok | 5/5 Sudah; ≥ 60% Setengah; < 60% Belum |
 | A-3 | Mekanisme Perlu Pendampingan | Otomatis berdasarkan aturan, hanya terlihat guru |
-| A-4 | Nama produk | **Guru Pintar** (sudah diputuskan) |
+| A-4 | Nama produk | **Guru Pintarku** (sudah diputuskan) |
 | A-5 | Akses halaman guru | Tanpa login (khusus demo) |
 
 ---

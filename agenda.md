@@ -1,4 +1,4 @@
-# agenda.md: Guru Pintar
+# agenda.md: Guru Pintarku
 
 | Atribut | Isi |
 | --- | --- |
@@ -364,8 +364,8 @@ Sebelum `git add .`, pastikan `git status` tidak menampilkan `.env.local`.
 Dikerjakan setelah F-1 s.d. F-8 selesai. Masing-masing punya rencana dan verifikasi (lint, build, test) sendiri.
 
 - **Ubah Modul (PRD F-9):** guru menempelkan teks modul matematika kelas 7 di `/guru/modul` dan melihat pratinjaunya dalam empat bentuk belajar, agar guru bisa memakai modul yang sudah dimilikinya tanpa menyusun materi dari awal.
-- **Buat Soal (PRD F-10):** guru membuat topik baru berisi 5 soal di `/guru/soal` lalu memilihnya saat membuka kuis, agar Guru Pintar tidak terbatas pada topik demo Pecahan Senilai.
-- **Landing page (`design.md` 3.10):** halaman `/` menjelaskan masalah, cara kerja, fitur, dan prinsip Guru Pintar dengan donut kelompok sebagai visual utama, agar juri dan guru memahami produk sebelum mencobanya.
+- **Buat Soal (PRD F-10):** guru membuat topik baru berisi 5 soal di `/guru/soal` lalu memilihnya saat membuka kuis, agar Guru Pintarku tidak terbatas pada topik demo Pecahan Senilai.
+- **Landing page (`design.md` 3.10):** halaman `/` menjelaskan masalah, cara kerja, fitur, dan prinsip Guru Pintarku dengan donut kelompok sebagai visual utama, agar juri dan guru memahami produk sebelum mencobanya.
 
 ---
 
@@ -475,7 +475,7 @@ Batalkan perubahan di luar Fase [n]. Kerjakan hanya yang tercantum di @agenda.md
 Simpan sebagai `CLAUDE.md` di root proyek. Buat tetap pendek.
 
 ```markdown
-# Guru Pintar
+# Guru Pintarku
 Dokumen acuan (baca hanya bagian yang dirujuk di prompt): PRD.md (kebutuhan), architecture.md (teknis), design.md (UI), agenda.md (urutan fase).
 Kerjakan hanya fase yang sedang aktif. Jika ada yang tidak jelas, tanyakan.
 

@@ -1,4 +1,4 @@
-# architecture.md: Guru Pintar
+# architecture.md: Guru Pintarku
 
 | Atribut | Isi |
 | --- | --- |

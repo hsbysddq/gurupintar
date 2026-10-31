@@ -1,4 +1,4 @@
-# Guru Pintar
+# Guru Pintarku
 
 Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP, guru melihat peta pemahaman kelas secara langsung, lalu membagikan materi lanjutan per kelompok.
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Guru Pintar (Next.js)
+Description=Guru Pintarku (Next.js)
 Documentation=https://github.com/hsbysddq/gurupintar
 After=network.target
 

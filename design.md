@@ -1,4 +1,4 @@
-# design.md: Guru Pintar
+# design.md: Guru Pintarku
 
 | Atribut | Isi |
 | --- | --- |
@@ -246,7 +246,7 @@ Peta kelas adalah **satu kartu besar** (bukan tiga kartu terpisah) agar terbaca 
 ```text
 /siswa              /siswa/format        /siswa/kuis          /siswa/selesai       /siswa/materi
 ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│ Guru Pintar   │   │ Kamu lebih    │   │ Soal 2 dari 5 │   │ Jawabanmu     │   │ Materi untukmu│
+│ Guru Pintarku   │   │ Kamu lebih    │   │ Soal 2 dari 5 │   │ Jawabanmu     │   │ Materi untukmu│
 │ Masukkan kode │   │ suka belajar  │   │ ▓▓▓▓░░░░░░    │   │ sudah terkirim│   │ Pecahan       │
 │ [ A7K2P     ] │   │ lewat apa?    │   │ Teks soal     │   │ Tunggu gurumu │   │ Senilai       │
 │ [ Lanjut    ] │   │ [PPT][Audio]│   │ [A. 3/4     ] │   │ membagikan    │   │ PPT|Audio|  │
@@ -324,7 +324,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 
 ```text
 ┌───────────────────────────────────────────────────────────────────┐
-│ ( Guru Pintar       Masalah  Cara kerja     Gabung kuis           │
+│ ( Guru Pintarku       Masalah  Cara kerja     Gabung kuis           │
 │                                        [Coba sebagai guru] )      │
 │ (Untuk guru SMP · Kurikulum Merdeka)                              │
 │ Tahu siapa yang tertinggal          ┌─────────────────────┐       │
@@ -339,7 +339,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 │          └────────────┘├ Ubah Modul ┐┌ Buat soal ┐                │
 │ #prinsip   4 butir dalam satu kartu, 2 kolom                      │
 │ ▓ Coba satu siklus dalam lima menit          [ Coba sebagai guru ]│
-│ Prototipe hackathon. Guru Pintar.                 Kembali ke atas │
+│ Prototipe hackathon. Guru Pintarku.                 Kembali ke atas │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -453,7 +453,7 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 ### 4.18 `NavbarLanding`
 - **Tujuan:** navigasi landing page. Server Component tanpa JavaScript; hanya dipakai di `/`.
 - **Tampilan:** `<header>` `sticky top-3 z-20` dengan jarak tepi `mx-3` (`mx-6` di ≥768px); `<nav aria-label="Navigasi utama">` berbentuk kapsul `kaca rounded-full`, tinggi 64px, lebar maksimal 1200px, padding `px-4` (16px) yang sama di kiri dan kanan: ikon logo (tanpa padding sendiri) dan tepi tombol sekunder sama jauhnya dari tepi kapsul.
-- **Isi:** kiri ikon `GraduationCap` + "Guru Pintar" ke `/` (`aria-label` "Guru Pintar, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`, dengan `gap-2`: teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), setara dengan padding tepi kapsul.
+- **Isi:** kiri ikon `GraduationCap` + "Guru Pintarku" ke `/` (`aria-label` "Guru Pintarku, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`, dengan `gap-2`: teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), setara dengan padding tepi kapsul.
 - **Jangan:** tombol varian `utama`, menu hamburger, atau skrip.
 
 ### 4.19 `PratinjauDasbor`

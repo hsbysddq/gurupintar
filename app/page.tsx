@@ -26,7 +26,7 @@ import { PratinjauDasbor } from "@/components/PratinjauDasbor";
 import { TeksBerputar } from "@/components/TeksBerputar";
 
 export const metadata: Metadata = {
-  title: "Guru Pintar: tahu siapa yang tertinggal hari ini",
+  title: "Guru Pintarku: tahu siapa yang tertinggal hari ini",
   description:
     "Cek pemahaman kilat 5 soal dari HP siswa, peta kelas dalam hitungan menit, dan materi lanjutan per kelompok yang dibuat dengan bantuan AI lalu diperiksa guru.",
 };
@@ -155,7 +155,7 @@ const PRINSIP: { teks: string; ikon: LucideIcon }[] = [
     teks: "Materi AI selalu berupa draf sampai guru memeriksanya dan menekan Bagikan ke Siswa.",
     ikon: ShieldCheck,
   },
-  { teks: "Guru Pintar tidak mengirim nama atau data siswa ke AI.", ikon: LockKeyhole },
+  { teks: "Guru Pintarku tidak mengirim nama atau data siswa ke AI.", ikon: LockKeyhole },
   {
     teks: "Siswa tidak pernah melihat label kelompoknya. Yang mereka lihat hanya Materi untukmu.",
     ikon: EyeOff,
@@ -272,9 +272,9 @@ export default function Beranda() {
         <section id="mengapa" aria-labelledby="judul-mengapa" className="flex scroll-mt-28 flex-col gap-8">
           <JudulBagian
             id="judul-mengapa"
-            eyebrow="Mengapa Guru Pintar"
+            eyebrow="Mengapa Guru Pintarku"
             title="Bukan sekadar kuis. Satu alur dari diagnosis sampai tindak lanjut."
-            description="Guru Pintar mengubah jawaban 5 soal menjadi peta pemahaman, materi yang berbeda untuk tiap kelompok, dan daftar siswa yang perlu dibantu."
+            description="Guru Pintarku mengubah jawaban 5 soal menjadi peta pemahaman, materi yang berbeda untuk tiap kelompok, dan daftar siswa yang perlu dibantu."
           />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -556,7 +556,7 @@ export default function Beranda() {
                   AI menyusun draf, guru memutuskan sebelum materi dibagikan.
                 </h3>
                 <p className="mt-3 font-body text-[15px] leading-[26px] text-aura-muted">
-                  Guru Pintar menjaga batas yang jelas: data pribadi tidak dikirim ke model AI, label kelompok tidak
+                  Guru Pintarku menjaga batas yang jelas: data pribadi tidak dikirim ke model AI, label kelompok tidak
                   ditampilkan ke siswa, dan setiap materi diperiksa guru.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">

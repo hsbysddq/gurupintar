@@ -5,7 +5,7 @@ import { LatarPastel } from "@/components/LatarPastel";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Guru Pintar",
+  title: "Guru Pintarku",
   description: "Cek pemahaman kilat, pengelompokan siswa, dan materi lanjutan per kelompok.",
 };
 

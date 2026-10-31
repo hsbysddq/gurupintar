@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# Guru Pintar
+# Guru Pintarku
 Dokumen acuan (baca hanya bagian yang dirujuk di prompt): PRD.md (kebutuhan), architecture.md (teknis), design.md (UI), agenda.md (urutan fase).
 Kerjakan hanya fase yang sedang aktif. Jika ada yang tidak jelas, tanyakan.
 

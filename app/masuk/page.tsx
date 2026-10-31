@@ -215,7 +215,7 @@ function FormMasuk() {
                   id="judul-masuk"
                   className="text-balance font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
                 >
-                  Masuk ke Guru Pintar
+                  Masuk ke Guru Pintarku
                 </h1>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
                   Gunakan akun guru atau siswa yang sudah terdaftar.

@@ -1,4 +1,4 @@
-# Deploy Guru Pintar ke VPS Jagoan Hosting
+# Deploy Guru Pintarku ke VPS Jagoan Hosting
 
 Panduan ini memakai Ubuntu 22.04/24.04, Node.js 22 LTS, systemd, Nginx, dan Certbot.
 Arsitektur akhirnya:
