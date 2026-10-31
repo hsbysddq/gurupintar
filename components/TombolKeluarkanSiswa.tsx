@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { ErrorApi, keluarkanSiswa } from '@/lib/api-klien';
 
 export function TombolKeluarkanSiswa({
@@ -51,8 +52,10 @@ export function TombolKeluarkanSiswa({
         type="button"
         onClick={keluarkan}
         disabled={memuat}
-        className="inline-flex min-h-11 items-center rounded-full bg-belum-latar px-3 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
+        aria-busy={memuat || undefined}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-belum-latar px-3 text-[12px] leading-normal font-semibold text-belum-teks disabled:opacity-60"
       >
+        {memuat && <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />}
         {memuat ? 'Mengeluarkan…' : 'Ya, keluarkan'}
       </button>
       <button

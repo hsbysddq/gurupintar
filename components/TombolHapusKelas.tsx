@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { ErrorApi, keluarKelas } from '@/lib/api-klien';
 
 /**
@@ -48,8 +49,10 @@ export function TombolHapusKelas({ kelasId, mapel }: { kelasId: string; mapel: s
           type="button"
           onClick={hapus}
           disabled={memuat}
-          className="inline-flex min-h-11 items-center rounded-xl bg-belum px-4 text-[14px] leading-normal font-semibold text-white disabled:opacity-60"
+          aria-busy={memuat || undefined}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-belum px-4 text-[14px] leading-normal font-semibold text-white disabled:opacity-60"
         >
+          {memuat && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}
           {memuat ? 'Menghapus…' : 'Ya, hapus'}
         </button>
         <button

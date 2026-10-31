@@ -88,6 +88,7 @@ export default function HalamanBuatSoal() {
   const [percobaanTopik, setPercobaanTopik] = useState(0);
   const [mengubah, setMengubah] = useState<ModeUbah | null>(null);
   const [memuatDetail, setMemuatDetail] = useState(false);
+  const [memuatDetailId, setMemuatDetailId] = useState<string | null>(null);
   const [hapusId, setHapusId] = useState<string | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [pesanAksi, setPesanAksi] = useState<PesanAksi | null>(null);
@@ -168,6 +169,7 @@ export default function HalamanBuatSoal() {
 
   async function mulaiUbah(id: string) {
     setMemuatDetail(true);
+    setMemuatDetailId(id);
     setPesanAksi(null);
     try {
       const detail = await ambilDetailTopik(id);
@@ -191,6 +193,7 @@ export default function HalamanBuatSoal() {
       });
     } finally {
       setMemuatDetail(false);
+      setMemuatDetailId(null);
     }
   }
 
@@ -417,9 +420,11 @@ export default function HalamanBuatSoal() {
                         <button
                           type="button"
                           disabled={menghapus}
+                          aria-busy={menghapus || undefined}
                           onClick={() => void hapusTopikAksi(t.id)}
                           className="aura-btn aura-btn-danger h-11 px-3 text-[12px] disabled:opacity-60"
                         >
+                          {menghapus && <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />}
                           {menghapus ? "Menghapus…" : "Ya, hapus"}
                         </button>
                         <button
@@ -436,11 +441,16 @@ export default function HalamanBuatSoal() {
                         <button
                           type="button"
                           disabled={memuatDetail}
+                          aria-busy={memuatDetailId === t.id || undefined}
                           onClick={() => void mulaiUbah(t.id)}
                           className="aura-btn aura-btn-secondary h-11 px-3 text-[12px] disabled:opacity-60"
                         >
-                          <Pencil aria-hidden="true" className="size-3.5" />
-                          Ubah
+                          {memuatDetailId === t.id ? (
+                            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+                          ) : (
+                            <Pencil aria-hidden="true" className="size-3.5" />
+                          )}
+                          {memuatDetailId === t.id ? "Memuat…" : "Ubah"}
                         </button>
                         <button
                           type="button"

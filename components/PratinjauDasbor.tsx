@@ -4,7 +4,7 @@ import {
   FileText,
   Headphones,
   ListChecks,
-  PlayCircle,
+  Pencil,
   Presentation,
   Send,
   Sparkles,
@@ -19,10 +19,10 @@ const KELOMPOK: { label: string; jumlah: number; persen: number; warna: string }
 ];
 
 const BENTUK: { label: string; ikon: LucideIcon }[] = [
-  { label: "Video", ikon: PlayCircle },
+  { label: "PPT", ikon: Presentation },
   { label: "Audio", ikon: Headphones },
   { label: "Bacaan", ikon: FileText },
-  { label: "PPT", ikon: Presentation },
+  { label: "Latihan", ikon: Pencil },
 ];
 
 const REKOMENDASI: { label: string; nilai: string; ikon: LucideIcon }[] = [

@@ -12,7 +12,7 @@ import {
   Lightbulb,
   ListChecks,
   LockKeyhole,
-  PlayCircle,
+  Pencil,
   Presentation,
   ShieldCheck,
   SlidersHorizontal,
@@ -44,7 +44,7 @@ const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
   {
     judul: "Materi berbeda untuk tiap kelompok",
-    isi: "Video, audio, bacaan, dan latihan disusun AI, lalu diperiksa guru sebelum dibagikan.",
+    isi: "PPT, audio, bacaan, dan latihan disusun AI, lalu diperiksa guru sebelum dibagikan.",
     ikon: Sparkles,
   },
   {
@@ -90,9 +90,9 @@ const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
 // Ikon sama dengan tab di TabMateriSiswa.
 const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon; aksen: string }[] = [
   {
-    label: "Video",
-    keterangan: "Tonton penjelasan langkah demi langkah.",
-    ikon: PlayCircle,
+    label: "PPT",
+    keterangan: "Lihat slide ringkas untuk diulang.",
+    ikon: Presentation,
     aksen: "from-aura-primary to-aura-indigo",
   },
   {
@@ -108,9 +108,9 @@ const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon; akse
     aksen: "from-aura-emerald to-aura-primary",
   },
   {
-    label: "PPT",
-    keterangan: "Lihat slide ringkas untuk diulang.",
-    ikon: Presentation,
+    label: "Latihan",
+    keterangan: "Kerjakan soal dengan pembahasan.",
+    ikon: Pencil,
     aksen: "from-aura-amber to-aura-primary",
   },
 ];

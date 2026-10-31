@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { LogoGuruPintar, TulisanGuruPintar } from "@/components/LogoGuruPintar";
 import { NavigasiGuru, type KelasNav } from "@/components/NavigasiGuru";
 import { keluar } from "@/lib/api-klien";
@@ -30,8 +30,10 @@ function inisial(nama: string) {
  */
 export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
   const router = useRouter();
+  const [keluarMemuat, setKeluarMemuat] = useState(false);
 
   async function keluarAkun() {
+    setKeluarMemuat(true);
     try {
       await keluar();
     } finally {
@@ -79,11 +81,17 @@ export function KerangkaGuru({ children, nama, kelas }: KerangkaGuruProps) {
           <button
             type="button"
             onClick={keluarAkun}
+            disabled={keluarMemuat}
+            aria-busy={keluarMemuat || undefined}
             title="Keluar"
-            className="group flex min-h-12 shrink-0 items-center justify-center gap-0 rounded-2xl px-1 text-[15px] font-semibold text-aura-muted transition-colors hover:bg-aura-red/10 hover:text-aura-red md:rounded-xl xl:justify-start xl:gap-3 xl:rounded-2xl xl:px-3"
+            className="group flex min-h-12 shrink-0 items-center justify-center gap-0 rounded-2xl px-1 text-[15px] font-semibold text-aura-muted transition-colors hover:bg-aura-red/10 hover:text-aura-red disabled:cursor-wait disabled:opacity-60 md:rounded-xl xl:justify-start xl:gap-3 xl:rounded-2xl xl:px-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/60 ring-1 ring-white/70 transition-colors group-hover:bg-aura-red/10 group-hover:ring-aura-red/15">
-              <LogOut aria-hidden="true" className="size-4" />
+              {keluarMemuat ? (
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              ) : (
+                <LogOut aria-hidden="true" className="size-4" />
+              )}
             </span>
             <span className="sr-only xl:not-sr-only">Keluar</span>
           </button>

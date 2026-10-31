@@ -1,8 +1,20 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, Presentation, type LucideIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  FileText,
+  Headphones,
+  Loader2,
+  Pencil,
+  Presentation,
+  type LucideIcon,
+} from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
+import { LatihanInteraktif } from "@/components/LatihanInteraktif";
+import { TombolDengarkan } from "@/components/TombolDengarkan";
 import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, IsiMateri } from "@/lib/tipe";
 
@@ -13,12 +25,15 @@ type TabMateriSiswaProps = {
 
 const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
   { format: "ppt", label: "PPT", ikon: Presentation },
+  { format: "audio", label: "Audio", ikon: Headphones },
+  { format: "bacaan", label: "Bacaan", ikon: FileText },
+  { format: "latihan", label: "Latihan", ikon: Pencil },
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
 export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
   const idDasar = useId();
-  const [aktif, setAktif] = useState<Format>("ppt");
+  const [aktif, setAktif] = useState<Format>(formatAwal ?? "ppt");
   const tombolTab = useRef<(HTMLButtonElement | null)[]>([]);
 
   function tanganiTombol(e: KeyboardEvent, indeks: number) {
@@ -35,46 +50,64 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {TAB.length > 1 && (
-        <div role="tablist" aria-label="Bentuk materi" className="kaca grid grid-cols-4 gap-1 p-1">
-          {TAB.map(({ format, label, ikon: Ikon }, i) => {
-            const terpilih = aktif === format;
-            return (
-              <button
-                key={format}
-                ref={(el) => {
-                  tombolTab.current[i] = el;
-                }}
-                id={`${idDasar}-tab-${format}`}
-                type="button"
-                role="tab"
-                aria-selected={terpilih}
-                aria-controls={`${idDasar}-panel-${format}`}
-                tabIndex={terpilih ? 0 : -1}
-                onClick={() => setAktif(format)}
-                onKeyDown={(e) => tanganiTombol(e, i)}
-                className={`flex min-h-13 flex-col items-center justify-center gap-1 rounded-kecil text-[13px] leading-normal font-semibold transition-colors ${
-                  terpilih ? "bg-primer text-white" : "text-tinta hover:bg-primer-lembut"
-                }`}
-              >
-                <Ikon aria-hidden="true" className="size-5" />
-                {label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <div
-        id={`${idDasar}-panel-ppt`}
-        role="tabpanel"
-        aria-labelledby={`${idDasar}-tab-ppt`}
-        tabIndex={0}
-      >
-        <KartuKaca className="flex flex-col gap-4 p-6">
-          <PenampilSlide isi={isi} />
-        </KartuKaca>
+      <div role="tablist" aria-label="Bentuk materi" className="kaca grid grid-cols-4 gap-1 p-1">
+        {TAB.map(({ format, label, ikon: Ikon }, i) => {
+          const terpilih = aktif === format;
+          return (
+            <button
+              key={format}
+              ref={(el) => {
+                tombolTab.current[i] = el;
+              }}
+              id={`${idDasar}-tab-${format}`}
+              type="button"
+              role="tab"
+              aria-selected={terpilih}
+              aria-controls={`${idDasar}-panel-${format}`}
+              tabIndex={terpilih ? 0 : -1}
+              onClick={() => setAktif(format)}
+              onKeyDown={(e) => tanganiTombol(e, i)}
+              className={`flex min-h-13 flex-col items-center justify-center gap-1 rounded-kecil text-[13px] leading-normal font-semibold transition-colors ${
+                terpilih ? "bg-primer text-white" : "text-tinta hover:bg-primer-lembut"
+              }`}
+            >
+              <Ikon aria-hidden="true" className="size-5" />
+              {label}
+            </button>
+          );
+        })}
       </div>
+
+      {TAB.map(({ format }) => (
+        <div
+          key={format}
+          id={`${idDasar}-panel-${format}`}
+          role="tabpanel"
+          aria-labelledby={`${idDasar}-tab-${format}`}
+          hidden={aktif !== format}
+          tabIndex={0}
+        >
+          {aktif === format && (
+            <KartuKaca className="flex flex-col gap-4 p-6">
+              {format === "ppt" && <PenampilSlide isi={isi} />}
+              {format === "audio" && (
+                <>
+                  <h2 className="text-xl leading-snug font-semibold">Dengarkan penjelasan</h2>
+                  <TombolDengarkan teks={isi.naskah_audio} />
+                  <p className="whitespace-pre-line">{isi.naskah_audio}</p>
+                </>
+              )}
+              {format === "bacaan" && (
+                <>
+                  <h2 className="text-xl leading-snug font-semibold">{isi.judul}</h2>
+                  <p className="whitespace-pre-line">{isi.ringkasan}</p>
+                </>
+              )}
+              {format === "latihan" && <LatihanInteraktif latihan={isi.latihan} />}
+            </KartuKaca>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -144,9 +177,14 @@ function PenampilSlide({ isi }: { isi: IsiMateri }) {
         type="button"
         onClick={unduh}
         disabled={mengunduh}
+        aria-busy={mengunduh || undefined}
         className="inline-flex min-h-12 items-center gap-2 self-start font-semibold text-primer hover:underline disabled:opacity-60"
       >
-        <Download aria-hidden="true" className="size-5" />
+        {mengunduh ? (
+          <Loader2 aria-hidden="true" className="size-5 animate-spin" />
+        ) : (
+          <Download aria-hidden="true" className="size-5" />
+        )}
         {mengunduh ? "Menyiapkan file…" : "Unduh PPT"}
       </button>
       {galat && (
