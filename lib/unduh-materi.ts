@@ -69,6 +69,10 @@ export async function unduhDocx(isi: IsiMateri) {
     p(isi.ringkasan),
     h('Naskah audio'),
     p(isi.naskah_audio),
+    h('Ide video'),
+    new Paragraph({ children: [new TextRun({ text: isi.ide_video.judul, bold: true })], spacing: { after: 120 } }),
+    p(isi.ide_video.deskripsi),
+    p(`Kata kunci pencarian: ${isi.ide_video.kata_kunci_pencarian}`),
     h('Kerangka slide PPT'),
     ...isi.slide_ppt.slide.flatMap((slide, i) => [
       new Paragraph({ children: [new TextRun({ text: `Slide ${i + 1}: ${slide.judul}`, bold: true })], spacing: { before: 120, after: 60 } }),

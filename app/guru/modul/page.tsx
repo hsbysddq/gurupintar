@@ -12,6 +12,7 @@ import {
   Headphones,
   Loader2,
   Pencil,
+  PlayCircle,
   Presentation,
   RefreshCw,
   Save,
@@ -41,9 +42,10 @@ type Keadaan =
 type Sumber = "teks" | "pdf";
 
 const BENTUK: { label: string; ikon: LucideIcon }[] = [
-  { label: "PPT", ikon: Presentation },
+  { label: "Video", ikon: PlayCircle },
   { label: "Audio", ikon: Headphones },
   { label: "Bacaan", ikon: FileText },
+  { label: "PPT", ikon: Presentation },
   { label: "Latihan", ikon: Pencil },
 ];
 
@@ -257,7 +259,7 @@ function IsiHalamanUbahModul() {
               Ubah modul
             </h1>
             <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-              Tempelkan teks atau unggah PDF modul, ubah menjadi PPT, audio, bacaan, dan latihan, lalu simpan
+              Tempelkan teks atau unggah PDF modul, ubah menjadi video, audio, bacaan, PPT, dan latihan, lalu simpan
               hasilnya ke materi kelas.
             </p>
             <div className="mt-1 flex flex-wrap gap-2">

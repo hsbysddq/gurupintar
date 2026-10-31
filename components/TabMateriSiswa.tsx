@@ -1,17 +1,7 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileText,
-  Headphones,
-  Loader2,
-  Pencil,
-  Presentation,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, Pencil, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
 import { LatihanInteraktif } from "@/components/LatihanInteraktif";
 import { TombolDengarkan } from "@/components/TombolDengarkan";
@@ -24,16 +14,17 @@ type TabMateriSiswaProps = {
 };
 
 const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
-  { format: "ppt", label: "PPT", ikon: Presentation },
+  { format: "video", label: "Video", ikon: PlayCircle },
   { format: "audio", label: "Audio", ikon: Headphones },
   { format: "bacaan", label: "Bacaan", ikon: FileText },
+  { format: "ppt", label: "PPT", ikon: Presentation },
   { format: "latihan", label: "Latihan", ikon: Pencil },
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
 export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
   const idDasar = useId();
-  const [aktif, setAktif] = useState<Format>(formatAwal ?? "ppt");
+  const [aktif, setAktif] = useState<Format>(formatAwal ?? "bacaan");
   const tombolTab = useRef<(HTMLButtonElement | null)[]>([]);
 
   function tanganiTombol(e: KeyboardEvent, indeks: number) {
@@ -48,9 +39,11 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
     tombolTab.current[tujuan]?.focus();
   }
 
+  const urlYoutube = `https://www.youtube.com/results?search_query=${encodeURIComponent(isi.ide_video.kata_kunci_pencarian)}`;
+
   return (
     <div className="flex flex-col gap-4">
-      <div role="tablist" aria-label="Bentuk materi" className="kaca grid grid-cols-4 gap-1 p-1">
+      <div role="tablist" aria-label="Bentuk materi" className="kaca grid grid-cols-5 gap-1 p-1">
         {TAB.map(({ format, label, ikon: Ikon }, i) => {
           const terpilih = aktif === format;
           return (
@@ -89,7 +82,21 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
         >
           {aktif === format && (
             <KartuKaca className="flex flex-col gap-4 p-6">
-              {format === "ppt" && <PenampilSlide isi={isi} />}
+              {format === "video" && (
+                <>
+                  <h2 className="text-xl leading-snug font-semibold">{isi.ide_video.judul}</h2>
+                  <p>{isi.ide_video.deskripsi}</p>
+                  <a
+                    href={urlYoutube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center gap-2 font-semibold text-primer hover:underline"
+                  >
+                    <ExternalLink aria-hidden="true" className="size-5" />
+                    Cari video di YouTube
+                  </a>
+                </>
+              )}
               {format === "audio" && (
                 <>
                   <h2 className="text-xl leading-snug font-semibold">Dengarkan penjelasan</h2>
@@ -103,6 +110,7 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
                   <p className="whitespace-pre-line">{isi.ringkasan}</p>
                 </>
               )}
+              {format === "ppt" && <PenampilSlide isi={isi} />}
               {format === "latihan" && <LatihanInteraktif latihan={isi.latihan} />}
             </KartuKaca>
           )}

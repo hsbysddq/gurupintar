@@ -9,6 +9,11 @@ function isiValid(): IsiMateri {
       'Pecahan senilai adalah pecahan yang tulisannya berbeda tetapi nilainya sama. Misalnya 1/2 pizza sama banyaknya dengan 2/4 pizza. Kalikan atau bagi pembilang dan penyebut dengan bilangan yang sama.',
     naskah_audio:
       'Halo! Satu per dua pizza sama banyaknya dengan dua per empat pizza. Kalikan angka atas dan bawah dengan bilangan yang sama, ya.',
+    ide_video: {
+      judul: 'Pecahan Senilai dengan Pizza',
+      deskripsi: 'Video pendek yang memotong pizza menjadi beberapa bagian sama besar.',
+      kata_kunci_pencarian: 'pecahan senilai pizza',
+    },
     slide_ppt: {
       judul: 'Pecahan Senilai dengan Pizza',
       slide: [
@@ -235,22 +240,29 @@ describe('data/materi-cadangan.json (architecture.md 9.5)', () => {
 });
 
 describe('lengkapiIsiMateri', () => {
-  const lama = () => {
-    const { slide_ppt: _s, ...sisa } = isiValid();
-    void _s;
-    return { ...sisa, ide_video: { judul: 'Video lama', deskripsi: 'x', kata_kunci_pencarian: 'y' } };
+  const tanpa = (kunci: 'slide_ppt' | 'ide_video') => {
+    const { [kunci]: _dibuang, ...sisa } = isiValid();
+    void _dibuang;
+    return sisa;
   };
 
-  it('materi yang sudah punya slide_ppt dikembalikan apa adanya', () => {
+  it('materi yang sudah lengkap dikembalikan apa adanya', () => {
     const isi = isiValid();
     expect(lengkapiIsiMateri(isi)).toBe(isi);
   });
 
-  it('materi lama mendapat slide_ppt yang valid dan ide_video dibuang', () => {
-    const hasil = lengkapiIsiMateri(lama());
-    expect('ide_video' in hasil).toBe(false);
+  it('materi lama tanpa slide_ppt mendapat slide yang valid dan ide_video tetap', () => {
+    const hasil = lengkapiIsiMateri(tanpa('slide_ppt'));
+    expect(hasil.ide_video).toEqual(isiValid().ide_video);
     expect(periksaIsiMateri(hasil).ok).toBe(true);
     expect(hasil.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('materi tanpa ide_video mendapat ide video dari judul dan ringkasan', () => {
+    const hasil = lengkapiIsiMateri(tanpa('ide_video'));
+    expect(hasil.slide_ppt).toEqual(isiValid().slide_ppt);
+    expect(hasil.ide_video.kata_kunci_pencarian).toBe(isiValid().judul);
+    expect(periksaIsiMateri(hasil).ok).toBe(true);
   });
 
   it('data yang bukan objek dikembalikan tanpa error', () => {
