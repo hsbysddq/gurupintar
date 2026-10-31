@@ -3,6 +3,11 @@
     "judul": "Mengenal Pecahan Senilai Langkah demi Langkah",
     "ringkasan": "Pecahan senilai adalah pecahan yang tulisannya berbeda, tetapi nilainya sama. Bayangkan satu pizza dipotong 2 bagian sama besar, lalu kamu ambil 1 potong. Itu 1/2 pizza. Sekarang pizza yang sama dipotong 4 bagian, lalu kamu ambil 2 potong. Itu 2/4 pizza. Banyaknya pizza yang kamu makan tetap sama, jadi 1/2 = 2/4.\n\nCara mencari pecahan senilai:\n1. Kalikan pembilang dan penyebut dengan bilangan yang sama. Contoh: 1/2, dikali 3 di atas dan di bawah, menjadi 3/6.\n2. Atau bagi pembilang dan penyebut dengan bilangan yang sama. Contoh: 6/8, dibagi 2 di atas dan di bawah, menjadi 3/4.\n\nHati-hati: menambah angka yang sama tidak menghasilkan pecahan senilai. Jika 1/2 ditambah 1 di atas dan di bawah, hasilnya 2/3, dan 2/3 lebih besar dari 1/2.",
     "naskah_audio": "Halo! Kita belajar pecahan senilai, ya. Bayangkan satu pizza dipotong dua, lalu kamu makan satu potong. Itu satu per dua pizza. Kalau pizza yang sama dipotong empat, lalu kamu makan dua potong, itu dua per empat pizza. Ternyata banyaknya sama! Jadi satu per dua sama dengan dua per empat. Rahasianya: kalikan atau bagi angka atas dan angka bawah dengan bilangan yang sama. Jangan ditambah, ya, karena hasilnya akan berbeda.",
+    "ide_video": {
+      "judul": "Pecahan Senilai dengan Potongan Pizza",
+      "deskripsi": "Video pendek yang menunjukkan satu pizza dipotong menjadi 2, 4, dan 8 bagian untuk memperlihatkan bahwa 1/2, 2/4, dan 4/8 bernilai sama.",
+      "kata_kunci_pencarian": "pecahan senilai kelas 7 dengan gambar"
+    },
     "slide_ppt": {
       "judul": "Pecahan Senilai Langkah demi Langkah",
       "slide": [
@@ -80,6 +85,11 @@
     "judul": "Meluruskan Cara Mencari Pecahan Senilai",
     "ringkasan": "Ada tiga kesalahan yang sering terjadi saat mencari pecahan senilai.\n\n1. Menambah angka yang sama. Contoh: 2/5 menjadi 3/6 karena masing-masing ditambah 1. Ini keliru, karena 2/5 tidak sama dengan 3/6. Pecahan senilai hanya diperoleh dengan mengalikan atau membagi pembilang dan penyebut dengan bilangan yang sama.\n\n2. Hanya mengubah satu bagian. Contoh: 2/3 menjadi 2/6 karena hanya penyebut yang dikali 2. Ini keliru. Jika penyebut dikali 2, pembilang juga harus dikali 2, sehingga hasilnya 4/6.\n\n3. Berhenti sebelum paling sederhana. Contoh: 12/18 dibagi 2 menjadi 6/9. Hasil ini senilai, tetapi masih bisa dibagi 3. Bentuk paling sederhananya 2/3. Cara cepatnya, bagi dengan FPB pembilang dan penyebut.",
     "naskah_audio": "Yuk, kita luruskan tiga kesalahan yang sering terjadi. Pertama, jangan menambah angka yang sama. Dua per lima tidak sama dengan tiga per enam. Kedua, jangan hanya mengubah angka bawah. Kalau angka bawah dikali dua, angka atas juga dikali dua. Ketiga, saat menyederhanakan, jangan berhenti terlalu cepat. Dua belas per delapan belas bisa dibagi enam sekaligus, hasilnya dua per tiga. Kamu pasti bisa!",
+    "ide_video": {
+      "judul": "Kesalahan Umum Pecahan Senilai",
+      "deskripsi": "Video yang membahas contoh cara yang keliru dan cara yang benar dalam mencari pecahan senilai serta menyederhanakan pecahan dengan FPB.",
+      "kata_kunci_pencarian": "menyederhanakan pecahan dengan FPB"
+    },
     "slide_ppt": {
       "judul": "Meluruskan Pecahan Senilai",
       "slide": [
@@ -157,6 +167,11 @@
     "judul": "Tantangan Pecahan Senilai dalam Kehidupan Sehari-hari",
     "ringkasan": "Pecahan senilai sangat berguna untuk membandingkan dua keadaan yang ukurannya berbeda. Contoh: Budi menjawab benar 15 dari 20 soal, sedangkan Tiara menjawab benar 18 dari 24 soal. Siapa yang lebih baik? Sederhanakan keduanya. 15/20 dibagi 5 menjadi 3/4, dan 18/24 dibagi 6 juga menjadi 3/4. Ternyata hasil mereka sama baiknya.\n\nPecahan senilai juga membantu mencari bilangan yang hilang. Jika 3/n = 12/20, sederhanakan dulu 12/20 menjadi 3/5. Karena pembilangnya sama-sama 3, maka n = 5.\n\nTantangan untukmu: saat membandingkan, ubah pecahan ke bentuk paling sederhana atau ke penyebut yang sama, lalu bandingkan.",
     "naskah_audio": "Siap untuk tantangan? Budi menjawab benar lima belas dari dua puluh soal. Tiara menjawab benar delapan belas dari dua puluh empat soal. Siapa yang lebih hebat? Coba sederhanakan. Lima belas per dua puluh menjadi tiga per empat. Delapan belas per dua puluh empat juga menjadi tiga per empat. Hasilnya sama! Jadi, ketika ukurannya berbeda, ubah dulu ke bentuk paling sederhana sebelum membandingkan.",
+    "ide_video": {
+      "judul": "Membandingkan Pecahan dalam Soal Cerita",
+      "deskripsi": "Video tentang penerapan pecahan senilai untuk membandingkan nilai ulangan, bagian buku yang dibaca, dan mencari bilangan yang hilang.",
+      "kata_kunci_pencarian": "soal cerita pecahan senilai SMP"
+    },
     "slide_ppt": {
       "judul": "Tantangan Pecahan Senilai",
       "slide": [

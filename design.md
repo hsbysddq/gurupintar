@@ -1,4 +1,4 @@
-# design.md: Guru Pintarku
+# design.md: Guru Pintar
 
 | Atribut | Isi |
 | --- | --- |
@@ -246,7 +246,7 @@ Peta kelas adalah **satu kartu besar** (bukan tiga kartu terpisah) agar terbaca 
 ```text
 /siswa              /siswa/format        /siswa/kuis          /siswa/selesai       /siswa/materi
 ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│ Guru Pintarku   │   │ Kamu lebih    │   │ Soal 2 dari 5 │   │ Jawabanmu     │   │ Materi untukmu│
+│ Guru Pintar   │   │ Kamu lebih    │   │ Soal 2 dari 5 │   │ Jawabanmu     │   │ Materi untukmu│
 │ Masukkan kode │   │ suka belajar  │   │ ▓▓▓▓░░░░░░    │   │ sudah terkirim│   │ Pecahan       │
 │ [ A7K2P     ] │   │ lewat apa?    │   │ Teks soal     │   │ Tunggu gurumu │   │ Senilai       │
 │ [ Lanjut    ] │   │ [PPT][Audio]│   │ [A. 3/4     ] │   │ membagikan    │   │ PPT|Audio|  │
@@ -282,7 +282,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 │          │ └────────────────────────────────────────────────────┘ │
 │          │ Pratinjau                                              │
 │          │ Hasil ini tidak disimpan. Periksa isinya sebelum …     │
-│          │ TabMateriSiswa: PPT | Audio | Bacaan | Latihan       │
+│          │ TabMateriSiswa: Video | Audio | ... │       
 └──────────┴────────────────────────────────────────────────────────┘
 ```
 
@@ -324,7 +324,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 
 ```text
 ┌───────────────────────────────────────────────────────────────────┐
-│ ( Guru Pintarku       Masalah  Cara kerja     Gabung kuis           │
+│ ( Guru Pintar       Masalah  Cara kerja     Gabung kuis           │
 │                                        [Coba sebagai guru] )      │
 │ (Untuk guru SMP · Kurikulum Merdeka)                              │
 │ Tahu siapa yang tertinggal          ┌─────────────────────┐       │
@@ -339,7 +339,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 │          └────────────┘├ Ubah Modul ┐┌ Buat soal ┐                │
 │ #prinsip   4 butir dalam satu kartu, 2 kolom                      │
 │ ▓ Coba satu siklus dalam lima menit          [ Coba sebagai guru ]│
-│ Prototipe hackathon. Guru Pintarku.                 Kembali ke atas │
+│ Prototipe hackathon. Guru Pintar.                 Kembali ke atas │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -350,7 +350,7 @@ Siswa **tidak pernah** melihat kata "Sudah Paham", "Setengah Paham", "Belum Paha
 - **Pengecualian tipografi (hanya di landing page):** H1 36px di HP dan 56px/1.05 di ≥1024px, `font-extrabold`, `tracking-tight`. Judul bagian 28px (32px di ≥768px). Angka di bagian masalah 40px (48px di ≥768px).
 - **#masalah:** tiga kartu kaca berisi angka besar dan satuan (40 siswa, 80 menit, 2 menit per anak) dengan keterangan singkat, lalu satu kalimat tentang zona buta sebelum ulangan.
 - **#cara-kerja:** tiga langkah dengan lingkaran nomor `bg-primer` teks putih. Di ≥768px ada garis penghubung `bg-primer/20` di belakang lingkaran (`aria-hidden`); di HP langkah bertumpuk tanpa garis.
-- **#fitur (bento):** ≥1024px empat kolom: Peta kelas 2×2, Materi AI 4 bentuk 2×1, Soal paling banyak salah 1×1, Perlu Pendampingan 1×1, Ubah Modul 2×1, Buat soal sendiri 2×1. 768–1023px dua kolom (Peta kelas dan Materi AI selebar penuh). Di bawahnya satu kolom. Kotak peta kelas berisi bilah bertumpuk 16/12/10 (`grow-[n]`, `role="img"` dengan `aria-label`); kotak materi AI berisi empat ubin PPT, Audio, Bacaan, Latihan.
+- **#fitur (bento):** ≥1024px empat kolom: Peta kelas 2×2, Materi AI 4 bentuk 2×1, Soal paling banyak salah 1×1, Perlu Pendampingan 1×1, Ubah Modul 2×1, Buat soal sendiri 2×1. 768–1023px dua kolom (Peta kelas dan Materi AI selebar penuh). Di bawahnya satu kolom. Kotak peta kelas berisi bilah bertumpuk 16/12/10 (`grow-[n]`, `role="img"` dengan `aria-label`); kotak materi AI berisi lima ubin Video, Audio, Bacaan, PPT, Latihan.
 - **#prinsip:** empat butir dalam satu kartu kaca, dua kolom di ≥768px.
 - **Penutup:** pita `bg-primer text-white rounded-kartu` dengan `data-latar="primer"` (garis fokus menjadi putih, bagian 2.4), tagline, satu kalimat, dan `Tombol varian="terang"`. Footer: teks kecil dan tautan "Kembali ke atas" (`#atas`).
 - **Kontras:** teks kecil di atas `primer-lembut` memakai `primer-hover` (±5.3:1), bukan `primer` (±3.9:1). Putih di atas `primer` dan `primer` di atas putih ±4.5:1. "hari ini" berwarna `primer` lolos karena teks besar (≥3:1). Warna `ai` hanya untuk ikon, tidak untuk teks kecil.
@@ -430,7 +430,7 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 - **Perilaku:** tombol "Simpan perubahan" (varian sekunder, karena tombol utama halaman adalah "Bagikan ke Siswa"); error `409` tampil sebagai pesan di dalam kartu. Jika `status = 'dibagikan'`, mode edit tidak tersedia dan tampil "Sudah dibagikan".
 
 ### 4.14 `TabMateriSiswa`, `TombolDengarkan`, `LatihanInteraktif`
-- **`TabMateriSiswa` props:** `{ isi: IsiMateri; formatAwal: Format | null }` → tab PPT, Audio, Bacaan, Latihan (`role="tablist"`, navigasi panah kiri/kanan); tab awal = `formatAwal` atau Bacaan.
+- **`TabMateriSiswa` props:** `{ isi: IsiMateri; formatAwal: Format | null }` → tab Video, Audio, Bacaan, PPT, Latihan (`role="tablist"`, navigasi panah kiri/kanan); tab awal = `formatAwal` atau Bacaan.
 - **`TombolDengarkan` props:** `{ teks: string }` → memakai `window.speechSynthesis` dengan `lang = 'id-ID'`; tombol berubah "Berhenti" saat berbicara; disembunyikan jika `speechSynthesis` tidak ada.
 - **`LatihanInteraktif` props:** `{ latihan: IsiMateri['latihan'] }` → setelah memilih, tampil "Benar" (ikon centang, warna `sudah-teks`) atau "Belum tepat" (warna `belum-teks`) + pembahasan; tombol "Coba soal berikutnya".
 - Tab PPT: judul presentasi, satu slide tampil sekaligus (judul + poin) dengan tombol Sebelumnya/Berikutnya dan penanda "Slide n dari N", serta tombol "Unduh PPT" (PPTX dibuat di browser).
@@ -453,7 +453,7 @@ Setiap komponen: satu file `components/NamaKomponen.tsx`, named export. Tabel "J
 ### 4.18 `NavbarLanding`
 - **Tujuan:** navigasi landing page. Server Component tanpa JavaScript; hanya dipakai di `/`.
 - **Tampilan:** `<header>` `sticky top-3 z-20` dengan jarak tepi `mx-3` (`mx-6` di ≥768px); `<nav aria-label="Navigasi utama">` berbentuk kapsul `kaca rounded-full`, tinggi 64px, lebar maksimal 1200px, padding `px-4` (16px) yang sama di kiri dan kanan: ikon logo (tanpa padding sendiri) dan tepi tombol sekunder sama jauhnya dari tepi kapsul.
-- **Isi:** kiri ikon `GraduationCap` + "Guru Pintarku" ke `/` (`aria-label` "Guru Pintarku, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`, dengan `gap-2`: teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), setara dengan padding tepi kapsul.
+- **Isi:** kiri ikon `GraduationCap` + "Guru Pintar" ke `/` (`aria-label` "Guru Pintar, ke beranda"; teks menjadi `sr-only` di bawah 640px). Tengah hanya dua tautan anchor, Masalah dan Cara kerja, ke `#masalah` dan `#cara-kerja` (tinggi 48px), disembunyikan di bawah 768px. Kanan `Tombol varian="teks"` "Gabung kuis" ke `/siswa` (disembunyikan di bawah 640px) dan `Tombol varian="sekunder"` "Coba sebagai guru" ke `/guru`, dengan `gap-2`: teks "Gabung kuis" berjarak 16px dari tombol (padding tombol teks 8px + gap 8px), setara dengan padding tepi kapsul.
 - **Jangan:** tombol varian `utama`, menu hamburger, atau skrip.
 
 ### 4.19 `PratinjauDasbor`
