@@ -122,7 +122,7 @@ export function FormKuisBanyak({ kelas }: { kelas: KelasRingkas[] }) {
                 value={topikId}
                 disabled={!daftarTopik || memuat}
                 onChange={(e) => setTopikId(e.target.value)}
-                className="h-12 min-w-[220px] rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta disabled:opacity-60"
+                className="h-12 w-full min-w-0 rounded-kecil border border-tinta/15 bg-white/80 px-3 text-base text-tinta disabled:opacity-60 sm:w-auto sm:min-w-[220px] sm:max-w-xs"
               >
                 {daftarTopik ? (
                   daftarTopik.map((t) => (

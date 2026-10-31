@@ -36,7 +36,7 @@ export function TabKelas({ kelasId }: { kelasId: string }) {
 
   return (
     <nav aria-label="Bagian kelas" className="aura-glass rounded-[24px] p-1 md:rounded-full">
-      <ul className="flex flex-wrap gap-1 md:flex-nowrap md:overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:flex md:flex-nowrap md:overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tab.map(({ href, label, aktif }) => (
           <li key={href} className="shrink-0">
             <Link

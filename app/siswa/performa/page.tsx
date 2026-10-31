@@ -44,7 +44,7 @@ export default function HalamanPerforma() {
       <Tombol varian="utama" ukuran="besar" lebarPenuh href="/siswa/gabung">
         Masukkan kode kuis
       </Tombol>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Tombol varian="sekunder" ukuran="besar" lebarPenuh href={hrefMapel}>
           Ke mata pelajaran
         </Tombol>

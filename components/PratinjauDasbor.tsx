@@ -135,7 +135,7 @@ export function PratinjauDasbor() {
             </ul>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
             <div className="rounded-2xl border border-white/60 bg-white/45 p-3">
               <p className="font-display text-[10px] leading-[15px] font-bold uppercase tracking-[0.04em] text-aura-muted">
                 Modul bisa di-convert menjadi 4 bentuk

@@ -158,10 +158,29 @@ export default function HalamanKuis() {
           >
             {labelUtama}
           </Tombol>
-          {indeks > 0 && (
-            <Tombol varian="sekunder" ukuran="besar" lebarPenuh disabled={mengirim} onClick={() => setIndeks((i) => i - 1)}>
+          <div className="sm:hidden">
+            <Tombol
+              varian="sekunder"
+              ukuran="besar"
+              lebarPenuh
+              disabled={indeks === 0 || mengirim}
+              onClick={() => setIndeks((i) => i - 1)}
+            >
               Sebelumnya
             </Tombol>
+          </div>
+          {indeks > 0 && (
+            <div className="hidden sm:block">
+              <Tombol
+                varian="sekunder"
+                ukuran="besar"
+                lebarPenuh
+                disabled={mengirim}
+                onClick={() => setIndeks((i) => i - 1)}
+              >
+                Sebelumnya
+              </Tombol>
+            </div>
           )}
         </>
       }

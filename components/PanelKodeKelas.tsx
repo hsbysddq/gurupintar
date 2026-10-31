@@ -152,7 +152,7 @@ export function PanelKodeKelas({
       </div>
 
       <div className="relative mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <Link href={urlHasil} className="aura-btn aura-btn-primary h-12 px-6 text-[15px]">
+        <Link href={urlHasil} className="aura-btn aura-btn-primary h-12 w-full px-6 text-[15px] sm:w-auto">
           <ChartColumn aria-hidden="true" className="size-4" />
           Lihat hasil
         </Link>
@@ -160,7 +160,7 @@ export function PanelKodeKelas({
           type="button"
           onClick={onTutup}
           disabled={sedangMenutup}
-          className="aura-btn aura-btn-danger h-12 px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60"
+          className="aura-btn aura-btn-danger h-12 w-full px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {sedangMenutup ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
           Tutup kuis

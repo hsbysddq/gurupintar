@@ -149,28 +149,30 @@ function PenampilSlide({ isi }: { isi: IsiMateri }) {
         </ul>
       </section>
 
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setIndeks((i) => Math.max(0, i - 1))}
-          disabled={indeks === 0}
-          className="inline-flex min-h-12 items-center gap-1 rounded-tombol px-3 font-semibold text-primer hover:bg-primer-lembut disabled:opacity-40"
-        >
-          <ChevronLeft aria-hidden="true" className="size-5" />
-          Sebelumnya
-        </button>
-        <p aria-live="polite" className="text-[13px] leading-normal font-medium text-tinta-lembut">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p aria-live="polite" className="order-first text-center text-[13px] leading-normal font-medium text-tinta-lembut sm:order-none">
           Slide {indeks + 1} dari {slide.length}
         </p>
-        <button
-          type="button"
-          onClick={() => setIndeks((i) => Math.min(slide.length - 1, i + 1))}
-          disabled={indeks === slide.length - 1}
-          className="inline-flex min-h-12 items-center gap-1 rounded-tombol px-3 font-semibold text-primer hover:bg-primer-lembut disabled:opacity-40"
-        >
-          Berikutnya
-          <ChevronRight aria-hidden="true" className="size-5" />
-        </button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
+          <button
+            type="button"
+            onClick={() => setIndeks((i) => Math.max(0, i - 1))}
+            disabled={indeks === 0}
+            className="inline-flex min-h-12 items-center justify-center gap-1 rounded-tombol px-3 font-semibold text-primer hover:bg-primer-lembut disabled:opacity-40"
+          >
+            <ChevronLeft aria-hidden="true" className="size-5" />
+            Sebelumnya
+          </button>
+          <button
+            type="button"
+            onClick={() => setIndeks((i) => Math.min(slide.length - 1, i + 1))}
+            disabled={indeks === slide.length - 1}
+            className="inline-flex min-h-12 items-center justify-center gap-1 rounded-tombol px-3 font-semibold text-primer hover:bg-primer-lembut disabled:opacity-40"
+          >
+            Berikutnya
+            <ChevronRight aria-hidden="true" className="size-5" />
+          </button>
+        </div>
       </div>
 
       <button

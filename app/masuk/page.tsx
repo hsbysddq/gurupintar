@@ -73,7 +73,7 @@ function FormMasuk() {
   }
 
   return (
-    <div className="relative isolate flex min-h-screen flex-1 flex-col overflow-x-clip bg-aura-canvas font-body text-aura-ink">
+    <div className="relative isolate flex min-h-[100dvh] flex-1 flex-col overflow-x-clip bg-aura-canvas font-body text-aura-ink">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-32 -top-40 size-[520px] rounded-full bg-aura-primary/10 blur-[120px]" />
         <div className="absolute -right-32 top-1/4 size-[460px] rounded-full bg-aura-violet/10 blur-[120px]" />
@@ -354,7 +354,7 @@ function FormMasuk() {
 
 function FallbackMasuk() {
   return (
-    <div className="flex min-h-screen items-center justify-center gap-3 bg-aura-canvas font-body text-aura-muted">
+    <div className="flex min-h-[100dvh] items-center justify-center gap-3 bg-aura-canvas font-body text-aura-muted">
       <Loader2 aria-hidden="true" className="size-5 animate-spin text-aura-primary" />
       Memuat halaman masuk…
     </div>

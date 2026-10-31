@@ -54,7 +54,7 @@ function KartuFeed({
 }) {
   return (
     <KartuKaca as="article" className="overflow-hidden">
-      <div className="flex items-start gap-4 p-4 md:p-5">
+      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:gap-4 md:p-5">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primer-lembut text-primer-hover">
           <Ikon aria-hidden="true" className="size-6" />
         </span>
@@ -232,7 +232,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
   const warna = warnaMapel(kelas.id);
 
   return (
-    <div className="flex flex-col gap-4 pb-24 md:pb-0">
+    <div className="flex flex-col gap-4 pb-28 md:pb-0">
       <div>
         <Link
           href="/siswa/kelas"
@@ -247,7 +247,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
         aria-labelledby="judul-mapel"
         className={`relative min-h-40 overflow-hidden rounded-[28px] bg-gradient-to-br ${warna.banner} p-6 text-white md:min-h-52 md:p-8`}
       >
-        <div className="relative z-10 flex max-w-[75%] flex-col gap-1.5">
+        <div className="relative z-10 flex max-w-none flex-col gap-1.5 md:max-w-[75%]">
           <h1
             id="judul-mapel"
             className="font-display text-[28px] leading-tight font-extrabold tracking-tight break-words md:text-[40px]"
@@ -271,7 +271,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
           className="flex min-h-14 items-center justify-center gap-2 rounded-full bg-primer-lembut px-6 text-[15px] font-semibold text-primer-hover hover:bg-primer/20"
         >
           <PlayCircle aria-hidden="true" className="size-5 shrink-0" />
-          <span className="truncate">Kerjakan kuis aktif: {detail.kuisAktif.judul}</span>
+          <span className="min-w-0 truncate">Kerjakan kuis aktif: {detail.kuisAktif.judul}</span>
         </Link>
       )}
 
@@ -303,7 +303,8 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
                 >
                   <IkonTab aria-hidden="true" className="size-6 md:size-5" />
                 </span>
-                <span>{label}</span>
+                <span className="md:hidden">{label.split(' ')[0]}</span>
+                <span className="hidden md:inline">{label}</span>
               </button>
             );
           })}

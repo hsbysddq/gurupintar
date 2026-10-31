@@ -146,7 +146,7 @@ export default async function HalamanDaftarKelas({
             </div>
           </div>
 
-          <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <ul className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
             {daftar.map((kelas, indeks) => {
               const progres =
                 kelas.kuisAktif && kelas.jumlahSiswa > 0
@@ -183,7 +183,7 @@ export default async function HalamanDaftarKelas({
                         </div>
                       )}
 
-                      <div className="relative flex items-start justify-between gap-3">
+                      <div className="relative flex flex-wrap items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-3">
                           <span
                             className="flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ring-white/70"

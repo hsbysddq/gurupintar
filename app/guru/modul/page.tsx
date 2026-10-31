@@ -591,7 +591,7 @@ function IsiHalamanUbahModul() {
               aria-hidden="true"
               className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-aura-emerald/10 blur-3xl"
             />
-            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex max-w-xl flex-col gap-1">
                 <span className="aura-eyebrow self-start">
                   <CircleCheck aria-hidden="true" className="size-3.5" />
@@ -607,7 +607,7 @@ function IsiHalamanUbahModul() {
                   Periksa hasilnya, lalu simpan ke materi kelas agar mudah dibuka lagi.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 sm:shrink-0">
+              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:shrink-0">
                 <button
                   type="button"
                   disabled={mengunduh === "pptx"}

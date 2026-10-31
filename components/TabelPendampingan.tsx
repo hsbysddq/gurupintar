@@ -133,7 +133,7 @@ export function TabelPendampingan({
 
   return (
     <div className="aura-glass overflow-hidden rounded-[24px]">
-      <ul className="divide-y divide-white/60 md:hidden">
+      <ul className="divide-y divide-white/60 lg:hidden">
         {data.map((siswa) => (
           <li key={siswa.siswaId} className="flex flex-col gap-3 p-4">
             <div className="flex items-start justify-between gap-3">
@@ -156,8 +156,8 @@ export function TabelPendampingan({
         ))}
       </ul>
 
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[720px] border-collapse text-left">
+      <div className="hidden overflow-x-auto lg:block">
+        <table className="w-full min-w-[560px] border-collapse text-left">
           <caption className="sr-only">Daftar siswa, nilai kuis, kategori pemahaman, dan tindakan</caption>
           <thead>
             <tr className="border-b border-white/60 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">

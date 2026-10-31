@@ -26,9 +26,9 @@ export function KepalaKelas({ kelas }: { kelas: KelasRingkas }) {
             <h1 className="mt-3 break-words font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
               {kelas.mapel}
             </h1>
-            <p className="mt-1 flex items-center gap-2 font-body text-[15px] leading-[24px] text-aura-muted">
+            <p className="mt-1 flex min-w-0 items-center gap-2 font-body text-[15px] leading-[24px] text-aura-muted">
               <School aria-hidden="true" className="size-4 shrink-0 text-aura-primary" />
-              {kelas.nama}
+              <span className="min-w-0 break-words">{kelas.nama}</span>
             </p>
           </div>
 

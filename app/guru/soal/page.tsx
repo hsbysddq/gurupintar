@@ -632,7 +632,8 @@ export default function HalamanBuatSoal() {
             return (
               <article key={i} className="aura-glass rounded-[24px] p-5 sm:p-6">
                 <fieldset className="flex flex-col gap-5">
-                  <legend className="flex w-full flex-wrap items-center justify-between gap-3">
+                  <legend className="sr-only">Soal {i + 1}</legend>
+                  <div className="flex w-full flex-wrap items-center justify-between gap-3">
                     <span className="flex items-center gap-3">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aura-primary to-aura-primary-deep font-display text-[13px] font-extrabold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]">
                         {i + 1}
@@ -656,7 +657,7 @@ export default function HalamanBuatSoal() {
                         Hapus
                       </button>
                     )}
-                  </legend>
+                  </div>
 
                   <Kolom id={idKolom(jalur("teks"))} label="Teks soal" galat={galat[jalur("teks")]}>
                     <textarea

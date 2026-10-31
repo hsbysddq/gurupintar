@@ -42,7 +42,7 @@ export function Tombol({
     "inline-flex items-center justify-center gap-2 font-semibold transition-colors",
     "disabled:cursor-not-allowed disabled:opacity-60",
     KELAS_VARIAN[varian],
-    ukuran === "besar" ? "h-13" : "h-12",
+    ukuran === "besar" ? "min-h-13" : "min-h-12",
     lebarPenuh ? "w-full" : "",
   ].join(" ");
 

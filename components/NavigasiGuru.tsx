@@ -107,6 +107,36 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
         </div>
       )}
 
+      {kelas.length > 0 && (
+        <div className="relative hidden md:block xl:hidden">
+          <label htmlFor="pilih-kelas-rail" className="sr-only">
+            Kelas aktif
+          </label>
+          <div
+            title={kelasTerpilih?.nama ?? 'Pilih kelas'}
+            className="relative flex h-12 items-center justify-center rounded-xl border border-aura-primary/15 bg-gradient-to-br from-aura-primary/10 to-aura-violet/10 text-aura-primary shadow-sm"
+          >
+            <School aria-hidden="true" className="size-5" />
+            {kelasTerpilih && (
+              <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 rounded-full bg-aura-primary ring-2 ring-white" />
+            )}
+            <select
+              id="pilih-kelas-rail"
+              value={kelasTerpilih ? kelasAktif : ''}
+              onChange={(e) => pilihKelas(e.target.value)}
+              className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+            >
+              <option value="">Pilih kelas</option>
+              {kelas.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <ul className="flex w-full flex-row justify-around gap-1 md:w-full md:flex-col md:justify-start md:gap-1.5">
         {menu.map(({ href, label, ikon: Ikon, aktif }) => {
           const sedangAktif = aktif(pathname);

@@ -229,11 +229,11 @@ export default function Beranda() {
 
       <NavbarLanding />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-16 px-4 pt-10 pb-20 text-[15px] leading-relaxed sm:px-5 md:gap-24 md:px-8 md:pt-16">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-16 px-4 pt-10 pb-20 text-[15px] leading-relaxed sm:px-5 md:gap-16 md:px-8 md:pt-16 lg:gap-24">
         <section
           id="atas"
           aria-labelledby="judul-hero"
-          className="grid scroll-mt-28 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10"
+          className="grid scroll-mt-28 items-center gap-12 md:grid-cols-[1.05fr_0.95fr] md:gap-8 lg:gap-10"
         >
           <div className="flex flex-col items-start gap-6">
             <span className="aura-eyebrow-bagian">
@@ -243,7 +243,7 @@ export default function Beranda() {
 
             <h1
               id="judul-hero"
-              className="text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink min-[390px]:text-[34px] min-[390px]:leading-[42px] min-[390px]:tracking-[-0.03em] lg:text-[52px] lg:leading-[1.05]"
+              className="text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[34px] sm:leading-[42px] sm:tracking-[-0.03em] md:text-[40px] md:leading-[1.12] lg:text-[52px] lg:leading-[1.05]"
             >
               Tahu siapa yang tertinggal <span className="text-aura-primary">hari ini</span>, bukan saat ulangan.
             </h1>
@@ -258,7 +258,7 @@ export default function Beranda() {
                 Masuk sebagai guru
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
-              <Link href="/masuk" className="aura-btn aura-btn-secondary h-[50px] w-full px-6 text-[15px] sm:w-auto">
+              <Link href="/masuk" className="aura-btn aura-btn-secondary h-[52px] w-full px-6 text-[15px] sm:w-auto">
                 <Users aria-hidden="true" className="size-4" />
                 Masuk sebagai siswa
               </Link>
@@ -382,13 +382,13 @@ export default function Beranda() {
                 <div
                   role="img"
                   aria-label="40 titik mewakili 40 anak, dua titik ditandai terang mewakili dua menit bagian tiap anak."
-                  className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-x-1 gap-y-2.5"
+                  className="grid grid-cols-[repeat(10,minmax(0,1fr))] gap-x-1 gap-y-2.5 lg:grid-cols-[repeat(20,minmax(0,1fr))]"
                 >
                   {TITIK_KELAS.map((disorot, i) => (
                     <span
                       key={i}
                       aria-hidden="true"
-                      className={`size-2.5 justify-self-center rounded-full sm:size-3 ${
+                      className={`size-2.5 justify-self-center rounded-full lg:size-3 ${
                         disorot ? "bg-aura-primary shadow-[0_0_0_3px_rgba(37,99,235,0.14)]" : "bg-aura-primary/15"
                       }`}
                     />

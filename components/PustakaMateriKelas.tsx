@@ -191,7 +191,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
                 </span>
               </div>
 
-              <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <ul className="grid gap-3 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                 {materi.map((m) => {
                   const sedangMenghapus = menghapus === m.id;
                   return (
@@ -240,7 +240,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
                           Diperbarui {FORMAT_TANGGAL.format(new Date(m.diperbaruiPada))}
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-1.5 border-t border-white/60 pt-3">
+                        <div className="grid grid-cols-2 gap-1.5 border-t border-white/60 pt-3 sm:flex sm:flex-wrap sm:items-center">
                           <Link
                             href={`/guru/modul?materi=${m.id}&kelas=${kelas.id}`}
                             className="aura-btn aura-btn-secondary h-10 px-3 text-[12px]"
@@ -279,7 +279,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
                             onClick={() => void hapus(m)}
                             disabled={sedangMenghapus}
                             aria-label={`Hapus materi ${m.judul}`}
-                            className="aura-btn aura-btn-danger ml-auto h-10 px-3 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="aura-btn aura-btn-danger col-start-2 h-10 px-3 disabled:cursor-not-allowed disabled:opacity-60 sm:col-auto sm:ml-auto"
                           >
                             {sedangMenghapus ? (
                               <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />

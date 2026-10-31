@@ -132,7 +132,7 @@ function IsiPendampingan() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 overflow-x-clip">
       <header className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <span className="font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-primary">
@@ -149,7 +149,7 @@ function IsiPendampingan() {
 
         <div className="flex flex-wrap items-center gap-3">
           {daftarKelas && daftarKelas.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex w-full min-w-0 flex-col items-start gap-1 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
               <label htmlFor={idKelas} className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
                 Kelas
               </label>
@@ -164,7 +164,7 @@ function IsiPendampingan() {
                   setGalatAksi(null);
                   router.replace(`/guru/pendampingan?kelas=${encodeURIComponent(id)}`);
                 }}
-                className="h-11 rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm"
+                className="h-11 w-full min-w-0 max-w-full rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm sm:w-auto sm:max-w-[240px]"
               >
                 {daftarKelas.map((k) => (
                   <option key={k.id} value={k.id}>
@@ -175,7 +175,7 @@ function IsiPendampingan() {
             </div>
           )}
           {dataSiap && dataSiap.ringkasan.daftarSesi.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex w-full min-w-0 flex-col items-start gap-1 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
               <label htmlFor={idSesi} className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
                 Kuis
               </label>
@@ -191,7 +191,7 @@ function IsiPendampingan() {
                     `/guru/pendampingan?kelas=${encodeURIComponent(kelasId)}&sesi=${encodeURIComponent(id)}`,
                   );
                 }}
-                className="h-11 rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm"
+                className="h-11 w-full min-w-0 max-w-full rounded-2xl border border-white/70 bg-white/70 px-3 font-body text-[14px] text-aura-ink shadow-sm backdrop-blur-sm sm:w-auto sm:max-w-[300px]"
               >
                 {dataSiap.ringkasan.daftarSesi.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -227,7 +227,7 @@ function IsiPendampingan() {
             </p>
           </div>
 
-          <ul className="grid gap-3 md:grid-cols-3">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <li className="rounded-2xl border border-white/60 bg-white/45 p-3">
               <span className="flex size-9 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
                 <Clock3 aria-hidden="true" className="size-4" />
@@ -502,7 +502,7 @@ function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan })
       />
       <div className="relative flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <span className="aura-eyebrow">
               <Users aria-hidden="true" className="size-3.5" />
               Ringkasan kelas
@@ -517,7 +517,7 @@ function RingkasanPemahaman({ ringkasan }: { ringkasan: RingkasanPendampingan })
               Sebaran kategori dari hasil kuis terpilih.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2 sm:max-w-[55%]">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
               <CheckCircle2 aria-hidden="true" className="size-4 text-aura-emerald" />
               {ringkasan.jumlahMenjawab} menjawab

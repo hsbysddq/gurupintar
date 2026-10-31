@@ -147,7 +147,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Donut benar={soal.benar} salah={soal.salah} total={soal.total} />
-            <ul className="flex min-w-[10rem] flex-col gap-3 text-[14px] leading-normal">
+            <ul className="flex min-w-0 flex-1 flex-col gap-3 text-[14px] leading-normal">
               <li className="flex items-center gap-2">
                 <span aria-hidden="true" className="size-2.5 rounded-full bg-sudah" />
                 <span className="text-aura-ink">Benar</span>
@@ -167,7 +167,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
         </KartuKaca>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.45fr_1fr]">
         <div className="flex flex-col gap-6">
           <KartuKaca as="section" className="flex flex-col gap-4 p-6">
             <div className="flex items-center justify-between gap-3">
@@ -198,7 +198,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                   return (
                     <li
                       key={k.id}
-                      className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2 rounded-2xl border border-white/60 bg-white/40 p-3 sm:grid-cols-[auto_1fr_minmax(0,11rem)_auto]"
+                      className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 rounded-2xl border border-white/60 bg-white/40 p-3 sm:grid-cols-[auto_1fr_minmax(0,11rem)_auto]"
                     >
                       <span className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${warna.ikon}`}>
                         <Ikon aria-hidden="true" className="size-6" />
@@ -210,7 +210,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                           {k.namaGuru ? ` · ${k.namaGuru}` : ''}
                         </p>
                       </div>
-                      <div className="order-last col-span-3 flex flex-col gap-1 sm:order-none sm:col-span-1">
+                      <div className="order-last col-span-2 flex flex-col gap-1 sm:order-none sm:col-span-1">
                         <p className={`text-[12px] leading-normal font-semibold ${warna.teks}`}>
                           Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                         </p>
@@ -224,7 +224,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                       </div>
                       <Link
                         href={`/siswa/kelas/detail?kelas=${k.id}`}
-                        className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-[13px] font-semibold ${
+                        className={`col-span-2 inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-[13px] font-semibold sm:col-span-1 ${
                           i === 0
                             ? 'bg-aura-primary text-white hover:bg-aura-primary-deep'
                             : 'bg-aura-primary/10 text-aura-primary hover:bg-aura-primary/20'
