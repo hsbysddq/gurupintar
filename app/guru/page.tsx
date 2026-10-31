@@ -126,18 +126,22 @@ export default async function HalamanDaftarKelas({
                 Klik kartu untuk masuk ke ruang kelas.
               </p>
             </div>
-            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/60 bg-white/55 px-3 py-2 backdrop-blur-sm">
-              <span className="relative flex size-9 items-center justify-center" aria-hidden="true">
-                <span className="absolute inset-0 translate-x-1 translate-y-1 rounded-xl bg-aura-primary/10" />
-                <span className="relative flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-aura-primary to-aura-violet text-white shadow-sm">
-                  <School className="size-4" />
+            <div className="relative overflow-hidden rounded-[18px] border border-white/70 bg-white/35 px-4 py-2.5 shadow-[0_14px_32px_-20px_rgba(37,99,235,0.55)] backdrop-blur-xl">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-3 -top-4 size-12 rounded-full bg-aura-violet/20 blur-2xl"
+              />
+              <span className="relative flex items-baseline gap-1.5">
+                <span className="bg-gradient-to-br from-aura-ink via-aura-primary to-aura-violet bg-clip-text font-display text-[24px] leading-none font-extrabold tracking-[-0.04em] text-transparent">
+                  {daftar.length}
                 </span>
-              </span>
-              <span className="flex flex-col">
-                <span className="font-display text-[14px] leading-[18px] font-bold text-aura-ink">
-                  {daftar.length} kelas
+                <span className="font-display text-[10px] font-bold uppercase tracking-[0.12em] text-aura-muted">
+                  kelas
                 </span>
-                <span className="font-body text-[11px] leading-[14px] text-aura-muted">{totalSiswa} siswa</span>
               </span>
             </div>
           </div>
