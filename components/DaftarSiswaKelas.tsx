@@ -8,7 +8,6 @@ const LABEL_FORMAT: Record<Format, string> = {
   video: 'Video',
   audio: 'Audio',
   bacaan: 'Bacaan',
-  latihan: 'Latihan',
   ppt: 'PPT',
 };
 

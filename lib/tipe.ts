@@ -14,7 +14,7 @@ export interface Profil {
 
 export type Kelompok = 'sudah' | 'setengah' | 'belum';
 
-export type Format = 'video' | 'audio' | 'bacaan' | 'latihan' | 'ppt';
+export type Format = 'video' | 'audio' | 'bacaan' | 'ppt';
 
 export type KodePilihan = 'A' | 'B' | 'C' | 'D';
 
