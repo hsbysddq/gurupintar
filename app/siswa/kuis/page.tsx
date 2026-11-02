@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, Loader2, Send, type LucideIcon } from "lucide-react";
+import { KartuKaca } from "@/components/KartuKaca";
 import { KartuSoalKuis } from "@/components/KartuSoalKuis";
 import { KerangkaSiswa } from "@/components/KerangkaSiswa";
+import { NavigasiSoal } from "@/components/NavigasiSoal";
 import { ProgressKuis } from "@/components/ProgressKuis";
 import { StatusHalaman } from "@/components/StatusHalaman";
-import { Tombol } from "@/components/Tombol";
 import { useSesiAktif } from "@/hooks/use-sesi-aktif";
 import { ambilSoal, ErrorApi, kirimJawaban } from "@/lib/api-klien";
 import { hapusSesi } from "@/lib/sesi-lokal";
@@ -138,36 +140,49 @@ export default function HalamanKuis() {
   }
 
   const labelUtama = terakhir ? (kiriman.status === "gagal" ? "Coba lagi" : "Kirim jawaban") : "Berikutnya";
+  const indeksTerjawab = new Set(
+    soal.flatMap((s, i) => (jawaban[s.id] !== undefined ? [i] : [])),
+  );
+  const pilihSoal = (i: number) => setIndeks(i);
 
   return (
     <KerangkaSiswa
       langkah={3}
       aksi={
         <>
+          <div className="hidden lg:block">
+            <NavigasiSoal
+              total={soal.length}
+              indeks={indeks}
+              terjawab={indeksTerjawab}
+              onPilih={pilihSoal}
+              disabled={mengirim}
+            />
+          </div>
           {kiriman.status === "gagal" && (
             <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
               {kiriman.pesan}
             </p>
           )}
-          <Tombol
-            varian="utama"
-            ukuran="besar"
-            lebarPenuh
-            disabled={!sudahDijawab}
-            memuat={mengirim}
-            onClick={berikutnya}
-          >
-            {labelUtama}
-          </Tombol>
-          <Tombol
-            varian="sekunder"
-            ukuran="besar"
-            lebarPenuh
-            disabled={indeks === 0 || mengirim}
-            onClick={() => setIndeks((i) => i - 1)}
-          >
-            Sebelumnya
-          </Tombol>
+          <div className="grid grid-cols-2 gap-2">
+            <TombolLangkah
+              ikon={ArrowLeft}
+              disabled={indeks === 0 || mengirim}
+              onClick={() => setIndeks((i) => i - 1)}
+            >
+              Sebelumnya
+            </TombolLangkah>
+            <TombolLangkah
+              utama
+              ikon={terakhir ? Send : undefined}
+              ikonAkhir={!terakhir ? ArrowRight : undefined}
+              disabled={!sudahDijawab}
+              memuat={mengirim}
+              onClick={berikutnya}
+            >
+              {labelUtama}
+            </TombolLangkah>
+          </div>
           <p className="text-center text-[12px] leading-[18px] text-aura-muted">
             Jawaban bisa diubah sebelum dikirim.
           </p>
@@ -189,6 +204,55 @@ export default function HalamanKuis() {
         terpilih={jawaban[soalIni.id] ?? null}
         onPilih={(kode) => setJawaban((j) => ({ ...j, [soalIni.id]: kode as KodePilihan }))}
       />
+      <KartuKaca className="p-4 lg:hidden">
+        <NavigasiSoal
+          total={soal.length}
+          indeks={indeks}
+          terjawab={indeksTerjawab}
+          onPilih={pilihSoal}
+          disabled={mengirim}
+        />
+      </KartuKaca>
     </KerangkaSiswa>
+  );
+}
+
+function TombolLangkah({
+  utama = false,
+  ikon: Ikon,
+  ikonAkhir: IkonAkhir,
+  memuat = false,
+  disabled = false,
+  onClick,
+  children,
+}: {
+  utama?: boolean;
+  ikon?: LucideIcon;
+  ikonAkhir?: LucideIcon;
+  memuat?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled || memuat}
+      aria-busy={memuat || undefined}
+      onClick={onClick}
+      className={`inline-flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5 font-display text-[12px] font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+        utama
+          ? "bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_10px_24px_-12px_rgba(37,99,235,0.65)] hover:brightness-105"
+          : "border border-aura-primary/20 bg-white/65 text-aura-primary hover:bg-aura-primary/5"
+      }`}
+    >
+      {memuat ? (
+        <Loader2 aria-hidden="true" className="size-4 shrink-0 animate-spin" />
+      ) : (
+        Ikon && <Ikon aria-hidden="true" className="size-4 shrink-0" />
+      )}
+      <span className="truncate">{children}</span>
+      {!memuat && IkonAkhir && <IkonAkhir aria-hidden="true" className="size-4 shrink-0" />}
+    </button>
   );
 }

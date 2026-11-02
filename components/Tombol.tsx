@@ -8,6 +8,8 @@ interface TombolProps {
   /** `besar` = 52px untuk halaman siswa (design.md 4.3). */
   ukuran?: "standar" | "besar";
   ikon?: LucideIcon;
+  /** Ikon di sisi kanan, untuk tombol navigasi seperti "Berikutnya". */
+  ikonAkhir?: LucideIcon;
   memuat?: boolean;
   lebarPenuh?: boolean;
   type?: "button" | "submit";
@@ -29,6 +31,7 @@ export function Tombol({
   varian,
   ukuran = "standar",
   ikon: Ikon,
+  ikonAkhir: IkonAkhir,
   memuat = false,
   lebarPenuh = false,
   type = "button",
@@ -51,6 +54,7 @@ export function Tombol({
       <Link href={href} className={kelas}>
         {Ikon && <Ikon aria-hidden="true" className="size-5" />}
         {children}
+        {IkonAkhir && <IkonAkhir aria-hidden="true" className="size-5" />}
       </Link>
     );
   }
@@ -63,6 +67,7 @@ export function Tombol({
         Ikon && <Ikon aria-hidden="true" className="size-5" />
       )}
       {children}
+      {!memuat && IkonAkhir && <IkonAkhir aria-hidden="true" className="size-5" />}
     </button>
   );
 }
