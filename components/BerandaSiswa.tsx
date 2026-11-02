@@ -85,7 +85,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
       keterangan: 'Sudah menguasai materi.',
     },
     {
-      label: 'Sedang Belajar',
+      label: 'Setengah Paham',
       jumlah: materi.sedang,
       warna: 'bg-setengah',
       keterangan: 'Sudah mulai paham, masih perlu latihan.',

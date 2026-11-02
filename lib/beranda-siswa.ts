@@ -84,7 +84,7 @@ export function hitungPersen(bagian: number, total: number): number {
 
 /**
  * Meringkas beranda siswa.
- * - Paham: hasil kelompok "sudah". Sedang Belajar: hasil kelompok "setengah".
+ * - Paham: hasil kelompok "sudah". Setengah Paham: hasil kelompok "setengah".
  * - Belum Paham: kuis yang sudah dikerjakan dengan hasil kelompok "belum".
  * - Belum Mengerjakan: kuis yang belum punya hasil pengerjaan.
  * - Kuis yang dikerjakan ulang: kelompok dan status dikerjakan mengikuti pengerjaan terakhir, sedangkan soal
