@@ -12,7 +12,7 @@ export interface SesiAktif {
 
 const KUNCI = 'guru-pintar:sesi-aktif';
 const PERISTIWA = 'guru-pintar:sesi-aktif-berubah';
-const DAFTAR_FORMAT: Format[] = ['video', 'audio', 'bacaan', 'latihan', 'ppt'];
+const DAFTAR_FORMAT: Format[] = ['video', 'audio', 'bacaan', 'ppt'];
 
 function penyimpanan(): Storage | null {
   try {

@@ -1,9 +1,8 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, Pencil, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
-import { LatihanInteraktif } from "@/components/LatihanInteraktif";
 import { TombolDengarkan } from "@/components/TombolDengarkan";
 import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, IsiMateri } from "@/lib/tipe";
@@ -18,7 +17,6 @@ const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
   { format: "audio", label: "Audio", ikon: Headphones },
   { format: "bacaan", label: "Bacaan", ikon: FileText },
   { format: "ppt", label: "PPT", ikon: Presentation },
-  { format: "latihan", label: "Latihan", ikon: Pencil },
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
@@ -46,7 +44,7 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
       <div
         role="tablist"
         aria-label="Bentuk materi"
-        className="aura-glass grid grid-cols-5 gap-1 p-1 lg:sticky lg:top-6 lg:flex lg:flex-col lg:gap-1.5 lg:p-2"
+        className="aura-glass grid grid-cols-4 gap-1 p-1 lg:sticky lg:top-6 lg:flex lg:flex-col lg:gap-1.5 lg:p-2"
       >
         {TAB.map(({ format, label, ikon: Ikon }, i) => {
           const terpilih = aktif === format;
@@ -118,7 +116,6 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
                   </>
                 )}
                 {format === "ppt" && <PenampilSlide isi={isi} />}
-                {format === "latihan" && <LatihanInteraktif latihan={isi.latihan} />}
               </KartuKaca>
             )}
           </div>
