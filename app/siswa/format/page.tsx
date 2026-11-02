@@ -50,29 +50,7 @@ export default function HalamanPilihFormat() {
   }
 
   return (
-    <KerangkaSiswa
-      langkah={2}
-      aksi={
-        <>
-          <div className="rounded-2xl bg-aura-primary/5 p-3">
-            <p className="font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-muted">
-              Pilihanmu
-            </p>
-            <p className="mt-1 font-display text-[16px] font-bold text-aura-ink">
-              {nilai ? LABEL_FORMAT[nilai] : 'Belum dipilih'}
-            </p>
-          </div>
-          {galat && (
-            <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
-              {galat}
-            </p>
-          )}
-          <Tombol varian="utama" ukuran="besar" lebarPenuh disabled={!nilai} memuat={memuat} onClick={lanjut}>
-            Lanjut
-          </Tombol>
-        </>
-      }
-    >
+    <KerangkaSiswa langkah={2}>
       <header className="flex flex-col gap-1.5">
         <span className="aura-eyebrow">Ruang siswa</span>
         <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink md:text-[32px]">
@@ -81,7 +59,24 @@ export default function HalamanPilihFormat() {
         <p className="text-aura-muted">Halo, {profil.nama}. Pilih bentuk materi yang paling nyaman untukmu.</p>
       </header>
       <PilihanFormat nilai={nilai} onPilih={setPilihan} />
-      <p className="text-[13px] leading-normal text-aura-muted">Kamu bisa ganti kapan saja.</p>
+      {galat && (
+        <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
+          {galat}
+        </p>
+      )}
+      <div className="flex flex-col gap-4 border-t border-white/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-display text-[14px] font-bold text-aura-ink">
+            {nilai ? `Pilihanmu: ${LABEL_FORMAT[nilai]}` : 'Pilih satu format dulu'}
+          </p>
+          <p className="text-[13px] leading-normal text-aura-muted">Kamu bisa ganti kapan saja.</p>
+        </div>
+        <div className="w-full sm:w-44">
+          <Tombol varian="utama" ukuran="besar" lebarPenuh disabled={!nilai} memuat={memuat} onClick={lanjut}>
+            Lanjut
+          </Tombol>
+        </div>
+      </div>
     </KerangkaSiswa>
   );
 }
