@@ -68,7 +68,7 @@ function GabungKelas() {
   }
 
   return (
-    <KerangkaSiswa>
+    <KerangkaSiswa langkah={1}>
       <header className="flex flex-col gap-1.5">
         <span className="aura-eyebrow">Ruang siswa</span>
         <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink md:text-[32px]">

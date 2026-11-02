@@ -1,19 +1,22 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
+import { LangkahKuis, type NomorLangkah } from "@/components/LangkahKuis";
 import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 
 type KerangkaSiswaProps = {
   children: ReactNode;
   /** Tombol aksi utama; menempel di bawah layar di HP, panel samping di desktop. */
   aksi?: ReactNode;
+  /** Langkah aktif pada alur kuis; kosongkan untuk halaman materi/selesai. */
+  langkah?: NomorLangkah;
 };
 
 /**
  * Kerangka alur siswa (gabung, pilih format, kuis, materi, selesai).
  * Di HP tetap satu kolom sempit; di desktop memakai konten + panel aksi agar tidak terasa seperti aplikasi mobile.
  */
-export function KerangkaSiswa({ children, aksi }: KerangkaSiswaProps) {
+export function KerangkaSiswa({ children, aksi, langkah }: KerangkaSiswaProps) {
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col px-4 text-base leading-relaxed md:max-w-[1120px] md:px-6">
       <header className="flex items-center justify-between gap-4 py-4 md:py-6">
@@ -29,6 +32,12 @@ export function KerangkaSiswa({ children, aksi }: KerangkaSiswaProps) {
           <span className="sr-only sm:hidden">Ke dasbor</span>
         </Link>
       </header>
+
+      {langkah && (
+        <div className="pb-2">
+          <LangkahKuis aktif={langkah} />
+        </div>
+      )}
 
       <div
         className={

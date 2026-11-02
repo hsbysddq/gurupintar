@@ -9,6 +9,7 @@ const LABEL_FORMAT: Record<Format, string> = {
   audio: 'Audio',
   bacaan: 'Bacaan',
   ppt: 'PPT',
+  latihan: 'Latihan',
 };
 
 export function DaftarSiswaKelas({

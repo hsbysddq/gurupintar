@@ -141,6 +141,7 @@ export default function HalamanKuis() {
 
   return (
     <KerangkaSiswa
+      langkah={3}
       aksi={
         <>
           {kiriman.status === "gagal" && (
@@ -167,6 +168,9 @@ export default function HalamanKuis() {
           >
             Sebelumnya
           </Tombol>
+          <p className="text-center text-[12px] leading-[18px] text-aura-muted">
+            Jawaban bisa diubah sebelum dikirim.
+          </p>
         </>
       }
     >
@@ -175,6 +179,7 @@ export default function HalamanKuis() {
         <h1 className="font-display text-[24px] leading-[32px] font-extrabold tracking-[-0.02em] text-aura-ink md:text-[28px]">
           Jawab soal berikut
         </h1>
+        <p className="text-aura-muted">Pilih satu jawaban yang paling tepat. Kamu bisa kembali sebelum mengirim.</p>
       </header>
       <ProgressKuis saatIni={indeks + 1} total={soal.length} />
       <KartuSoalKuis

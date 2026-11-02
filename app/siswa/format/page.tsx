@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { KerangkaSiswa } from '@/components/KerangkaSiswa';
 import { useSiswa } from '@/components/PenyediaSiswa';
-import { PilihanFormat } from '@/components/PilihanFormat';
+import { LABEL_FORMAT, PilihanFormat } from '@/components/PilihanFormat';
 import { StatusHalaman } from '@/components/StatusHalaman';
 import { Tombol } from '@/components/Tombol';
 import { useSesiAktif } from '@/hooks/use-sesi-aktif';
@@ -51,8 +51,17 @@ export default function HalamanPilihFormat() {
 
   return (
     <KerangkaSiswa
+      langkah={2}
       aksi={
         <>
+          <div className="rounded-2xl bg-aura-primary/5 p-3">
+            <p className="font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-muted">
+              Pilihanmu
+            </p>
+            <p className="mt-1 font-display text-[16px] font-bold text-aura-ink">
+              {nilai ? LABEL_FORMAT[nilai] : 'Belum dipilih'}
+            </p>
+          </div>
           {galat && (
             <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
               {galat}
