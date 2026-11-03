@@ -7,6 +7,7 @@ import { KartuKaca } from "@/components/KartuKaca";
 import { KartuSoalKuis } from "@/components/KartuSoalKuis";
 import { KerangkaSiswa } from "@/components/KerangkaSiswa";
 import { NavigasiSoal } from "@/components/NavigasiSoal";
+import { cekBlokirDibuka, hapusCatatanPelanggaran, LayarDiblokir, lepasBlokirLokal, Lapisan, PemantauKuis } from "@/components/PemantauKuis";
 import { ProgressKuis } from "@/components/ProgressKuis";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { useSesiAktif } from "@/hooks/use-sesi-aktif";
@@ -17,6 +18,7 @@ import type { KodePilihan, SoalUntukSiswa } from "@/lib/tipe";
 type Muatan =
   | { status: "memuat" }
   | { status: "gagal"; pesan: string; sesiHilang: boolean }
+  | { status: "diblokir" }
   | { status: "siap"; soal: SoalUntukSiswa[] };
 
 type Kiriman = { status: "diam" } | { status: "mengirim" } | { status: "gagal"; pesan: string; ditutup: boolean };
@@ -33,6 +35,8 @@ export default function HalamanKuis() {
   const [indeks, setIndeks] = useState(0);
   const [jawaban, setJawaban] = useState<Record<string, KodePilihan>>({});
   const [kiriman, setKiriman] = useState<Kiriman>({ status: "diam" });
+  const [mengecekBlokir, setMengecekBlokir] = useState(false);
+  const [pesanBlokir, setPesanBlokir] = useState<string | null>(null);
 
   // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
@@ -44,11 +48,17 @@ export default function HalamanKuis() {
     let batal = false;
     ambilSoal(sesiId)
       .then((soal) => {
-        if (!batal) setMuatan({ status: "siap", soal });
+        if (batal) return;
+        lepasBlokirLokal(sesiId);
+        setMuatan({ status: "siap", soal });
       })
       .catch((err: unknown) => {
         if (batal) return;
         const status = err instanceof ErrorApi ? err.status : 0;
+        if (status === 423) {
+          setMuatan({ status: "diblokir" });
+          return;
+        }
         setMuatan({
           status: "gagal",
           pesan: status === 404 ? "Kuis tidak ditemukan. Masukkan kode kelas lagi." : "Soal belum berhasil dimuat. Periksa koneksi, lalu coba lagi.",
@@ -64,6 +74,33 @@ export default function HalamanKuis() {
     return (
       <KerangkaSiswa>
         <StatusHalaman jenis="memuat" judul="Memuat soal" />
+      </KerangkaSiswa>
+    );
+  }
+
+  if (muatan.status === "diblokir") {
+    return (
+      <KerangkaSiswa>
+        <Lapisan>
+          <LayarDiblokir
+            onCek={() => {
+              void cekBlokirDibuka(sesi.sesiId).then((hasil) => {
+                if (hasil.dibuka) {
+                  hapusCatatanPelanggaran(sesi.sesiId);
+                  setMuatan({ status: "memuat" });
+                  setPercobaan((n) => n + 1);
+                } else {
+                  setPesanBlokir(hasil.pesan);
+                }
+                setMengecekBlokir(false);
+              });
+              setMengecekBlokir(true);
+              setPesanBlokir(null);
+            }}
+            mengecek={mengecekBlokir}
+            pesanCek={pesanBlokir}
+          />
+        </Lapisan>
       </KerangkaSiswa>
     );
   }
@@ -126,10 +163,16 @@ export default function HalamanKuis() {
       } catch {
         // Penyimpanan tidak tersedia: halaman selesai tampil tanpa skor.
       }
+      hapusCatatanPelanggaran(sesi.sesiId);
       router.replace("/siswa/selesai");
     } catch (err) {
       const status = err instanceof ErrorApi ? err.status : 0;
       const pesan = status === 0 || status >= 500 ? PESAN_GAGAL_KIRIM : err instanceof ErrorApi ? err.message : PESAN_GAGAL_KIRIM;
+      if (status === 423) {
+        setMuatan({ status: "diblokir" });
+        setKiriman({ status: "diam" });
+        return;
+      }
       setKiriman({ status: "gagal", pesan, ditutup: status === 409 });
     }
   }
@@ -197,6 +240,7 @@ export default function HalamanKuis() {
         </h1>
         <p className="text-aura-muted">Pilih satu jawaban yang paling tepat. Kamu bisa kembali sebelum mengirim.</p>
       </header>
+      <PemantauKuis sesiId={sesi.sesiId} />
       <ProgressKuis saatIni={indeks + 1} total={soal.length} />
       <KartuSoalKuis
         key={soalIni.id}

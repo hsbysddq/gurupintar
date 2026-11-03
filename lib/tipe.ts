@@ -79,6 +79,16 @@ export interface SiswaKelas {
   kelompok: Kelompok | null;
   skor: number | null;
   total: number | null;
+  /** Kuis tempat siswa ini sedang diblokir karena curang (kosong bila tidak diblokir). */
+  blokir: BlokirSiswaKelas[];
+}
+
+/** Satu blokir aktif seorang siswa pada satu kuis (untuk tab Siswa). */
+export interface BlokirSiswaKelas {
+  sesiId: string;
+  namaKuis: string;
+  jumlahBlokir: number;
+  diblokirPada: string | null;
 }
 
 /** Ringkasan satu kelas untuk halaman lintas kelas. */
@@ -184,6 +194,22 @@ export interface RingkasanMateri {
   kelompokTanpaMateri: Kelompok[];
 }
 
+/** Siswa yang sedang diblokir karena meninggalkan halaman kuis (hanya terlihat oleh guru). */
+export interface SiswaDiblokirGuru {
+  siswaId: string;
+  nama: string;
+  /** Berapa kali siswa ini pernah diblokir di kuis ini. */
+  jumlahBlokir: number;
+  /** ISO 8601. */
+  diblokirPada: string | null;
+}
+
+/** POST /api/siswa/pelanggaran */
+export interface HasilPelanggaran {
+  jumlah: number;
+  terblokir: boolean;
+}
+
 /** GET /api/guru/hasil */
 export interface HasilGuru extends RingkasanMateri {
   sesi: {
@@ -198,6 +224,7 @@ export interface HasilGuru extends RingkasanMateri {
   };
   jumlahSiswa: number;
   jumlahMenjawab: number;
+  diblokir: SiswaDiblokirGuru[];
   kelompok: Record<Kelompok, SiswaHasil[]>;
   soalTersulit: SoalTersulit | null;
 }

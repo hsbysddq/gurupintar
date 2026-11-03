@@ -163,6 +163,7 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 - AC-3.6: Setelah terkirim → `/siswa/selesai`: "Jawabanmu sudah terkirim. Tunggu gurumu membagikan materi untukmu." Nilai dan kelompok **tidak** ditampilkan.
 - AC-3.7: Pengiriman gagal → jawaban tetap di layar dan muncul "Jawaban belum terkirim. Periksa koneksi, lalu coba lagi." dengan tombol "Coba lagi".
 - AC-3.8: Mengirim ulang untuk sesi yang sama menimpa jawaban sebelumnya, tanpa data ganda.
+- AC-3.9: Saat kuis berlangsung, browser mendeteksi siswa pindah tab, membuka aplikasi lain, atau keluar dari browser dan melaporkannya ke server. Pelanggaran pertama dan kedua memunculkan peringatan "Pelanggaran X dari 3"; pelanggaran ketiga memblokir siswa dengan pesan "Kuis diblokir karena curang". Selama diblokir, server menolak memuat soal dan menerima jawaban (kode 423) sampai guru membuka blokirnya, termasuk untuk mengerjakan ulang. Siswa menekan "Cek lagi" setelah gurunya membuka blokir. Hitungan bertahan saat halaman dimuat ulang dan kembali ke 0 setelah blokir dibuka atau jawaban terkirim. Deteksi hanya di browser, jadi bukan bukti mutlak, dan tidak mengubah data penilaian.
 
 ### F-4 Buka dan tutup kuis (guru)
 
@@ -186,6 +187,7 @@ Format: cerita pengguna (US), lalu kriteria penerimaan (AC) yang bisa diuji. Rut
 - AC-5.6: Tombol "Buat Materi Lanjutan dengan AI" adalah elemen paling menonjol, nonaktif jika belum ada jawaban.
 - AC-5.7: Jika ada kelompok berisi siswa tetapi belum punya materi (misalnya siswa baru menjawab setelah materi dibuat), tampil pemberitahuan "Ada siswa yang belum mendapat materi" dengan tombol "Buat materi yang kurang".
 - AC-5.8: Tautan "Lihat siswa yang perlu pendampingan" menuju `/guru/pendampingan`.
+- AC-5.9: Siswa yang diblokir karena meninggalkan halaman kuis (AC-3.9) tampil di kartu "Diblokir karena curang" pada halaman hasil, lengkap dengan tombol "Buka blokir" per siswa. Setelah dibuka, siswa boleh mengerjakan lagi dan hitungan pelanggarannya kembali ke 0. Hanya guru pemilik kelas yang bisa membuka blokir.
 
 ### F-6 Materi lanjutan AI (guru)
 

@@ -4,6 +4,7 @@ import { skemaQueryHasil } from '@/lib/skema-api';
 import { cadanganTersedia } from '@/lib/soal-guru';
 import { cariSoalTersulit } from '@/lib/soal-tersulit';
 import { sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
+import { daftarDiblokir } from '@/lib/server/blokir';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       .single();
     if (dataSesi.error) return petakanErrorDb(dataSesi.error);
 
-    const [kelas, topik, anggota, hasil, soal, jawaban, materi] = await Promise.all([
+    const [kelas, topik, anggota, hasil, soal, jawaban, materi, diblokirMentah] = await Promise.all([
       db.from('kelas').select('nama').eq('id', sesi.kelas_id).single(),
       db.from('topik').select('nama').eq('id', sesi.topik_id).single(),
       db.from('keanggotaan_kelas').select('siswa_id').eq('kelas_id', sesi.kelas_id),
@@ -44,12 +45,14 @@ export async function GET(request: NextRequest) {
       db.from('soal').select('id, nomor, teks, miskonsepsi').eq('topik_id', sesi.topik_id),
       db.from('jawaban').select('soal_id, pilihan, benar').eq('sesi_id', sesiId),
       db.from('materi').select('kelompok, status').eq('sesi_id', sesiId),
+      daftarDiblokir(db, sesiId),
     ]);
     for (const r of [kelas, topik, anggota, hasil, soal, jawaban, materi]) {
       if (r.error) return petakanErrorDb(r.error);
     }
 
     const idSiswa = anggota.data!.map((a) => a.siswa_id as string);
+    const idDiblokir = new Set(diblokirMentah.map((d) => d.siswaId));
     let daftarSiswa: { id: string; nama: string }[] = [];
     if (idSiswa.length > 0) {
       const siswa = await db.from('pengguna').select('id, nama').in('id', idSiswa);
@@ -58,6 +61,11 @@ export async function GET(request: NextRequest) {
     }
 
     const namaSiswa = new Map<string, string>(daftarSiswa.map((s) => [s.id, s.nama]));
+    // Hanya anggota kelas yang masih terdaftar; urut abjad.
+    const diblokir = diblokirMentah
+      .filter((d) => idSiswa.includes(d.siswaId) && idDiblokir.has(d.siswaId))
+      .map((d) => ({ ...d, nama: namaSiswa.get(d.siswaId) ?? 'Siswa' }))
+      .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
     const kelompok = kelompokkanHasil(
       hasil.data!.map((h) => ({
         siswaId: h.siswa_id,
@@ -90,6 +98,7 @@ export async function GET(request: NextRequest) {
       },
       jumlahSiswa: idSiswa.length,
       jumlahMenjawab: hasil.data!.length,
+      diblokir,
       kelompok,
       soalTersulit,
       ...ringkasMateri(
