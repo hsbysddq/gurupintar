@@ -393,9 +393,11 @@ Aturan umum:
 | Metode & rute | Input | Respons sukses | Error |
 | --- | --- | --- | --- |
 | `GET /api/sesi?kode=` | kode kelas | `{ sesi: {id, kodeKelas, status, namaKelas, namaTopik}, siswa: [{id, nama}] }` | `404` "Kode kelas tidak ditemukan. Periksa lagi kode dari gurumu." · `409` "Kuis ini sudah ditutup." |
-| `GET /api/soal?sesi=` | id sesi | `[{ id, nomor, teks, pilihan: [{kode, teks}] }]` urut nomor, **tanpa** `kunci` & `miskonsepsi` | `404` |
+| `GET /api/soal?sesi=` | id sesi | `[{ id, nomor, teks, pilihan: [{kode, teks}] }]` urut nomor, **tanpa** `kunci` & `miskonsepsi` | `404` · `423` siswa diblokir karena curang |
 | `POST /api/siswa/format` | `{ siswaId, format }` | `{ ok: true }` | `404` |
-| `POST /api/jawaban` | `{ sesiId, siswaId, jawaban: [{soalId, pilihan}] }` | `{ ok: true }` | `400` jawaban tidak lengkap · `403` siswa bukan anggota kelas · `404` · `409` "Kuis ini sudah ditutup." |
+| `POST /api/siswa/pelanggaran` | `{ sesiId }` (siswa dari sesi login) | `{ jumlah, terblokir }`; pelanggaran ke-3 memblokir siswa | `403` bukan anggota · `404` · `409` kuis ditutup |
+| `POST /api/guru/blokir` | `{ sesiId, siswaId }` | `{ ok: true }`; membuka blokir, hitungan kembali 0 | `404` bukan sesi/siswa milik guru · `409` siswa tidak diblokir |
+| `POST /api/jawaban` | `{ sesiId, siswaId, jawaban: [{soalId, pilihan}] }` | `{ ok: true }` | `400` jawaban tidak lengkap · `403` siswa bukan anggota kelas · `404` · `423` siswa diblokir karena curang · `409` "Kuis ini sudah ditutup." |
 | `GET /api/materi?sesi=&siswa=` | id sesi, id siswa | `{ status: 'belum-mengerjakan' }` · `{ status: 'disiapkan' }` · `{ status: 'tersedia', namaTopik, isi }` | `404` |
 | `GET /api/guru/sesi` | | `[{ id, kodeKelas, status, dibuatPada, jumlahMenjawab }]` terbaru di atas | |
 | `POST /api/guru/sesi` | `{ topikId? }`; tanpa `topikId` → `TOPIK_DEMO_ID` | `{ id, kodeKelas }` | `400` `topikId` bukan UUID · `404` "Topik tidak ditemukan." · `400` "Topik harus punya tepat 5 soal." · `500` jika 5 kali percobaan kode bentrok |

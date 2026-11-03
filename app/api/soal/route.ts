@@ -1,9 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { skemaQuerySoal } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { bacaBlokir } from '@/lib/server/blokir';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
+  PESAN_DIBLOKIR,
   PESAN_INPUT_TIDAK_VALID,
   PESAN_SESI_TIDAK_ADA,
   responsError,
@@ -34,6 +36,9 @@ export async function GET(request: NextRequest) {
     if (!(await anggotaKelas(db, auth.profil.id, sesi.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
     }
+
+    // Siswa yang diblokir tidak dilayani sampai guru membuka blokirnya (423 Locked).
+    if ((await bacaBlokir(db, input.data.sesi, auth.profil.id))?.terblokir) return responsError(PESAN_DIBLOKIR, 423);
 
     const soal = await db
       .from('soal')

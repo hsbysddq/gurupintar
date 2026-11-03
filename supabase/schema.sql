@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
+drop table if exists materi, blokir_kuis, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
 
 -- ===== Akun dan peran =====
 -- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
@@ -102,6 +102,20 @@ create table percobaan_kuis (
   check (skor <= total)
 );
 create index percobaan_kuis_siswa_waktu on percobaan_kuis (siswa_id, sesi_id, dikirim_pada desc);
+
+create table blokir_kuis (
+  sesi_id uuid not null references sesi_kuis(id) on delete cascade,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
+  jumlah int not null default 0 check (jumlah >= 0),
+  terblokir boolean not null default false,
+  jumlah_blokir int not null default 0 check (jumlah_blokir >= 0),
+  diblokir_pada timestamptz,
+  dibuka_pada timestamptz,
+  diperbarui_pada timestamptz not null default now(),
+  primary key (sesi_id, siswa_id)
+);
+create index blokir_kuis_sesi_terblokir on blokir_kuis (sesi_id) where terblokir;
+alter table blokir_kuis enable row level security;
 
 create table materi (
   id uuid primary key default gen_random_uuid(),

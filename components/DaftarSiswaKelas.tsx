@@ -1,5 +1,7 @@
+import { ShieldAlert } from 'lucide-react';
 import { BadgeKelompok } from '@/components/BadgeKelompok';
 import { KartuKaca } from '@/components/KartuKaca';
+import { TombolBukaBlokir } from '@/components/TombolBukaBlokir';
 import { TombolKeluarkanSiswa } from '@/components/TombolKeluarkanSiswa';
 import { TombolSalinKode } from '@/components/TombolSalinKode';
 import type { Format, SiswaKelas } from '@/lib/tipe';
@@ -36,6 +38,8 @@ export function DaftarSiswaKelas({
     );
   }
 
+  const jumlahDiblokir = siswa.filter((s) => s.blokir.length > 0).length;
+
   return (
     <section className="flex flex-col gap-4">
       <KartuKaca as="div" className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -47,6 +51,19 @@ export function DaftarSiswaKelas({
         </div>
         <TombolSalinKode kode={kodeUndangan} />
       </KartuKaca>
+
+      {jumlahDiblokir > 0 && (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-kecil bg-belum-latar px-4 py-3 text-[14px] leading-normal text-belum-teks"
+        >
+          <ShieldAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+          <p>
+            <strong>{jumlahDiblokir} siswa diblokir karena curang.</strong> Mereka meninggalkan halaman kuis 3 kali dan
+            tidak bisa mengerjakan lagi sampai kamu membuka blokirnya.
+          </p>
+        </div>
+      )}
 
       <KartuKaca as="div" className="p-2">
         <ul className="flex flex-col divide-y divide-tinta/10">
@@ -74,6 +91,25 @@ export function DaftarSiswaKelas({
                 )}
                 <TombolKeluarkanSiswa kelasId={kelasId} siswaId={s.siswaId} nama={s.nama} />
               </div>
+              {s.blokir.length > 0 && (
+                <ul className="flex w-full flex-col gap-2">
+                  {s.blokir.map((b) => (
+                    <li
+                      key={b.sesiId}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-kecil bg-belum-latar px-3 py-2"
+                    >
+                      <span className="flex min-w-0 items-center gap-2 text-[13px] leading-normal text-belum-teks">
+                        <ShieldAlert aria-hidden="true" className="size-4 shrink-0" />
+                        <span className="min-w-0">
+                          <strong>Diblokir karena curang</strong> di kuis {b.namaKuis}
+                          {b.jumlahBlokir > 1 && ` · sudah ${b.jumlahBlokir} kali`}
+                        </span>
+                      </span>
+                      <TombolBukaBlokir sesiId={b.sesiId} siswaId={s.siswaId} />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>

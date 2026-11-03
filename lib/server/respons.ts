@@ -2,6 +2,7 @@ import 'server-only';
 
 export const PESAN_SESI_TIDAK_ADA = 'Sesi kuis tidak ditemukan.';
 export const PESAN_SESI_DITUTUP = 'Kuis ini sudah ditutup.';
+export const PESAN_DIBLOKIR = 'Kuismu diblokir karena terdeteksi meninggalkan halaman kuis. Minta gurumu membukanya.';
 export const PESAN_ERROR_UMUM = 'Terjadi kesalahan di server. Coba lagi sebentar.';
 export const PESAN_INPUT_TIDAK_VALID = 'Data yang dikirim tidak valid.';
 

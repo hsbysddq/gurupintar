@@ -129,6 +129,12 @@ export const skemaBodyJawaban = z.object({
     .min(1),
 });
 
+// POST /api/siswa/pelanggaran: siswa meninggalkan halaman kuis; siswa diambil dari sesi login.
+export const skemaBodyPelanggaran = z.object({ sesiId: z.uuid() });
+
+// POST /api/guru/blokir: guru membuka blokir seorang siswa pada satu kuis.
+export const skemaBodyBukaBlokir = z.object({ sesiId: z.uuid(), siswaId: z.uuid() });
+
 // POST /api/guru/sesi/tutup
 export const skemaBodyTutupSesi = z.object({
   sesiId: z.uuid(),
@@ -282,6 +288,8 @@ function skemaTeksMiskonsepsi() {
 
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
+export type BodyPelanggaran = z.infer<typeof skemaBodyPelanggaran>;
+export type BodyBukaBlokir = z.infer<typeof skemaBodyBukaBlokir>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
 export type BodyTindakanPendampingan = z.infer<typeof skemaBodyTindakanPendampingan>;
 export type BodyMateriPustaka = z.infer<typeof skemaBodyMateriPustaka>;

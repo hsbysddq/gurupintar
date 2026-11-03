@@ -4,8 +4,10 @@ import { normalisasiFormat } from '@/lib/format-materi';
 import { pilihHasilTerbaru } from '@/lib/hasil-terbaru';
 import { lengkapiIsiMateri } from '@/lib/validasi-materi';
 import { kelasMilikGuru, kolomArsipBelumAda } from './auth';
+import { tabelBlokirBelumAda } from './blokir';
 import type {
   AsalMateriPustaka,
+  BlokirSiswaKelas,
   Format,
   KelasRingkas,
   Kelompok,
@@ -20,6 +22,13 @@ type BarisKelas = {
   mapel: string;
   kode_undangan: string;
   keanggotaan_kelas: { count: number }[];
+};
+
+type BarisBlokirKelas = {
+  sesi_id: string;
+  siswa_id: string;
+  jumlah_blokir: number;
+  diblokir_pada: string | null;
 };
 
 type BarisSesiAktif = {
@@ -168,13 +177,49 @@ export async function ambilSiswaKelas(
 
   const idSesi = barisSesi.map((s) => s.id);
   let barisHasil: BarisHasil[] = [];
+  let barisBlokir: BarisBlokirKelas[] = [];
+  const namaKuis = new Map<string, string>();
   if (idSesi.length > 0) {
-    const hasil = await db
-      .from('hasil_siswa')
-      .select('sesi_id, siswa_id, skor, total, kelompok')
-      .in('sesi_id', idSesi);
+    const [hasil, blokir, topik] = await Promise.all([
+      db.from('hasil_siswa').select('sesi_id, siswa_id, skor, total, kelompok').in('sesi_id', idSesi),
+      db
+        .from('blokir_kuis')
+        .select('sesi_id, siswa_id, jumlah_blokir, diblokir_pada')
+        .in('sesi_id', idSesi)
+        .eq('terblokir', true),
+      db.from('sesi_kuis').select('id, topik(nama)').in('id', idSesi),
+    ]);
     if (hasil.error) throw hasil.error;
     barisHasil = hasil.data as BarisHasil[];
+    if (blokir.error) {
+      // Tabel blokir belum dibuat (migrasi belum dijalankan): anggap tidak ada siswa yang diblokir.
+      if (!tabelBlokirBelumAda(blokir.error)) throw blokir.error;
+    } else {
+      barisBlokir = blokir.data as BarisBlokirKelas[];
+    }
+    if (!topik.error) {
+      type BarisNamaKuis = { id: string; topik: { nama: string } | { nama: string }[] | null };
+      for (const t of topik.data as unknown as BarisNamaKuis[]) {
+        const tp = Array.isArray(t.topik) ? t.topik[0] : t.topik;
+        namaKuis.set(t.id, tp?.nama ?? 'Kuis');
+      }
+    }
+  }
+
+  // Blokir aktif per siswa, terbaru lebih dulu.
+  const blokirPerSiswa = new Map<string, BlokirSiswaKelas[]>();
+  for (const b of barisBlokir) {
+    const daftar = blokirPerSiswa.get(b.siswa_id) ?? [];
+    daftar.push({
+      sesiId: b.sesi_id,
+      namaKuis: namaKuis.get(b.sesi_id) ?? 'Kuis',
+      jumlahBlokir: b.jumlah_blokir,
+      diblokirPada: b.diblokir_pada,
+    });
+    blokirPerSiswa.set(b.siswa_id, daftar);
+  }
+  for (const daftar of blokirPerSiswa.values()) {
+    daftar.sort((a, b) => (urutanSesi.get(b.sesiId) ?? 0) - (urutanSesi.get(a.sesiId) ?? 0));
   }
 
   // Hasil terbaru per siswa berdasarkan urutan sesi.
@@ -201,6 +246,7 @@ export async function ambilSiswaKelas(
         kelompok: hasil?.kelompok ?? null,
         skor: hasil?.skor ?? null,
         total: hasil?.total ?? null,
+        blokir: blokirPerSiswa.get(a.siswa_id) ?? [],
       };
     })
     .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));

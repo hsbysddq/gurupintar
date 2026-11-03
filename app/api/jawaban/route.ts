@@ -1,10 +1,12 @@
 import { tentukanKelompok } from '@/lib/pengelompokan';
 import { skemaBodyJawaban } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { bacaBlokir } from '@/lib/server/blokir';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
   petakanErrorDb,
+  PESAN_DIBLOKIR,
   PESAN_INPUT_TIDAK_VALID,
   PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
@@ -38,6 +40,8 @@ export async function POST(request: Request) {
     if (!(await anggotaKelas(db, siswaId, sesi.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
     }
+
+    if ((await bacaBlokir(db, sesiId, siswaId))?.terblokir) return responsError(PESAN_DIBLOKIR, 423);
 
     const { data: soal, error: galatSoal } = await db.from('soal').select('id, kunci').eq('topik_id', sesi.topik_id);
     if (galatSoal) return petakanErrorDb(galatSoal);

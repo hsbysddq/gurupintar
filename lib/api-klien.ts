@@ -6,6 +6,7 @@ import type {
   BodyDaftarGuru,
   BodyDaftarSiswa,
   BodyHapusSiswa,
+  BodyBukaBlokir,
   BodyJawaban,
   BodyMasuk,
   BodyMateriPustaka,
@@ -19,6 +20,7 @@ import type {
   DataPendampingan,
   Format,
   HasilGuru,
+  HasilPelanggaran,
   IsiMateri,
   KelasRingkas,
   KelasSiswa,
@@ -154,6 +156,11 @@ export function kirimFormat(sesiId: string, format: Format): Promise<{ ok: true 
   return minta('/api/siswa/format', { method: 'POST', body: JSON.stringify({ sesiId, format }) });
 }
 
+/** Melaporkan siswa meninggalkan halaman kuis; server mencatat dan memblokir pada batas. */
+export function laporPelanggaran(sesiId: string): Promise<HasilPelanggaran> {
+  return minta('/api/siswa/pelanggaran', { method: 'POST', body: JSON.stringify({ sesiId }) });
+}
+
 export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true; skor: number; total: number }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -163,6 +170,11 @@ export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<
 }
 
 // ===== Guru =====
+
+/** Guru membuka blokir siswa pada satu kuis. */
+export function bukaBlokirSiswa(body: BodyBukaBlokir): Promise<{ ok: true }> {
+  return minta('/api/guru/blokir', { method: 'POST', body: JSON.stringify(body) });
+}
 
 export function ambilDaftarKelas(): Promise<KelasRingkas[]> {
   return minta('/api/guru/kelas');
