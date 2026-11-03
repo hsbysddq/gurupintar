@@ -18,6 +18,14 @@ export type Format = 'video' | 'audio' | 'bacaan' | 'ppt' | 'latihan';
 
 export type KodePilihan = 'A' | 'B' | 'C' | 'D';
 
+export type TipeSoal =
+  | 'pilgan'
+  | 'pilgan_kompleks'
+  | 'benar_salah'
+  | 'isian_singkat'
+  | 'menjodohkan'
+  | 'esai';
+
 export type StatusSesi = 'aktif' | 'selesai';
 
 export type StatusMateri = 'draf' | 'dibagikan';
@@ -28,6 +36,18 @@ export interface PilihanSoal {
   kode: KodePilihan;
   teks: string;
 }
+
+export interface ButirPilihan {
+  kode: string;
+  teks: string;
+}
+
+export interface PilihanMenjodohkan {
+  kiri: ButirPilihan[];
+  kanan: ButirPilihan[];
+}
+
+export type DataPilihanSoal = PilihanSoal[] | ButirPilihan[] | PilihanMenjodohkan;
 
 // ===== Respons API untuk siswa (architecture.md bagian 6), tanpa data rahasia =====
 
@@ -146,10 +166,12 @@ export interface TopikRingkas {
 /** GET /api/guru/topik/detail */
 export interface SoalTopikDetail {
   nomor: number;
+  tipe: TipeSoal;
   teks: string;
-  pilihan: PilihanSoal[];
-  kunci: KodePilihan;
-  miskonsepsi: Partial<Record<KodePilihan, string>>;
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
+  kunci: string;
+  miskonsepsi: Record<string, string>;
 }
 
 export interface TopikDetail {
@@ -210,6 +232,20 @@ export interface HasilPelanggaran {
   terblokir: boolean;
 }
 
+/** Jawaban esai siswa untuk dinilai guru pada halaman Hasil. */
+export interface JawabanEsaiGuru {
+  soalId: string;
+  nomorSoal: number;
+  teksSoal: string;
+  gambarSoal: string | null;
+  pedomanJawaban: string | null;
+  siswaId: string;
+  namaSiswa: string;
+  jawabanTeks: string;
+  belumDinilai: boolean;
+  benar: boolean;
+}
+
 /** GET /api/guru/hasil */
 export interface HasilGuru extends RingkasanMateri {
   sesi: {
@@ -225,6 +261,7 @@ export interface HasilGuru extends RingkasanMateri {
   jumlahSiswa: number;
   jumlahMenjawab: number;
   diblokir: SiswaDiblokirGuru[];
+  esai: JawabanEsaiGuru[];
   kelompok: Record<Kelompok, SiswaHasil[]>;
   soalTersulit: SoalTersulit | null;
 }
@@ -233,8 +270,10 @@ export interface HasilGuru extends RingkasanMateri {
 export interface SoalUntukSiswa {
   id: string;
   nomor: number;
+  tipe: TipeSoal;
   teks: string;
-  pilihan: PilihanSoal[];
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
 }
 
 /** GET /api/siswa/hasil: rincian jawaban percobaan terakhir pada satu kuis. */
@@ -252,11 +291,14 @@ export interface RincianJawabanSiswa {
   soal: {
     id: string;
     nomor: number;
+    tipe: TipeSoal;
     teks: string;
-    pilihan: PilihanSoal[];
-    pilihanSiswa: KodePilihan | null;
-    kunci: KodePilihan;
+    gambar: string | null;
+    pilihan: DataPilihanSoal;
+    pilihanSiswa: string | null;
+    kunci: string;
     benar: boolean;
+    belumDinilai: boolean;
   }[];
 }
 

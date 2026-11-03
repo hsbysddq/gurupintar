@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { skemaQuerySoal } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { bacaJawabanSesi, bacaSoalTopik } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
@@ -9,27 +10,14 @@ import {
   responsError,
   responsOk,
 } from '@/lib/server/respons';
-import type { KodePilihan, PilihanSoal, RincianJawabanSiswa } from '@/lib/tipe';
+import type { RincianJawabanSiswa } from '@/lib/tipe';
 
 type KelasRingkas = { nama: string; mapel: string } | null;
 type TopikRingkas = { nama: string } | null;
 
-type BarisJawaban = {
-  soal_id: string;
-  pilihan: string;
-  benar: boolean;
-};
-
-type BarisSoal = {
-  id: string;
-  nomor: number;
-  teks: string;
-  pilihan: PilihanSoal[];
-  kunci: string;
-};
-
 // GET /api/siswa/hasil?sesi=: rincian per soal untuk percobaan terakhir siswa pada satu kuis.
-// Kunci hanya dikirim setelah siswa punya hasil; label kelompok tidak pernah dikirim (D-2).
+// Kunci hanya dikirim setelah siswa punya hasil; pedoman esai disembunyikan selama belum dinilai guru.
+// Label kelompok tidak pernah dikirim (D-2).
 export async function GET(request: NextRequest) {
   const auth = await wajibPeranApi('siswa');
   if (!auth.ok) return auth.respons;
@@ -61,21 +49,13 @@ export async function GET(request: NextRequest) {
     if (!hasil.data) return responsError('Hasil kuis belum tersedia.', 404);
 
     const [jawaban, soal] = await Promise.all([
-      db
-        .from('jawaban')
-        .select('soal_id, pilihan, benar')
-        .eq('sesi_id', input.data.sesi)
-        .eq('siswa_id', auth.profil.id),
-      db
-        .from('soal')
-        .select('id, nomor, teks, pilihan, kunci')
-        .eq('topik_id', sesi.topik_id)
-        .order('nomor'),
+      bacaJawabanSesi(db, input.data.sesi, auth.profil.id),
+      bacaSoalTopik(db, sesi.topik_id, { sertakanRahasia: true }),
     ]);
-    if (jawaban.error) return petakanErrorDb(jawaban.error);
-    if (soal.error) return petakanErrorDb(soal.error);
+    if (jawaban.error || !jawaban.data) return petakanErrorDb(jawaban.error);
+    if (soal.error || !soal.data) return petakanErrorDb(soal.error);
 
-    const petaJawaban = new Map((jawaban.data as BarisJawaban[]).map((j) => [j.soal_id, j]));
+    const petaJawaban = new Map(jawaban.data.map((j) => [j.soal_id, j]));
     const kelas = sesi.kelas as unknown as KelasRingkas;
     const topik = sesi.topik as unknown as TopikRingkas;
 
@@ -90,16 +70,21 @@ export async function GET(request: NextRequest) {
       },
       skor: hasil.data.skor as number,
       total: hasil.data.total as number,
-      soal: (soal.data as BarisSoal[]).map((s) => {
+      soal: soal.data.map((s) => {
         const j = petaJawaban.get(s.id);
+        const belumDinilai = j?.belum_dinilai ?? false;
         return {
           id: s.id,
           nomor: s.nomor,
+          tipe: s.tipe,
           teks: s.teks,
+          gambar: s.gambar,
           pilihan: s.pilihan,
-          pilihanSiswa: (j?.pilihan as KodePilihan | undefined) ?? null,
-          kunci: s.kunci as KodePilihan,
+          pilihanSiswa: j?.pilihan ?? null,
+          // Pedoman esai baru ditampilkan setelah dinilai guru agar tidak bocor saat mengerjakan ulang.
+          kunci: s.tipe === 'esai' && belumDinilai ? '' : s.kunci,
           benar: j?.benar ?? false,
+          belumDinilai,
         };
       }),
     };

@@ -50,10 +50,13 @@ create table soal (
   id uuid primary key default gen_random_uuid(),
   topik_id uuid not null references topik(id) on delete cascade,
   nomor int not null,
+  tipe text not null default 'pilgan'
+    check (tipe in ('pilgan','pilgan_kompleks','benar_salah','isian_singkat','menjodohkan','esai')),
   teks text not null,
-  pilihan jsonb not null,          -- [{"kode":"A","teks":"3/4"}, ...]
-  kunci text not null check (kunci in ('A','B','C','D')),
-  miskonsepsi jsonb not null default '{}'::jsonb,  -- {"A":"...", "C":"..."}
+  gambar text,
+  pilihan jsonb not null,          -- [{"kode":"A","teks":"3/4"}, ...] atau struktur TKA
+  kunci text not null check (char_length(kunci) <= 2000),
+  miskonsepsi jsonb not null default '{}'::jsonb,  -- {"A":"...", "C":"...", "umum":"..."}
   unique (topik_id, nomor)
 );
 
@@ -73,8 +76,9 @@ create table jawaban (
   sesi_id uuid not null references sesi_kuis(id) on delete cascade,
   siswa_id uuid not null references pengguna(id) on delete cascade,
   soal_id uuid not null references soal(id) on delete cascade,
-  pilihan text not null check (pilihan in ('A','B','C','D')),
+  pilihan text not null check (char_length(pilihan) between 1 and 2000),
   benar boolean not null,
+  belum_dinilai boolean not null default false,
   dibuat_pada timestamptz not null default now(),
   unique (sesi_id, siswa_id, soal_id)
 );
@@ -183,11 +187,15 @@ begin
   if v_status is null then raise exception 'SESI_TIDAK_ADA'; end if;
   if v_status <> 'aktif' then raise exception 'SESI_DITUTUP'; end if;
 
-  insert into jawaban (sesi_id, siswa_id, soal_id, pilihan, benar)
-  select p_sesi, p_siswa, (j->>'soalId')::uuid, j->>'pilihan', (j->>'benar')::boolean
+  insert into jawaban (sesi_id, siswa_id, soal_id, pilihan, benar, belum_dinilai)
+  select p_sesi, p_siswa, (j->>'soalId')::uuid, j->>'pilihan',
+         (j->>'benar')::boolean, coalesce((j->>'belumDinilai')::boolean, false)
   from jsonb_array_elements(p_jawaban) as j
   on conflict (sesi_id, siswa_id, soal_id)
-  do update set pilihan = excluded.pilihan, benar = excluded.benar, dibuat_pada = now();
+  do update set pilihan = excluded.pilihan,
+                benar = excluded.benar,
+                belum_dinilai = excluded.belum_dinilai,
+                dibuat_pada = now();
 
   insert into hasil_siswa (sesi_id, siswa_id, skor, total, kelompok)
   values (p_sesi, p_siswa, p_skor, p_total, p_kelompok)
@@ -245,11 +253,42 @@ begin
 
   delete from soal where topik_id = p_topik;
 
-  insert into soal (topik_id, nomor, teks, pilihan, kunci, miskonsepsi)
-  select p_topik, (s->>'nomor')::int, s->>'teks', s->'pilihan', s->>'kunci',
+  insert into soal (topik_id, nomor, tipe, teks, gambar, pilihan, kunci, miskonsepsi)
+  select p_topik,
+         (s->>'nomor')::int,
+         coalesce(nullif(s->>'tipe', ''), 'pilgan'),
+         s->>'teks',
+         nullif(s->>'gambar', ''),
+         s->'pilihan',
+         coalesce(s->>'kunci', ''),
          coalesce(s->'miskonsepsi', '{}'::jsonb)
   from jsonb_array_elements(p_soal) as s;
-end $$;
+end $;
+
+-- Guru menilai jawaban esai dan memperbarui skor serta kelompok siswa secara atomik.
+create or replace function simpan_nilai_esai(
+  p_sesi uuid, p_siswa uuid, p_soal uuid,
+  p_benar boolean, p_skor int, p_total int, p_kelompok text
+) returns void language plpgsql as $
+begin
+  update jawaban
+  set benar = p_benar, belum_dinilai = false
+  where sesi_id = p_sesi and siswa_id = p_siswa and soal_id = p_soal;
+  if not found then raise exception 'JAWABAN_TIDAK_ADA'; end if;
+
+  update hasil_siswa
+  set skor = p_skor, total = p_total, kelompok = p_kelompok
+  where sesi_id = p_sesi and siswa_id = p_siswa;
+
+  update percobaan_kuis
+  set skor = p_skor, total = p_total, kelompok = p_kelompok
+  where id = (
+    select id from percobaan_kuis
+    where sesi_id = p_sesi and siswa_id = p_siswa
+    order by dikirim_pada desc
+    limit 1
+  );
+end $;
 
 revoke execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) from public, anon, authenticated;
 revoke execute on function buka_sesi(uuid, uuid, text) from public, anon, authenticated;
@@ -257,9 +296,11 @@ revoke execute on function ambil_kunci_materi(uuid) from public, anon, authentic
 revoke execute on function lepas_kunci_materi(uuid) from public, anon, authenticated;
 revoke execute on function hapus_anggota_kelas(uuid, uuid) from public, anon, authenticated;
 revoke execute on function ubah_topik(uuid, text, text, jsonb) from public, anon, authenticated;
+revoke execute on function simpan_nilai_esai(uuid, uuid, uuid, boolean, int, int, text) from public, anon, authenticated;
 grant execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) to service_role;
 grant execute on function buka_sesi(uuid, uuid, text) to service_role;
 grant execute on function ambil_kunci_materi(uuid) to service_role;
 grant execute on function lepas_kunci_materi(uuid) to service_role;
 grant execute on function hapus_anggota_kelas(uuid, uuid) to service_role;
 grant execute on function ubah_topik(uuid, text, text, jsonb) to service_role;
+grant execute on function simpan_nilai_esai(uuid, uuid, uuid, boolean, int, int, text) to service_role;

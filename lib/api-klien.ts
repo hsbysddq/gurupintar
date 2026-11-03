@@ -8,6 +8,7 @@ import type {
   BodyHapusSiswa,
   BodyBukaBlokir,
   BodyJawaban,
+  BodyNilaiEsai,
   BodyMasuk,
   BodyMateriPustaka,
   BodyTindakanPendampingan,
@@ -161,7 +162,9 @@ export function laporPelanggaran(sesiId: string): Promise<HasilPelanggaran> {
   return minta('/api/siswa/pelanggaran', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }
 
-export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true; skor: number; total: number }> {
+export function kirimJawaban(
+  body: BodyJawaban,
+): Promise<{ ok: true; skor: number; total: number; menungguNilai?: number }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
 }
 
@@ -174,6 +177,11 @@ export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<
 /** Guru membuka blokir siswa pada satu kuis. */
 export function bukaBlokirSiswa(body: BodyBukaBlokir): Promise<{ ok: true }> {
   return minta('/api/guru/blokir', { method: 'POST', body: JSON.stringify(body) });
+}
+
+/** Guru menilai jawaban esai siswa (Benar / Salah) secara manual. */
+export function nilaiJawabanEsai(body: BodyNilaiEsai): Promise<{ ok: true; skor: number; total: number }> {
+  return minta('/api/guru/jawaban/nilai', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function ambilDaftarKelas(): Promise<KelasRingkas[]> {

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { skemaQuerySoal } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
 import { bacaBlokir } from '@/lib/server/blokir';
+import { bacaSoalTopik } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
@@ -11,7 +12,7 @@ import {
   responsError,
   responsOk,
 } from '@/lib/server/respons';
-import type { PilihanSoal, SoalUntukSiswa } from '@/lib/tipe';
+import type { SoalUntukSiswa } from '@/lib/tipe';
 
 // GET /api/soal?sesi= (PRD F-3)
 // Kolom kunci dan miskonsepsi sengaja tidak di-select agar tidak pernah sampai ke browser (AC-3.5).
@@ -40,18 +41,16 @@ export async function GET(request: NextRequest) {
     // Siswa yang diblokir tidak dilayani sampai guru membuka blokirnya (423 Locked).
     if ((await bacaBlokir(db, input.data.sesi, auth.profil.id))?.terblokir) return responsError(PESAN_DIBLOKIR, 423);
 
-    const soal = await db
-      .from('soal')
-      .select('id, nomor, teks, pilihan')
-      .eq('topik_id', sesi.topik_id)
-      .order('nomor');
-    if (soal.error) return petakanErrorDb(soal.error);
+    const soal = await bacaSoalTopik(db, sesi.topik_id, { sertakanRahasia: false });
+    if (soal.error || !soal.data) return petakanErrorDb(soal.error);
 
     const respons: SoalUntukSiswa[] = soal.data.map((s) => ({
       id: s.id,
       nomor: s.nomor,
+      tipe: s.tipe,
       teks: s.teks,
-      pilihan: s.pilihan as PilihanSoal[],
+      gambar: s.gambar,
+      pilihan: s.pilihan,
     }));
     return responsOk(respons);
   } catch (err) {

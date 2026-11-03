@@ -29,6 +29,23 @@ export function tentukanTargetMateri(input: {
   return { ok: true, target: berisiSiswa.filter((k) => !punyaMateri.has(k)) };
 }
 
+function ekstrakTeksMiskonsepsi(peta: Record<string, string> | undefined, pilihan: string): string[] {
+  if (!peta) return [];
+  const langsung = peta[pilihan]?.trim();
+  if (langsung) return [langsung];
+
+  if (pilihan.includes(',')) {
+    const daftar = pilihan
+      .split(',')
+      .map((kode) => peta[kode.trim()]?.trim() ?? '')
+      .filter((t) => t.length > 0);
+    if (daftar.length > 0) return daftar;
+  }
+
+  const umum = peta.umum?.trim();
+  return umum ? [umum] : [];
+}
+
 /**
  * Teks miskonsepsi yang paling sering muncul di tiap kelompok, untuk pesan AI (architecture.md 9.2 dan 9.4).
  * Hanya teks miskonsepsi yang keluar dari fungsi ini; nama dan ID siswa tidak ikut.
@@ -36,7 +53,7 @@ export function tentukanTargetMateri(input: {
 export function miskonsepsiPerKelompok(
   input: {
     hasil: { siswaId: string; kelompok: Kelompok }[];
-    jawaban: { siswaId: string; soalId: string; pilihan: string; benar: boolean }[];
+    jawaban: { siswaId: string; soalId: string; pilihan: string; benar: boolean; belumDinilai?: boolean }[];
     soal: { id: string; miskonsepsi: Record<string, string> }[];
   },
   batas = 3,
@@ -46,11 +63,12 @@ export function miskonsepsiPerKelompok(
   const hitungan: Record<Kelompok, Map<string, number>> = { sudah: new Map(), setengah: new Map(), belum: new Map() };
 
   for (const j of input.jawaban) {
-    if (j.benar) continue;
+    if (j.benar || j.belumDinilai) continue;
     const kelompok = kelompokSiswa.get(j.siswaId);
-    const teks = miskonsepsiSoal.get(j.soalId)?.[j.pilihan]?.trim();
-    if (!kelompok || !teks) continue;
-    hitungan[kelompok].set(teks, (hitungan[kelompok].get(teks) ?? 0) + 1);
+    if (!kelompok) continue;
+    for (const teks of ekstrakTeksMiskonsepsi(miskonsepsiSoal.get(j.soalId), j.pilihan)) {
+      hitungan[kelompok].set(teks, (hitungan[kelompok].get(teks) ?? 0) + 1);
+    }
   }
 
   const urutkan = (peta: Map<string, number>) =>

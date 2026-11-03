@@ -2,6 +2,7 @@ import { skemaBodyHapusTopik, skemaBodyTopikBaru, skemaBodyUbahTopik } from '@/l
 import { TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { keBarisSoal, susunDaftarTopik } from '@/lib/soal-guru';
 import { wajibPeranApi } from '@/lib/server/auth';
+import { perluMigrasiSoalTka, PESAN_MIGRASI_SOAL_TKA } from '@/lib/server/soal-tka-db';
 import { topikDipakai, topikMilikGuru } from '@/lib/server/topik';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
@@ -53,12 +54,32 @@ export async function POST(request: Request) {
       .single();
     if (topik.error) return petakanErrorDb(topik.error);
 
-    const { error } = await db.from('soal').insert(keBarisSoal(topik.data.id, soal));
+    const barisSoal = keBarisSoal(topik.data.id, soal);
+    let { error } = await db.from('soal').insert(barisSoal);
+    const butuhKolomTka = barisSoal.some((b) => b.tipe !== 'pilgan' || b.gambar !== null);
+
+    // Bila migrasi TKA belum dijalankan, soal pilgan murni tanpa gambar tetap bisa disimpan ke skema lama.
+    if (error && perluMigrasiSoalTka(error) && !butuhKolomTka) {
+      const barisLama = barisSoal.map((b) => ({
+        topik_id: b.topik_id,
+        nomor: b.nomor,
+        teks: b.teks,
+        pilihan: b.pilihan,
+        kunci: b.kunci,
+        miskonsepsi: b.miskonsepsi,
+      }));
+      const ulang = await db.from('soal').insert(barisLama);
+      error = ulang.error;
+    }
+
     if (error) {
       console.error('Soal gagal disimpan:', error.message);
       // Jika penghapusan ini juga gagal, topik tanpa soal tidak muncul di GET dan ditolak saat membuka kuis.
       const hapus = await db.from('topik').delete().eq('id', topik.data.id);
       if (hapus.error) console.error('Topik tanpa soal gagal dihapus:', hapus.error.message);
+      if (perluMigrasiSoalTka(error)) {
+        return responsError(PESAN_MIGRASI_SOAL_TKA, 503);
+      }
       return responsError(PESAN_ERROR_UMUM, 500);
     }
 
@@ -84,19 +105,37 @@ export async function PATCH(request: Request) {
     if (!topik) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
     if (await topikDipakai(db, topik.id)) return responsError(PESAN_TOPIK_DIPAKAI, 409);
 
+    const barisSoal = keBarisSoal(topik.id, input.data.soal);
     const { error } = await db.rpc('ubah_topik', {
       p_topik: topik.id,
       p_nama: input.data.nama,
       p_capaian: input.data.capaianPembelajaran,
-      p_soal: keBarisSoal(topik.id, input.data.soal),
+      p_soal: barisSoal,
     });
     if (error) {
       const pesan = error.message ?? '';
+      if (perluMigrasiSoalTka(error)) {
+        return responsError(PESAN_MIGRASI_SOAL_TKA, 503);
+      }
       if (error.code === 'PGRST202' || (pesan.includes('ubah_topik') && pesan.includes('Could not find'))) {
         return responsError(PESAN_MIGRASI_UBAH, 503);
       }
       if (pesan.includes('TOPIK_TIDAK_ADA')) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
       return petakanErrorDb(error);
+    }
+
+    // Jika fungsi ubah_topik di DB masih versi lama (sebelum migrasi-soal-tka.sql), pastikan tipe & gambar ikut tersimpan.
+    for (const b of barisSoal) {
+      if (b.tipe !== 'pilgan' || b.gambar !== null) {
+        const upd = await db
+          .from('soal')
+          .update({ tipe: b.tipe, gambar: b.gambar })
+          .eq('topik_id', topik.id)
+          .eq('nomor', b.nomor);
+        if (upd.error && perluMigrasiSoalTka(upd.error)) {
+          return responsError(PESAN_MIGRASI_SOAL_TKA, 503);
+        }
+      }
     }
 
     return responsOk({ ok: true });

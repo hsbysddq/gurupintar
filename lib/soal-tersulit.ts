@@ -1,17 +1,31 @@
 import type { SoalTersulit } from './tipe';
 
 type SoalDinilai = { id: string; nomor: number; teks: string; miskonsepsi: Record<string, string> };
-type JawabanDinilai = { soalId: string; pilihan: string; benar: boolean };
+type JawabanDinilai = { soalId: string; pilihan: string; benar: boolean; belumDinilai?: boolean };
+
+function ambilMiskonsepsi(peta: Record<string, string>, kodeTerbanyak: string | null): string | null {
+  if (kodeTerbanyak) {
+    if (peta[kodeTerbanyak]) return peta[kodeTerbanyak];
+    if (kodeTerbanyak.includes(',')) {
+      for (const kode of kodeTerbanyak.split(',')) {
+        if (peta[kode]) return peta[kode];
+      }
+    }
+  }
+  return peta.umum || null;
+}
 
 /**
  * Soal dengan persentase salah tertinggi (seri → nomor terkecil), beserta miskonsepsi dari pilihan salah
  * yang paling sering dipilih (seri → kode abjad terkecil). `null` jika tidak ada jawaban (architecture.md 8.3).
+ * Jawaban esai yang masih `belumDinilai` dilewati agar tidak dihitung salah sebelum dinilai guru.
  */
 export function cariSoalTersulit(soal: SoalDinilai[], jawaban: JawabanDinilai[]): SoalTersulit | null {
   const statistik = new Map<string, { total: number; salah: number; pilihanSalah: Map<string, number> }>();
   for (const s of soal) statistik.set(s.id, { total: 0, salah: 0, pilihanSalah: new Map() });
 
   for (const j of jawaban) {
+    if (j.belumDinilai) continue;
     const st = statistik.get(j.soalId);
     if (!st) continue;
     st.total++;
@@ -44,6 +58,6 @@ export function cariSoalTersulit(soal: SoalDinilai[], jawaban: JawabanDinilai[])
     nomor: terpilih.soal.nomor,
     teks: terpilih.soal.teks,
     persenSalah: Math.round(terpilih.rasio * 100),
-    miskonsepsi: (kodeTerbanyak && terpilih.soal.miskonsepsi[kodeTerbanyak]) || null,
+    miskonsepsi: kodeTerbanyak ? ambilMiskonsepsi(terpilih.soal.miskonsepsi, kodeTerbanyak) : null,
   };
 }
