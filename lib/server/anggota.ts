@@ -1,5 +1,6 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { tabelBlokirBelumAda } from './blokir';
 import { tabelPercobaanBelumAda } from './percobaan';
 
 export const PESAN_NAMA_DIPAKAI =
@@ -45,7 +46,7 @@ export async function tambahAnggotaKelas(
 }
 
 /**
- * Mengeluarkan siswa dari kelas beserta jawaban, hasil, dan riwayat percobaan kuisnya di kelas itu.
+ * Mengeluarkan siswa dari kelas beserta jawaban, hasil, riwayat percobaan, dan blokir kuisnya.
  * Dikerjakan langsung dengan penghapusan biasa (tanpa fungsi SQL khusus) supaya jalan di database mana pun;
  * keanggotaan dihapus terakhir, jadi bila ada langkah yang gagal siswa tetap terdaftar dan bisa mengulang.
  * Pemanggil wajib sudah memeriksa hak (siswa menghapus dirinya sendiri, atau guru pemilik kelas).
@@ -56,6 +57,9 @@ export async function hapusAnggotaKelas(db: SupabaseClient, kelasId: string, sis
   const idSesi = sesi.data.map((s) => s.id as string);
 
   if (idSesi.length > 0) {
+    const blokir = await db.from('blokir_kuis').delete().eq('siswa_id', siswaId).in('sesi_id', idSesi);
+    if (blokir.error && !tabelBlokirBelumAda(blokir.error)) throw blokir.error;
+
     const jawaban = await db.from('jawaban').delete().eq('siswa_id', siswaId).in('sesi_id', idSesi);
     if (jawaban.error) throw jawaban.error;
 

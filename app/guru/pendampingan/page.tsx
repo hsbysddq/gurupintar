@@ -10,6 +10,8 @@ import {
   CircleHelp,
   Clock3,
   Info,
+  LayoutGrid,
+  School,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -202,6 +204,21 @@ function IsiPendampingan() {
             </div>
           )}
           <LabelHanyaGuru />
+          <div className="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
+            {kelasId && (
+              <Link
+                href={`/guru/kelas?kelas=${encodeURIComponent(kelasId)}`}
+                className="aura-btn aura-btn-primary h-11 px-4 text-[12px]"
+              >
+                <School aria-hidden="true" className="size-4" />
+                Ruang kelas
+              </Link>
+            )}
+            <Link href="/guru" className="aura-btn aura-btn-secondary h-11 px-4 text-[12px]">
+              <LayoutGrid aria-hidden="true" className="size-4" />
+              Semua mapel
+            </Link>
+          </div>
         </div>
       </header>
 

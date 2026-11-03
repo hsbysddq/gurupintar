@@ -237,6 +237,8 @@ returns void language plpgsql as $$
 begin
   delete from jawaban j using sesi_kuis s
     where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  delete from blokir_kuis b using sesi_kuis s
+    where b.sesi_id = s.id and s.kelas_id = p_kelas and b.siswa_id = p_siswa;
   delete from percobaan_kuis p using sesi_kuis s
     where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
   delete from hasil_siswa h using sesi_kuis s
