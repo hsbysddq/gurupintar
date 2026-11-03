@@ -210,6 +210,29 @@ export interface SoalUntukSiswa {
   pilihan: PilihanSoal[];
 }
 
+/** GET /api/siswa/hasil: rincian jawaban percobaan terakhir pada satu kuis. */
+export interface RincianJawabanSiswa {
+  sesi: {
+    id: string;
+    kelasId: string;
+    namaKelas: string;
+    namaMapel: string;
+    namaTopik: string;
+    dikirimPada: string;
+  };
+  skor: number;
+  total: number;
+  soal: {
+    id: string;
+    nomor: number;
+    teks: string;
+    pilihan: PilihanSoal[];
+    pilihanSiswa: KodePilihan | null;
+    kunci: KodePilihan;
+    benar: boolean;
+  }[];
+}
+
 // ===== Materi (architecture.md bagian 6) =====
 
 /** GET/POST /api/guru/materi */

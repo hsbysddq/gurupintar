@@ -31,6 +31,7 @@ import type {
   SesiGuru,
   SesiSiswa,
   SesiUntukSiswa,
+  RincianJawabanSiswa,
   SoalUntukSiswa,
   SumberMateri,
   TopikDetail,
@@ -142,6 +143,11 @@ export async function ambilDetailKelasSiswa(
 
 export function ambilSoal(sesiId: string): Promise<SoalUntukSiswa[]> {
   return minta(`/api/soal?sesi=${encodeURIComponent(sesiId)}`);
+}
+
+/** Rincian benar/salah per soal untuk percobaan terakhir pada satu kuis. */
+export function ambilRincianHasil(sesiId: string, signal?: AbortSignal): Promise<RincianJawabanSiswa> {
+  return minta(`/api/siswa/hasil?sesi=${encodeURIComponent(sesiId)}`, { signal });
 }
 
 export function kirimFormat(sesiId: string, format: Format): Promise<{ ok: true }> {

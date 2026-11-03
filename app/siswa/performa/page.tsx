@@ -109,6 +109,12 @@ export default function HalamanPerforma() {
   const titik = titikGrafik(daftar);
   const judulKuis = petaJudulKuis(daftar);
   const terbaruDulu = [...daftar].sort((a, b) => b.dikirimPada.localeCompare(a.dikirimPada));
+  const sesiTerlihat = new Set<string>();
+  const riwayatTampil = terbaruDulu.map((k) => {
+    const pertama = !sesiTerlihat.has(k.sesiId);
+    sesiTerlihat.add(k.sesiId);
+    return { ...k, pertama };
+  });
   const IkonPerubahan =
     ringkas.perubahan === null || ringkas.perubahan === 0
       ? Minus
@@ -240,7 +246,7 @@ export default function HalamanPerforma() {
             <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">Semua pengerjaan, terbaru di atas.</p>
           </div>
           <ul className="grid gap-3 md:grid-cols-2">
-            {terbaruDulu.map((k) => (
+            {riwayatTampil.map((k) => (
               <li key={`${k.sesiId}-${k.dikirimPada}`}>
                 <article className="aura-glass flex items-start justify-between gap-3 rounded-[20px] p-4">
                   <div className="min-w-0">
@@ -251,6 +257,15 @@ export default function HalamanPerforma() {
                       {k.namaMapel ? `${k.namaMapel} · ` : ""}
                       {k.namaKelas} · {formatTanggalPanjang(k.dikirimPada)}
                     </p>
+                    {k.pertama && (
+                      <Link
+                        href={`/siswa/hasil?sesi=${encodeURIComponent(k.sesiId)}`}
+                        className="mt-2 inline-flex items-center gap-1 font-display text-[12px] font-semibold text-aura-primary hover:underline"
+                      >
+                        Lihat rincian jawaban
+                        <ArrowRight aria-hidden="true" className="size-3.5" />
+                      </Link>
+                    )}
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="font-display text-[20px] leading-none font-extrabold text-aura-primary">
