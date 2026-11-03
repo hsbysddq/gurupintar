@@ -38,7 +38,8 @@ export function DaftarSiswaKelas({
     );
   }
 
-  const jumlahDiblokir = siswa.filter((s) => s.blokir.length > 0).length;
+  const jumlahTerindikasi = siswa.filter((s) => s.blokir.length > 0).length;
+  const jumlahDiblokir = siswa.filter((s) => s.blokir.some((b) => b.terblokir)).length;
 
   return (
     <section className="flex flex-col gap-4">
@@ -52,15 +53,16 @@ export function DaftarSiswaKelas({
         <TombolSalinKode kode={kodeUndangan} />
       </KartuKaca>
 
-      {jumlahDiblokir > 0 && (
+      {jumlahTerindikasi > 0 && (
         <div
           role="status"
           className="flex items-start gap-2 rounded-kecil bg-belum-latar px-4 py-3 text-[14px] leading-normal text-belum-teks"
         >
           <ShieldAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <p>
-            <strong>{jumlahDiblokir} siswa diblokir karena curang.</strong> Mereka meninggalkan halaman kuis 3 kali dan
-            tidak bisa mengerjakan lagi sampai kamu membuka blokirnya.
+            <strong>{jumlahTerindikasi} siswa memiliki indikasi kecurangan.</strong> Mereka terdeteksi meninggalkan
+            halaman kuis. {jumlahDiblokir > 0 ? `${jumlahDiblokir} sudah diblokir.` : "Belum ada yang diblokir."}
+            {" "}Pelanggaran ketiga akan memblokir kuis sampai kamu membukanya.
           </p>
         </div>
       )}
@@ -101,11 +103,12 @@ export function DaftarSiswaKelas({
                       <span className="flex min-w-0 items-center gap-2 text-[13px] leading-normal text-belum-teks">
                         <ShieldAlert aria-hidden="true" className="size-4 shrink-0" />
                         <span className="min-w-0">
-                          <strong>Diblokir karena curang</strong> di kuis {b.namaKuis}
-                          {b.jumlahBlokir > 1 && ` · sudah ${b.jumlahBlokir} kali`}
+                          <strong>Indikasi kecurangan</strong> di kuis {b.namaKuis} · {b.jumlah}× meninggalkan halaman
+                          {b.terblokir ? " · diblokir" : ""}
+                          {b.jumlahBlokir > 1 && ` · sudah ${b.jumlahBlokir} kali diblokir`}
                         </span>
                       </span>
-                      <TombolBukaBlokir sesiId={b.sesiId} siswaId={s.siswaId} />
+                      {b.terblokir && <TombolBukaBlokir sesiId={b.sesiId} siswaId={s.siswaId} />}
                     </li>
                   ))}
                 </ul>

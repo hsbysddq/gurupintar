@@ -27,7 +27,7 @@ export default async function HalamanSiswaKelas({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Status "diblokir karena curang" muncul tanpa guru memuat ulang halaman. */}
+      {/* Status indikasi kecurangan muncul tanpa guru memuat ulang halaman. */}
       <PerbaruiOtomatis intervalMs={INTERVAL_POLLING_GURU_MS} />
       <KepalaKelas kelas={dipilih} />
       <DaftarSiswaKelas siswa={siswa} kodeUndangan={dipilih.kodeUndangan} kelasId={dipilih.id} />

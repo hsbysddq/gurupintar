@@ -8,7 +8,11 @@ type Baris = { sesi_id: string; siswa_id: string; jumlah: number; terblokir: boo
 /** Basis data palsu satu tabel (blokir_kuis) cukup untuk kueri yang dipakai lib/server/blokir. */
 function basisPalsu(awal: Baris[] = [], galat: { message: string } | null = null) {
   const baris = [...awal];
-  const cocok = (b: Baris, saring: Record<string, unknown>) => Object.entries(saring).every(([k, v]) => (b as Record<string, unknown>)[k] === v);
+  const cocok = (b: Baris, saring: Record<string, unknown>) =>
+    Object.entries(saring).every(([k, v]) => {
+      if (k.startsWith('gt:')) return Number((b as Record<string, unknown>)[k.slice(3)]) > Number(v);
+      return (b as Record<string, unknown>)[k] === v;
+    });
   const db = {
     from: () => {
       const saring: Record<string, unknown> = {};
@@ -16,6 +20,10 @@ function basisPalsu(awal: Baris[] = [], galat: { message: string } | null = null
         select: () => q,
         eq: (k: string, v: unknown) => {
           saring[k] = v;
+          return q;
+        },
+        gt: (k: string, v: unknown) => {
+          saring[`gt:${k}`] = v;
           return q;
         },
         maybeSingle: async () => ({ data: galat ? null : (baris.find((b) => cocok(b, saring)) ?? null), error: galat }),
@@ -113,12 +121,15 @@ describe('bukaBlokirSiswa', () => {
 });
 
 describe('daftarDiblokir', () => {
-  it('hanya siswa yang sedang terblokir pada kuis itu', async () => {
+  it('mengembalikan semua indikasi kecurangan pada kuis itu, termasuk yang belum diblokir', async () => {
     const { db } = basisPalsu([
       { sesi_id: 'sesi', siswa_id: 'a', jumlah: 3, terblokir: true, jumlah_blokir: 2, diblokir_pada: '2026-11-03T10:00:00Z' },
       { sesi_id: 'sesi', siswa_id: 'b', jumlah: 1, terblokir: false, jumlah_blokir: 0 },
       { sesi_id: 'lain', siswa_id: 'c', jumlah: 3, terblokir: true, jumlah_blokir: 1 },
     ]);
-    expect(await daftarDiblokir(db, 'sesi')).toEqual([{ siswaId: 'a', jumlahBlokir: 2, diblokirPada: '2026-11-03T10:00:00Z' }]);
+    expect(await daftarDiblokir(db, 'sesi')).toEqual([
+      { siswaId: 'a', jumlah: 3, terblokir: true, jumlahBlokir: 2, diblokirPada: '2026-11-03T10:00:00Z' },
+      { siswaId: 'b', jumlah: 1, terblokir: false, jumlahBlokir: 0, diblokirPada: null },
+    ]);
   });
 });

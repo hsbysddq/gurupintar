@@ -57,7 +57,7 @@ describe('sisaKesempatan dan pesanPeringatan', () => {
 
   it('pesan menyebut nomor pelanggaran dan batas, tanpa label kelompok', () => {
     const pesan = pesanPeringatan({ jumlah: 1, terakhirPada: 1 });
-    expect(pesan).toContain(`pelanggaran 1 dari ${BATAS_PELANGGARAN}`);
+    expect(pesan).toContain(`indikasi kecurangan 1 dari ${BATAS_PELANGGARAN}`);
     expect(pesan).not.toMatch(/paham|kelompok/i);
   });
 });

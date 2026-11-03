@@ -27,6 +27,8 @@ type BarisKelas = {
 type BarisBlokirKelas = {
   sesi_id: string;
   siswa_id: string;
+  jumlah: number;
+  terblokir: boolean;
   jumlah_blokir: number;
   diblokir_pada: string | null;
 };
@@ -184,9 +186,9 @@ export async function ambilSiswaKelas(
       db.from('hasil_siswa').select('sesi_id, siswa_id, skor, total, kelompok').in('sesi_id', idSesi),
       db
         .from('blokir_kuis')
-        .select('sesi_id, siswa_id, jumlah_blokir, diblokir_pada')
+        .select('sesi_id, siswa_id, jumlah, terblokir, jumlah_blokir, diblokir_pada')
         .in('sesi_id', idSesi)
-        .eq('terblokir', true),
+        .gt('jumlah', 0),
       db.from('sesi_kuis').select('id, topik(nama)').in('id', idSesi),
     ]);
     if (hasil.error) throw hasil.error;
@@ -206,13 +208,15 @@ export async function ambilSiswaKelas(
     }
   }
 
-  // Blokir aktif per siswa, terbaru lebih dulu.
+  // Indikasi kecurangan per siswa, terbaru lebih dulu.
   const blokirPerSiswa = new Map<string, BlokirSiswaKelas[]>();
   for (const b of barisBlokir) {
     const daftar = blokirPerSiswa.get(b.siswa_id) ?? [];
     daftar.push({
       sesiId: b.sesi_id,
       namaKuis: namaKuis.get(b.sesi_id) ?? 'Kuis',
+      jumlah: b.jumlah,
+      terblokir: b.terblokir,
       jumlahBlokir: b.jumlah_blokir,
       diblokirPada: b.diblokir_pada,
     });

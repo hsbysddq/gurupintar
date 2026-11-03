@@ -68,7 +68,7 @@ export function LayarDiblokir({
         <ShieldAlert aria-hidden="true" className="size-6" />
       </span>
       <h2 id="judul-blokir" className="font-display text-[22px] leading-snug font-extrabold text-aura-ink">
-        Kuis diblokir karena curang
+        Kuis diblokir karena indikasi kecurangan
       </h2>
       <p id="isi-blokir" className="text-aura-muted">
         Kamu meninggalkan halaman kuis sebanyak {jumlah} kali, jadi kuis ini dihentikan. Kamu tidak bisa mengerjakan
@@ -143,13 +143,13 @@ export function PemantauKuis({ sesiId }: { sesiId: string }) {
         .catch(() => {});
     }
     function saatVisibilitasBerubah() {
+      // Hanya tab/jendela yang benar-benar disembunyikan. `blur` tidak dipakai karena
+      // bisa terpicu saat siswa menekan address bar atau membuka devtools.
       if (document.visibilityState === "hidden") lapor();
     }
     document.addEventListener("visibilitychange", saatVisibilitasBerubah);
-    window.addEventListener("blur", lapor);
     return () => {
       document.removeEventListener("visibilitychange", saatVisibilitasBerubah);
-      window.removeEventListener("blur", lapor);
     };
   }, [sesiId]);
 

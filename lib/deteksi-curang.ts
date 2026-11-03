@@ -57,7 +57,7 @@ export function uraiCatatan(mentah: string | null): CatatanPelanggaran {
 
 export function pesanPeringatan(catatan: CatatanPelanggaran): string {
   const sisa = sisaKesempatan(catatan);
-  return `Kami mendeteksi kamu membuka tab lain atau keluar dari halaman kuis. Ini pelanggaran ${catatan.jumlah} dari ${BATAS_PELANGGARAN}. Jika sampai ${BATAS_PELANGGARAN} kali, kuismu diblokir (sisa ${sisa} kali).`;
+  return `Kami mendeteksi kamu membuka tab lain atau keluar dari halaman kuis. Ini indikasi kecurangan ${catatan.jumlah} dari ${BATAS_PELANGGARAN}. Jika sampai ${BATAS_PELANGGARAN} kali, kuismu diblokir (sisa ${sisa} kali).`;
 }
 
 /** Baris tabel blokir_kuis untuk satu siswa di satu kuis. */

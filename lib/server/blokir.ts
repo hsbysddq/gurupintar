@@ -78,24 +78,36 @@ export async function bukaBlokirSiswa(db: SupabaseClient, sesiId: string, siswaI
 
 export interface SiswaDiblokir {
   siswaId: string;
+  jumlah: number;
+  terblokir: boolean;
   jumlahBlokir: number;
   diblokirPada: string | null;
 }
 
-/** Siswa yang sedang terblokir di satu kuis (kosong bila tabel belum dibuat). */
+/** Semua siswa yang pernah meninggalkan halaman kuis, termasuk yang belum diblokir. */
 export async function daftarDiblokir(db: SupabaseClient, sesiId: string): Promise<SiswaDiblokir[]> {
   const { data, error } = await db
     .from('blokir_kuis')
-    .select('siswa_id, jumlah_blokir, diblokir_pada')
+    .select('siswa_id, jumlah, terblokir, jumlah_blokir, diblokir_pada')
     .eq('sesi_id', sesiId)
-    .eq('terblokir', true);
+    .gt('jumlah', 0);
   if (error) {
     if (tabelBlokirBelumAda(error)) return [];
     throw error;
   }
-  return (data as { siswa_id: string; jumlah_blokir: number; diblokir_pada: string | null }[]).map((b) => ({
+  return (
+    data as {
+      siswa_id: string;
+      jumlah: number;
+      terblokir: boolean;
+      jumlah_blokir: number;
+      diblokir_pada: string | null;
+    }[]
+  ).map((b) => ({
     siswaId: b.siswa_id,
+    jumlah: b.jumlah,
+    terblokir: b.terblokir,
     jumlahBlokir: b.jumlah_blokir,
-    diblokirPada: b.diblokir_pada,
+    diblokirPada: b.diblokir_pada ?? null,
   }));
 }
