@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { PlayCircle } from 'lucide-react';
 import { FormGabungMapel } from '@/components/FormGabungMapel';
 import { KartuKaca } from '@/components/KartuKaca';
-import { TombolHapusKelas } from '@/components/TombolHapusKelas';
 import { ikonMapel, warnaMapel } from '@/components/ikon-mapel';
 import { labelKelas, type ProgresKelas } from '@/lib/beranda-siswa';
 
@@ -13,8 +12,7 @@ import { labelKelas, type ProgresKelas } from '@/lib/beranda-siswa';
 export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1.5">
-        <span className="aura-eyebrow">Ruang siswa</span>
+      <header className="flex flex-col gap-1">
         <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-tight text-aura-ink md:text-[32px]">
           Mata Pelajaran
         </h1>
@@ -43,46 +41,46 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
           <p className="text-aura-muted">Minta kode undangan mata pelajaran kepada gurumu, lalu masukkan di kolom di atas.</p>
         </KartuKaca>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {kelas.map((k) => {
             const Ikon = ikonMapel(k.mapel);
             const warna = warnaMapel(k.id);
             return (
               <li key={k.id}>
-                <KartuKaca as="article" className="flex h-full flex-col gap-4 p-5">
+                <KartuKaca as="article" className="flex h-full flex-col gap-3 p-4">
                   <div className="flex items-start gap-3">
-                    <span className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${warna.ikon}`}>
-                      <Ikon aria-hidden="true" className="size-6" />
+                    <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${warna.ikon}`}>
+                      <Ikon aria-hidden="true" className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <h2 className="line-clamp-2 font-display text-[20px] leading-snug font-bold break-words text-aura-ink">
+                      <h2 className="line-clamp-2 font-display text-[18px] leading-snug font-bold break-words text-aura-ink">
                         {k.mapel}
                       </h2>
-                      <p className="truncate text-[13px] leading-normal text-aura-muted">
+                      <p className="truncate text-[12px] leading-normal text-aura-muted">
                         {labelKelas(k.nama)}
                         {k.namaGuru ? ` · ${k.namaGuru}` : ''}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    {k.kodeKuisAktif && (
-                      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-aura-primary/10 px-2.5 py-1 text-[11px] leading-normal font-semibold text-aura-primary">
-                        <PlayCircle aria-hidden="true" className="size-3.5" />
-                        Kuis aktif
-                      </span>
-                    )}
-                    <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between gap-2">
                       <p className={`text-[11px] leading-normal font-semibold ${warna.teks}`}>
                         Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                       </p>
-                      <div
-                        role="img"
-                        aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
-                        className="h-2 overflow-hidden rounded-full bg-aura-ink/10"
-                      >
-                        <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
-                      </div>
+                      {k.kodeKuisAktif && (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-aura-primary/10 px-2 py-0.5 text-[10px] leading-normal font-semibold text-aura-primary">
+                          <PlayCircle aria-hidden="true" className="size-3" />
+                          Kuis aktif
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      role="img"
+                      aria-label={`Progres ${k.mapel}: ${k.progres} persen`}
+                      className="h-1.5 overflow-hidden rounded-full bg-aura-ink/10"
+                    >
+                      <div className={`h-full rounded-full ${warna.bilah}`} style={{ width: `${k.progres}%` }} />
                     </div>
                   </div>
 
@@ -90,18 +88,17 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
                     {k.kodeKuisAktif && (
                       <Link
                         href={`/siswa/gabung?kode=${encodeURIComponent(k.kodeKuisAktif)}`}
-                        className="text-[14px] leading-normal font-semibold text-aura-primary hover:underline"
+                        className="text-[13px] leading-normal font-semibold text-aura-primary hover:underline"
                       >
                         Kerjakan kuis sekarang →
                       </Link>
                     )}
                     <Link
                       href={`/siswa/kelas/detail?kelas=${k.id}`}
-                      className="aura-btn aura-btn-primary min-h-12 px-4 text-[14px]"
+                      className="aura-btn aura-btn-primary min-h-11 px-4 text-[13px]"
                     >
                       Buka mapel
                     </Link>
-                    <TombolHapusKelas kelasId={k.id} mapel={k.mapel} />
                   </div>
                 </KartuKaca>
               </li>

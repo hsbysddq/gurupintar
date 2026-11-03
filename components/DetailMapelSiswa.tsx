@@ -6,6 +6,7 @@ import { ArrowLeft, BookOpen, ClipboardList, History, PlayCircle, type LucideIco
 import { BlokPerformaMapel } from '@/components/BlokPerformaMapel';
 import { IKON_MAPEL, kunciIkonMapel, warnaMapel } from '@/components/ikon-mapel';
 import { KartuKaca } from '@/components/KartuKaca';
+import { TombolHapusKelas } from '@/components/TombolHapusKelas';
 import { labelKelas } from '@/lib/beranda-siswa';
 import {
   DAFTAR_TAB,
@@ -234,7 +235,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
 
   return (
     <div className="flex flex-col gap-4 pb-28 md:pb-0">
-      <div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           href="/siswa/kelas"
           className="inline-flex min-h-11 items-center gap-1.5 text-[13px] leading-normal font-semibold text-aura-muted hover:text-aura-primary"
@@ -242,6 +243,7 @@ export function DetailMapelSiswa({ kelas, detail, tabAwal = 'materi' }: Props) {
           <ArrowLeft aria-hidden="true" className="size-4" />
           Mata Pelajaran
         </Link>
+        <TombolHapusKelas kelasId={kelas.id} mapel={kelas.mapel} />
       </div>
 
       <section
