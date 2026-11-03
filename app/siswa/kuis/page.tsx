@@ -148,6 +148,7 @@ export default function HalamanKuis() {
   return (
     <KerangkaSiswa
       langkah={3}
+      kunciDasbor
       aksi={
         <>
           <div className="hidden lg:block">

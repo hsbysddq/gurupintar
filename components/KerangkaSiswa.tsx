@@ -10,27 +10,37 @@ type KerangkaSiswaProps = {
   aksi?: ReactNode;
   /** Langkah aktif pada alur kuis; kosongkan untuk halaman materi/selesai. */
   langkah?: NomorLangkah;
+  /** Sembunyikan tautan ke dasbor selama kuis berlangsung. */
+  kunciDasbor?: boolean;
 };
 
 /**
  * Kerangka alur siswa (gabung, pilih format, kuis, materi, selesai).
  * Di HP tetap satu kolom sempit; di desktop memakai konten + panel aksi agar tidak terasa seperti aplikasi mobile.
  */
-export function KerangkaSiswa({ children, aksi, langkah }: KerangkaSiswaProps) {
+export function KerangkaSiswa({ children, aksi, langkah, kunciDasbor = false }: KerangkaSiswaProps) {
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col px-4 text-base leading-relaxed md:max-w-[1120px] md:px-6">
       <header className="flex items-center justify-between gap-4 py-4 md:py-6">
-        <Link href="/siswa" aria-label="Guru Pintarku, ke dasbor siswa" className="inline-flex min-h-11 items-center">
-          <TulisanGuruPintar className="h-5 w-auto sm:h-6" />
-        </Link>
-        <Link
-          href="/siswa"
-          className="aura-glass-subtle inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-display text-[12px] font-semibold text-aura-muted transition-colors hover:bg-white/75 hover:text-aura-primary md:px-4"
-        >
-          <LayoutDashboard aria-hidden="true" className="size-4" />
-          <span className="hidden sm:inline">Ke dasbor</span>
-          <span className="sr-only sm:hidden">Ke dasbor</span>
-        </Link>
+        {kunciDasbor ? (
+          <div className="inline-flex min-h-11 items-center">
+            <TulisanGuruPintar className="h-5 w-auto sm:h-6" />
+          </div>
+        ) : (
+          <Link href="/siswa" aria-label="Guru Pintarku, ke dasbor siswa" className="inline-flex min-h-11 items-center">
+            <TulisanGuruPintar className="h-5 w-auto sm:h-6" />
+          </Link>
+        )}
+        {!kunciDasbor && (
+          <Link
+            href="/siswa"
+            className="aura-glass-subtle inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-display text-[12px] font-semibold text-aura-muted transition-colors hover:bg-white/75 hover:text-aura-primary md:px-4"
+          >
+            <LayoutDashboard aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">Ke dasbor</span>
+            <span className="sr-only sm:hidden">Ke dasbor</span>
+          </Link>
+        )}
       </header>
 
       {langkah && (
