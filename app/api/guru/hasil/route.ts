@@ -11,8 +11,9 @@ import {
   PESAN_SESI_TIDAK_ADA,
   responsError,
   responsOk,
+  tabelBelumAda,
 } from '@/lib/server/respons';
-import type { HasilGuru, Kelompok, StatusMateri, StatusSesi } from '@/lib/tipe';
+import type { HasilGuru, Kelompok, SiswaCurang, StatusMateri, StatusSesi } from '@/lib/tipe';
 
 // GET /api/guru/hasil?sesi= (PRD F-5, architecture.md 6.1 dan 7.2)
 // Hanya guru pemilik kelas. Kunci jawaban tidak ikut dikirim; miskonsepsi hanya teks soal tersulit.
@@ -58,6 +59,14 @@ export async function GET(request: NextRequest) {
     }
 
     const namaSiswa = new Map<string, string>(daftarSiswa.map((s) => [s.id, s.nama]));
+
+    const catatan = await db.from('pelanggaran_kuis').select('siswa_id').eq('sesi_id', sesiId);
+    if (catatan.error && !tabelBelumAda(catatan.error)) return petakanErrorDb(catatan.error);
+    const hitungPelanggaran = new Map<string, number>();
+    for (const p of catatan.error ? [] : (catatan.data as { siswa_id: string }[])) {
+      hitungPelanggaran.set(p.siswa_id, (hitungPelanggaran.get(p.siswa_id) ?? 0) + 1);
+    }
+
     const kelompok = kelompokkanHasil(
       hasil.data!.map((h) => ({
         siswaId: h.siswa_id,
@@ -65,8 +74,27 @@ export async function GET(request: NextRequest) {
         skor: h.skor,
         total: h.total,
         kelompok: h.kelompok as Kelompok,
+        pelanggaran: hitungPelanggaran.get(h.siswa_id) ?? 0,
       })),
     );
+
+    const hasilPerSiswa = new Map(hasil.data!.map((h) => [h.siswa_id, h]));
+    const curang: SiswaCurang[] = [...hitungPelanggaran.entries()]
+      .map(([siswaId, pelanggaran]) => {
+        const hasilSiswa = hasilPerSiswa.get(siswaId);
+        return {
+          siswaId,
+          nama: namaSiswa.get(siswaId) ?? 'Siswa',
+          pelanggaran,
+          skor: hasilSiswa?.skor ?? null,
+          total: hasilSiswa?.total ?? null,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.pelanggaran - a.pelanggaran ||
+          a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }),
+      );
 
     const soalTersulit = cariSoalTersulit(
       soal.data!.map((s) => ({
@@ -91,6 +119,7 @@ export async function GET(request: NextRequest) {
       jumlahSiswa: idSiswa.length,
       jumlahMenjawab: hasil.data!.length,
       kelompok,
+      curang,
       soalTersulit,
       ...ringkasMateri(
         kelompok,

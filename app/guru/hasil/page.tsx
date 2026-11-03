@@ -93,7 +93,7 @@ function HasilKuis() {
         )}
       </header>
 
-      <PetaKelas kelompok={data.kelompok} jumlahSiswa={data.jumlahSiswa} />
+      <PetaKelas kelompok={data.kelompok} jumlahSiswa={data.jumlahSiswa} curang={data.curang} />
 
       <KartuSoalTersulit data={data.soalTersulit} jumlahMenjawab={data.jumlahMenjawab} />
 

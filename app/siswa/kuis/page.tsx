@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2, Send, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
@@ -10,7 +10,7 @@ import { NavigasiSoal } from "@/components/NavigasiSoal";
 import { ProgressKuis } from "@/components/ProgressKuis";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { useSesiAktif } from "@/hooks/use-sesi-aktif";
-import { ambilSoal, ErrorApi, kirimJawaban } from "@/lib/api-klien";
+import { ambilSoal, ErrorApi, kirimJawaban, kirimPelanggaran } from "@/lib/api-klien";
 import { hapusSesi } from "@/lib/sesi-lokal";
 import type { KodePilihan, SoalUntukSiswa } from "@/lib/tipe";
 
@@ -33,6 +33,27 @@ export default function HalamanKuis() {
   const [indeks, setIndeks] = useState(0);
   const [jawaban, setJawaban] = useState<Record<string, KodePilihan>>({});
   const [kiriman, setKiriman] = useState<Kiriman>({ status: "diam" });
+  const selesaiRef = useRef(false);
+
+  // Catat ketika siswa meninggalkan tab/jendela kuis. Ini heuristik, bukan bukti mutlak.
+  useEffect(() => {
+    if (!sesiId) return;
+    selesaiRef.current = false;
+    let terakhir = 0;
+
+    const saatVisibilitasBerubah = () => {
+      if (document.visibilityState !== "hidden" || selesaiRef.current) return;
+      const sekarang = Date.now();
+      if (sekarang - terakhir < 1_000) return;
+      terakhir = sekarang;
+      void kirimPelanggaran(sesiId).catch(() => {
+        // Jaringan atau migrasi belum siap tidak boleh mengganggu pengerjaan kuis.
+      });
+    };
+
+    document.addEventListener("visibilitychange", saatVisibilitasBerubah);
+    return () => document.removeEventListener("visibilitychange", saatVisibilitasBerubah);
+  }, [sesiId]);
 
   // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
@@ -115,6 +136,7 @@ export default function HalamanKuis() {
 
   async function kirim() {
     if (!sesi) return;
+    selesaiRef.current = true;
     setKiriman({ status: "mengirim" });
     try {
       const hasil = await kirimJawaban({
@@ -128,6 +150,7 @@ export default function HalamanKuis() {
       }
       router.replace("/siswa/selesai");
     } catch (err) {
+      selesaiRef.current = false;
       const status = err instanceof ErrorApi ? err.status : 0;
       const pesan = status === 0 || status >= 500 ? PESAN_GAGAL_KIRIM : err instanceof ErrorApi ? err.message : PESAN_GAGAL_KIRIM;
       setKiriman({ status: "gagal", pesan, ditutup: status === 409 });
@@ -196,6 +219,9 @@ export default function HalamanKuis() {
           Jawab soal berikut
         </h1>
         <p className="text-aura-muted">Pilih satu jawaban yang paling tepat. Kamu bisa kembali sebelum mengirim.</p>
+        <p className="text-[12px] leading-[18px] font-medium text-belum-teks">
+          Jangan pindah tab atau jendela selama kuis. Aktivitas pindah tab akan dicatat.
+        </p>
       </header>
       <ProgressKuis saatIni={indeks + 1} total={soal.length} />
       <KartuSoalKuis

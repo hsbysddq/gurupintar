@@ -162,11 +162,24 @@ export interface SesiBanyakBaru {
   gagal: { kelasId: string; namaKelas: string; pesan: string }[];
 }
 
+export type JenisPelanggaran = 'pindah-tab';
+
 export interface SiswaHasil {
   siswaId: string;
   nama: string;
   skor: number;
   total: number;
+  /** Jumlah pindah tab yang tercatat selama kuis. */
+  pelanggaran?: number;
+}
+
+/** Siswa yang terdeteksi membuka tab/jendela lain selama kuis. */
+export interface SiswaCurang {
+  siswaId: string;
+  nama: string;
+  pelanggaran: number;
+  skor: number | null;
+  total: number | null;
 }
 
 export interface SoalTersulit {
@@ -199,6 +212,7 @@ export interface HasilGuru extends RingkasanMateri {
   jumlahSiswa: number;
   jumlahMenjawab: number;
   kelompok: Record<Kelompok, SiswaHasil[]>;
+  curang: SiswaCurang[];
   soalTersulit: SoalTersulit | null;
 }
 

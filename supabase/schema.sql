@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
+drop table if exists materi, pelanggaran_kuis, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
 
 -- ===== Akun dan peran =====
 -- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
@@ -103,6 +103,16 @@ create table percobaan_kuis (
 );
 create index percobaan_kuis_siswa_waktu on percobaan_kuis (siswa_id, sesi_id, dikirim_pada desc);
 
+-- Kejadian mencurigakan selama kuis. Saat ini hanya pindah tab/jendela browser.
+create table pelanggaran_kuis (
+  id uuid primary key default gen_random_uuid(),
+  sesi_id uuid not null references sesi_kuis(id) on delete cascade,
+  siswa_id uuid not null references pengguna(id) on delete cascade,
+  jenis text not null check (jenis in ('pindah-tab')),
+  dibuat_pada timestamptz not null default now()
+);
+create index pelanggaran_kuis_sesi_siswa on pelanggaran_kuis (sesi_id, siswa_id);
+
 create table materi (
   id uuid primary key default gen_random_uuid(),
   sesi_id uuid not null references sesi_kuis(id) on delete cascade,
@@ -151,6 +161,7 @@ alter table sesi_kuis enable row level security;
 alter table jawaban enable row level security;
 alter table hasil_siswa enable row level security;
 alter table percobaan_kuis enable row level security;
+alter table pelanggaran_kuis enable row level security;
 alter table materi enable row level security;
 alter table materi_pustaka enable row level security;
 alter table tindakan_pendampingan_kuis enable row level security;
@@ -215,6 +226,8 @@ returns void language plpgsql as $$
 begin
   delete from jawaban j using sesi_kuis s
     where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  delete from pelanggaran_kuis p using sesi_kuis s
+    where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
   delete from percobaan_kuis p using sesi_kuis s
     where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
   delete from hasil_siswa h using sesi_kuis s

@@ -20,6 +20,7 @@ import type {
   Format,
   HasilGuru,
   IsiMateri,
+  JenisPelanggaran,
   KelasRingkas,
   KelasSiswa,
   MateriGuru,
@@ -156,6 +157,18 @@ export function kirimFormat(sesiId: string, format: Format): Promise<{ ok: true 
 
 export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true; skor: number; total: number }> {
   return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
+}
+
+/** Catat pelanggaran saat kuis. `keepalive` agar request tetap terkirim ketika tab disembunyikan. */
+export function kirimPelanggaran(
+  sesiId: string,
+  jenis: JenisPelanggaran = 'pindah-tab',
+): Promise<{ ok: true }> {
+  return minta('/api/siswa/pelanggaran', {
+    method: 'POST',
+    keepalive: true,
+    body: JSON.stringify({ sesiId, jenis }),
+  });
 }
 
 export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<MateriSiswa> {
