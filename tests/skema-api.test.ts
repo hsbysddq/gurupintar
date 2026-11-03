@@ -17,6 +17,7 @@ import {
   skemaBodyUbahTopik,
   skemaBodyFormat,
   skemaBodyJawaban,
+  skemaBodyNilaiEsai,
   skemaBodyTutupSesi,
   skemaBodyUbahKelas,
   skemaBodyUbahMateri,
@@ -94,9 +95,12 @@ describe('skemaBodyJawaban', () => {
     expect(skemaBodyJawaban.safeParse({ ...valid, jawaban: [] }).success).toBe(false);
   });
 
-  it('menolak pilihan di luar A–D', () => {
-    const body = { ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: 'E' }] };
-    expect(skemaBodyJawaban.safeParse(body).success).toBe(false);
+  it('menerima jawaban TKA/esai tidak kosong dan menolak string kosong atau terlalu panjang', () => {
+    expect(skemaBodyJawaban.safeParse({ ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: 'A,C' }] }).success).toBe(true);
+    expect(skemaBodyJawaban.safeParse({ ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: '   ' }] }).success).toBe(false);
+    expect(
+      skemaBodyJawaban.safeParse({ ...valid, jawaban: [{ soalId: SOAL_ID, pilihan: 'x'.repeat(2001) }] }).success,
+    ).toBe(false);
   });
 
   it('tidak meneruskan field tambahan seperti siswaId atau benar dari browser', () => {
@@ -226,7 +230,10 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
     });
     expect(hasil.success).toBe(true);
     expect(hasil.data?.nama).toBe('Pecahan Biasa');
-    expect(hasil.data?.soal[0].pilihan[0]).toBe('2/6');
+    expect(hasil.data?.soal[0].tipe).toBe('pilgan');
+    if (hasil.data?.soal[0].tipe === 'pilgan') {
+      expect(hasil.data.soal[0].pilihan[0]).toBe('2/6');
+    }
   });
 
   it.each([
@@ -290,6 +297,86 @@ describe('skemaBodyTopikBaru (PRD F-10)', () => {
   it('menolak body kosong', () => {
     expect(skemaBodyTopikBaru.safeParse(undefined).success).toBe(false);
     expect(skemaBodyTopikBaru.safeParse({}).success).toBe(false);
+  });
+
+  it('menerima 6 tipe soal TKA beserta gambar data URL yang valid', () => {
+    const gambar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    const campuran = skemaBodyTopikBaru.safeParse({
+      nama: 'Kuis TKA Matematika',
+      capaianPembelajaran: 'Peserta didik menguasai bangun datar dan pecahan.',
+      soal: [
+        { ...soalValid(), gambar },
+        {
+          tipe: 'pilgan_kompleks',
+          teks: 'Manakah pecahan yang senilai dengan 1/2?',
+          gambar,
+          pilihan: ['2/4', '3/6', '2/5', '1/4'],
+          kunciKompleks: ['A', 'B'],
+          miskonsepsi: ['', '', 'Salah perkalian', ''],
+        },
+        {
+          tipe: 'benar_salah',
+          teks: 'Tentukan Benar atau Salah tentang segitiga!',
+          pernyataan: [
+            { teks: 'Jumlah sudut dalam segitiga 180 derajat', kunci: 'B' },
+            { teks: 'Segitiga sama sisi punya 2 sisi berbeda', kunci: 'S' },
+          ],
+          catatanMiskonsepsi: 'Belum hafal sifat segitiga.',
+        },
+        {
+          tipe: 'isian_singkat',
+          teks: 'Berapa nilai desimal dari 1/2?',
+          jawabanSingkat: ['0,5', '1/2'],
+        },
+        {
+          tipe: 'menjodohkan',
+          teks: 'Pasangkan bangun datar dan jumlah sisinya!',
+          pasangan: [
+            { kiri: 'Segitiga', kanan: '3 sisi' },
+            { kiri: 'Persegi', kanan: '4 sisi' },
+          ],
+        },
+        {
+          tipe: 'esai',
+          teks: 'Jelaskan cara menghitung luas segitiga dengan alas 8 cm dan tinggi 6 cm!',
+          gambar,
+          pedomanJawaban: 'Luas = 1/2 x 8 x 6 = 24 cm².',
+        },
+      ],
+    });
+    expect(campuran.success).toBe(true);
+  });
+
+  it('menolak pilgan_kompleks yang hanya memilih 1 kunci dan gambar bukan data URL', () => {
+    const kurangKunci = skemaBodyTopikBaru.safeParse({
+      nama: 'Kuis TKA',
+      capaianPembelajaran: 'Peserta didik memahami materi.',
+      soal: [
+        {
+          tipe: 'pilgan_kompleks',
+          teks: 'Pilih semua bilangan genap berikut!',
+          pilihan: ['2', '3', '5', '7'],
+          kunciKompleks: ['A'],
+        },
+      ],
+    });
+    expect(kurangKunci.success).toBe(false);
+
+    const gambarSalah = dengan((b) => {
+      (b.soal[0] as Record<string, unknown>).gambar = 'https://contoh.id/segitiga.png';
+    });
+    expect(gambarSalah.success).toBe(false);
+  });
+});
+
+describe('skemaBodyNilaiEsai', () => {
+  it('memvalidasi sesiId, siswaId, soalId, dan boolean benar', () => {
+    expect(
+      skemaBodyNilaiEsai.safeParse({ sesiId: SESI_ID, siswaId: SISWA_ID, soalId: SOAL_ID, benar: true }).success,
+    ).toBe(true);
+    expect(
+      skemaBodyNilaiEsai.safeParse({ sesiId: SESI_ID, siswaId: SISWA_ID, soalId: SOAL_ID, benar: 'benar' }).success,
+    ).toBe(false);
   });
 });
 

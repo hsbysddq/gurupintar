@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DaftarSiswaCurang } from "@/components/DaftarSiswaCurang";
 import { DaftarSiswaKelompok } from "@/components/DaftarSiswaKelompok";
 import { DonutKelompok } from "@/components/DonutKelompok";
 import { KartuKaca } from "@/components/KartuKaca";
 import { LABEL_KELOMPOK, URUTAN_TAMPIL_KELOMPOK, WARNA_KELOMPOK } from "@/components/BadgeKelompok";
-import type { Kelompok, SiswaCurang, SiswaHasil } from "@/lib/tipe";
+import type { Kelompok, SiswaHasil } from "@/lib/tipe";
 
 type PetaKelasProps = {
   kelompok: Record<Kelompok, SiswaHasil[]>;
   jumlahSiswa: number;
-  curang: SiswaCurang[];
 };
 
 const LAMA_SOROTAN_MS = 600;
 
-export function PetaKelas({ kelompok, jumlahSiswa, curang }: PetaKelasProps) {
+export function PetaKelas({ kelompok, jumlahSiswa }: PetaKelasProps) {
   const jumlah: Record<Kelompok, number> = {
     sudah: kelompok.sudah.length,
     setengah: kelompok.setengah.length,
@@ -46,12 +44,11 @@ export function PetaKelas({ kelompok, jumlahSiswa, curang }: PetaKelasProps) {
         <h2 className="text-xl leading-snug font-semibold">Peta kelas</h2>
         <p className="text-[13px] leading-normal font-medium text-tinta-lembut">
           {jumlahMenjawab} dari {jumlahSiswa} siswa sudah dikelompokkan
-          {curang.length > 0 ? ` · ${curang.length} terdeteksi pindah tab` : ""}
         </p>
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        <dl className="grid grid-cols-3 gap-2 sm:gap-3">
           {URUTAN_TAMPIL_KELOMPOK.map((k) => (
             <div
               key={k}
@@ -65,19 +62,14 @@ export function PetaKelas({ kelompok, jumlahSiswa, curang }: PetaKelasProps) {
               <dd className={`text-[32px] leading-[1.1] font-bold sm:text-[40px] ${WARNA_KELOMPOK[k].teks}`}>{jumlah[k]}</dd>
             </div>
           ))}
-          <div className="flex flex-col gap-1 rounded-kecil bg-belum-latar p-2 sm:p-3">
-            <dt className="text-[12px] leading-normal font-medium text-belum-teks sm:text-[13px]">Curang</dt>
-            <dd className="text-[32px] leading-[1.1] font-bold text-belum-teks sm:text-[40px]">{curang.length}</dd>
-          </div>
         </dl>
         <DonutKelompok jumlah={jumlah} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {URUTAN_TAMPIL_KELOMPOK.map((k) => (
           <DaftarSiswaKelompok key={k} kelompok={k} siswa={kelompok[k]} />
         ))}
-        <DaftarSiswaCurang siswa={curang} />
       </div>
     </KartuKaca>
   );

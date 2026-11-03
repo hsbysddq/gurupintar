@@ -18,6 +18,14 @@ export type Format = 'video' | 'audio' | 'bacaan' | 'ppt' | 'latihan';
 
 export type KodePilihan = 'A' | 'B' | 'C' | 'D';
 
+export type TipeSoal =
+  | 'pilgan'
+  | 'pilgan_kompleks'
+  | 'benar_salah'
+  | 'isian_singkat'
+  | 'menjodohkan'
+  | 'esai';
+
 export type StatusSesi = 'aktif' | 'selesai';
 
 export type StatusMateri = 'draf' | 'dibagikan';
@@ -28,6 +36,18 @@ export interface PilihanSoal {
   kode: KodePilihan;
   teks: string;
 }
+
+export interface ButirPilihan {
+  kode: string;
+  teks: string;
+}
+
+export interface PilihanMenjodohkan {
+  kiri: ButirPilihan[];
+  kanan: ButirPilihan[];
+}
+
+export type DataPilihanSoal = PilihanSoal[] | ButirPilihan[] | PilihanMenjodohkan;
 
 // ===== Respons API untuk siswa (architecture.md bagian 6), tanpa data rahasia =====
 
@@ -79,6 +99,16 @@ export interface SiswaKelas {
   kelompok: Kelompok | null;
   skor: number | null;
   total: number | null;
+  /** Kuis tempat siswa ini sedang diblokir karena curang (kosong bila tidak diblokir). */
+  blokir: BlokirSiswaKelas[];
+}
+
+/** Satu blokir aktif seorang siswa pada satu kuis (untuk tab Siswa). */
+export interface BlokirSiswaKelas {
+  sesiId: string;
+  namaKuis: string;
+  jumlahBlokir: number;
+  diblokirPada: string | null;
 }
 
 /** Ringkasan satu kelas untuk halaman lintas kelas. */
@@ -136,10 +166,12 @@ export interface TopikRingkas {
 /** GET /api/guru/topik/detail */
 export interface SoalTopikDetail {
   nomor: number;
+  tipe: TipeSoal;
   teks: string;
-  pilihan: PilihanSoal[];
-  kunci: KodePilihan;
-  miskonsepsi: Partial<Record<KodePilihan, string>>;
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
+  kunci: string;
+  miskonsepsi: Record<string, string>;
 }
 
 export interface TopikDetail {
@@ -162,24 +194,11 @@ export interface SesiBanyakBaru {
   gagal: { kelasId: string; namaKelas: string; pesan: string }[];
 }
 
-export type JenisPelanggaran = 'pindah-tab';
-
 export interface SiswaHasil {
   siswaId: string;
   nama: string;
   skor: number;
   total: number;
-  /** Jumlah pindah tab yang tercatat selama kuis. */
-  pelanggaran?: number;
-}
-
-/** Siswa yang terdeteksi membuka tab/jendela lain selama kuis. */
-export interface SiswaCurang {
-  siswaId: string;
-  nama: string;
-  pelanggaran: number;
-  skor: number | null;
-  total: number | null;
 }
 
 export interface SoalTersulit {
@@ -197,6 +216,36 @@ export interface RingkasanMateri {
   kelompokTanpaMateri: Kelompok[];
 }
 
+/** Siswa yang sedang diblokir karena meninggalkan halaman kuis (hanya terlihat oleh guru). */
+export interface SiswaDiblokirGuru {
+  siswaId: string;
+  nama: string;
+  /** Berapa kali siswa ini pernah diblokir di kuis ini. */
+  jumlahBlokir: number;
+  /** ISO 8601. */
+  diblokirPada: string | null;
+}
+
+/** POST /api/siswa/pelanggaran */
+export interface HasilPelanggaran {
+  jumlah: number;
+  terblokir: boolean;
+}
+
+/** Jawaban esai siswa untuk dinilai guru pada halaman Hasil. */
+export interface JawabanEsaiGuru {
+  soalId: string;
+  nomorSoal: number;
+  teksSoal: string;
+  gambarSoal: string | null;
+  pedomanJawaban: string | null;
+  siswaId: string;
+  namaSiswa: string;
+  jawabanTeks: string;
+  belumDinilai: boolean;
+  benar: boolean;
+}
+
 /** GET /api/guru/hasil */
 export interface HasilGuru extends RingkasanMateri {
   sesi: {
@@ -211,8 +260,9 @@ export interface HasilGuru extends RingkasanMateri {
   };
   jumlahSiswa: number;
   jumlahMenjawab: number;
+  diblokir: SiswaDiblokirGuru[];
+  esai: JawabanEsaiGuru[];
   kelompok: Record<Kelompok, SiswaHasil[]>;
-  curang: SiswaCurang[];
   soalTersulit: SoalTersulit | null;
 }
 
@@ -220,8 +270,10 @@ export interface HasilGuru extends RingkasanMateri {
 export interface SoalUntukSiswa {
   id: string;
   nomor: number;
+  tipe: TipeSoal;
   teks: string;
-  pilihan: PilihanSoal[];
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
 }
 
 /** GET /api/siswa/hasil: rincian jawaban percobaan terakhir pada satu kuis. */
@@ -239,11 +291,14 @@ export interface RincianJawabanSiswa {
   soal: {
     id: string;
     nomor: number;
+    tipe: TipeSoal;
     teks: string;
-    pilihan: PilihanSoal[];
-    pilihanSiswa: KodePilihan | null;
-    kunci: KodePilihan;
+    gambar: string | null;
+    pilihan: DataPilihanSoal;
+    pilihanSiswa: string | null;
+    kunci: string;
     benar: boolean;
+    belumDinilai: boolean;
   }[];
 }
 

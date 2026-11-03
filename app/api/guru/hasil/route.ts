@@ -4,6 +4,8 @@ import { skemaQueryHasil } from '@/lib/skema-api';
 import { cadanganTersedia } from '@/lib/soal-guru';
 import { cariSoalTersulit } from '@/lib/soal-tersulit';
 import { sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
+import { daftarDiblokir } from '@/lib/server/blokir';
+import { bacaJawabanSesi, bacaSoalTopik } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
@@ -11,12 +13,11 @@ import {
   PESAN_SESI_TIDAK_ADA,
   responsError,
   responsOk,
-  tabelBelumAda,
 } from '@/lib/server/respons';
-import type { HasilGuru, Kelompok, SiswaCurang, StatusMateri, StatusSesi } from '@/lib/tipe';
+import type { HasilGuru, JawabanEsaiGuru, Kelompok, StatusMateri, StatusSesi } from '@/lib/tipe';
 
 // GET /api/guru/hasil?sesi= (PRD F-5, architecture.md 6.1 dan 7.2)
-// Hanya guru pemilik kelas. Kunci jawaban tidak ikut dikirim; miskonsepsi hanya teks soal tersulit.
+// Hanya guru pemilik kelas. Kunci soal objektif tidak ikut dikirim; soal esai menyertakan pedoman penilaian guru.
 export async function GET(request: NextRequest) {
   const auth = await wajibPeranApi('guru');
   if (!auth.ok) return auth.respons;
@@ -37,35 +38,38 @@ export async function GET(request: NextRequest) {
       .single();
     if (dataSesi.error) return petakanErrorDb(dataSesi.error);
 
-    const [kelas, topik, anggota, hasil, soal, jawaban, materi] = await Promise.all([
+    const [kelas, topik, anggota, hasil, soal, jawaban, materi, diblokirMentah] = await Promise.all([
       db.from('kelas').select('nama').eq('id', sesi.kelas_id).single(),
       db.from('topik').select('nama').eq('id', sesi.topik_id).single(),
       db.from('keanggotaan_kelas').select('siswa_id').eq('kelas_id', sesi.kelas_id),
       db.from('hasil_siswa').select('siswa_id, skor, total, kelompok').eq('sesi_id', sesiId),
-      db.from('soal').select('id, nomor, teks, miskonsepsi').eq('topik_id', sesi.topik_id),
-      db.from('jawaban').select('soal_id, pilihan, benar').eq('sesi_id', sesiId),
+      bacaSoalTopik(db, sesi.topik_id, { sertakanRahasia: true }),
+      bacaJawabanSesi(db, sesiId),
       db.from('materi').select('kelompok, status').eq('sesi_id', sesiId),
+      daftarDiblokir(db, sesiId),
     ]);
-    for (const r of [kelas, topik, anggota, hasil, soal, jawaban, materi]) {
+    for (const r of [kelas, topik, anggota, hasil, materi]) {
       if (r.error) return petakanErrorDb(r.error);
     }
+    if (soal.error || !soal.data) return petakanErrorDb(soal.error);
+    if (jawaban.error || !jawaban.data) return petakanErrorDb(jawaban.error);
 
     const idSiswa = anggota.data!.map((a) => a.siswa_id as string);
+    const idDiblokir = new Set(diblokirMentah.map((d) => d.siswaId));
+    const semuaIdSiswa = [...new Set([...idSiswa, ...hasil.data!.map((h) => h.siswa_id as string)])];
     let daftarSiswa: { id: string; nama: string }[] = [];
-    if (idSiswa.length > 0) {
-      const siswa = await db.from('pengguna').select('id, nama').in('id', idSiswa);
+    if (semuaIdSiswa.length > 0) {
+      const siswa = await db.from('pengguna').select('id, nama').in('id', semuaIdSiswa);
       if (siswa.error) return petakanErrorDb(siswa.error);
       daftarSiswa = siswa.data as { id: string; nama: string }[];
     }
 
     const namaSiswa = new Map<string, string>(daftarSiswa.map((s) => [s.id, s.nama]));
-
-    const catatan = await db.from('pelanggaran_kuis').select('siswa_id').eq('sesi_id', sesiId);
-    if (catatan.error && !tabelBelumAda(catatan.error)) return petakanErrorDb(catatan.error);
-    const hitungPelanggaran = new Map<string, number>();
-    for (const p of catatan.error ? [] : (catatan.data as { siswa_id: string }[])) {
-      hitungPelanggaran.set(p.siswa_id, (hitungPelanggaran.get(p.siswa_id) ?? 0) + 1);
-    }
+    // Hanya anggota kelas yang masih terdaftar; urut abjad.
+    const diblokir = diblokirMentah
+      .filter((d) => idSiswa.includes(d.siswaId) && idDiblokir.has(d.siswaId))
+      .map((d) => ({ ...d, nama: namaSiswa.get(d.siswaId) ?? 'Siswa' }))
+      .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 
     const kelompok = kelompokkanHasil(
       hasil.data!.map((h) => ({
@@ -74,36 +78,48 @@ export async function GET(request: NextRequest) {
         skor: h.skor,
         total: h.total,
         kelompok: h.kelompok as Kelompok,
-        pelanggaran: hitungPelanggaran.get(h.siswa_id) ?? 0,
       })),
     );
 
-    const hasilPerSiswa = new Map(hasil.data!.map((h) => [h.siswa_id, h]));
-    const curang: SiswaCurang[] = [...hitungPelanggaran.entries()]
-      .map(([siswaId, pelanggaran]) => {
-        const hasilSiswa = hasilPerSiswa.get(siswaId);
+    const petaSoalEsai = new Map(soal.data.filter((s) => s.tipe === 'esai').map((s) => [s.id, s]));
+    const siswaMenjawab = new Set(hasil.data!.map((h) => h.siswa_id as string));
+    const esai: JawabanEsaiGuru[] = jawaban.data
+      .filter((j) => petaSoalEsai.has(j.soal_id) && siswaMenjawab.has(j.siswa_id))
+      .map((j) => {
+        const s = petaSoalEsai.get(j.soal_id)!;
         return {
-          siswaId,
-          nama: namaSiswa.get(siswaId) ?? 'Siswa',
-          pelanggaran,
-          skor: hasilSiswa?.skor ?? null,
-          total: hasilSiswa?.total ?? null,
+          soalId: s.id,
+          nomorSoal: s.nomor,
+          teksSoal: s.teks,
+          gambarSoal: s.gambar,
+          pedomanJawaban: s.kunci.trim() || null,
+          siswaId: j.siswa_id,
+          namaSiswa: namaSiswa.get(j.siswa_id) ?? 'Siswa',
+          jawabanTeks: j.pilihan,
+          belumDinilai: j.belum_dinilai,
+          benar: j.benar,
         };
       })
       .sort(
         (a, b) =>
-          b.pelanggaran - a.pelanggaran ||
-          a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }),
+          Number(b.belumDinilai) - Number(a.belumDinilai) ||
+          a.nomorSoal - b.nomorSoal ||
+          a.namaSiswa.localeCompare(b.namaSiswa, 'id', { sensitivity: 'base' }),
       );
 
     const soalTersulit = cariSoalTersulit(
-      soal.data!.map((s) => ({
+      soal.data.map((s) => ({
         id: s.id,
         nomor: s.nomor,
         teks: s.teks,
-        miskonsepsi: (s.miskonsepsi ?? {}) as Record<string, string>,
+        miskonsepsi: s.miskonsepsi,
       })),
-      jawaban.data!.map((j) => ({ soalId: j.soal_id, pilihan: j.pilihan, benar: j.benar })),
+      jawaban.data.map((j) => ({
+        soalId: j.soal_id,
+        pilihan: j.pilihan,
+        benar: j.benar,
+        belumDinilai: j.belum_dinilai,
+      })),
     );
 
     const respons: HasilGuru = {
@@ -118,8 +134,9 @@ export async function GET(request: NextRequest) {
       },
       jumlahSiswa: idSiswa.length,
       jumlahMenjawab: hasil.data!.length,
+      diblokir,
+      esai,
       kelompok,
-      curang,
       soalTersulit,
       ...ringkasMateri(
         kelompok,

@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, Sparkles, UserPlus } from "lucide-react";
 import { GagalBuatMateri } from "@/components/GagalBuatMateri";
 import { KartuKaca } from "@/components/KartuKaca";
+import { KartuPenilaianEsai } from "@/components/KartuPenilaianEsai";
+import { KartuSiswaDiblokir } from "@/components/KartuSiswaDiblokir";
 import { KartuSoalTersulit } from "@/components/KartuSoalTersulit";
 import { KepalaKelasDariId } from "@/components/KepalaKelasDariId";
 import { PetaKelas } from "@/components/PetaKelas";
@@ -93,7 +95,11 @@ function HasilKuis() {
         )}
       </header>
 
-      <PetaKelas kelompok={data.kelompok} jumlahSiswa={data.jumlahSiswa} curang={data.curang} />
+      <KartuSiswaDiblokir sesiId={data.sesi.id} siswa={data.diblokir} onDibuka={muatUlang} />
+
+      <KartuPenilaianEsai sesiId={data.sesi.id} daftar={data.esai ?? []} onDinilai={muatUlang} />
+
+      <PetaKelas kelompok={data.kelompok} jumlahSiswa={data.jumlahSiswa} />
 
       <KartuSoalTersulit data={data.soalTersulit} jumlahMenjawab={data.jumlahMenjawab} />
 

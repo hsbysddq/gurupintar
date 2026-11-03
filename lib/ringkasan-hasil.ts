@@ -8,8 +8,8 @@ type HasilDenganKelompok = SiswaHasil & { kelompok: Kelompok };
 /** Mengelompokkan hasil siswa ke tiga kelompok, nama urut abjad (AC-5.3). */
 export function kelompokkanHasil(hasil: HasilDenganKelompok[]): Record<Kelompok, SiswaHasil[]> {
   const kelompok: Record<Kelompok, SiswaHasil[]> = { sudah: [], setengah: [], belum: [] };
-  for (const { kelompok: k, siswaId, nama, skor, total, pelanggaran } of hasil) {
-    kelompok[k].push({ siswaId, nama, skor, total, pelanggaran });
+  for (const { kelompok: k, siswaId, nama, skor, total } of hasil) {
+    kelompok[k].push({ siswaId, nama, skor, total });
   }
   for (const k of URUTAN_KELOMPOK) {
     kelompok[k].sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));

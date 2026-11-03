@@ -3,22 +3,31 @@
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookOpen, CircleCheck, Home, LineChart, ListChecks } from 'lucide-react';
+import { BookOpen, CircleCheck, Clock, Home, LineChart, ListChecks } from 'lucide-react';
 import { KartuKaca } from '@/components/KartuKaca';
 import { KerangkaSiswa } from '@/components/KerangkaSiswa';
 import { StatusHalaman } from '@/components/StatusHalaman';
 import { useSesiAktif } from '@/hooks/use-sesi-aktif';
 
-type Hasil = { skor: number; total: number };
+type Hasil = { skor: number; total: number; menungguNilai: number };
 
 // Skor boleh tampil ke siswa; label kelompok tetap tidak pernah ditampilkan (D-2).
 function bacaHasil(sesiId: string): Hasil | null {
   try {
     const mentah = sessionStorage.getItem('gp-hasil-kuis');
     if (!mentah) return null;
-    const data = JSON.parse(mentah) as { sesiId?: string; skor?: number; total?: number };
+    const data = JSON.parse(mentah) as {
+      sesiId?: string;
+      skor?: number;
+      total?: number;
+      menungguNilai?: number;
+    };
     if (data.sesiId !== sesiId || typeof data.skor !== 'number' || typeof data.total !== 'number') return null;
-    return { skor: data.skor, total: data.total };
+    return {
+      skor: data.skor,
+      total: data.total,
+      menungguNilai: typeof data.menungguNilai === 'number' ? data.menungguNilai : 0,
+    };
   } catch {
     return null;
   }
@@ -49,6 +58,7 @@ export default function HalamanSelesai() {
     : '/siswa/kelas';
 
   const persen = hasil && hasil.total > 0 ? Math.round((hasil.skor / hasil.total) * 100) : 0;
+  const salahOtomatis = hasil ? Math.max(0, hasil.total - hasil.skor - hasil.menungguNilai) : 0;
 
   return (
     <KerangkaSiswa>
@@ -64,7 +74,7 @@ export default function HalamanSelesai() {
             <div className="flex w-full flex-col gap-4">
               <div>
                 <div className="mb-1 flex justify-between text-sm font-semibold text-aura-muted">
-                  <span>Akurasi</span>
+                  <span>{hasil.menungguNilai > 0 ? 'Akurasi sementara' : 'Akurasi'}</span>
                   <span>{persen}%</span>
                 </div>
                 <div
@@ -78,16 +88,28 @@ export default function HalamanSelesai() {
                   <div className="h-full rounded-full bg-sudah" style={{ width: `${persen}%` }} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className={`grid gap-3 ${hasil.menungguNilai > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
                 <div className="rounded-2xl bg-sudah-latar p-4">
                   <p className="font-display text-3xl font-extrabold text-sudah-teks">{hasil.skor}</p>
                   <p className="text-sm text-aura-muted">Benar</p>
                 </div>
                 <div className="rounded-2xl bg-belum-latar p-4">
-                  <p className="font-display text-3xl font-extrabold text-belum-teks">{hasil.total - hasil.skor}</p>
+                  <p className="font-display text-3xl font-extrabold text-belum-teks">{salahOtomatis}</p>
                   <p className="text-sm text-aura-muted">Salah</p>
                 </div>
+                {hasil.menungguNilai > 0 && (
+                  <div className="rounded-2xl bg-setengah-latar p-4">
+                    <p className="font-display text-3xl font-extrabold text-setengah-teks">{hasil.menungguNilai}</p>
+                    <p className="text-sm text-setengah-teks">Menunggu nilai</p>
+                  </div>
+                )}
               </div>
+              {hasil.menungguNilai > 0 && (
+                <p className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-setengah-latar/70 px-3 py-2 text-[13px] font-medium text-setengah-teks">
+                  <Clock aria-hidden="true" className="size-4 shrink-0" />
+                  Jawaban esai akan diperiksa gurumu dan nilaimu akan diperbarui otomatis.
+                </p>
+              )}
             </div>
           )}
 

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { DaftarSiswaKelas } from '@/components/DaftarSiswaKelas';
 import { KepalaKelas } from '@/components/KepalaKelas';
+import { PerbaruiOtomatis } from '@/components/PerbaruiOtomatis';
+import { INTERVAL_POLLING_GURU_MS } from '@/lib/konstanta';
 import { profilWajib } from '@/lib/server/auth';
 import { ambilKelasGuru, ambilSiswaKelas } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
@@ -25,6 +27,8 @@ export default async function HalamanSiswaKelas({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Status "diblokir karena curang" muncul tanpa guru memuat ulang halaman. */}
+      <PerbaruiOtomatis intervalMs={INTERVAL_POLLING_GURU_MS} />
       <KepalaKelas kelas={dipilih} />
       <DaftarSiswaKelas siswa={siswa} kodeUndangan={dipilih.kodeUndangan} kelasId={dipilih.id} />
     </div>

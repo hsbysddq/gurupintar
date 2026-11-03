@@ -6,7 +6,9 @@ import type {
   BodyDaftarGuru,
   BodyDaftarSiswa,
   BodyHapusSiswa,
+  BodyBukaBlokir,
   BodyJawaban,
+  BodyNilaiEsai,
   BodyMasuk,
   BodyMateriPustaka,
   BodyTindakanPendampingan,
@@ -19,8 +21,8 @@ import type {
   DataPendampingan,
   Format,
   HasilGuru,
+  HasilPelanggaran,
   IsiMateri,
-  JenisPelanggaran,
   KelasRingkas,
   KelasSiswa,
   MateriGuru,
@@ -155,20 +157,15 @@ export function kirimFormat(sesiId: string, format: Format): Promise<{ ok: true 
   return minta('/api/siswa/format', { method: 'POST', body: JSON.stringify({ sesiId, format }) });
 }
 
-export function kirimJawaban(body: BodyJawaban): Promise<{ ok: true; skor: number; total: number }> {
-  return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
+/** Melaporkan siswa meninggalkan halaman kuis; server mencatat dan memblokir pada batas. */
+export function laporPelanggaran(sesiId: string): Promise<HasilPelanggaran> {
+  return minta('/api/siswa/pelanggaran', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }
 
-/** Catat pelanggaran saat kuis. `keepalive` agar request tetap terkirim ketika tab disembunyikan. */
-export function kirimPelanggaran(
-  sesiId: string,
-  jenis: JenisPelanggaran = 'pindah-tab',
-): Promise<{ ok: true }> {
-  return minta('/api/siswa/pelanggaran', {
-    method: 'POST',
-    keepalive: true,
-    body: JSON.stringify({ sesiId, jenis }),
-  });
+export function kirimJawaban(
+  body: BodyJawaban,
+): Promise<{ ok: true; skor: number; total: number; menungguNilai?: number }> {
+  return minta('/api/jawaban', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<MateriSiswa> {
@@ -176,6 +173,16 @@ export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<
 }
 
 // ===== Guru =====
+
+/** Guru membuka blokir siswa pada satu kuis. */
+export function bukaBlokirSiswa(body: BodyBukaBlokir): Promise<{ ok: true }> {
+  return minta('/api/guru/blokir', { method: 'POST', body: JSON.stringify(body) });
+}
+
+/** Guru menilai jawaban esai siswa (Benar / Salah) secara manual. */
+export function nilaiJawabanEsai(body: BodyNilaiEsai): Promise<{ ok: true; skor: number; total: number }> {
+  return minta('/api/guru/jawaban/nilai', { method: 'POST', body: JSON.stringify(body) });
+}
 
 export function ambilDaftarKelas(): Promise<KelasRingkas[]> {
   return minta('/api/guru/kelas');

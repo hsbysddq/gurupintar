@@ -7,6 +7,7 @@ import { lengkapiIsiMateri, periksaIsiMateri, type IsiMateri } from '@/lib/valid
 import { buatMateriSemua } from '@/lib/server/materi-ai';
 import { ambilMateriCadangan } from '@/lib/server/materi-cadangan';
 import { materiMilikGuru, sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
+import { bacaJawabanSesi } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
@@ -112,14 +113,21 @@ export async function POST(request: Request) {
         const [topik, soal, jawaban] = await Promise.all([
           db.from('topik').select('nama, capaian_pembelajaran').eq('id', sesi.topik_id).single(),
           db.from('soal').select('id, miskonsepsi').eq('topik_id', sesi.topik_id),
-          db.from('jawaban').select('siswa_id, soal_id, pilihan, benar').eq('sesi_id', sesiId),
+          bacaJawabanSesi(db, sesiId),
         ]);
-        for (const r of [topik, soal, jawaban]) if (r.error) return petakanErrorDb(r.error);
+        for (const r of [topik, soal]) if (r.error) return petakanErrorDb(r.error);
+        if (jawaban.error || !jawaban.data) return petakanErrorDb(jawaban.error);
 
         // Hanya teks miskonsepsi yang dikirim ke AI; nama dan ID siswa tidak (architecture.md 9.2).
         const miskonsepsi = miskonsepsiPerKelompok({
           hasil: kini.barisHasil.map((h) => ({ siswaId: h.siswa_id, kelompok: h.kelompok })),
-          jawaban: jawaban.data!.map((j) => ({ siswaId: j.siswa_id, soalId: j.soal_id, pilihan: j.pilihan, benar: j.benar })),
+          jawaban: jawaban.data.map((j) => ({
+            siswaId: j.siswa_id,
+            soalId: j.soal_id,
+            pilihan: j.pilihan,
+            benar: j.benar,
+            belumDinilai: j.belum_dinilai,
+          })),
           soal: soal.data!.map((s) => ({ id: s.id, miskonsepsi: (s.miskonsepsi ?? {}) as Record<string, string> })),
         });
 

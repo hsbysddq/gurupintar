@@ -12,7 +12,8 @@ import {
 
 const TOPIK_ID = '00000000-0000-4000-8000-000000000999';
 
-const soal = (ubah: Partial<SoalBaru> = {}): SoalBaru => ({
+import type { SoalPilganBaru } from '@/lib/soal-guru';
+const soal = (ubah: Partial<SoalPilganBaru> = {}): SoalPilganBaru => ({
   teks: 'Pecahan yang senilai dengan 1/3 adalah …',
   pilihan: ['2/6', '1/6', '3/6', '2/3'],
   kunci: 'A',
@@ -31,7 +32,9 @@ describe('keBarisSoal (PRD F-10)', () => {
     expect(baris[0]).toEqual({
       topik_id: TOPIK_ID,
       nomor: 1,
+      tipe: 'pilgan',
       teks: 'Soal nomor 1',
+      gambar: null,
       pilihan: [
         { kode: 'A', teks: '2/6' },
         { kode: 'B', teks: '1/6' },
@@ -48,7 +51,7 @@ describe('keBarisSoal (PRD F-10)', () => {
       soal({ teks: '  Soal  ', pilihan: [' 2/6 ', '1/6', '3/6', '2/3'], miskonsepsi: ['', '  Alasan B  ', '', ''] }),
     ]);
     expect(baris.teks).toBe('Soal');
-    expect(baris.pilihan[0]).toEqual({ kode: 'A', teks: '2/6' });
+    expect(Array.isArray(baris.pilihan) && baris.pilihan[0]).toEqual({ kode: 'A', teks: '2/6' });
     expect(baris.miskonsepsi).toEqual({ B: 'Alasan B' });
   });
 
@@ -63,6 +66,43 @@ describe('keBarisSoal (PRD F-10)', () => {
   it('miskonsepsi kosong atau hanya spasi tidak disimpan', () => {
     const [baris] = keBarisSoal(TOPIK_ID, [soal({ miskonsepsi: ['', '   ', '', '\n'] })]);
     expect(baris.miskonsepsi).toEqual({});
+  });
+
+  it('mengubah tipe TKA & esai beserta gambar menjadi baris tabel soal dengan benar', () => {
+    const daftar: SoalBaru[] = [
+      {
+        tipe: 'pilgan_kompleks',
+        teks: 'Pilih pecahan senilai 1/2',
+        gambar: 'data:image/png;base64,AAA=',
+        pilihan: ['2/4', '3/6', '1/3', '2/5'],
+        kunciKompleks: ['B', 'A'],
+        miskonsepsi: ['Tidak dipakai karena kunci', '', 'Salah konsep', ''],
+      },
+      {
+        tipe: 'esai',
+        teks: 'Hitung luas segitiga!',
+        pedomanJawaban: ' 24 cm² ',
+        catatanMiskonsepsi: ' Lupa dikali 1/2 ',
+      },
+    ];
+    const baris = keBarisSoal(TOPIK_ID, daftar);
+    expect(baris[0]).toMatchObject({
+      nomor: 1,
+      tipe: 'pilgan_kompleks',
+      gambar: 'data:image/png;base64,AAA=',
+      kunci: 'A,B',
+      miskonsepsi: { C: 'Salah konsep' },
+    });
+    expect(baris[1]).toEqual({
+      topik_id: TOPIK_ID,
+      nomor: 2,
+      tipe: 'esai',
+      teks: 'Hitung luas segitiga!',
+      gambar: null,
+      pilihan: [],
+      kunci: '24 cm²',
+      miskonsepsi: { umum: 'Lupa dikali 1/2' },
+    });
   });
 });
 

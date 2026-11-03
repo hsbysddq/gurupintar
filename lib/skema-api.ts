@@ -28,6 +28,18 @@ const skemaKodeKelasOpsional = z.preprocess(
   skemaKodeKelas.optional(),
 );
 
+const skemaGambarSoalOpsional = z.preprocess(
+  (nilai) => (typeof nilai === 'string' && nilai.trim() === '' ? undefined : nilai === null ? undefined : nilai),
+  z
+    .string()
+    .max(800_000, 'Gambar soal terlalu besar.')
+    .refine(
+      (nilai) => /^data:image\/(jpeg|png|webp);base64,/.test(nilai),
+      'Gambar soal harus berupa gambar JPEG, PNG, atau WebP.',
+    )
+    .optional(),
+);
+
 // ===== Autentikasi =====
 
 // POST /api/auth/masuk; panjang minimum tidak diperiksa agar pesan tidak membocorkan kebijakan sandi.
@@ -122,18 +134,27 @@ export const skemaBodyFormat = z.object({
 });
 
 // POST /api/jawaban; siswa diambil dari sesi login, bukan dari body.
+// Format detail `pilihan` diperiksa per tipe soal di server lewat `periksaDanNilaiJawaban`.
 export const skemaBodyJawaban = z.object({
   sesiId: z.uuid(),
   jawaban: z
-    .array(z.object({ soalId: z.uuid(), pilihan: skemaKodePilihan }))
+    .array(z.object({ soalId: z.uuid(), pilihan: z.string().trim().min(1).max(2000) }))
     .min(1),
 });
 
-// POST /api/siswa/pelanggaran
-export const skemaBodyPelanggaran = z.object({
+// POST /api/guru/jawaban/nilai: guru menilai jawaban esai siswa (Benar / Salah).
+export const skemaBodyNilaiEsai = z.object({
   sesiId: z.uuid(),
-  jenis: z.literal('pindah-tab'),
+  siswaId: z.uuid(),
+  soalId: z.uuid(),
+  benar: z.boolean(),
 });
+
+// POST /api/siswa/pelanggaran: siswa meninggalkan halaman kuis; siswa diambil dari sesi login.
+export const skemaBodyPelanggaran = z.object({ sesiId: z.uuid() });
+
+// POST /api/guru/blokir: guru membuka blokir seorang siswa pada satu kuis.
+export const skemaBodyBukaBlokir = z.object({ sesiId: z.uuid(), siswaId: z.uuid() });
 
 // POST /api/guru/sesi/tutup
 export const skemaBodyTutupSesi = z.object({
@@ -238,24 +259,181 @@ export const skemaQueryKelasOpsional = z.object({
   kelas: z.uuid().optional(),
 });
 
-// POST /api/guru/topik (PRD F-10). Pilihan kembar dibandingkan dengan samakanTeksPilihan.
-const skemaSoalBaru = z
+// ===== Bank Soal & Tipe Soal TKA (PRD F-10) =====
+
+function periksaPilihanUnik(pilihan: readonly string[], ctx: z.RefinementCtx) {
+  const terlihat = new Set<string>();
+  pilihan.forEach((p, j) => {
+    const kunci = samakanTeksPilihan(p);
+    if (terlihat.has(kunci)) {
+      ctx.addIssue({ code: 'custom', path: ['pilihan', j], message: 'Pilihan tidak boleh sama dengan pilihan lain.' });
+    }
+    terlihat.add(kunci);
+  });
+}
+
+const skemaSoalPilgan = z
   .object({
+    tipe: z.literal('pilgan'),
     teks: z.string().trim().min(5).max(300),
+    gambar: skemaGambarSoalOpsional,
     pilihan: z.tuple([skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan()]),
     kunci: skemaKodePilihan,
-    miskonsepsi: z.tuple([skemaTeksMiskonsepsi(), skemaTeksMiskonsepsi(), skemaTeksMiskonsepsi(), skemaTeksMiskonsepsi()]),
+    miskonsepsi: z.tuple([
+      skemaTeksMiskonsepsi(),
+      skemaTeksMiskonsepsi(),
+      skemaTeksMiskonsepsi(),
+      skemaTeksMiskonsepsi(),
+    ]),
+  })
+  .superRefine((soal, ctx) => {
+    periksaPilihanUnik(soal.pilihan, ctx);
+  });
+
+const skemaSoalPilganKompleks = z
+  .object({
+    tipe: z.literal('pilgan_kompleks'),
+    teks: z.string().trim().min(5).max(300),
+    gambar: skemaGambarSoalOpsional,
+    pilihan: z.tuple([skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan()]),
+    kunciKompleks: z
+      .array(skemaKodePilihan)
+      .min(2, 'Pilih minimal 2 kunci jawaban yang benar.')
+      .max(4)
+      .refine((daftar) => new Set(daftar).size === daftar.length, {
+        message: 'Kunci jawaban tidak boleh kembar.',
+      }),
+    miskonsepsi: z
+      .tuple([
+        skemaTeksMiskonsepsi(),
+        skemaTeksMiskonsepsi(),
+        skemaTeksMiskonsepsi(),
+        skemaTeksMiskonsepsi(),
+      ])
+      .optional(),
+  })
+  .superRefine((soal, ctx) => {
+    periksaPilihanUnik(soal.pilihan, ctx);
+  });
+
+const skemaSoalBenarSalah = z
+  .object({
+    tipe: z.literal('benar_salah'),
+    teks: z.string().trim().min(5).max(300),
+    gambar: skemaGambarSoalOpsional,
+    pernyataan: z
+      .array(
+        z.object({
+          teks: z.string().trim().min(1).max(200),
+          kunci: z.enum(['B', 'S']),
+        }),
+      )
+      .min(2)
+      .max(5),
+    catatanMiskonsepsi: skemaTeksMiskonsepsi().optional(),
   })
   .superRefine((soal, ctx) => {
     const terlihat = new Set<string>();
-    soal.pilihan.forEach((p, j) => {
-      const kunci = samakanTeksPilihan(p);
-      if (terlihat.has(kunci)) {
-        ctx.addIssue({ code: 'custom', path: ['pilihan', j], message: 'Pilihan tidak boleh sama dengan pilihan lain.' });
+    soal.pernyataan.forEach((p, j) => {
+      const kunci = samakanTeksPilihan(p.teks);
+      if (kunci && terlihat.has(kunci)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['pernyataan', j, 'teks'],
+          message: 'Pernyataan tidak boleh sama dengan pernyataan lain.',
+        });
       }
-      terlihat.add(kunci);
+      if (kunci) terlihat.add(kunci);
     });
   });
+
+const skemaSoalIsianSingkat = z
+  .object({
+    tipe: z.literal('isian_singkat'),
+    teks: z.string().trim().min(5).max(300),
+    gambar: skemaGambarSoalOpsional,
+    jawabanSingkat: z.array(z.string().trim().min(1).max(100)).min(1).max(5),
+    catatanMiskonsepsi: skemaTeksMiskonsepsi().optional(),
+  })
+  .superRefine((soal, ctx) => {
+    const terlihat = new Set<string>();
+    soal.jawabanSingkat.forEach((jwb, j) => {
+      const kunci = samakanTeksPilihan(jwb);
+      if (kunci && terlihat.has(kunci)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['jawabanSingkat', j],
+          message: 'Variasi jawaban tidak boleh sama dengan variasi lain.',
+        });
+      }
+      if (kunci) terlihat.add(kunci);
+    });
+  });
+
+const skemaSoalMenjodohkan = z
+  .object({
+    tipe: z.literal('menjodohkan'),
+    teks: z.string().trim().min(5).max(300),
+    gambar: skemaGambarSoalOpsional,
+    pasangan: z
+      .array(
+        z.object({
+          kiri: z.string().trim().min(1).max(120),
+          kanan: z.string().trim().min(1).max(120),
+        }),
+      )
+      .min(2)
+      .max(5),
+    catatanMiskonsepsi: skemaTeksMiskonsepsi().optional(),
+  })
+  .superRefine((soal, ctx) => {
+    const lihatKiri = new Set<string>();
+    const lihatKanan = new Set<string>();
+    soal.pasangan.forEach((p, j) => {
+      const k1 = samakanTeksPilihan(p.kiri);
+      const k2 = samakanTeksPilihan(p.kanan);
+      if (k1 && lihatKiri.has(k1)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['pasangan', j, 'kiri'],
+          message: 'Bagian kiri tidak boleh sama dengan baris lain.',
+        });
+      }
+      if (k2 && lihatKanan.has(k2)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['pasangan', j, 'kanan'],
+          message: 'Pasangan kanan tidak boleh sama dengan baris lain.',
+        });
+      }
+      if (k1) lihatKiri.add(k1);
+      if (k2) lihatKanan.add(k2);
+    });
+  });
+
+const skemaSoalEsai = z.object({
+  tipe: z.literal('esai'),
+  teks: z.string().trim().min(5).max(300),
+  gambar: skemaGambarSoalOpsional,
+  pedomanJawaban: z.string().trim().max(500).optional(),
+  catatanMiskonsepsi: skemaTeksMiskonsepsi().optional(),
+});
+
+// Tanpa `tipe`, soal dianggap pilihan ganda biasa (kompatibel dengan data & tes lama).
+const skemaSoalBaru = z.preprocess(
+  (nilai) =>
+    typeof nilai === 'object' && nilai !== null && !('tipe' in nilai)
+      ? { ...(nilai as Record<string, unknown>), tipe: 'pilgan' }
+      : nilai,
+  z.discriminatedUnion('tipe', [
+    skemaSoalPilgan,
+    skemaSoalPilganKompleks,
+    skemaSoalBenarSalah,
+    skemaSoalIsianSingkat,
+    skemaSoalMenjodohkan,
+    skemaSoalEsai,
+  ]),
+);
 
 export const skemaBodyTopikBaru = z.object({
   nama: z.string().trim().min(3).max(80),
@@ -288,7 +466,9 @@ function skemaTeksMiskonsepsi() {
 
 export type BodyFormat = z.infer<typeof skemaBodyFormat>;
 export type BodyJawaban = z.infer<typeof skemaBodyJawaban>;
+export type BodyNilaiEsai = z.infer<typeof skemaBodyNilaiEsai>;
 export type BodyPelanggaran = z.infer<typeof skemaBodyPelanggaran>;
+export type BodyBukaBlokir = z.infer<typeof skemaBodyBukaBlokir>;
 export type BodyBuatMateri = z.infer<typeof skemaBodyBuatMateri>;
 export type BodyTindakanPendampingan = z.infer<typeof skemaBodyTindakanPendampingan>;
 export type BodyMateriPustaka = z.infer<typeof skemaBodyMateriPustaka>;
@@ -304,3 +484,4 @@ export type BodyHapusSiswa = z.infer<typeof skemaBodyHapusSiswa>;
 export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;
+export type SoalTervalidasi = BodyTopikBaru['soal'][number];

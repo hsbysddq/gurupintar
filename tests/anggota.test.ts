@@ -30,12 +30,11 @@ function dbPalsu(hasil: Record<string, Hasil> = {}) {
 }
 
 describe('hapusAnggotaKelas', () => {
-  it('menghapus pelanggaran, jawaban, percobaan, hasil, lalu keanggotaan (keanggotaan terakhir)', async () => {
+  it('menghapus jawaban, percobaan, hasil, lalu keanggotaan (keanggotaan terakhir)', async () => {
     const { db, catatan } = dbPalsu({ sesi_kuis: { data: [{ id: 's1' }, { id: 's2' }] } });
     await hapusAnggotaKelas(db, 'k1', 'siswa-1');
     expect(catatan).toEqual([
       'sesi_kuis:select',
-      'pelanggaran_kuis:delete',
       'jawaban:delete',
       'percobaan_kuis:delete',
       'hasil_siswa:delete',
