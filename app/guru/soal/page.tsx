@@ -612,10 +612,10 @@ export default function HalamanBuatSoal() {
             <div>
               <span className="aura-eyebrow">Soal</span>
               <h2 id="judul-soal" className="mt-2 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-                {isian.soal.length} soal pilihan ganda
+                Soal pilihan ganda
               </h2>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                Lengkapi teks soal, empat pilihan, kunci jawaban, dan kesalahan pemahaman tiap pengecoh.
+                Tambahkan soal sesuai kebutuhan. Lengkapi teks soal, empat pilihan, kunci jawaban, dan kesalahan pemahaman tiap pengecoh.
               </p>
             </div>
             <button
