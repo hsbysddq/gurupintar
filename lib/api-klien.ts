@@ -27,6 +27,7 @@ import type {
   IsiMateri,
   KelasRingkas,
   KelasSiswa,
+  KoinGuru,
   MateriGuru,
   MateriPustaka,
   MateriSiswa,
@@ -277,14 +278,21 @@ export function ambilModelAi(signal?: AbortSignal): Promise<DaftarModelAi> {
   return minta('/api/guru/model-ai', { signal });
 }
 
-export function ubahModul(teks: string, model?: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
+export function ambilKoin(signal?: AbortSignal): Promise<KoinGuru> {
+  return minta('/api/guru/koin', { signal });
+}
+
+export function ubahModul(
+  teks: string,
+  model?: string,
+): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks, ...(model ? { model } : {}) }) });
 }
 
 export function ubahModulPdf(
   pdfBase64: string,
   model?: string,
-): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
+): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul/pdf', {
     method: 'POST',
     body: JSON.stringify({ pdf: pdfBase64, ...(model ? { model } : {}) }),

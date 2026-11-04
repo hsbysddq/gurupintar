@@ -180,6 +180,13 @@ export interface DaftarModelAi {
   daftar: ModelAi[];
 }
 
+/** GET /api/guru/koin */
+export interface KoinGuru {
+  koin: number;
+  biayaModul: number;
+  whatsappAdmin: string | null;
+}
+
 /** GET /api/guru/topik: hanya topik dengan minimal satu soal */
 export interface TopikRingkas {
   id: string;

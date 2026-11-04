@@ -5,6 +5,10 @@ import {
   ambilDaftarTopik,
   ambilDetailTopik,
   ambilHasil,
+  ambilKoin,
+  ambilModelAi,
+  ubahModul,
+  ubahModulPdf,
   ambilDetailKelasSiswa,
   ambilKelasSiswa,
   ambilMateriGuru,
@@ -188,6 +192,28 @@ describe('api-klien guru', () => {
     await ambilDaftarSesi('k 1');
     expect(palsu.mock.calls[0][0]).toBe('/api/guru/sesi');
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi?kelas=k%201');
+  });
+
+  it('mengambil koin, model, dan mengirim model saat Ubah Modul', async () => {
+    const palsu = stubFetch(async () => Response.json({}));
+    await ambilKoin();
+    await ambilModelAi();
+    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash');
+    await ubahModulPdf('base64pdf', 'claude-haiku-4-5-20251001');
+
+    const panggilan = palsu.mock.calls.map(([url, init]) => [url, init?.method, init?.body]);
+    expect(panggilan[0]).toEqual(['/api/guru/koin', undefined, undefined]);
+    expect(panggilan[1]).toEqual(['/api/guru/model-ai', undefined, undefined]);
+    expect(panggilan[2]).toEqual([
+      '/api/guru/modul',
+      'POST',
+      JSON.stringify({ teks: 'teks modul', model: 'deepseek/deepseek-v4.1-flash' }),
+    ]);
+    expect(panggilan[3]).toEqual([
+      '/api/guru/modul/pdf',
+      'POST',
+      JSON.stringify({ pdf: 'base64pdf', model: 'claude-haiku-4-5-20251001' }),
+    ]);
   });
 
   it('bukaSesiBanyak memakai rute batch dan mengirim daftar kelas', async () => {

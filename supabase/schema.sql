@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, blokir_kuis, percobaan_kuis, hasil_siswa, jawaban, jadwal_kuis, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
+drop table if exists materi, blokir_kuis, percobaan_kuis, hasil_siswa, jawaban, jadwal_kuis, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, transaksi_koin, pengguna cascade;
 
 -- ===== Akun dan peran =====
 -- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
@@ -9,8 +9,21 @@ create table pengguna (
   nama text not null,
   email text,
   peran text not null check (peran in ('guru','siswa')),
+  koin int not null default 3 check (koin >= 0),
   dibuat_pada timestamptz not null default now()
 );
+
+-- Riwayat pemakaian dan top up koin guru.
+create table transaksi_koin (
+  id uuid primary key default gen_random_uuid(),
+  guru_id uuid not null references pengguna(id) on delete cascade,
+  jumlah int not null check (jumlah <> 0),
+  jenis text not null check (jenis in ('bonus_awal','topup','generate_modul','refund','penyesuaian')),
+  keterangan text,
+  dibuat_pada timestamptz not null default now()
+);
+create index transaksi_koin_guru_waktu on transaksi_koin (guru_id, dibuat_pada desc);
+alter table transaksi_koin enable row level security;
 
 -- ===== Kelas milik guru =====
 create table kelas (
@@ -190,6 +203,60 @@ alter table tindakan_pendampingan_kuis enable row level security;
 
 -- ===== Fungsi atomik (AD-5) =====
 
+-- Potong koin guru secara atomik; gagal bila saldo kurang.
+create or replace function potong_koin(
+  p_guru uuid,
+  p_jumlah int,
+  p_keterangan text default null
+) returns int language plpgsql as $$
+declare v_koin int;
+begin
+  if p_jumlah <= 0 then raise exception 'JUMLAH_KOIN_TIDAK_VALID'; end if;
+
+  update pengguna
+  set koin = koin - p_jumlah
+  where id = p_guru and peran = 'guru' and koin >= p_jumlah
+  returning koin into v_koin;
+
+  if not found then
+    if exists (select 1 from pengguna where id = p_guru and peran = 'guru') then
+      raise exception 'KOIN_TIDAK_CUKUP';
+    end if;
+    raise exception 'GURU_TIDAK_ADA';
+  end if;
+
+  insert into transaksi_koin (guru_id, jumlah, jenis, keterangan)
+  values (p_guru, -p_jumlah, 'generate_modul', p_keterangan);
+
+  return v_koin;
+end $$;
+
+create or replace function tambah_koin(
+  p_guru uuid,
+  p_jumlah int,
+  p_jenis text,
+  p_keterangan text default null
+) returns int language plpgsql as $$
+declare v_koin int;
+begin
+  if p_jumlah <= 0 then raise exception 'JUMLAH_KOIN_TIDAK_VALID'; end if;
+  if p_jenis not in ('bonus_awal','topup','refund','penyesuaian') then
+    raise exception 'JENIS_KOIN_TIDAK_VALID';
+  end if;
+
+  update pengguna
+  set koin = koin + p_jumlah
+  where id = p_guru and peran = 'guru'
+  returning koin into v_koin;
+
+  if not found then raise exception 'GURU_TIDAK_ADA'; end if;
+
+  insert into transaksi_koin (guru_id, jumlah, jenis, keterangan)
+  values (p_guru, p_jumlah, p_jenis, p_keterangan);
+
+  return v_koin;
+end $$;
+
 create or replace function simpan_hasil(
   p_sesi uuid, p_siswa uuid, p_jawaban jsonb,
   p_skor int, p_total int, p_kelompok text
@@ -305,6 +372,8 @@ begin
   );
 end $;
 
+revoke execute on function potong_koin(uuid, int, text) from public, anon, authenticated;
+revoke execute on function tambah_koin(uuid, int, text, text) from public, anon, authenticated;
 revoke execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) from public, anon, authenticated;
 revoke execute on function buka_sesi(uuid, uuid, text) from public, anon, authenticated;
 revoke execute on function ambil_kunci_materi(uuid) from public, anon, authenticated;
@@ -312,6 +381,8 @@ revoke execute on function lepas_kunci_materi(uuid) from public, anon, authentic
 revoke execute on function hapus_anggota_kelas(uuid, uuid) from public, anon, authenticated;
 revoke execute on function ubah_topik(uuid, text, text, jsonb) from public, anon, authenticated;
 revoke execute on function simpan_nilai_esai(uuid, uuid, uuid, boolean, int, int, text) from public, anon, authenticated;
+grant execute on function potong_koin(uuid, int, text) to service_role;
+grant execute on function tambah_koin(uuid, int, text, text) to service_role;
 grant execute on function simpan_hasil(uuid, uuid, jsonb, int, int, text) to service_role;
 grant execute on function buka_sesi(uuid, uuid, text) to service_role;
 grant execute on function ambil_kunci_materi(uuid) to service_role;

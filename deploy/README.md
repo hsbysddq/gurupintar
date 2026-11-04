@@ -128,6 +128,7 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 COMMAND_CODE_API_KEY
 AI_MODEL
+WHATSAPP_ADMIN
 SUPABASE_SERVICE_ROLE_KEY
 ANTHROPIC_API_KEY
 ANTHROPIC_MODEL
@@ -142,7 +143,20 @@ Catatan:
 - `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi. Jika keduanya kosong, fitur materi AI menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
 - Jika memakai proyek Supabase baru, jalankan `supabase/schema.sql` lalu `supabase/seed.sql` di SQL Editor Supabase.
 - Database yang sudah berjalan: jalankan `supabase/migrasi-perbaikan-kuis.sql` di SQL Editor Supabase. File ini membuat tabel `percobaan_kuis` dan `jadwal_kuis` yang belum ada, memperbaiki fungsi `simpan_hasil`, serta mengaktifkan jadwal buka/tutup otomatis. Aman dijalankan berulang.
+- Jalankan juga `supabase/migrasi-koin-guru.sql` untuk sistem koin Ubah Modul. Akun guru mendapat 3 koin awal dan setiap generate memakai 1 koin.
 - Jika siswa mendapat pesan **Jawaban belum terkirim** padahal jaringan normal, periksa dengan `node scripts/cek-migrasi-supabase.mjs`, lalu jalankan migrasi perbaikan di atas.
+- Setelah `WHATSAPP_ADMIN` diisi, tombol **Top up via WhatsApp** akan membuka chat admin.
+
+Contoh top up manual oleh admin:
+
+```sql
+select tambah_koin(
+  (select id from pengguna where email = 'guru@contoh.id'),
+  10,
+  'topup',
+  'Top up via WhatsApp'
+);
+```
 
 ## 7. Build aplikasi
 

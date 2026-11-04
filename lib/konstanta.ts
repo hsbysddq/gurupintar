@@ -9,5 +9,6 @@ export const PANJANG_MISKONSEPSI_MAKS = 500; // penjelasan opsi jawaban salah
 export const PANJANG_MODUL_MIN = 200;      // PRD F-9
 export const PANJANG_MODUL_MAKS = 8000;
 export const UKURAN_PDF_MAKS_BYTE = 5 * 1024 * 1024; // unggah modul PDF
+export const KOIN_PER_MODUL = 1; // biaya satu kali Ubah Modul
 export const KARAKTER_KODE = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const PANJANG_KODE = 5;

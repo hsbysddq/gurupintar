@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useId, useState } from "react";
+import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   BookOpen,
   CircleCheck,
+  Coins,
   FileText,
   FileUp,
   Headphones,
@@ -22,6 +23,7 @@ import {
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
 import {
   ambilDaftarKelas,
+  ambilKoin,
   ambilMateriPustaka,
   ambilModelAi,
   simpanMateriPustaka,
@@ -29,7 +31,8 @@ import {
   ubahModul,
   ubahModulPdf,
 } from "@/lib/api-klien";
-import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
+import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
+import { tautanTopUpKoin } from "@/lib/koin";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
 import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri } from "@/lib/tipe";
 
@@ -99,6 +102,11 @@ function IsiHalamanUbahModul() {
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
+  const [koin, setKoin] = useState<number | null>(null);
+  const [biayaKoin, setBiayaKoin] = useState(KOIN_PER_MODUL);
+  const [whatsappAdmin, setWhatsappAdmin] = useState<string | null>(null);
+  const [memuatKoin, setMemuatKoin] = useState(true);
+  const [galatKoin, setGalatKoin] = useState<string | null>(null);
   const kelasAwalParam = params.get("kelas");
   const materiAwalParam = params.get("materi");
 
@@ -106,10 +114,13 @@ function IsiHalamanUbahModul() {
   const panjang = teks.trim().length;
   const panjangSesuai = panjang >= PANJANG_MODUL_MIN && panjang <= PANJANG_MODUL_MAKS;
   const memuat = keadaan.status === "memuat";
-  const siapKirim = (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "";
+  const koinCukup = koin !== null && koin >= biayaKoin;
+  const siapKirim =
+    (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "" && koinCukup;
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
   const grupModel = [...new Set(daftarModel.map((m) => m.grup))];
+  const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
 
   useEffect(() => {
     let aktif = true;
@@ -163,6 +174,42 @@ function IsiHalamanUbahModul() {
     };
   }, []);
 
+  const muatKoin = useCallback(async () => {
+    try {
+      const data = await ambilKoin();
+      setKoin(data.koin);
+      setBiayaKoin(data.biayaModul);
+      setWhatsappAdmin(data.whatsappAdmin);
+      setGalatKoin(null);
+    } catch (err) {
+      setGalatKoin(err instanceof Error ? err.message : "Saldo koin belum bisa dimuat.");
+    } finally {
+      setMemuatKoin(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let aktif = true;
+    ambilKoin()
+      .then((data) => {
+        if (!aktif) return;
+        setKoin(data.koin);
+        setBiayaKoin(data.biayaModul);
+        setWhatsappAdmin(data.whatsappAdmin);
+        setGalatKoin(null);
+      })
+      .catch((err: unknown) => {
+        if (!aktif) return;
+        setGalatKoin(err instanceof Error ? err.message : "Saldo koin belum bisa dimuat.");
+      })
+      .finally(() => {
+        if (aktif) setMemuatKoin(false);
+      });
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
   function pilihBerkas(file: File | null) {
     setGalatBerkas(null);
     if (!file) return setBerkas(null);
@@ -196,7 +243,9 @@ function IsiHalamanUbahModul() {
         sumber === "teks"
           ? await ubahModul(teks, model)
           : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model);
-      const { isi, sumber: sumberHasil } = hasil;
+      const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
+      if (typeof sisaKoin === "number") setKoin(sisaKoin);
+      else void muatKoin();
       setSumberMateri(sumberHasil);
       setAsalMateri(sumber);
       // Nomor baru memasang ulang pratinjau agar tab dan jawaban latihan kembali ke awal.
@@ -204,6 +253,7 @@ function IsiHalamanUbahModul() {
       setNomor(berikut);
       setKeadaan({ status: "siap", isi, nomor: berikut });
     } catch (err) {
+      void muatKoin();
       setKeadaan({ status: "gagal", pesan: err instanceof Error ? err.message : "Materi belum berhasil dibuat." });
     }
   }
@@ -319,6 +369,57 @@ function IsiHalamanUbahModul() {
           </div>
         </div>
       </header>
+
+      <section aria-label="Saldo koin" className="aura-glass rounded-[24px] p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary">
+              <Coins aria-hidden="true" className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                Koin kamu
+              </p>
+              <p className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em] text-aura-ink">
+                {memuatKoin ? "…" : (koin ?? "—")}
+              </p>
+            </div>
+            <div className="min-w-0 border-aura-ink/10 sm:border-l sm:pl-4">
+              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">Biaya generate</p>
+              <p className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">
+                {biayaKoin} koin per materi
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start gap-1 sm:items-end">
+            {topUpHref ? (
+              <a
+                href={topUpHref}
+                target="_blank"
+                rel="noreferrer"
+                className="aura-btn aura-btn-secondary h-11 px-4 text-[12px]"
+              >
+                Top up via WhatsApp
+              </a>
+            ) : (
+              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
+                Hubungi admin untuk top up.
+              </p>
+            )}
+            {!memuatKoin && koin !== null && !koinCukup && (
+              <p role="status" className="font-body text-[12px] leading-[18px] font-semibold text-aura-red">
+                Koin tidak cukup untuk generate berikutnya.
+              </p>
+            )}
+          </div>
+        </div>
+        {galatKoin && (
+          <p role="alert" className="mt-3 font-body text-[12px] leading-[18px] font-medium text-aura-red">
+            {galatKoin}
+          </p>
+        )}
+      </section>
 
       <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
         <div

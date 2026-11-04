@@ -1,10 +1,23 @@
-import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from '@/lib/konstanta';
+import {
+  KOIN_PER_MODUL,
+  PANJANG_MODUL_MAKS,
+  PANJANG_MODUL_MIN,
+  UKURAN_PDF_MAKS_BYTE,
+} from '@/lib/konstanta';
 import { skemaBodyUbahModulPdf } from '@/lib/skema-api';
 import { pastikanModelAi } from '@/lib/server/ai-provider';
 import { wajibPeranApi } from '@/lib/server/auth';
+import { PESAN_KOIN_HABIS, PESAN_MIGRASI_KOIN, potongKoin, tambahKoin } from '@/lib/server/koin';
 import { buatMateriDariModul, ErrorMateriAi } from '@/lib/server/materi-ai';
 import { ekstrakTeksPdf } from '@/lib/server/pdf-teks';
-import { bacaBodyJson, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
+import { ambilSupabase } from '@/lib/server/supabase';
+import {
+  bacaBodyJson,
+  petakanErrorDb,
+  PESAN_ERROR_UMUM,
+  responsError,
+  responsOk,
+} from '@/lib/server/respons';
 
 export const maxDuration = 70;
 
@@ -43,15 +56,37 @@ export async function POST(request: Request) {
   if (teks.length > PANJANG_MODUL_MAKS) return responsError(PESAN_PDF_TERLALU_PANJANG, 400);
 
   try {
-    const isi = await buatMateriDariModul(teks, { model: input.data.model });
-    return responsOk({ isi, sumber: 'ai' });
-  } catch (err) {
-    // Isi PDF tidak dicatat di log.
-    if (err instanceof ErrorMateriAi) {
-      console.error('Pembuatan materi dari PDF gagal:', err.message);
-      return responsError(PESAN_GAGAL_DIBUAT, 502);
+    const db = ambilSupabase();
+    const potong = await potongKoin(db, auth.profil.id, KOIN_PER_MODUL, 'Ubah modul dari PDF');
+    if (!potong.ok) {
+      if (potong.alasan === 'kurang') return responsError(PESAN_KOIN_HABIS, 402);
+      if (potong.alasan === 'migrasi') return responsError(PESAN_MIGRASI_KOIN, 503);
+      return petakanErrorDb(potong.error);
     }
-    console.error('Error tak terduga di /api/guru/modul/pdf:', err instanceof Error ? err.message : err);
-    return responsError(PESAN_ERROR_UMUM, 500);
+
+    try {
+      const isi = await buatMateriDariModul(teks, { model: input.data.model });
+      return responsOk({ isi, sumber: 'ai', koin: potong.sisa });
+    } catch (err) {
+      const refund = await tambahKoin(
+        db,
+        auth.profil.id,
+        KOIN_PER_MODUL,
+        'refund',
+        'Refund karena pembuatan materi dari PDF gagal',
+      );
+      if (!refund.ok) console.error('Refund koin PDF gagal:', refund.error);
+
+      // Isi PDF tidak dicatat di log.
+      if (err instanceof ErrorMateriAi) {
+        console.error('Pembuatan materi dari PDF gagal:', err.message);
+        return responsError(PESAN_GAGAL_DIBUAT, 502);
+      }
+      console.error('Error tak terduga di /api/guru/modul/pdf:', err instanceof Error ? err.message : err);
+      return responsError(PESAN_ERROR_UMUM, 500);
+    }
+  } catch (err) {
+    console.error('Error /api/guru/modul/pdf:', err instanceof Error ? err.message : err);
+    return petakanErrorDb(err);
   }
 }

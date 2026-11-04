@@ -25,6 +25,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    SUPABASE_SERVICE_ROLE_KEY=
    COMMAND_CODE_API_KEY=
    AI_MODEL=deepseek/deepseek-v4.1-flash
+   WHATSAPP_ADMIN=
    ANTHROPIC_API_KEY=
    ANTHROPIC_MODEL=
    KODE_UNDANGAN_GURU=
@@ -34,6 +35,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    - `SUPABASE_SERVICE_ROLE_KEY`, `COMMAND_CODE_API_KEY`, dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
    - `COMMAND_CODE_API_KEY` berasal dari Command Code Studio. Paket Provider bersifat pay-as-you-go; GOAT/Pro/Max/Team juga punya akses API.
    - `AI_MODEL` adalah model default untuk Ubah Modul dan materi lanjutan. Guru tetap bisa memilih model lain dari dropdown.
+   - `WHATSAPP_ADMIN` adalah nomor WhatsApp admin untuk top up koin, format `628...`.
    - `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi.
    - `KODE_UNDANGAN_GURU` wajib untuk pendaftaran guru. Jika kosong, pendaftaran guru ditutup.
 
@@ -42,6 +44,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    Jika database sudah berisi data, jalankan `supabase/migrasi-arsip-kelas.sql`,
    `supabase/migrasi-identitas-siswa.sql`, dan `supabase/migrasi-ubah-topik.sql` untuk
    menambah kolom arsip, identitas siswa per kelas, serta fungsi ubah topik.
+   Untuk sistem koin Ubah Modul, jalankan `supabase/migrasi-koin-guru.sql`.
 
 4. Jalankan aplikasi.
 

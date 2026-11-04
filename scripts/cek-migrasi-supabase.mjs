@@ -16,6 +16,7 @@ const db = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_
 
 const tabel = [
   'pengguna',
+  'transaksi_koin',
   'kelas',
   'keanggotaan_kelas',
   'topik',
@@ -33,7 +34,7 @@ const tabel = [
 
 const kolom = [
   ['kelas', ['warna', 'sampul', 'diarsipkan_pada']],
-  ['pengguna', ['email']],
+  ['pengguna', ['email', 'koin']],
   ['keanggotaan_kelas', ['nama_tampil', 'preferensi_format']],
   ['soal', ['tipe', 'gambar']],
   ['jawaban', ['id', 'sesi_id', 'siswa_id', 'soal_id', 'pilihan', 'benar', 'belum_dinilai', 'dibuat_pada']],
@@ -74,11 +75,18 @@ const rpc = [
   ['simpan_hasil', { p_sesi: acak, p_siswa: acak2, p_jawaban: [], p_skor: 0, p_total: 1, p_kelompok: 'belum' }],
   ['hapus_anggota_kelas', { p_kelas: acak, p_siswa: acak2 }],
   ['simpan_nilai_esai', { p_sesi: acak, p_siswa: acak2, p_soal: acak3, p_benar: true, p_skor: 1, p_total: 1, p_kelompok: 'sudah' }],
+  ['potong_koin', { p_guru: acak, p_jumlah: 1, p_keterangan: 'uji' }],
+  ['tambah_koin', { p_guru: acak, p_jumlah: 1, p_jenis: 'topup', p_keterangan: 'uji' }],
 ];
 for (const [nama, arg] of rpc) {
   const hasil = await db.rpc(nama, arg);
   const pesan = hasil.error?.message ?? '';
   if (!hasil.error) console.log(`${nama}: ADA`);
-  else if (pesan.includes('SESI_TIDAK_ADA') || pesan.includes('JAWABAN_TIDAK_ADA')) console.log(`${nama}: ADA (argumen uji ditolak seperti seharusnya)`);
+  else if (
+    pesan.includes('SESI_TIDAK_ADA') ||
+    pesan.includes('JAWABAN_TIDAK_ADA') ||
+    pesan.includes('GURU_TIDAK_ADA')
+  )
+    console.log(`${nama}: ADA (argumen uji ditolak seperti seharusnya)`);
   else console.log(`${nama}: HILANG/ERROR — ${JSON.stringify(ringkasError(hasil.error))}`);
 }
