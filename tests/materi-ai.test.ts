@@ -8,6 +8,7 @@ import {
   buatMateriSemua,
   ErrorMateriAi,
   INSTRUKSI_SISTEM,
+  MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
   PENANDA_AWAL_MODUL,
   susunPesanModul,
@@ -106,13 +107,13 @@ describe('uraiKeluaranAi', () => {
 });
 
 describe('buatMateriSemua', () => {
-  it('memanggil AI sekali per kelompok dengan instruksi sistem dan max_tokens 2000', async () => {
+  it('memanggil AI sekali per kelompok dengan instruksi sistem dan batas token materi', async () => {
     const { klien, create } = klienTiruan(async () => responsTeks(JSON.stringify(ISI_VALID)));
     const hasil = await buatMateriSemua([konteks('belum'), konteks('sudah')], { klien, model: 'model-uji', acak: TANPA_ACAK });
 
     expect(create).toHaveBeenCalledTimes(2);
     const [body, opsi] = create.mock.calls[0];
-    expect(body).toMatchObject({ model: 'model-uji', max_tokens: 2000, system: INSTRUKSI_SISTEM });
+    expect(body).toMatchObject({ model: 'model-uji', max_tokens: MAKS_TOKEN_MATERI, system: INSTRUKSI_SISTEM });
     expect(opsi?.signal).toBeInstanceOf(AbortSignal);
     expect(opsi?.timeout).toBeGreaterThan(0);
     expect(hasil.belum).toEqual(ISI_VALID);
@@ -272,13 +273,13 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
 });
 
 describe('buatMateriDariModul', () => {
-  it('satu panggilan dengan instruksi sistem 9.3, max_tokens 2000, dan pesan modul', async () => {
+  it('satu panggilan dengan instruksi sistem 9.3, batas token materi, dan pesan modul', async () => {
     const { klien, create } = klienTiruan(async () => responsTeks(JSON.stringify(ISI_VALID)));
     const isi = await buatMateriDariModul(TEKS_MODUL, { klien, model: 'model-uji', acak: TANPA_ACAK });
 
     expect(create).toHaveBeenCalledTimes(1);
     const [body, opsi] = create.mock.calls[0];
-    expect(body).toMatchObject({ model: 'model-uji', max_tokens: 2000, system: INSTRUKSI_SISTEM });
+    expect(body).toMatchObject({ model: 'model-uji', max_tokens: MAKS_TOKEN_MATERI, system: INSTRUKSI_SISTEM });
     expect(body.messages).toEqual([{ role: 'user', content: susunPesanModul(TEKS_MODUL) }]);
     expect(opsi?.signal).toBeInstanceOf(AbortSignal);
     expect(isi).toEqual(ISI_VALID);

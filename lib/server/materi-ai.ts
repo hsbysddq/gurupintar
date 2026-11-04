@@ -7,6 +7,9 @@ import { buatKlienCommandCode, MODEL_DEFAULT, type KlienAi } from './ai-provider
 
 export type { KlienAi };
 
+/** Cukup untuk JSON materi + ruang penalaran model reasoning. */
+export const MAKS_TOKEN_MATERI = 4000;
+
 // Instruksi sistem disalin persis dari architecture.md 9.3 (dijaga oleh tests/materi-ai.test.ts).
 export const INSTRUKSI_SISTEM = `Kamu adalah asisten guru matematika SMP di Indonesia. Tugasmu membuat materi lanjutan singkat untuk siswa kelas 7.
 
@@ -128,7 +131,12 @@ async function buatSatuMateri(t: Tenggat, pesanAwal: string, label: string): Pro
     if (sisa <= 0 || t.signal.aborted) break;
 
     const respons = await t.klien.messages.create(
-      { model: t.model, max_tokens: 2000, system: INSTRUKSI_SISTEM, messages: [{ role: 'user', content: pesan }] },
+      {
+        model: t.model,
+        max_tokens: MAKS_TOKEN_MATERI,
+        system: INSTRUKSI_SISTEM,
+        messages: [{ role: 'user', content: pesan }],
+      },
       { signal: t.signal, timeout: sisa },
     );
     const teks = respons.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
