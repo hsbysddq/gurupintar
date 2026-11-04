@@ -246,12 +246,11 @@ sudo systemctl start gurupintar
 
 Jangan menjalankan `npm run build` saat layanan masih hidup. Build menulis ulang folder `.next` yang sedang dipakai proses `next start`, sehingga halaman bisa error atau mendeteksi versi build yang belum selesai.
 
-Modal maintenance hanya muncul jika:
+Modal **Website sedang maintenance** hanya muncul jika `MAINTENANCE_MODE=1` di environment. Jaringan lambat, timeout, atau server mati sebentar **tidak** memunculkannya.
 
-- `MAINTENANCE_MODE=1` di environment, atau
-- server sudah menjalankan build baru setelah restart.
+Deploy baru tidak memakai modal maintenance. Tab lama hanya menampilkan banner kecil **Versi baru tersedia** yang bisa ditunda atau ditutup. Build ID sekarang diambil dari commit Git (`generateBuildId` di `next.config.ts`), jadi rebuild tanpa perubahan kode tidak dianggap versi baru.
 
-Jaringan lambat, timeout, atau server mati sebentar **tidak** memunculkan modal maintenance. Kalau ingin menampilkan maintenance terjadwal, set `MAINTENANCE_MODE=1` lalu restart layanan sebelum maintenance, dan hapus variabel itu setelah selesai.
+Kalau ingin menampilkan maintenance terjadwal, set `MAINTENANCE_MODE=1` lalu restart layanan sebelum maintenance, dan hapus variabel itu setelah selesai.
 
 ## 14. Masalah umum
 

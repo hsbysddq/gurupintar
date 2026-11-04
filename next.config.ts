@@ -1,6 +1,32 @@
+import { execFileSync } from "node:child_process";
 import type { NextConfig } from "next";
 
+/**
+ * Build ID dari commit Git, bukan angka acak. Rebuild tanpa perubahan kode
+ * memakai ID yang sama sehingga tidak memicu pemberitahuan versi baru.
+ */
+function buildIdDariGit(): string | null {
+  const dariEnv =
+    process.env.GIT_COMMIT ??
+    process.env.GITHUB_SHA ??
+    process.env.CI_COMMIT_SHA ??
+    process.env.VERCEL_GIT_COMMIT_SHA;
+  if (dariEnv?.trim()) return dariEnv.trim();
+
+  try {
+    return execFileSync("git", ["rev-parse", "--short=16", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 const nextConfig: NextConfig = {
+  generateBuildId: async () => buildIdDariGit(),
+
   async headers() {
     return [
       {
