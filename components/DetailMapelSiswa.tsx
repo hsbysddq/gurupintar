@@ -8,6 +8,7 @@ import { IKON_MAPEL, kunciIkonMapel, warnaMapel } from '@/components/ikon-mapel'
 import { KartuKaca } from '@/components/KartuKaca';
 import { TombolHapusKelas } from '@/components/TombolHapusKelas';
 import { labelKelas } from '@/lib/beranda-siswa';
+import { formatJadwal } from '@/lib/jadwal-kuis';
 import {
   DAFTAR_TAB,
   formatTanggalKartu,
@@ -130,14 +131,21 @@ function PanelKuis({ daftar }: { daftar: ItemKuis[] }) {
         const skor =
           k.jumlahPengerjaan > 1 ? `Dikerjakan ${k.jumlahPengerjaan}× · terakhir ${skorTerakhir}` : `Sudah dikerjakan · ${skorTerakhir}`;
         const aktif = k.status === 'aktif-belum' || k.status === 'aktif-selesai';
+        const terjadwal = k.status === 'terjadwal';
         return (
           <li key={k.sesiId}>
             <KartuFeed
               ikon={ClipboardList}
-              judul={`${aktif ? 'Kuis baru' : 'Kuis'}: ${k.judul}`}
+              judul={`${terjadwal ? 'Kuis terjadwal' : aktif ? 'Kuis baru' : 'Kuis'}: ${k.judul}`}
               tanggal={formatTanggalKartu(k.tanggal)}
-              lencana={<Lencana aktif={aktif}>{aktif ? 'Aktif' : 'Selesai'}</Lencana>}
+              lencana={<Lencana aktif={aktif}>{terjadwal ? 'Terjadwal' : aktif ? 'Aktif' : 'Selesai'}</Lencana>}
             >
+              {terjadwal && (
+                <p className={`${TEKS_REDUP} py-3`}>
+                  Dibuka otomatis {formatJadwal(k.bukaPada)}.
+                  {k.tutupPada ? ` Ditutup otomatis ${formatJadwal(k.tutupPada)}.` : ''}
+                </p>
+              )}
               {k.status === 'aktif-belum' && k.hrefKerjakan && (
                 <Link href={k.hrefKerjakan} className={LINK_AKSI}>
                   Kerjakan kuis →

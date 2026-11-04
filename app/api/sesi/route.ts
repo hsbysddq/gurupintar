@@ -2,16 +2,18 @@ import type { NextRequest } from 'next/server';
 import { skemaBodyGabungSesi } from '@/lib/skema-api';
 import { PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
 import { wajibPeranApi } from '@/lib/server/auth';
+import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
   petakanErrorDb,
   PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_BELUM_DIBUKA,
   PESAN_SESI_DITUTUP,
   responsError,
   responsOk,
 } from '@/lib/server/respons';
-import type { SesiUntukSiswa, StatusSesi } from '@/lib/tipe';
+import type { SesiUntukSiswa } from '@/lib/tipe';
 
 const PESAN_KODE_TIDAK_DITEMUKAN = 'Kode kelas tidak ditemukan. Periksa lagi kode dari gurumu.';
 
@@ -32,7 +34,10 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
     if (error) return petakanErrorDb(error);
     if (!sesi) return responsError(PESAN_KODE_TIDAK_DITEMUKAN, 404);
-    if (sesi.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
+
+    const akses = await statusAksesSesi(db, { id: sesi.id, status: sesi.status });
+    if (akses.status === 'terjadwal') return responsError(PESAN_SESI_BELUM_DIBUKA, 409);
+    if (akses.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
 
     const [kelas, topik, anggota] = await Promise.all([
       db.from('kelas').select('nama').eq('id', sesi.kelas_id).single(),
@@ -55,10 +60,12 @@ export async function POST(request: NextRequest) {
       sesi: {
         id: sesi.id,
         kodeKelas: sesi.kode_kelas,
-        status: sesi.status as StatusSesi,
+        status: akses.status,
         kelasId: sesi.kelas_id,
         namaKelas: kelas.data.nama,
         namaTopik: topik.data.nama,
+        bukaPada: akses.jadwal?.bukaPada ?? null,
+        tutupPada: akses.jadwal?.tutupPada ?? null,
       },
     };
     return responsOk(respons);

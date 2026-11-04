@@ -1,8 +1,10 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { DataBeranda, HasilBeranda, KelasBeranda, SesiBeranda } from '@/lib/beranda-siswa';
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import type { Kelompok } from '@/lib/tipe';
 import { kolomArsipBelumAda } from './auth';
+import { bacaJadwalBanyak, tutupSesiKedaluwarsa } from './jadwal-kuis';
 import { ambilPercobaanSiswa } from './percobaan';
 
 type BarisKelas = { id: string; nama: string; mapel: string; guru_id: string };
@@ -43,6 +45,7 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
   const idAktif = barisKelas.map((k) => k.id);
   const idGuru = [...new Set(barisKelas.map((k) => k.guru_id))];
 
+  await tutupSesiKedaluwarsa(db);
   const [guru, sesi] = await Promise.all([
     db.from('pengguna').select('id, nama').in('id', idGuru),
     db.from('sesi_kuis').select('id, kelas_id, kode_kelas, status').in('kelas_id', idAktif),
@@ -52,6 +55,8 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
 
   const barisSesi = sesi.data as BarisSesi[];
   const idSesi = barisSesi.map((s) => s.id);
+  const jadwal = await bacaJadwalBanyak(db, idSesi);
+  const sekarang = new Date();
 
   let barisHasil: BarisHasil[] = [];
   if (idSesi.length > 0) {
@@ -71,7 +76,10 @@ export async function ambilDataBerandaSiswa(db: SupabaseClient, siswaId: string)
   const daftarSesi: SesiBeranda[] = barisSesi.map((s) => ({
     id: s.id,
     kelasId: s.kelas_id,
-    kodeAktif: s.status === 'aktif' ? s.kode_kelas : null,
+    kodeAktif:
+      statusSesiEfektif(s.status === 'aktif' ? 'aktif' : 'selesai', jadwal.get(s.id), sekarang) === 'aktif'
+        ? s.kode_kelas
+        : null,
   }));
   const daftarHasil: HasilBeranda[] = barisHasil.map((h) => ({
     sesiId: h.sesi_id,

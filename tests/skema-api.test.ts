@@ -12,6 +12,7 @@ import {
   skemaBodyGabungSesi,
   skemaBodyHapusSiswa,
   skemaBodyHapusTopik,
+  skemaBodyJadwalSesi,
   skemaBodyMasuk,
   skemaBodyTopikBaru,
   skemaBodyUbahTopik,
@@ -485,6 +486,45 @@ describe('skemaBodyBukaSesi', () => {
   it('menolak id yang bukan uuid', () => {
     expect(skemaBodyBukaSesi.safeParse({ topikId: 'pecahan' }).success).toBe(false);
     expect(skemaBodyBukaSesi.safeParse({ kelasId: '7a' }).success).toBe(false);
+  });
+
+  it('menerima jadwal ISO dan menormalkannya', () => {
+    const hasil = skemaBodyBukaSesi.parse({
+      bukaPada: '2026-11-03T08:00:00+07:00',
+      tutupPada: '2026-11-03T09:00:00+07:00',
+    });
+    expect(hasil.bukaPada).toBe('2026-11-03T01:00:00.000Z');
+    expect(hasil.tutupPada).toBe('2026-11-03T02:00:00.000Z');
+  });
+
+  it('menolak jadwal yang bukan tanggal ISO', () => {
+    expect(skemaBodyBukaSesi.safeParse({ bukaPada: 'besok' }).success).toBe(false);
+    expect(skemaBodyBukaSesi.safeParse({ tutupPada: 'nanti' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyJadwalSesi', () => {
+  it('menerima sesi dan jadwal lengkap', () => {
+    const hasil = skemaBodyJadwalSesi.parse({
+      sesiId: SESI_ID,
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: '2026-11-03T02:00:00.000Z',
+    });
+    expect(hasil).toEqual({
+      sesiId: SESI_ID,
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: '2026-11-03T02:00:00.000Z',
+    });
+  });
+
+  it('menerima tutup null atau kosong untuk menghapus batas otomatis', () => {
+    expect(skemaBodyJadwalSesi.safeParse({ sesiId: SESI_ID, tutupPada: null }).success).toBe(true);
+    expect(skemaBodyJadwalSesi.parse({ sesiId: SESI_ID, tutupPada: '' }).tutupPada).toBeNull();
+  });
+
+  it('menolak sesi atau waktu yang tidak valid', () => {
+    expect(skemaBodyJadwalSesi.safeParse({ sesiId: 'sesi', tutupPada: null }).success).toBe(false);
+    expect(skemaBodyJadwalSesi.safeParse({ sesiId: SESI_ID, tutupPada: 'nanti' }).success).toBe(false);
   });
 });
 

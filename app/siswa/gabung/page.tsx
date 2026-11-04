@@ -44,7 +44,13 @@ function GabungKelas() {
   async function masuk(kodeDipakai: string) {
     try {
       const { sesi } = await gabungSesi(kodeDipakai);
-      simpanSesi({ sesiId: sesi.id, kodeKelas: sesi.kodeKelas, format: null, kelasId: sesi.kelasId });
+      simpanSesi({
+        sesiId: sesi.id,
+        kodeKelas: sesi.kodeKelas,
+        format: null,
+        kelasId: sesi.kelasId,
+        ...(sesi.tutupPada ? { tutupPada: sesi.tutupPada } : {}),
+      });
       router.push('/siswa/format');
     } catch (err) {
       setGalat(err instanceof ErrorApi ? err.message : 'Terjadi kesalahan. Coba lagi sebentar.');

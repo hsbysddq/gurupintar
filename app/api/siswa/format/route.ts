@@ -1,10 +1,13 @@
 import { skemaBodyFormat } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
   petakanErrorDb,
   PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_BELUM_DIBUKA,
+  PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
   responsError,
   responsOk,
@@ -21,9 +24,13 @@ export async function POST(request: Request) {
 
   try {
     const db = ambilSupabase();
-    const sesi = await db.from('sesi_kuis').select('kelas_id').eq('id', sesiId).maybeSingle();
+    const sesi = await db.from('sesi_kuis').select('id, kelas_id, status').eq('id', sesiId).maybeSingle();
     if (sesi.error) return petakanErrorDb(sesi.error);
     if (!sesi.data) return responsError(PESAN_SESI_TIDAK_ADA, 404);
+
+    const akses = await statusAksesSesi(db, { id: sesi.data.id, status: sesi.data.status });
+    if (akses.status === 'terjadwal') return responsError(PESAN_SESI_BELUM_DIBUKA, 409);
+    if (akses.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
 
     if (!(await anggotaKelas(db, auth.profil.id, sesi.data.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);

@@ -4,9 +4,11 @@ import { useEffect, useId, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Layers } from 'lucide-react';
+import { FormJadwalKuis, JADWAL_FORM_KOSONG, type GalatJadwalForm, type NilaiJadwalForm } from '@/components/JadwalKuis';
 import { KartuKaca } from '@/components/KartuKaca';
 import { Tombol } from '@/components/Tombol';
 import { ambilDaftarTopik, bukaSesiBanyak, ErrorApi } from '@/lib/api-klien';
+import { validasiJadwalIso, waktuLokalKeIso } from '@/lib/jadwal-kuis';
 import { TOPIK_DEMO_ID } from '@/lib/konstanta';
 import type { KelasRingkas, SesiBanyakBaru, TopikRingkas } from '@/lib/tipe';
 
@@ -21,6 +23,8 @@ export function FormKuisBanyak({ kelas }: { kelas: KelasRingkas[] }) {
   const [memuat, setMemuat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [hasil, setHasil] = useState<SesiBanyakBaru | null>(null);
+  const [jadwal, setJadwal] = useState<NilaiJadwalForm>(JADWAL_FORM_KOSONG);
+  const [galatJadwal, setGalatJadwal] = useState<GalatJadwalForm>({});
 
   useEffect(() => {
     if (!terbuka || daftarTopik) return;
@@ -54,13 +58,39 @@ export function FormKuisBanyak({ kelas }: { kelas: KelasRingkas[] }) {
   async function kirim(e: FormEvent) {
     e.preventDefault();
     if (dipilih.size === 0) return;
+
+    const bukaIso = waktuLokalKeIso(jadwal.buka);
+    const tutupIso = waktuLokalKeIso(jadwal.tutup);
+    if (jadwal.buka.trim() && !bukaIso) {
+      setGalatJadwal({ buka: 'Waktu buka belum valid.' });
+      return;
+    }
+    if (jadwal.tutup.trim() && !tutupIso) {
+      setGalatJadwal({ tutup: 'Waktu tutup belum valid.' });
+      return;
+    }
+    const validasiJadwal = validasiJadwalIso(bukaIso, tutupIso);
+    if (!validasiJadwal.ok) {
+      setGalatJadwal(
+        validasiJadwal.kolom === 'bukaPada' ? { buka: validasiJadwal.pesan } : { tutup: validasiJadwal.pesan },
+      );
+      return;
+    }
+
     setMemuat(true);
     setGalat(null);
+    setGalatJadwal({});
     setHasil(null);
     try {
-      const respons = await bukaSesiBanyak({ kelasIds: [...dipilih], topikId });
+      const respons = await bukaSesiBanyak({
+        kelasIds: [...dipilih],
+        topikId,
+        ...(bukaIso ? { bukaPada: bukaIso } : {}),
+        ...(tutupIso ? { tutupPada: tutupIso } : {}),
+      });
       setHasil(respons);
       setDipilih(new Set());
+      setJadwal(JADWAL_FORM_KOSONG);
       router.refresh();
     } catch (err) {
       setGalat(err instanceof ErrorApi ? err.message : 'Kuis belum berhasil dibuka. Coba lagi sebentar.');
@@ -149,6 +179,17 @@ export function FormKuisBanyak({ kelas }: { kelas: KelasRingkas[] }) {
               </Tombol>
             </div>
           </div>
+
+          <FormJadwalKuis
+            nilai={jadwal}
+            onUbah={(baru) => {
+              setJadwal(baru);
+              setGalatJadwal({});
+            }}
+            galat={galatJadwal}
+            judul="Jadwal untuk semua kelas"
+            deskripsi="Jadwal yang sama dipakai di setiap kelas terpilih. Kosongkan waktu tutup jika ingin menutup manual."
+          />
 
           {adaKuisAktifTerpilih && (
             <p role="status" className="text-[13px] leading-normal font-medium text-setengah-teks">

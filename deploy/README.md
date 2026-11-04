@@ -138,6 +138,7 @@ Catatan:
 - `NEXT_PUBLIC_*` ditanam saat build, jadi lakukan build setelah file ini ada.
 - `ANTHROPIC_API_KEY` boleh kosong; fitur materi AI akan menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
 - Jika memakai proyek Supabase baru, jalankan `supabase/schema.sql` lalu `supabase/seed.sql` di SQL Editor Supabase.
+- Database yang sudah berjalan: jalankan `supabase/migrasi-jadwal-kuis.sql` agar guru bisa mengatur buka/tutup kuis otomatis. Tanpa migrasi ini, kuis tetap bisa dibuka dan ditutup manual seperti biasa.
 
 ## 7. Build aplikasi
 

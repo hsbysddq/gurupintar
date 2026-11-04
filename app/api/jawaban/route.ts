@@ -3,6 +3,7 @@ import { skemaBodyJawaban } from '@/lib/skema-api';
 import { periksaDanNilaiJawaban } from '@/lib/soal-tka';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
 import { bacaBlokir } from '@/lib/server/blokir';
+import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
 import { bacaSoalTopik, perluMigrasiSoalTka, PESAN_MIGRASI_SOAL_TKA } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
@@ -10,6 +11,7 @@ import {
   petakanErrorDb,
   PESAN_DIBLOKIR,
   PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_BELUM_DIBUKA,
   PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
   responsError,
@@ -37,7 +39,10 @@ export async function POST(request: Request) {
       .maybeSingle();
     if (error) return petakanErrorDb(error);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
-    if (sesi.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
+
+    const akses = await statusAksesSesi(db, { id: sesiId, status: sesi.status });
+    if (akses.status === 'terjadwal') return responsError(PESAN_SESI_BELUM_DIBUKA, 409);
+    if (akses.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
 
     if (!(await anggotaKelas(db, siswaId, sesi.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);

@@ -8,6 +8,8 @@ export interface SesiAktif {
   format: Format | null;
   /** Kelas tempat kuis ini berada; dipakai tombol kembali ke halaman mata pelajaran. Boleh kosong pada data lama. */
   kelasId?: string;
+  /** Batas waktu tutup otomatis dari server, bila ada. */
+  tutupPada?: string;
 }
 
 const KUNCI = 'guru-pintar:sesi-aktif';
@@ -48,7 +50,15 @@ export function uraiSesi(mentah: string | null): SesiAktif | null {
           ? (data.format as Format)
           : null;
       const kelasId = 'kelasId' in data && typeof data.kelasId === 'string' && data.kelasId ? data.kelasId : null;
-      return { sesiId: data.sesiId, kodeKelas: data.kodeKelas, format, ...(kelasId ? { kelasId } : {}) };
+      const tutupPada =
+        'tutupPada' in data && typeof data.tutupPada === 'string' && data.tutupPada ? data.tutupPada : null;
+      return {
+        sesiId: data.sesiId,
+        kodeKelas: data.kodeKelas,
+        format,
+        ...(kelasId ? { kelasId } : {}),
+        ...(tutupPada ? { tutupPada } : {}),
+      };
     }
     return null;
   } catch {

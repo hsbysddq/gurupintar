@@ -7,6 +7,7 @@ import type {
   BodyDaftarSiswa,
   BodyHapusSiswa,
   BodyBukaBlokir,
+  BodyJadwalSesi,
   BodyJawaban,
   BodyNilaiEsai,
   BodyMasuk,
@@ -211,8 +212,15 @@ export function ambilDaftarSesi(kelasId?: string, signal?: AbortSignal): Promise
 }
 
 /** Tanpa `topikId`, server memakai topik demo; tanpa `kelasId`, kelas pertama milik guru. */
-export function bukaSesi(input: { kelasId?: string; topikId?: string } = {}): Promise<SesiBaru> {
+export function bukaSesi(
+  input: { kelasId?: string; topikId?: string; bukaPada?: string; tutupPada?: string } = {},
+): Promise<SesiBaru> {
   return minta('/api/guru/sesi', { method: 'POST', body: JSON.stringify(input) });
+}
+
+/** Mengatur ulang jadwal buka/tutup satu sesi. */
+export function aturJadwalSesi(body: BodyJadwalSesi): Promise<{ ok: true }> {
+  return minta('/api/guru/sesi', { method: 'PATCH', body: JSON.stringify(body) });
 }
 
 /** Buka satu topik untuk beberapa kelas sekaligus. */

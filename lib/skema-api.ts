@@ -237,10 +237,31 @@ export const skemaBodyUbahModulPdf = z.object({
   pdf: z.string().min(100).max(Math.ceil((UKURAN_PDF_MAKS_BYTE * 4) / 3) + 8),
 });
 
+// Waktu jadwal dikirim sebagai ISO 8601. Nilai kosong berarti "buka sekarang" / "tanpa batas tutup".
+const skemaWaktuIso = z
+  .string()
+  .trim()
+  .min(1)
+  .max(60)
+  .refine((nilai) => Number.isFinite(Date.parse(nilai)), 'Waktu jadwal tidak valid.')
+  .transform((nilai) => new Date(nilai).toISOString());
+
+const skemaWaktuIsoOpsional = z.preprocess(
+  (nilai) => (typeof nilai === 'string' && nilai.trim() === '' ? undefined : nilai),
+  skemaWaktuIso.optional(),
+);
+
+const skemaWaktuIsoNullable = z.preprocess(
+  (nilai) => (typeof nilai === 'string' && nilai.trim() === '' ? null : nilai),
+  skemaWaktuIso.nullable(),
+);
+
 // POST /api/guru/sesi; tanpa kelasId → kelas pertama milik guru, tanpa topikId → TOPIK_DEMO_ID.
 export const skemaBodyBukaSesi = z.object({
   kelasId: z.uuid().optional(),
   topikId: z.uuid().optional(),
+  bukaPada: skemaWaktuIsoOpsional,
+  tutupPada: skemaWaktuIsoOpsional,
 });
 
 // POST /api/guru/sesi/banyak: satu topik untuk beberapa kelas sekaligus.
@@ -248,11 +269,20 @@ export const skemaBodyBukaSesiBanyak = z
   .object({
     kelasIds: z.array(z.uuid()).min(1).max(20),
     topikId: z.uuid().optional(),
+    bukaPada: skemaWaktuIsoOpsional,
+    tutupPada: skemaWaktuIsoOpsional,
   })
   .refine((data) => new Set(data.kelasIds).size === data.kelasIds.length, {
     path: ['kelasIds'],
     message: 'Kelas tidak boleh dipilih lebih dari sekali.',
   });
+
+// PATCH /api/guru/sesi: atur ulang jadwal satu sesi.
+export const skemaBodyJadwalSesi = z.object({
+  sesiId: z.uuid(),
+  bukaPada: skemaWaktuIsoOpsional,
+  tutupPada: skemaWaktuIsoNullable,
+});
 
 // GET /api/guru/sesi?kelas= dan GET /api/guru/pendampingan?kelas=
 export const skemaQueryKelasOpsional = z.object({
@@ -482,6 +512,7 @@ export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
 export type BodyUbahKelas = z.infer<typeof skemaBodyUbahKelas>;
 export type BodyHapusSiswa = z.infer<typeof skemaBodyHapusSiswa>;
 export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
+export type BodyJadwalSesi = z.infer<typeof skemaBodyJadwalSesi>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;
 export type SoalTervalidasi = BodyTopikBaru['soal'][number];

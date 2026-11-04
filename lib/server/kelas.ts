@@ -3,8 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalisasiFormat } from '@/lib/format-materi';
 import { pilihHasilTerbaru } from '@/lib/hasil-terbaru';
 import { lengkapiIsiMateri } from '@/lib/validasi-materi';
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import { kelasMilikGuru, kolomArsipBelumAda } from './auth';
 import { tabelBlokirBelumAda } from './blokir';
+import { bacaJadwalBanyak, tutupSesiKedaluwarsa } from './jadwal-kuis';
 import type {
   AsalMateriPustaka,
   BlokirSiswaKelas,
@@ -87,13 +89,22 @@ export async function ambilKelasGuru(
 
   let sesiAktif: BarisSesiAktif[] = [];
   if (ids.length > 0) {
+    await tutupSesiKedaluwarsa(db);
     const sesi = await db
       .from('sesi_kuis')
       .select('id, kelas_id, kode_kelas, hasil_siswa(count)')
       .in('kelas_id', ids)
       .eq('status', 'aktif');
     if (sesi.error) throw sesi.error;
-    sesiAktif = sesi.data as BarisSesiAktif[];
+    const kandidat = sesi.data as BarisSesiAktif[];
+    const jadwal = await bacaJadwalBanyak(
+      db,
+      kandidat.map((s) => s.id),
+    );
+    const sekarang = new Date();
+    sesiAktif = kandidat.filter(
+      (s) => statusSesiEfektif('aktif', jadwal.get(s.id), sekarang) === 'aktif',
+    );
   }
 
   return daftar.map((k) => {

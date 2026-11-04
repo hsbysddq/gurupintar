@@ -4,9 +4,11 @@ import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowUpRight, CalendarDays, Inbox, Loader2, Plus, Sparkles } from 'lucide-react';
+import { PengaturanJadwalSesi } from '@/components/JadwalKuis';
 import { PanelKodeKelas } from '@/components/PanelKodeKelas';
 import { usePolling } from '@/hooks/use-polling';
 import { ambilDaftarSesi, ErrorApi, tutupSesi } from '@/lib/api-klien';
+import { ringkasJadwal } from '@/lib/jadwal-kuis';
 import { INTERVAL_POLLING_GURU_MS } from '@/lib/konstanta';
 import type { KelasRingkas, SesiGuru } from '@/lib/tipe';
 
@@ -35,7 +37,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
   const [konfirmasiGanti, setKonfirmasiGanti] = useState(false);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
 
-  const sesiAktif = daftar?.find((s) => s.status === 'aktif');
+  const sesiAktif = daftar?.find((s) => s.status === 'aktif' || s.status === 'terjadwal');
 
   async function jalankanBuatKuis() {
     setMembuka(true);
@@ -125,10 +127,13 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
               <AlertTriangle aria-hidden="true" className="size-5" />
             </span>
             <div>
-              <h2 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">Kuis masih aktif</h2>
+              <h2 className="font-display text-[16px] leading-[24px] font-semibold text-aura-ink">
+                {sesiAktif.status === 'terjadwal' ? 'Kuis masih dijadwalkan' : 'Kuis masih aktif'}
+              </h2>
               <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">
-                Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong> masih aktif. Untuk
-                membuat kuis baru, kuis ini akan ditutup dan kamu diarahkan membuat soal terlebih dahulu.
+                Kuis <strong className="tracking-wide text-aura-ink">{sesiAktif.kodeKelas}</strong>{' '}
+                {sesiAktif.status === 'terjadwal' ? 'sudah dijadwalkan' : 'masih aktif'}. Untuk membuat kuis baru, kuis
+                ini akan ditutup dan kamu diarahkan membuat soal terlebih dahulu.
               </p>
             </div>
           </div>
@@ -155,15 +160,30 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
       )}
 
       {sesiAktif && (
-        <PanelKodeKelas
-          kodeKelas={sesiAktif.kodeKelas}
-          urlGabung={`${window.location.origin}/siswa/gabung?kode=${sesiAktif.kodeKelas}`}
-          urlHasil={`/guru/hasil?sesi=${sesiAktif.id}&kelas=${kelas.id}`}
-          jumlahSiswa={kelas.jumlahSiswa}
-          jumlahMenjawab={sesiAktif.jumlahMenjawab}
-          onTutup={() => tutupKuis(sesiAktif.id)}
-          sedangMenutup={menutup}
-        />
+        <>
+          <PanelKodeKelas
+            kodeKelas={sesiAktif.kodeKelas}
+            urlGabung={`${window.location.origin}/siswa/gabung?kode=${sesiAktif.kodeKelas}`}
+            urlHasil={`/guru/hasil?sesi=${sesiAktif.id}&kelas=${kelas.id}`}
+            jumlahSiswa={kelas.jumlahSiswa}
+            jumlahMenjawab={sesiAktif.jumlahMenjawab}
+            status={sesiAktif.status === 'terjadwal' ? 'terjadwal' : 'aktif'}
+            bukaPada={sesiAktif.bukaPada}
+            tutupPada={sesiAktif.tutupPada}
+            onTutup={() => tutupKuis(sesiAktif.id)}
+            sedangMenutup={menutup}
+          />
+          <PengaturanJadwalSesi
+            key={`${sesiAktif.id}-${sesiAktif.bukaPada}-${sesiAktif.tutupPada}`}
+            sesiId={sesiAktif.id}
+            bukaPada={sesiAktif.bukaPada}
+            tutupPada={sesiAktif.tutupPada}
+            onTersimpan={() => {
+              muatUlang();
+              router.refresh();
+            }}
+          />
+        </>
       )}
 
       <section aria-labelledby="judul-riwayat" className="flex flex-col gap-3">
@@ -204,6 +224,7 @@ export function RuangKelas({ kelas }: { kelas: KelasRingkas }) {
 
 function HistoryRow({ sesi, kelasId }: { sesi: SesiGuru; kelasId: string }) {
   const aktif = sesi.status === 'aktif';
+  const terjadwal = sesi.status === 'terjadwal';
   return (
     <li>
       <Link
@@ -222,17 +243,31 @@ function HistoryRow({ sesi, kelasId }: { sesi: SesiGuru; kelasId: string }) {
               Kode <span className="font-semibold tracking-wide text-aura-ink">{sesi.kodeKelas}</span> ·{' '}
               {sesi.jumlahMenjawab} menjawab
             </p>
+            {(aktif || terjadwal || sesi.tutupPada) && (
+              <p className="mt-0.5 font-body text-[11px] leading-[16px] text-aura-muted">
+                {ringkasJadwal({ bukaPada: sesi.bukaPada, tutupPada: sesi.tutupPada })}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span
             className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] ${
-              aktif ? 'bg-aura-emerald/10 text-[#047857]' : 'bg-white/60 text-aura-muted'
+              aktif
+                ? 'bg-aura-emerald/10 text-[#047857]'
+                : terjadwal
+                  ? 'bg-aura-amber/10 text-[#92400e]'
+                  : 'bg-white/60 text-aura-muted'
             }`}
           >
-            {aktif && <span aria-hidden="true" className="size-1.5 rounded-full bg-aura-emerald" />}
-            {aktif ? 'Aktif' : 'Selesai'}
+            {(aktif || terjadwal) && (
+              <span
+                aria-hidden="true"
+                className={`size-1.5 rounded-full ${aktif ? 'bg-aura-emerald' : 'bg-aura-amber'}`}
+              />
+            )}
+            {aktif ? 'Aktif' : terjadwal ? 'Terjadwal' : 'Selesai'}
           </span>
           <ArrowUpRight aria-hidden="true" className="size-4 text-aura-muted transition-colors group-hover:text-aura-primary" />
         </div>

@@ -16,6 +16,7 @@ import { Tombol } from "@/components/Tombol";
 import { useBuatMateri } from "@/hooks/use-buat-materi";
 import { usePolling } from "@/hooks/use-polling";
 import { ambilHasil } from "@/lib/api-klien";
+import { formatJadwal } from "@/lib/jadwal-kuis";
 import { INTERVAL_POLLING_GURU_MS } from "@/lib/konstanta";
 
 const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", {
@@ -83,7 +84,13 @@ function HasilKuis() {
         </p>
         <p className="text-tinta-lembut">
           {FORMAT_TANGGAL.format(new Date(data.sesi.dibuatPada))} · Kode {data.sesi.kodeKelas} ·{" "}
-          {data.sesi.status === "aktif" ? "Kuis masih dibuka" : "Kuis sudah ditutup"}
+          {data.sesi.status === "terjadwal"
+            ? `Kuis dijadwalkan buka ${formatJadwal(data.sesi.bukaPada)}`
+            : data.sesi.status === "aktif"
+              ? data.sesi.tutupPada
+                ? `Kuis ditutup otomatis ${formatJadwal(data.sesi.tutupPada)}`
+                : "Kuis masih dibuka"
+              : "Kuis sudah ditutup"}
         </p>
         <p aria-live="polite" className="text-xl leading-snug font-semibold">
           {data.jumlahMenjawab} dari {data.jumlahSiswa} siswa menjawab

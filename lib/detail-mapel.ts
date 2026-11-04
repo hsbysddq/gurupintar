@@ -26,6 +26,8 @@ export interface SesiDetail {
   dibuatPada: string;
   namaTopik: string;
   statusMateri: StatusMateriSiswa;
+  bukaPada?: string | null;
+  tutupPada?: string | null;
 }
 
 /** Satu pengerjaan kuis. Kuis yang dikerjakan ulang punya beberapa baris dengan `sesiId` yang sama. */
@@ -65,13 +67,15 @@ export interface ItemMateri {
   href: string | null;
 }
 
-export type StatusKuis = 'aktif-belum' | 'aktif-selesai' | 'selesai-dikerjakan' | 'selesai-tidak';
+export type StatusKuis = 'terjadwal' | 'aktif-belum' | 'aktif-selesai' | 'selesai-dikerjakan' | 'selesai-tidak';
 
 export interface ItemKuis {
   sesiId: string;
   judul: string;
   tanggal: string;
   status: StatusKuis;
+  bukaPada: string | null;
+  tutupPada: string | null;
   /** Skor pengerjaan terakhir; null bila belum dikerjakan. */
   skor: number | null;
   total: number | null;
@@ -143,18 +147,23 @@ export function susunDetailMapel(data: DataDetailMapel): DetailMapel {
   const kuis: ItemKuis[] = sesi.map((s) => {
     const hasil = hasilPerSesi.get(s.id) ?? null;
     const aktif = s.status === 'aktif';
-    const status: StatusKuis = aktif
-      ? hasil
-        ? 'aktif-selesai'
-        : 'aktif-belum'
-      : hasil
-        ? 'selesai-dikerjakan'
-        : 'selesai-tidak';
+    const status: StatusKuis =
+      s.status === 'terjadwal'
+        ? 'terjadwal'
+        : aktif
+          ? hasil
+            ? 'aktif-selesai'
+            : 'aktif-belum'
+          : hasil
+            ? 'selesai-dikerjakan'
+            : 'selesai-tidak';
     return {
       sesiId: s.id,
       judul: s.namaTopik,
       tanggal: s.dibuatPada,
       status,
+      bukaPada: s.bukaPada ?? null,
+      tutupPada: s.tutupPada ?? null,
       skor: hasil?.skor ?? null,
       total: hasil?.total ?? null,
       jumlahPengerjaan: jumlahPerSesi.get(s.id) ?? 0,

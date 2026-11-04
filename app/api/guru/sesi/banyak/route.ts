@@ -1,8 +1,10 @@
+import { validasiJadwalIso } from '@/lib/jadwal-kuis';
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
 import { SOAL_MINIMAL_TOPIK, TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaBodyBukaSesiBanyak } from '@/lib/skema-api';
 import { bolehPakaiTopik } from '@/lib/topik';
 import { wajibPeranApi, kolomArsipBelumAda } from '@/lib/server/auth';
+import { simpanJadwalSesi, tabelJadwalBelumAda } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
 import type { SesiBanyakBaru } from '@/lib/tipe';
@@ -11,6 +13,8 @@ const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba lagi.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
 const PESAN_JUMLAH_SOAL = `Topik harus punya minimal ${SOAL_MINIMAL_TOPIK} soal.`;
 const PESAN_KELAS_TIDAK_ADA = 'Sebagian kelas tidak ditemukan.';
+const PESAN_MIGRASI_JADWAL =
+  'Fitur jadwal kuis belum aktif. Jalankan supabase/migrasi-jadwal-kuis.sql di Supabase.';
 
 // POST /api/guru/sesi/banyak: buka satu topik untuk beberapa kelas sekaligus.
 // Setiap kelas mendapat sesi dan kode sendiri. Jika satu kelas gagal, kelas lain tetap diproses
@@ -24,8 +28,20 @@ export async function POST(request: Request) {
   const topikId = input.data.topikId ?? TOPIK_DEMO_ID;
   const ids = input.data.kelasIds;
 
+  const validasiJadwal = validasiJadwalIso(input.data.bukaPada ?? null, input.data.tutupPada ?? null);
+  if (!validasiJadwal.ok) return responsError(validasiJadwal.pesan, 400);
+  const mintaJadwal = Boolean(input.data.bukaPada || input.data.tutupPada);
+
   try {
     const db = ambilSupabase();
+
+    if (mintaJadwal) {
+      const cek = await db.from('jadwal_kuis').select('sesi_id').limit(1);
+      if (cek.error) {
+        if (tabelJadwalBelumAda(cek.error)) return responsError(PESAN_MIGRASI_JADWAL, 503);
+        return petakanErrorDb(cek.error);
+      }
+    }
 
     const dasar = () =>
       db.from('kelas').select('id, nama').in('id', ids).eq('guru_id', auth.profil.id);
@@ -65,7 +81,24 @@ export async function POST(request: Request) {
       });
 
       if (hasil.status === 'berhasil') {
-        respons.sesi.push({ kelasId, namaKelas: nama, id: hasil.nilai, kodeKelas: hasil.kode });
+        const simpan = await simpanJadwalSesi(db, hasil.nilai, validasiJadwal.jadwal);
+        if (!simpan.ok && (!simpan.tabelBelumAda || mintaJadwal)) {
+          await db.from('sesi_kuis').delete().eq('id', hasil.nilai);
+          respons.gagal.push({
+            kelasId,
+            namaKelas: nama,
+            pesan: simpan.tabelBelumAda ? PESAN_MIGRASI_JADWAL : 'Jadwal kuis belum berhasil disimpan.',
+          });
+          continue;
+        }
+        respons.sesi.push({
+          kelasId,
+          namaKelas: nama,
+          id: hasil.nilai,
+          kodeKelas: hasil.kode,
+          bukaPada: validasiJadwal.jadwal.bukaPada ?? new Date().toISOString(),
+          tutupPada: validasiJadwal.jadwal.tutupPada,
+        });
       } else {
         if (hasil.status === 'gagal') {
           console.error('Buka sesi gagal untuk kelas:', kelasId, hasil.error);

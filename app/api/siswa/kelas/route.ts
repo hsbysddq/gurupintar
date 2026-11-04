@@ -1,6 +1,8 @@
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import { skemaBodyGabungKelas, skemaQueryKelasSiswa } from '@/lib/skema-api';
 import { hapusAnggotaKelas, PESAN_NAMA_DIPAKAI, tambahAnggotaKelas } from '@/lib/server/anggota';
 import { anggotaKelas, kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
+import { bacaJadwalBanyak, tutupSesiKedaluwarsa } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
@@ -13,7 +15,7 @@ import type { KelasSiswa } from '@/lib/tipe';
 
 const PESAN_KODE_TIDAK_DITEMUKAN = 'Kode kelas tidak ditemukan. Periksa lagi kode dari gurumu.';
 
-type BarisSesiAktif = { kelas_id: string; kode_kelas: string };
+type BarisSesiAktif = { id: string; kelas_id: string; kode_kelas: string };
 
 // GET /api/siswa/kelas: daftar kelas yang diikuti siswa + kuis aktifnya.
 export async function GET() {
@@ -41,15 +43,28 @@ export async function GET() {
     const idKelas = kelas.data.map((k) => k.id as string);
     const idGuru = [...new Set(kelas.data.map((k) => k.guru_id as string))];
 
+    await tutupSesiKedaluwarsa(db);
     const [guru, sesi] = await Promise.all([
       db.from('pengguna').select('id, nama').in('id', idGuru),
-      db.from('sesi_kuis').select('kelas_id, kode_kelas').in('kelas_id', idKelas).eq('status', 'aktif'),
+      db.from('sesi_kuis').select('id, kelas_id, kode_kelas').in('kelas_id', idKelas).eq('status', 'aktif'),
     ]);
     if (guru.error) return petakanErrorDb(guru.error);
     if (sesi.error) return petakanErrorDb(sesi.error);
 
     const petaGuru = new Map(guru.data.map((g) => [g.id as string, g.nama as string]));
-    const petaSesi = new Map((sesi.data as BarisSesiAktif[]).map((s) => [s.kelas_id, s.kode_kelas]));
+    const barisSesi = sesi.data as BarisSesiAktif[];
+    const jadwal = await bacaJadwalBanyak(
+      db,
+      barisSesi.map((s) => s.id),
+    );
+    const sekarang = new Date();
+    const petaSesi = new Map<string, { kodeKelas: string; tutupPada: string | null }>();
+    for (const s of barisSesi) {
+      const jadwalSesi = jadwal.get(s.id);
+      if (statusSesiEfektif('aktif', jadwalSesi, sekarang) === 'aktif') {
+        petaSesi.set(s.kelas_id, { kodeKelas: s.kode_kelas, tutupPada: jadwalSesi?.tutupPada ?? null });
+      }
+    }
 
     const respons: KelasSiswa[] = kelas.data
       .map((k) => ({
@@ -58,7 +73,7 @@ export async function GET() {
         mapel: k.mapel as string,
         namaGuru: petaGuru.get(k.guru_id as string) ?? '',
         kodeUndangan: k.kode_undangan as string,
-        kuisAktif: petaSesi.has(k.id as string) ? { kodeKelas: petaSesi.get(k.id as string)! } : null,
+        kuisAktif: petaSesi.get(k.id as string) ?? null,
       }))
       .sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 

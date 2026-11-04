@@ -26,7 +26,8 @@ export type TipeSoal =
   | 'menjodohkan'
   | 'esai';
 
-export type StatusSesi = 'aktif' | 'selesai';
+/** `terjadwal` adalah status tampilan dari jadwal; kolom database tetap `aktif` sampai ditutup. */
+export type StatusSesi = 'aktif' | 'selesai' | 'terjadwal';
 
 export type StatusMateri = 'draf' | 'dibagikan';
 
@@ -65,6 +66,8 @@ export interface SesiUntukSiswa {
     kelasId: string;
     namaKelas: string;
     namaTopik: string;
+    bukaPada: string | null;
+    tutupPada: string | null;
   };
 }
 
@@ -133,7 +136,7 @@ export interface KelasSiswa {
   mapel: string;
   namaGuru: string;
   kodeUndangan: string;
-  kuisAktif: { kodeKelas: string } | null;
+  kuisAktif: { kodeKelas: string; tutupPada: string | null } | null;
 }
 
 export type StatusMateriSiswa = 'belum-mengerjakan' | 'disiapkan' | 'tersedia';
@@ -146,6 +149,8 @@ export interface SesiSiswa {
   dibuatPada: string;
   namaTopik: string;
   statusMateri: StatusMateriSiswa;
+  bukaPada?: string | null;
+  tutupPada?: string | null;
 }
 
 /** GET /api/guru/sesi */
@@ -157,6 +162,8 @@ export interface SesiGuru {
   status: StatusSesi;
   dibuatPada: string;
   jumlahMenjawab: number;
+  bukaPada: string | null;
+  tutupPada: string | null;
 }
 
 /** GET /api/guru/topik: hanya topik dengan minimal satu soal */
@@ -189,11 +196,20 @@ export interface TopikDetail {
 export interface SesiBaru {
   id: string;
   kodeKelas: string;
+  bukaPada: string | null;
+  tutupPada: string | null;
 }
 
 /** POST /api/guru/sesi/banyak */
 export interface SesiBanyakBaru {
-  sesi: { kelasId: string; namaKelas: string; id: string; kodeKelas: string }[];
+  sesi: {
+    kelasId: string;
+    namaKelas: string;
+    id: string;
+    kodeKelas: string;
+    bukaPada: string | null;
+    tutupPada: string | null;
+  }[];
   gagal: { kelasId: string; namaKelas: string; pesan: string }[];
 }
 
@@ -261,6 +277,8 @@ export interface HasilGuru extends RingkasanMateri {
     namaKelas: string;
     namaTopik: string;
     dibuatPada: string;
+    bukaPada: string | null;
+    tutupPada: string | null;
     /** Materi cadangan hanya ada untuk topik demo (PRD F-10). */
     cadanganTersedia: boolean;
   };

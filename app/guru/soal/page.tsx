@@ -17,6 +17,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { FormJadwalKuis, JADWAL_FORM_KOSONG, type GalatJadwalForm, type NilaiJadwalForm } from "@/components/JadwalKuis";
 import { UnggahGambarSoal } from "@/components/UnggahGambarSoal";
 import {
   ambilDaftarKelas,
@@ -27,6 +28,7 @@ import {
   simpanTopik,
   ubahTopik,
 } from "@/lib/api-klien";
+import { validasiJadwalIso, waktuLokalKeIso } from "@/lib/jadwal-kuis";
 import {
   PANJANG_MISKONSEPSI_MAKS,
   SOAL_AWAL_TOPIK,
@@ -71,7 +73,14 @@ type PesanAksi = { jenis: "sukses" | "gagal"; teks: string };
 type Pengiriman =
   | { status: "diam" }
   | { status: "mengirim" }
-  | { status: "berhasil"; jenis: "buat"; kelasId: string; namaKelas: string; kode: string | null }
+  | {
+      status: "berhasil";
+      jenis: "buat";
+      kelasId: string;
+      namaKelas: string;
+      kode: string | null;
+      pesanKuis?: string;
+    }
   | { status: "berhasil"; jenis: "ubah"; namaTopik: string }
   | { status: "gagal"; pesan: string };
 
@@ -223,6 +232,8 @@ export default function HalamanBuatSoal() {
   const [hapusId, setHapusId] = useState<string | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [pesanAksi, setPesanAksi] = useState<PesanAksi | null>(null);
+  const [jadwal, setJadwal] = useState<NilaiJadwalForm>(JADWAL_FORM_KOSONG);
+  const [galatJadwal, setGalatJadwal] = useState<GalatJadwalForm>({});
 
   // Pilihan kelas diambil dari kelas yang sudah dibuat guru. Jika hanya ada satu, langsung terpilih.
   useEffect(() => {
@@ -294,6 +305,8 @@ export default function HalamanBuatSoal() {
     setMengubah(null);
     setIsian(isianKosong());
     setGalat({});
+    setGalatJadwal({});
+    setJadwal(JADWAL_FORM_KOSONG);
     setPengiriman({ status: "diam" });
     setPesanAksi(null);
   }
@@ -404,19 +417,54 @@ export default function HalamanBuatSoal() {
       return;
     }
 
+    const bukaIso = waktuLokalKeIso(jadwal.buka);
+    const tutupIso = waktuLokalKeIso(jadwal.tutup);
+    if (jadwal.buka.trim() && !bukaIso) {
+      setGalatJadwal({ buka: "Waktu buka belum valid." });
+      return;
+    }
+    if (jadwal.tutup.trim() && !tutupIso) {
+      setGalatJadwal({ tutup: "Waktu tutup belum valid." });
+      return;
+    }
+    const validasiJadwal = validasiJadwalIso(bukaIso, tutupIso);
+    if (!validasiJadwal.ok) {
+      setGalatJadwal(
+        validasiJadwal.kolom === "bukaPada" ? { buka: validasiJadwal.pesan } : { tutup: validasiJadwal.pesan },
+      );
+      return;
+    }
+
     setGalat({});
+    setGalatJadwal({});
     setPengiriman({ status: "mengirim" });
     try {
       const topik = await simpanTopik(hasil.data);
       let kode: string | null = null;
+      let pesanKuis: string | undefined;
       try {
         // Soal langsung dipakai sebagai kuis kelas ini, sehingga muncul di Riwayat kuis.
-        kode = (await bukaSesi({ kelasId: kelas.id, topikId: topik.id })).kodeKelas;
-      } catch {
-        // Soal sudah tersimpan; kuis bisa dibuka manual dari Kelola kelas.
+        kode = (
+          await bukaSesi({
+            kelasId: kelas.id,
+            topikId: topik.id,
+            ...(bukaIso ? { bukaPada: bukaIso } : {}),
+            ...(tutupIso ? { tutupPada: tutupIso } : {}),
+          })
+        ).kodeKelas;
+      } catch (err) {
+        pesanKuis = err instanceof Error ? err.message : "Kuis belum berhasil dibuka.";
       }
       setIsian({ ...isianKosong(), kelasId: kelas.id });
-      setPengiriman({ status: "berhasil", jenis: "buat", kelasId: kelas.id, namaKelas: namaKelasLengkap(kelas), kode });
+      setJadwal(JADWAL_FORM_KOSONG);
+      setPengiriman({
+        status: "berhasil",
+        jenis: "buat",
+        kelasId: kelas.id,
+        namaKelas: namaKelasLengkap(kelas),
+        kode,
+        pesanKuis,
+      });
       setPercobaanTopik((n) => n + 1);
     } catch (err) {
       setPengiriman({ status: "gagal", pesan: err instanceof Error ? err.message : "Soal belum berhasil disimpan." });
@@ -730,6 +778,15 @@ export default function HalamanBuatSoal() {
                   sebelum membuat soal.
                 </p>
               )}
+
+              <FormJadwalKuis
+                nilai={jadwal}
+                onUbah={(baru) => {
+                  setJadwal(baru);
+                  setGalatJadwal({});
+                }}
+                galat={galatJadwal}
+              />
             </div>
           </section>
         )}
@@ -1362,7 +1419,8 @@ export default function HalamanBuatSoal() {
                     </>
                   ) : (
                     <>
-                      Soal tersimpan untuk {pengiriman.namaKelas}, tetapi kuis belum terbuka. Buka dari halaman kelas.{" "}
+                      Soal tersimpan untuk {pengiriman.namaKelas}, tetapi kuis belum terbuka.
+                      {pengiriman.pesanKuis ? ` ${pengiriman.pesanKuis}` : " Buka dari halaman kelas."}{" "}
                       <Link href={`/guru/kelas?kelas=${pengiriman.kelasId}`} className="font-semibold underline">
                         Lihat di Kelola kelas
                       </Link>

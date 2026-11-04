@@ -1,9 +1,11 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { DataDetailMapel, HasilDetail, SesiDetail } from '@/lib/detail-mapel';
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import { tentukanStatusMateriSiswa } from '@/lib/status-materi-siswa';
-import type { Kelompok, StatusSesi } from '@/lib/tipe';
+import type { Kelompok } from '@/lib/tipe';
 import { kolomArsipBelumAda } from './auth';
+import { bacaJadwalBanyak, tutupSesiKedaluwarsa } from './jadwal-kuis';
 import { ambilPercobaanSiswa } from './percobaan';
 
 type BarisKelas = { id: string; nama: string; mapel: string; guru_id: string };
@@ -44,6 +46,7 @@ export async function ambilDataDetailMapel(
   const ini = semuaKelas.find((k) => k.id === kelasId);
   if (!ini) return null;
 
+  await tutupSesiKedaluwarsa(db, { kelasId });
   const [guru, sesi] = await Promise.all([
     db.from('pengguna').select('nama').eq('id', ini.guru_id).maybeSingle(),
     db
@@ -57,6 +60,8 @@ export async function ambilDataDetailMapel(
 
   const barisSesi = sesi.data as BarisSesi[];
   const idSesi = barisSesi.map((s) => s.id);
+  const jadwal = await bacaJadwalBanyak(db, idSesi);
+  const sekarang = new Date();
 
   let barisHasil: BarisHasil[] = [];
   let barisMateri: BarisMateri[] = [];
@@ -83,14 +88,19 @@ export async function ambilDataDetailMapel(
     materiPerSesi.set(m.sesi_id, daftar);
   }
 
-  const daftarSesi: SesiDetail[] = barisSesi.map((s) => ({
-    id: s.id,
-    kodeKelas: s.kode_kelas,
-    status: s.status as StatusSesi,
-    dibuatPada: s.dibuat_pada,
-    namaTopik: namaTopikDari(s.topik),
-    statusMateri: tentukanStatusMateriSiswa(hasilPerSesi.get(s.id), materiPerSesi.get(s.id) ?? []),
-  }));
+  const daftarSesi: SesiDetail[] = barisSesi.map((s) => {
+    const jadwalSesi = jadwal.get(s.id);
+    return {
+      id: s.id,
+      kodeKelas: s.kode_kelas,
+      status: statusSesiEfektif(s.status === 'aktif' ? 'aktif' : 'selesai', jadwalSesi, sekarang),
+      dibuatPada: s.dibuat_pada,
+      namaTopik: namaTopikDari(s.topik),
+      statusMateri: tentukanStatusMateriSiswa(hasilPerSesi.get(s.id), materiPerSesi.get(s.id) ?? []),
+      bukaPada: jadwalSesi?.bukaPada ?? s.dibuat_pada,
+      tutupPada: jadwalSesi?.tutupPada ?? null,
+    };
+  });
   const daftarHasil: HasilDetail[] = barisHasil.map((h) => ({
     sesiId: h.sesi_id,
     skor: h.skor,

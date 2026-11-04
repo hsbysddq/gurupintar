@@ -13,6 +13,7 @@ import {
   bagikanMateri,
   buatKelas,
   buatMateri,
+  aturJadwalSesi,
   bukaSesi,
   bukaSesiBanyak,
   daftarGuru,
@@ -151,6 +152,34 @@ describe('api-klien guru', () => {
     expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({ kelasId: 'k1', topikId: 't1' });
     expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi/tutup');
     expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({ sesiId: 's1' });
+  });
+
+  it('bukaSesi mengirim jadwal dan aturJadwalSesi memakai PATCH', async () => {
+    const palsu = stubFetch(async () => Response.json({ ok: true }));
+    await bukaSesi({
+      kelasId: 'k1',
+      topikId: 't1',
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: '2026-11-03T02:00:00.000Z',
+    });
+    await aturJadwalSesi({
+      sesiId: 's1',
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: null,
+    });
+    expect(JSON.parse(palsu.mock.calls[0][1]?.body as string)).toEqual({
+      kelasId: 'k1',
+      topikId: 't1',
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: '2026-11-03T02:00:00.000Z',
+    });
+    expect(palsu.mock.calls[1][0]).toBe('/api/guru/sesi');
+    expect(palsu.mock.calls[1][1]?.method).toBe('PATCH');
+    expect(JSON.parse(palsu.mock.calls[1][1]?.body as string)).toEqual({
+      sesiId: 's1',
+      bukaPada: '2026-11-03T01:00:00.000Z',
+      tutupPada: null,
+    });
   });
 
   it('ambilDaftarSesi memakai query kelas hanya jika diberikan', async () => {

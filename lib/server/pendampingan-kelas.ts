@@ -1,6 +1,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { hitungPendampingan } from '@/lib/pendampingan';
+import { tutupSesiKedaluwarsa } from '@/lib/server/jadwal-kuis';
 import { tabelBelumAda } from '@/lib/server/respons';
 import type {
   DataPendampingan,
@@ -57,6 +58,7 @@ export async function dataPendampinganKelas(
   kelasId: string,
   sesiId?: string,
 ): Promise<DataPendampingan | null> {
+  await tutupSesiKedaluwarsa(db, { kelasId });
   const [sesi, anggota] = await Promise.all([
     db
       .from('sesi_kuis')

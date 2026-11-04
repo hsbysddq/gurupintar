@@ -72,6 +72,11 @@ describe('sesi-lokal', () => {
     });
   });
 
+  it('menyimpan dan membaca batas tutup otomatis', () => {
+    simpanSesi({ ...SESI, tutupPada: '2026-11-03T02:00:00.000Z' });
+    expect(ambilSesi()).toEqual({ ...SESI, tutupPada: '2026-11-03T02:00:00.000Z' });
+  });
+
   it('menyimpan format tanpa mengubah data lain', () => {
     simpanSesi(SESI);
     simpanFormatLokal('audio');

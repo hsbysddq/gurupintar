@@ -1,11 +1,13 @@
 import { skemaBodyPelanggaran } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
 import { catatPelanggaranSiswa } from '@/lib/server/blokir';
+import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
   petakanErrorDb,
   PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_BELUM_DIBUKA,
   PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
   responsError,
@@ -25,10 +27,17 @@ export async function POST(request: Request) {
 
   try {
     const db = ambilSupabase();
-    const { data: sesi, error } = await db.from('sesi_kuis').select('kelas_id, status').eq('id', sesiId).maybeSingle();
+    const { data: sesi, error } = await db
+      .from('sesi_kuis')
+      .select('id, kelas_id, status')
+      .eq('id', sesiId)
+      .maybeSingle();
     if (error) return petakanErrorDb(error);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
-    if (sesi.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
+
+    const akses = await statusAksesSesi(db, { id: sesi.id, status: sesi.status });
+    if (akses.status === 'terjadwal') return responsError(PESAN_SESI_BELUM_DIBUKA, 409);
+    if (akses.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
     if (!(await anggotaKelas(db, auth.profil.id, sesi.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
     }

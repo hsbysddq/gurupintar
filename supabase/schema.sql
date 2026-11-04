@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
-drop table if exists materi, blokir_kuis, percobaan_kuis, hasil_siswa, jawaban, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
+drop table if exists materi, blokir_kuis, percobaan_kuis, hasil_siswa, jawaban, jadwal_kuis, sesi_kuis, soal, topik, keanggotaan_kelas, siswa, kelas, pengguna cascade;
 
 -- ===== Akun dan peran =====
 -- Satu baris per pengguna Supabase Auth. `peran` menentukan area aplikasi yang boleh diakses.
@@ -70,6 +70,19 @@ create table sesi_kuis (
   dibuat_pada timestamptz not null default now()
 );
 create index sesi_kuis_kelas_waktu on sesi_kuis (kelas_id, dibuat_pada desc);
+
+-- Jadwal buka/tutup otomatis per sesi. Tanpa baris jadwal, sesi dianggap sudah terbuka
+-- dan hanya bisa ditutup manual seperti sebelumnya.
+create table jadwal_kuis (
+  sesi_id uuid primary key references sesi_kuis(id) on delete cascade,
+  buka_pada timestamptz not null default now(),
+  tutup_pada timestamptz,
+  dibuat_pada timestamptz not null default now(),
+  diperbarui_pada timestamptz not null default now(),
+  check (tutup_pada is null or tutup_pada > buka_pada)
+);
+create index jadwal_kuis_tutup on jadwal_kuis (tutup_pada) where tutup_pada is not null;
+alter table jadwal_kuis enable row level security;
 
 create table jawaban (
   id uuid primary key default gen_random_uuid(),

@@ -81,6 +81,27 @@ describe('susunDetailMapel: kuis', () => {
     expect(kuis.find((k) => k.sesiId === 's3')?.hrefKerjakan).toBeNull();
   });
 
+  it('menampilkan kuis terjadwal tanpa tautan mengerjakan', () => {
+    const { kuis, kuisAktif } = susunDetailMapel({
+      kelas: KELAS,
+      sesi: [
+        sesi('s6', '2026-11-03T03:00:00Z', {
+          status: 'terjadwal',
+          bukaPada: '2026-11-04T01:00:00Z',
+          tutupPada: '2026-11-04T02:00:00Z',
+        }),
+      ],
+      hasil: [],
+    });
+    expect(kuis[0]).toMatchObject({
+      status: 'terjadwal',
+      hrefKerjakan: null,
+      bukaPada: '2026-11-04T01:00:00Z',
+      tutupPada: '2026-11-04T02:00:00Z',
+    });
+    expect(kuisAktif).toBeNull();
+  });
+
   it('kuisAktif berisi kuis aktif yang belum dikerjakan, null bila sudah atau tidak ada', () => {
     expect(susunDetailMapel(DATA).kuisAktif).toEqual({
       sesiId: 's4',

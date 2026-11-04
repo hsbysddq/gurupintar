@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
-import { Activity, ChartColumn, Check, Copy, Loader2, Users } from 'lucide-react';
+import { Activity, CalendarClock, ChartColumn, Check, Copy, Loader2, Users } from 'lucide-react';
+import { formatJadwal } from '@/lib/jadwal-kuis';
 
 type PanelKodeKelasProps = {
   kodeKelas: string;
@@ -12,6 +13,9 @@ type PanelKodeKelasProps = {
   urlHasil: string;
   jumlahSiswa: number;
   jumlahMenjawab: number;
+  status: 'aktif' | 'terjadwal';
+  bukaPada: string | null;
+  tutupPada: string | null;
   onTutup: () => void;
   sedangMenutup: boolean;
 };
@@ -22,9 +26,13 @@ export function PanelKodeKelas({
   urlHasil,
   jumlahSiswa,
   jumlahMenjawab,
+  status,
+  bukaPada,
+  tutupPada,
   onTutup,
   sedangMenutup,
 }: PanelKodeKelasProps) {
+  const terjadwal = status === 'terjadwal';
   const [qr, setQr] = useState<{ url: string; gambar: string | null } | null>(null);
   const [disalin, setDisalin] = useState(false);
 
@@ -69,12 +77,23 @@ export function PanelKodeKelas({
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="aura-eyebrow">
-              <Activity aria-hidden="true" className="size-3.5" />
-              Kuis aktif
+              {terjadwal ? (
+                <CalendarClock aria-hidden="true" className="size-3.5" />
+              ) : (
+                <Activity aria-hidden="true" className="size-3.5" />
+              )}
+              {terjadwal ? 'Kuis terjadwal' : 'Kuis aktif'}
             </span>
-            <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-aura-emerald/10 px-2.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-[#047857]">
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-aura-emerald" />
-              Live
+            <span
+              className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] ${
+                terjadwal ? 'bg-aura-amber/10 text-[#92400e]' : 'bg-aura-emerald/10 text-[#047857]'
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`size-1.5 rounded-full ${terjadwal ? 'bg-aura-amber' : 'bg-aura-emerald'}`}
+              />
+              {terjadwal ? 'Terjadwal' : 'Live'}
             </span>
           </div>
 
@@ -84,7 +103,13 @@ export function PanelKodeKelas({
               {kodeKelas}
             </p>
             <p className="mt-2 max-w-prose font-body text-[14px] leading-[22px] text-aura-muted">
-              Bagikan kode atau QR ini. Siswa bergabung dari HP, lalu menjawab soal.
+              {terjadwal
+                ? `Kuis terbuka otomatis ${formatJadwal(bukaPada)}${
+                    tutupPada ? ` dan ditutup ${formatJadwal(tutupPada)}` : ''
+                  }. Kode dan QR boleh dibagikan lebih dulu.`
+                : tutupPada
+                  ? `Siswa bisa bergabung sekarang. Kuis ditutup otomatis ${formatJadwal(tutupPada)}.`
+                  : 'Bagikan kode atau QR ini. Siswa bergabung dari HP, lalu menjawab soal.'}
             </p>
           </div>
 

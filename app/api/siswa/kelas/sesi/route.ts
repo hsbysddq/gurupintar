@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server';
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import { skemaQueryKelasSiswa } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
+import { bacaJadwalBanyak, tutupSesiKedaluwarsa } from '@/lib/server/jadwal-kuis';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { tentukanStatusMateriSiswa } from '@/lib/status-materi-siswa';
 import {
@@ -9,7 +11,7 @@ import {
   responsError,
   responsOk,
 } from '@/lib/server/respons';
-import type { Kelompok, SesiSiswa, StatusSesi } from '@/lib/tipe';
+import type { Kelompok, SesiSiswa } from '@/lib/tipe';
 
 const PESAN_BUKAN_ANGGOTA = 'Kamu tidak terdaftar di kelas ini.';
 
@@ -45,6 +47,7 @@ export async function GET(request: NextRequest) {
       return responsError(PESAN_BUKAN_ANGGOTA, 403);
     }
 
+    await tutupSesiKedaluwarsa(db, { kelasId: input.data.kelas });
     const sesi = await db
       .from('sesi_kuis')
       .select('id, kode_kelas, status, dibuat_pada, topik(nama)')
@@ -55,6 +58,8 @@ export async function GET(request: NextRequest) {
     const barisSesi = sesi.data as BarisSesi[];
     const idSesi = barisSesi.map((s) => s.id);
     if (idSesi.length === 0) return responsOk<SesiSiswa[]>([]);
+    const jadwal = await bacaJadwalBanyak(db, idSesi);
+    const sekarang = new Date();
 
     const [hasil, materi] = await Promise.all([
       db
@@ -77,14 +82,19 @@ export async function GET(request: NextRequest) {
       materiPerSesi.set(m.sesi_id, daftar);
     }
 
-    const respons: SesiSiswa[] = barisSesi.map((s) => ({
-      id: s.id,
-      kodeKelas: s.kode_kelas,
-      status: s.status as StatusSesi,
-      dibuatPada: s.dibuat_pada,
-      namaTopik: namaTopikDari(s.topik),
-      statusMateri: tentukanStatusMateriSiswa(petaHasil.get(s.id), materiPerSesi.get(s.id) ?? []),
-    }));
+    const respons: SesiSiswa[] = barisSesi.map((s) => {
+      const jadwalSesi = jadwal.get(s.id);
+      return {
+        id: s.id,
+        kodeKelas: s.kode_kelas,
+        status: statusSesiEfektif(s.status === 'aktif' ? 'aktif' : 'selesai', jadwalSesi, sekarang),
+        dibuatPada: s.dibuat_pada,
+        namaTopik: namaTopikDari(s.topik),
+        statusMateri: tentukanStatusMateriSiswa(petaHasil.get(s.id), materiPerSesi.get(s.id) ?? []),
+        bukaPada: jadwalSesi?.bukaPada ?? s.dibuat_pada,
+        tutupPada: jadwalSesi?.tutupPada ?? null,
+      };
+    });
 
     return responsOk(respons);
   } catch (err) {

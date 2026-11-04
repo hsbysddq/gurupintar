@@ -1,10 +1,12 @@
 import type { NextRequest } from 'next/server';
+import { statusSesiEfektif } from '@/lib/jadwal-kuis';
 import { kelompokkanHasil, ringkasMateri } from '@/lib/ringkasan-hasil';
 import { skemaQueryHasil } from '@/lib/skema-api';
 import { cadanganTersedia } from '@/lib/soal-guru';
 import { cariSoalTersulit } from '@/lib/soal-tersulit';
 import { sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import { daftarDiblokir } from '@/lib/server/blokir';
+import { bacaJadwalSesi, tutupSesiKedaluwarsa } from '@/lib/server/jadwal-kuis';
 import { bacaJawabanSesi, bacaSoalTopik } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
@@ -14,7 +16,7 @@ import {
   responsError,
   responsOk,
 } from '@/lib/server/respons';
-import type { HasilGuru, JawabanEsaiGuru, Kelompok, StatusMateri, StatusSesi } from '@/lib/tipe';
+import type { HasilGuru, JawabanEsaiGuru, Kelompok, StatusMateri } from '@/lib/tipe';
 
 // GET /api/guru/hasil?sesi= (PRD F-5, architecture.md 6.1 dan 7.2)
 // Hanya guru pemilik kelas. Kunci soal objektif tidak ikut dikirim; soal esai menyertakan pedoman penilaian guru.
@@ -31,12 +33,14 @@ export async function GET(request: NextRequest) {
     const sesi = await sesiMilikGuru(db, auth.profil.id, sesiId);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
 
+    await tutupSesiKedaluwarsa(db, { sesiIds: [sesiId] });
     const dataSesi = await db
       .from('sesi_kuis')
       .select('id, kode_kelas, status, dibuat_pada')
       .eq('id', sesiId)
       .single();
     if (dataSesi.error) return petakanErrorDb(dataSesi.error);
+    const jadwal = await bacaJadwalSesi(db, sesiId);
 
     const [kelas, topik, anggota, hasil, soal, jawaban, materi, diblokirMentah] = await Promise.all([
       db.from('kelas').select('nama').eq('id', sesi.kelas_id).single(),
@@ -126,10 +130,16 @@ export async function GET(request: NextRequest) {
       sesi: {
         id: dataSesi.data.id,
         kodeKelas: dataSesi.data.kode_kelas,
-        status: dataSesi.data.status as StatusSesi,
+        status: statusSesiEfektif(
+          dataSesi.data.status === 'aktif' ? 'aktif' : 'selesai',
+          jadwal ?? undefined,
+          new Date(),
+        ),
         namaKelas: kelas.data!.nama,
         namaTopik: topik.data!.nama,
         dibuatPada: dataSesi.data.dibuat_pada,
+        bukaPada: jadwal?.bukaPada ?? dataSesi.data.dibuat_pada,
+        tutupPada: jadwal?.tutupPada ?? null,
         cadanganTersedia: cadanganTersedia(sesi.topik_id),
       },
       jumlahSiswa: idSiswa.length,

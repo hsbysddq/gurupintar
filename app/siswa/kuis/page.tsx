@@ -19,6 +19,7 @@ import { ProgressKuis } from "@/components/ProgressKuis";
 import { StatusHalaman } from "@/components/StatusHalaman";
 import { useSesiAktif } from "@/hooks/use-sesi-aktif";
 import { ambilSoal, ErrorApi, kirimJawaban } from "@/lib/api-klien";
+import { formatJadwal } from "@/lib/jadwal-kuis";
 import { hapusSesi } from "@/lib/sesi-lokal";
 import { sudahTerjawabSoal } from "@/lib/soal-tka";
 import type { SoalUntukSiswa } from "@/lib/tipe";
@@ -45,6 +46,22 @@ export default function HalamanKuis() {
   const [kiriman, setKiriman] = useState<Kiriman>({ status: "diam" });
   const [mengecekBlokir, setMengecekBlokir] = useState(false);
   const [pesanBlokir, setPesanBlokir] = useState<string | null>(null);
+  const [sekarang, setSekarang] = useState(0);
+
+  useEffect(() => {
+    if (!sesi?.tutupPada) return;
+    const cek = () => setSekarang(Date.now());
+    const awal = window.setTimeout(cek, 0);
+    const jadwal = window.setInterval(cek, 15_000);
+    return () => {
+      window.clearTimeout(awal);
+      window.clearInterval(jadwal);
+    };
+  }, [sesi?.tutupPada]);
+
+  const lewatBatas = Boolean(
+    sesi?.tutupPada && sekarang > 0 && sekarang >= Date.parse(sesi.tutupPada),
+  );
 
   // Belum memilih kuis → kembali ke halaman kode.
   useEffect(() => {
@@ -72,8 +89,10 @@ export default function HalamanKuis() {
           pesan:
             status === 404
               ? "Kuis tidak ditemukan. Masukkan kode kelas lagi."
-              : "Soal belum berhasil dimuat. Periksa koneksi, lalu coba lagi.",
-          sesiHilang: status === 404,
+              : status === 409 && err instanceof ErrorApi
+                ? err.message
+                : "Soal belum berhasil dimuat. Periksa koneksi, lalu coba lagi.",
+          sesiHilang: status === 404 || status === 409,
         });
       });
     return () => {
@@ -275,6 +294,17 @@ export default function HalamanKuis() {
           Jawab soal berikut
         </h1>
         <p className="text-aura-muted">Ikuti petunjuk pada setiap soal. Kamu bisa kembali sebelum mengirim.</p>
+        {sesi.tutupPada && (
+          <p
+            className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 font-body text-[12px] leading-[18px] font-semibold ${
+              lewatBatas ? 'bg-belum-latar text-belum-teks' : 'bg-aura-amber/10 text-[#92400e]'
+            }`}
+          >
+            {lewatBatas
+              ? 'Waktu kuis sudah lewat. Jawaban yang belum dikirim akan ditolak.'
+              : `Ditutup otomatis ${formatJadwal(sesi.tutupPada)}`}
+          </p>
+        )}
       </header>
       <PemantauKuis sesiId={sesi.sesiId} />
       <ProgressKuis saatIni={indeks + 1} total={soal.length} />

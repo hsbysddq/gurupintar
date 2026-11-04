@@ -2,12 +2,15 @@ import type { NextRequest } from 'next/server';
 import { skemaQuerySoal } from '@/lib/skema-api';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
 import { bacaBlokir } from '@/lib/server/blokir';
+import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
 import { bacaSoalTopik } from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   petakanErrorDb,
   PESAN_DIBLOKIR,
   PESAN_INPUT_TIDAK_VALID,
+  PESAN_SESI_BELUM_DIBUKA,
+  PESAN_SESI_DITUTUP,
   PESAN_SESI_TIDAK_ADA,
   responsError,
   responsOk,
@@ -28,11 +31,15 @@ export async function GET(request: NextRequest) {
     const db = ambilSupabase();
     const { data: sesi, error } = await db
       .from('sesi_kuis')
-      .select('topik_id, kelas_id')
+      .select('id, topik_id, kelas_id, status')
       .eq('id', input.data.sesi)
       .maybeSingle();
     if (error) return petakanErrorDb(error);
     if (!sesi) return responsError(PESAN_SESI_TIDAK_ADA, 404);
+
+    const akses = await statusAksesSesi(db, { id: sesi.id, status: sesi.status });
+    if (akses.status === 'terjadwal') return responsError(PESAN_SESI_BELUM_DIBUKA, 409);
+    if (akses.status !== 'aktif') return responsError(PESAN_SESI_DITUTUP, 409);
 
     if (!(await anggotaKelas(db, auth.profil.id, sesi.kelas_id))) {
       return responsError('Kamu tidak terdaftar di kelas kuis ini.', 403);
