@@ -7,16 +7,13 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  CircleCheck,
   Eye,
   EyeOff,
   KeyRound,
   Loader2,
   Mail,
-  ShieldCheck,
   Sparkles,
   Users,
-  type LucideIcon,
 } from 'lucide-react';
 import { TulisanGuruPintar } from '@/components/LogoGuruPintar';
 import { ErrorApi, masuk } from '@/lib/api-klien';
@@ -29,12 +26,6 @@ const KELOMPOK = [
   { label: 'Belum', jumlah: 16, lebar: 'w-[42%]', warna: 'bg-aura-red', garis: '' },
   { label: 'Setengah', jumlah: 12, lebar: 'w-[32%]', warna: 'bg-aura-amber', garis: 'border-l-2 border-white' },
   { label: 'Sudah', jumlah: 10, lebar: 'w-[26%]', warna: 'bg-aura-emerald', garis: 'border-l-2 border-white' },
-];
-
-const KEUNGGULAN: { label: string; ikon: LucideIcon }[] = [
-  { label: 'Kuis 5 soal', ikon: CircleCheck },
-  { label: 'Peta kelas otomatis', ikon: Sparkles },
-  { label: 'Materi lanjutan', ikon: ShieldCheck },
 ];
 
 export default function HalamanMasuk() {
@@ -189,18 +180,6 @@ function FormMasuk() {
               </div>
             </div>
           </div>
-
-          <ul className="flex flex-wrap gap-2">
-            {KEUNGGULAN.map(({ label, ikon: Ikon }) => (
-              <li
-                key={label}
-                className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink"
-              >
-                <Ikon aria-hidden="true" className="size-4 text-aura-emerald" />
-                {label}
-              </li>
-            ))}
-          </ul>
         </section>
 
         <section aria-labelledby="judul-masuk" className="mx-auto w-full max-w-[480px]">
