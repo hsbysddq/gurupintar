@@ -32,7 +32,8 @@ type Muatan =
 
 type Kiriman = { status: "diam" } | { status: "mengirim" } | { status: "gagal"; pesan: string; ditutup: boolean };
 
-const PESAN_GAGAL_KIRIM = "Jawaban belum terkirim. Periksa koneksi, lalu coba lagi.";
+const PESAN_GAGAL_KIRIM =
+  "Jawaban belum terkirim. Jawabanmu masih tersimpan di halaman ini. Periksa koneksi, lalu coba lagi.";
 
 export default function HalamanKuis() {
   const router = useRouter();
@@ -218,7 +219,7 @@ export default function HalamanKuis() {
     } catch (err) {
       const status = err instanceof ErrorApi ? err.status : 0;
       const pesan =
-        status === 0 || status >= 500
+        status === 0
           ? PESAN_GAGAL_KIRIM
           : err instanceof ErrorApi
             ? err.message

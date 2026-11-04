@@ -20,3 +20,5 @@ where j.sesi_id = s.id
   and s.status = 'aktif'
   and j.tutup_pada is not null
   and j.tutup_pada <= now();
+
+notify pgrst, 'reload schema';

@@ -4,7 +4,9 @@ import { sesiMilikGuru, wajibPeranApi } from '@/lib/server/auth';
 import {
   bacaJawabanSesi,
   bacaSoalTopik,
+  perluMigrasiPercobaanKuis,
   perluMigrasiSoalTka,
+  PESAN_MIGRASI_PERCOBAAN_KUIS,
   PESAN_MIGRASI_SOAL_TKA,
   simpanNilaiEsai,
 } from '@/lib/server/soal-tka-db';
@@ -67,6 +69,9 @@ export async function POST(request: Request) {
       kelompok,
     });
     if (simpan.error) {
+      if (perluMigrasiPercobaanKuis(simpan.error)) {
+        return responsError(PESAN_MIGRASI_PERCOBAAN_KUIS, 503);
+      }
       if (perluMigrasiSoalTka(simpan.error)) {
         return responsError(PESAN_MIGRASI_SOAL_TKA, 503);
       }

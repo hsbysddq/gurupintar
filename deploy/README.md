@@ -138,7 +138,8 @@ Catatan:
 - `NEXT_PUBLIC_*` ditanam saat build, jadi lakukan build setelah file ini ada.
 - `ANTHROPIC_API_KEY` boleh kosong; fitur materi AI akan menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
 - Jika memakai proyek Supabase baru, jalankan `supabase/schema.sql` lalu `supabase/seed.sql` di SQL Editor Supabase.
-- Database yang sudah berjalan: jalankan `supabase/migrasi-jadwal-kuis.sql` agar guru bisa mengatur buka/tutup kuis otomatis. Tanpa migrasi ini, kuis tetap bisa dibuka dan ditutup manual seperti biasa.
+- Database yang sudah berjalan: jalankan `supabase/migrasi-perbaikan-kuis.sql` di SQL Editor Supabase. File ini membuat tabel `percobaan_kuis` dan `jadwal_kuis` yang belum ada, memperbaiki fungsi `simpan_hasil`, serta mengaktifkan jadwal buka/tutup otomatis. Aman dijalankan berulang.
+- Jika siswa mendapat pesan **Jawaban belum terkirim** padahal jaringan normal, periksa dengan `node scripts/cek-migrasi-supabase.mjs`, lalu jalankan migrasi perbaikan di atas.
 
 ## 7. Build aplikasi
 

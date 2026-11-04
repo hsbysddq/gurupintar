@@ -1,5 +1,7 @@
 -- Migrasi: riwayat percobaan kuis.
 -- Jalankan sekali di SQL Editor Supabase pada database yang sudah ada.
+-- Jika database sudah memakai soal esai, jalankan supabase/migrasi-perbaikan-kuis.sql
+-- agar fungsi simpan_hasil tetap menyimpan kolom belum_dinilai.
 -- Siswa boleh mengerjakan ulang kuis yang masih aktif. Tiap pengiriman dicatat sebagai satu baris baru,
 -- jadi hasil pertama tidak hilang dan semua percobaan muncul di histori. hasil_siswa tetap berisi percobaan
 -- terakhir (dipakai guru untuk pengelompokan dan materi), jadi sisi guru tidak berubah.
@@ -33,11 +35,15 @@ begin
   if v_status is null then raise exception 'SESI_TIDAK_ADA'; end if;
   if v_status <> 'aktif' then raise exception 'SESI_DITUTUP'; end if;
 
-  insert into jawaban (sesi_id, siswa_id, soal_id, pilihan, benar)
-  select p_sesi, p_siswa, (j->>'soalId')::uuid, j->>'pilihan', (j->>'benar')::boolean
+  insert into jawaban (sesi_id, siswa_id, soal_id, pilihan, benar, belum_dinilai)
+  select p_sesi, p_siswa, (j->>'soalId')::uuid, j->>'pilihan',
+         (j->>'benar')::boolean, coalesce((j->>'belumDinilai')::boolean, false)
   from jsonb_array_elements(p_jawaban) as j
   on conflict (sesi_id, siswa_id, soal_id)
-  do update set pilihan = excluded.pilihan, benar = excluded.benar, dibuat_pada = now();
+  do update set pilihan = excluded.pilihan,
+                benar = excluded.benar,
+                belum_dinilai = excluded.belum_dinilai,
+                dibuat_pada = now();
 
   insert into hasil_siswa (sesi_id, siswa_id, skor, total, kelompok)
   values (p_sesi, p_siswa, p_skor, p_total, p_kelompok)
@@ -54,9 +60,15 @@ returns void language plpgsql as $$
 begin
   delete from jawaban j using sesi_kuis s
     where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  if to_regclass('public.blokir_kuis') is not null then
+    delete from blokir_kuis b using sesi_kuis s
+      where b.sesi_id = s.id and s.kelas_id = p_kelas and b.siswa_id = p_siswa;
+  end if;
   delete from percobaan_kuis p using sesi_kuis s
     where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
   delete from hasil_siswa h using sesi_kuis s
     where h.sesi_id = s.id and s.kelas_id = p_kelas and h.siswa_id = p_siswa;
   delete from keanggotaan_kelas where kelas_id = p_kelas and siswa_id = p_siswa;
 end $$;
+
+notify pgrst, 'reload schema';

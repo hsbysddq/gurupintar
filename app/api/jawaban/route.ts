@@ -4,7 +4,13 @@ import { periksaDanNilaiJawaban } from '@/lib/soal-tka';
 import { anggotaKelas, wajibPeranApi } from '@/lib/server/auth';
 import { bacaBlokir } from '@/lib/server/blokir';
 import { statusAksesSesi } from '@/lib/server/jadwal-kuis';
-import { bacaSoalTopik, perluMigrasiSoalTka, PESAN_MIGRASI_SOAL_TKA } from '@/lib/server/soal-tka-db';
+import {
+  bacaSoalTopik,
+  perluMigrasiPercobaanKuis,
+  perluMigrasiSoalTka,
+  PESAN_MIGRASI_PERCOBAAN_KUIS,
+  PESAN_MIGRASI_SOAL_TKA,
+} from '@/lib/server/soal-tka-db';
 import { ambilSupabase } from '@/lib/server/supabase';
 import {
   bacaBodyJson,
@@ -92,6 +98,9 @@ export async function POST(request: Request) {
       p_kelompok: tentukanKelompok(skor, total),
     });
     if (simpan.error) {
+      if (perluMigrasiPercobaanKuis(simpan.error)) {
+        return responsError(PESAN_MIGRASI_PERCOBAAN_KUIS, 503);
+      }
       if (perluMigrasiSoalTka(simpan.error)) {
         return responsError(PESAN_MIGRASI_SOAL_TKA, 503);
       }

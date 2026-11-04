@@ -28,6 +28,14 @@ returns void language plpgsql as $$
 begin
   delete from jawaban j using sesi_kuis s
     where j.sesi_id = s.id and s.kelas_id = p_kelas and j.siswa_id = p_siswa;
+  if to_regclass('public.blokir_kuis') is not null then
+    delete from blokir_kuis b using sesi_kuis s
+      where b.sesi_id = s.id and s.kelas_id = p_kelas and b.siswa_id = p_siswa;
+  end if;
+  if to_regclass('public.percobaan_kuis') is not null then
+    delete from percobaan_kuis p using sesi_kuis s
+      where p.sesi_id = s.id and s.kelas_id = p_kelas and p.siswa_id = p_siswa;
+  end if;
   delete from hasil_siswa h using sesi_kuis s
     where h.sesi_id = s.id and s.kelas_id = p_kelas and h.siswa_id = p_siswa;
   delete from keanggotaan_kelas where kelas_id = p_kelas and siswa_id = p_siswa;

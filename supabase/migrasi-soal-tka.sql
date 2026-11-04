@@ -1,5 +1,7 @@
 -- Migrasi Tipe Soal TKA-Friendly, Gambar Soal, dan Penilaian Esai Manual.
 -- Jalankan file ini sekali di SQL Editor Supabase.
+-- Fungsi simpan_hasil di bawah menulis ke percobaan_kuis, jadi jalankan
+-- supabase/migrasi-perbaikan-kuis.sql (atau migrasi-percobaan-kuis.sql) lebih dulu.
 
 -- 1. Tabel soal: tambah kolom tipe dan gambar, serta longgarkan constraint kunci
 --    agar mendukung pilgan kompleks ('A,C'), benar/salah ('B,S,B'), isian singkat (JSON array),
