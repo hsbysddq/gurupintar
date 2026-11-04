@@ -40,7 +40,7 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col md:flex-row">
+    <div className="flex min-w-0 flex-1 flex-col overflow-x-clip md:flex-row">
       <aside className="aura-glass sticky top-0 z-20 m-2 flex shrink-0 flex-row items-center gap-1 rounded-[24px] p-2 sm:gap-3 md:m-3 md:h-[calc(100vh-1.5rem)] md:w-[76px] md:flex-col md:items-stretch md:gap-3 md:p-3 xl:w-[280px] xl:p-4">
         <Link
           href="/"
@@ -124,7 +124,7 @@ export function KerangkaDasborSiswa({ children }: { children: ReactNode }) {
           </details>
         </div>
 
-        <main className="w-full flex-1 px-4 py-6 text-[15px] leading-relaxed md:p-8">{children}</main>
+        <main className="w-full min-w-0 flex-1 px-4 py-6 text-[15px] leading-relaxed md:p-8">{children}</main>
       </div>
     </div>
   );

@@ -124,7 +124,7 @@ function IsiHasilKuis() {
           <h2 id="ringkasan-rincian" className="font-display text-[18px] leading-snug font-bold text-aura-ink">
             Ringkasan hasil
           </h2>
-          <div className={`mt-4 grid gap-3 ${belumDinilai > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
+          <div className={`mt-4 grid grid-cols-1 gap-3 ${belumDinilai > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
             <div className="rounded-2xl bg-aura-primary/5 p-4">
               <p className="text-[12px] leading-normal text-aura-muted">
                 {belumDinilai > 0 ? "Nilai sementara" : "Nilai"}

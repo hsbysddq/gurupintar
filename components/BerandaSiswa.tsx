@@ -107,7 +107,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between gap-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col gap-1">
           <span className="font-display text-[11px] font-bold uppercase tracking-[0.08em] text-aura-primary">
             Ruang siswa
           </span>
@@ -126,7 +126,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
         <IlustrasiBelajar className="hidden h-28 w-auto shrink-0 sm:block" />
       </header>
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {kartu.map(({ judul, nilai, keterangan, ikon: Ikon, warna }) => (
           <li key={judul}>
             <KartuKaca className="flex h-full items-center gap-4 p-5">
@@ -145,7 +145,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
         ))}
       </ul>
 
-      <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
         <KartuKaca as="section" className="flex flex-col gap-5 p-6">
           <div className="flex items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-aura-primary/10 text-aura-primary">
@@ -214,7 +214,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
         </KartuKaca>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-6">
           <KartuKaca as="section" className="flex flex-col gap-4 p-6">
             <div className="flex items-center justify-between gap-3">
@@ -258,7 +258,7 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
                         </p>
                       </div>
                       <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
-                        <p className={`whitespace-nowrap text-[11px] leading-normal font-semibold ${warna.teks}`}>
+                        <p className={`text-[11px] leading-normal font-semibold lg:whitespace-nowrap ${warna.teks}`}>
                           Progres {k.progres}% · {k.dikerjakan}/{k.jumlahKuis} kuis
                         </p>
                         <div
