@@ -41,7 +41,7 @@ export function DaftarMapelSiswa({ kelas }: { kelas: ProgresKelas[] }) {
           <p className="text-aura-muted">Minta kode undangan mata pelajaran kepada gurumu, lalu masukkan di kolom di atas.</p>
         </KartuKaca>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {kelas.map((k) => {
             const Ikon = ikonMapel(k.mapel);
             const warna = warnaMapel(k.id);

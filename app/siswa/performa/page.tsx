@@ -147,7 +147,7 @@ export default function HalamanPerforma() {
           </div>
         </header>
 
-        <section aria-label="Ringkasan performa" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section aria-label="Ringkasan performa" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KartuStatistik ikon={BookOpen} label="Total kuis" nilai={String(ringkas.jumlahKuis)} keterangan="sudah dikerjakan" />
           <KartuStatistik
             ikon={Target}
@@ -245,7 +245,7 @@ export default function HalamanPerforma() {
             </h2>
             <p className="mt-1 font-body text-[13px] leading-[20px] text-aura-muted">Semua pengerjaan, terbaru di atas.</p>
           </div>
-          <ul className="grid gap-3 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {riwayatTampil.map((k) => (
               <li key={`${k.sesiId}-${k.dikirimPada}`}>
                 <article className="aura-glass flex items-start justify-between gap-3 rounded-[20px] p-4">
