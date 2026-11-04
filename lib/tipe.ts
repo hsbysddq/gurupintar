@@ -166,6 +166,20 @@ export interface SesiGuru {
   tutupPada: string | null;
 }
 
+/** Model yang bisa dipilih untuk fitur AI (Ubah Modul dan materi lanjutan). */
+export interface ModelAi {
+  id: string;
+  name: string;
+  grup: string;
+  contextLength: number | null;
+}
+
+/** GET /api/guru/model-ai */
+export interface DaftarModelAi {
+  modelDefault: string;
+  daftar: ModelAi[];
+}
+
 /** GET /api/guru/topik: hanya topik dengan minimal satu soal */
 export interface TopikRingkas {
   id: string;

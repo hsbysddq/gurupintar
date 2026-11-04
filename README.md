@@ -23,13 +23,18 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    NEXT_PUBLIC_SUPABASE_URL=
    NEXT_PUBLIC_SUPABASE_ANON_KEY=
    SUPABASE_SERVICE_ROLE_KEY=
+   COMMAND_CODE_API_KEY=
+   AI_MODEL=deepseek/deepseek-v4.1-flash
    ANTHROPIC_API_KEY=
    ANTHROPIC_MODEL=
    KODE_UNDANGAN_GURU=
    ```
 
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` adalah kunci anon/publishable dari Supabase.
-   - `SUPABASE_SERVICE_ROLE_KEY` dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
+   - `SUPABASE_SERVICE_ROLE_KEY`, `COMMAND_CODE_API_KEY`, dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
+   - `COMMAND_CODE_API_KEY` berasal dari Command Code Studio. Paket Provider bersifat pay-as-you-go; GOAT/Pro/Max/Team juga punya akses API.
+   - `AI_MODEL` adalah model default untuk Ubah Modul dan materi lanjutan. Guru tetap bisa memilih model lain dari dropdown.
+   - `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi.
    - `KODE_UNDANGAN_GURU` wajib untuk pendaftaran guru. Jika kosong, pendaftaran guru ditutup.
 
 3. Jalankan `supabase/schema.sql`, lalu `supabase/seed.sql` di SQL Editor Supabase.

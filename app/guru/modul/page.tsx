@@ -23,6 +23,7 @@ import { TabMateriSiswa } from "@/components/TabMateriSiswa";
 import {
   ambilDaftarKelas,
   ambilMateriPustaka,
+  ambilModelAi,
   simpanMateriPustaka,
   ubahMateriPustaka,
   ubahModul,
@@ -30,7 +31,7 @@ import {
 } from "@/lib/api-klien";
 import { PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
-import type { IsiMateri, KelasRingkas, SumberMateri } from "@/lib/tipe";
+import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri } from "@/lib/tipe";
 
 type Keadaan =
   | { status: "diam" }
@@ -94,6 +95,10 @@ function IsiHalamanUbahModul() {
   const [galatSimpan, setGalatSimpan] = useState<string | null>(null);
   const [memuatAwal, setMemuatAwal] = useState(true);
   const [galatAwal, setGalatAwal] = useState<string | null>(null);
+  const [model, setModel] = useState("");
+  const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
+  const [memuatModel, setMemuatModel] = useState(true);
+  const [galatModel, setGalatModel] = useState<string | null>(null);
   const kelasAwalParam = params.get("kelas");
   const materiAwalParam = params.get("materi");
 
@@ -101,9 +106,10 @@ function IsiHalamanUbahModul() {
   const panjang = teks.trim().length;
   const panjangSesuai = panjang >= PANJANG_MODUL_MIN && panjang <= PANJANG_MODUL_MAKS;
   const memuat = keadaan.status === "memuat";
-  const siapKirim = sumber === "teks" ? panjangSesuai : berkas !== null;
+  const siapKirim = (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "";
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
+  const grupModel = [...new Set(daftarModel.map((m) => m.grup))];
 
   useEffect(() => {
     let aktif = true;
@@ -137,6 +143,26 @@ function IsiHalamanUbahModul() {
     };
   }, [kelasAwalParam, materiAwalParam]);
 
+  useEffect(() => {
+    let aktif = true;
+    ambilModelAi()
+      .then(({ modelDefault, daftar }) => {
+        if (!aktif) return;
+        setDaftarModel(daftar);
+        setModel(modelDefault);
+      })
+      .catch((err: unknown) => {
+        if (!aktif) return;
+        setGalatModel(err instanceof Error ? err.message : "Daftar model AI belum bisa dimuat.");
+      })
+      .finally(() => {
+        if (aktif) setMemuatModel(false);
+      });
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
   function pilihBerkas(file: File | null) {
     setGalatBerkas(null);
     if (!file) return setBerkas(null);
@@ -167,7 +193,9 @@ function IsiHalamanUbahModul() {
     setGalatSimpan(null);
     try {
       const hasil =
-        sumber === "teks" ? await ubahModul(teks) : await ubahModulPdf(await bacaSebagaiBase64(berkas!));
+        sumber === "teks"
+          ? await ubahModul(teks, model)
+          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model);
       const { isi, sumber: sumberHasil } = hasil;
       setSumberMateri(sumberHasil);
       setAsalMateri(sumber);
@@ -510,24 +538,71 @@ function IsiHalamanUbahModul() {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 border-t border-white/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-start gap-1.5 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-              <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
-              Hasil akan disimpan setelah kamu menekan Simpan di pratinjau.
-            </p>
-            <button
-              type="button"
-              disabled={!siapKirim || memuat}
-              onClick={() => void ubah()}
-              className="aura-btn aura-btn-primary h-[52px] w-full shrink-0 px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none sm:w-auto"
-            >
-              {memuat ? (
-                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-              ) : (
-                <Sparkles aria-hidden="true" className="size-4" />
+          <div className="flex flex-col gap-4 border-t border-white/60 pt-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex min-w-0 flex-col gap-2 lg:max-w-md">
+              <label htmlFor={`${idDasar}-model`} className="flex flex-col gap-1">
+                <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                  Model AI
+                </span>
+                <select
+                  id={`${idDasar}-model`}
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  disabled={memuatModel || daftarModel.length === 0}
+                  className={`${KELAS_ISIAN} min-h-12 disabled:cursor-wait disabled:opacity-60`}
+                >
+                  {daftarModel.length === 0 ? (
+                    <option value="">{memuatModel ? "Memuat model…" : "Model belum tersedia"}</option>
+                  ) : (
+                    grupModel.map((grup) => (
+                      <optgroup key={grup} label={grup}>
+                        {daftarModel
+                          .filter((m) => m.grup === grup)
+                          .map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))
+                  )}
+                </select>
+              </label>
+              {galatModel && (
+                <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
+                  {galatModel} Periksa koneksi lalu muat ulang halaman.
+                </p>
               )}
-              Ubah jadi 4 bentuk belajar
-            </button>
+              {!memuatModel && !galatModel && daftarModel.length === 0 && (
+                <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
+                  Model AI belum tersedia. Hubungi admin untuk mengaktifkannya.
+                </p>
+              )}
+              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
+                Biaya mengikuti model yang dipilih. Model murah seperti DeepSeek Flash biasanya cukup untuk materi
+                pelajaran.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <p className="flex items-start gap-1.5 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
+                <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
+                Hasil disimpan setelah kamu menekan Simpan di pratinjau.
+              </p>
+              <button
+                type="button"
+                disabled={!siapKirim || memuat}
+                onClick={() => void ubah()}
+                className="aura-btn aura-btn-primary h-[52px] w-full shrink-0 px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none sm:w-auto"
+              >
+                {memuat ? (
+                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                ) : (
+                  <Sparkles aria-hidden="true" className="size-4" />
+                )}
+                Ubah jadi 4 bentuk belajar
+              </button>
+            </div>
           </div>
         </div>
       </section>}

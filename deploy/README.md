@@ -126,6 +126,8 @@ Variabel yang harus ada:
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
+COMMAND_CODE_API_KEY
+AI_MODEL
 SUPABASE_SERVICE_ROLE_KEY
 ANTHROPIC_API_KEY
 ANTHROPIC_MODEL
@@ -136,7 +138,8 @@ Catatan:
 
 - `.env.local` tidak pernah masuk Git.
 - `NEXT_PUBLIC_*` ditanam saat build, jadi lakukan build setelah file ini ada.
-- `ANTHROPIC_API_KEY` boleh kosong; fitur materi AI akan menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
+- Isi `COMMAND_CODE_API_KEY` dari Command Code Studio untuk mengaktifkan Ubah Modul dan materi AI. Paket Provider bersifat pay-as-you-go; GOAT/Pro/Max/Team juga punya akses API. `AI_MODEL` default `deepseek/deepseek-v4.1-flash`.
+- `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi. Jika keduanya kosong, fitur materi AI menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
 - Jika memakai proyek Supabase baru, jalankan `supabase/schema.sql` lalu `supabase/seed.sql` di SQL Editor Supabase.
 - Database yang sudah berjalan: jalankan `supabase/migrasi-perbaikan-kuis.sql` di SQL Editor Supabase. File ini membuat tabel `percobaan_kuis` dan `jadwal_kuis` yang belum ada, memperbaiki fungsi `simpan_hasil`, serta mengaktifkan jadwal buka/tutup otomatis. Aman dijalankan berulang.
 - Jika siswa mendapat pesan **Jawaban belum terkirim** padahal jaringan normal, periksa dengan `node scripts/cek-migrasi-supabase.mjs`, lalu jalankan migrasi perbaikan di atas.
@@ -226,9 +229,10 @@ Checklist manual:
 - Buka `https://DOMAIN_KAMU/masuk`, masuk dengan akun guru.
 - Sidebar tampil, menu aktif berpindah dengan benar.
 - Pilih kelas di sidebar dan pastikan URL berubah ke `?kelas=...`.
-- Buka `Ubah modul`, unggah PDF kecil, dan pastikan tidak muncul `413 Request Entity Too Large`.
+- Buka `Ubah modul`, tempel teks, pilih model, lalu uji pembuatan materi.
+- Unggah PDF kecil berbasis teks dan pastikan tidak muncul `413 Request Entity Too Large`. PDF hasil pindai tanpa lapisan teks akan ditolak dengan pesan yang jelas.
 - Buka kuis dan pastikan polling hasil berjalan.
-- Jika `ANTHROPIC_API_KEY` terisi, uji pembuatan materi AI; jika kosong, pastikan error tampil rapi.
+- Jika `COMMAND_CODE_API_KEY` terisi, uji pembuatan materi AI; jika kosong, pastikan error tampil rapi.
 
 ## 13. Alur update berikutnya
 

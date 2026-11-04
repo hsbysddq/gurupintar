@@ -19,6 +19,7 @@ import type {
   BodyUbahTopik,
 } from './skema-api';
 import type {
+  DaftarModelAi,
   DataPendampingan,
   Format,
   HasilGuru,
@@ -272,12 +273,22 @@ export function bagikanMateri(sesiId: string): Promise<{ ok: true; jumlahDibagik
   return minta('/api/guru/materi/bagikan', { method: 'POST', body: JSON.stringify({ sesiId }) });
 }
 
-export function ubahModul(teks: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
-  return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks }) });
+export function ambilModelAi(signal?: AbortSignal): Promise<DaftarModelAi> {
+  return minta('/api/guru/model-ai', { signal });
 }
 
-export function ubahModulPdf(pdfBase64: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
-  return minta('/api/guru/modul/pdf', { method: 'POST', body: JSON.stringify({ pdf: pdfBase64 }) });
+export function ubahModul(teks: string, model?: string): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
+  return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks, ...(model ? { model } : {}) }) });
+}
+
+export function ubahModulPdf(
+  pdfBase64: string,
+  model?: string,
+): Promise<{ isi: IsiMateri; sumber: SumberMateri }> {
+  return minta('/api/guru/modul/pdf', {
+    method: 'POST',
+    body: JSON.stringify({ pdf: pdfBase64, ...(model ? { model } : {}) }),
+  });
 }
 
 /** Daftar materi mandiri milik satu kelas. */
