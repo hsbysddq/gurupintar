@@ -9,7 +9,6 @@ import {
   Plus,
   RefreshCw,
   Sparkles,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { susunGrafikKoin } from '@/lib/koin';
@@ -98,16 +97,16 @@ function KartuStatistik({
 }
 
 export function RiwayatKoin({
-  koin,
   transaksi,
   memuat,
   galat,
+  tertanam = false,
   onCobaLagi,
 }: {
-  koin: number | null;
   transaksi: TransaksiKoin[];
   memuat: boolean;
   galat: string | null;
+  tertanam?: boolean;
   onCobaLagi: () => void;
 }) {
   const grafik = susunGrafikKoin(transaksi);
@@ -118,7 +117,10 @@ export function RiwayatKoin({
 
   if (memuat) {
     return (
-      <section aria-labelledby="judul-riwayat-koin" className="aura-glass flex items-center gap-3 rounded-[24px] p-5">
+      <section
+        aria-labelledby="judul-riwayat-koin"
+        className={tertanam ? 'flex items-center gap-3' : 'aura-glass flex items-center gap-3 rounded-[24px] p-5'}
+      >
         <Loader2 aria-hidden="true" className="size-5 animate-spin text-aura-primary" />
         <p className="font-body text-[14px] leading-[22px] text-aura-muted">Memuat riwayat koin…</p>
       </section>
@@ -127,7 +129,12 @@ export function RiwayatKoin({
 
   if (galat) {
     return (
-      <section aria-labelledby="judul-riwayat-koin" className="aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5">
+      <section
+        aria-labelledby="judul-riwayat-koin"
+        className={
+          tertanam ? 'flex flex-col items-start gap-3' : 'aura-glass flex flex-col items-start gap-3 rounded-[24px] p-5'
+        }
+      >
         <span className="flex size-10 items-center justify-center rounded-2xl bg-aura-amber/10 text-[#92400e]">
           <History aria-hidden="true" className="size-5" />
         </span>
@@ -146,7 +153,10 @@ export function RiwayatKoin({
   }
 
   return (
-    <section aria-labelledby="judul-riwayat-koin" className="aura-glass rounded-[24px] p-4 sm:p-5">
+    <section
+      aria-labelledby="judul-riwayat-koin"
+      className={tertanam ? 'min-w-0' : 'aura-glass rounded-[24px] p-4 sm:p-5'}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary">
@@ -167,14 +177,7 @@ export function RiwayatKoin({
         </button>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KartuStatistik
-          label="Saldo saat ini"
-          nilai={koin ?? '—'}
-          keterangan="koin tersedia"
-          ikon={Wallet}
-          warna="bg-aura-primary/10 text-aura-primary"
-        />
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <KartuStatistik
           label="Terpakai 7 hari"
           nilai={totalKeluar}

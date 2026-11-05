@@ -374,7 +374,12 @@ function IsiHalamanUbahModul() {
         <div className="absolute bottom-0 left-1/3 size-64 rounded-full bg-[#FB923C]/10 blur-[100px]" />
       </div>
 
-      <header className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
+      <section className="aura-glass relative overflow-hidden rounded-[28px]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-br from-aura-primary/[0.07] via-transparent to-aura-violet/10"
+        />
+        <header className="relative p-5 sm:p-6">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-aura-primary/10 blur-3xl"
@@ -383,7 +388,7 @@ function IsiHalamanUbahModul() {
           <div className="flex max-w-2xl flex-col gap-2">
             <span className="aura-eyebrow self-start">
               <Sparkles aria-hidden="true" className="size-3.5" />
-              Ubah modul
+              Ruang kerja AI
             </span>
             <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
               Ubah modul
@@ -402,7 +407,7 @@ function IsiHalamanUbahModul() {
               <span>PDF maks 5 MB</span>
             </p>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-2xl border border-white/70 bg-white/50 px-3.5 py-2.5">
+            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-2xl border border-aura-primary/15 bg-gradient-to-r from-aura-primary/[0.07] via-white/55 to-aura-violet/[0.08] px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
                 <Coins aria-hidden="true" className="size-4" />
               </span>
@@ -455,7 +460,7 @@ function IsiHalamanUbahModul() {
             {BENTUK.map(({ label, ikon: Ikon }) => (
               <span
                 key={label}
-                className="flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border border-aura-primary/10 bg-white/45 px-3 py-2 text-center backdrop-blur-sm"
+                className="flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border border-aura-primary/10 bg-white/50 px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-sm"
               >
                 <Ikon aria-hidden="true" className="size-4 text-aura-primary" />
                 <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-ink">
@@ -467,13 +472,16 @@ function IsiHalamanUbahModul() {
         </div>
       </header>
 
-      <RiwayatKoin
-        koin={koin}
-        transaksi={riwayat}
-        memuat={memuatRiwayat}
-        galat={galatRiwayat}
-        onCobaLagi={ulangiRiwayat}
-      />
+      <div className="relative border-t border-aura-ink/10 bg-white/25 p-4 sm:p-5">
+        <RiwayatKoin
+          tertanam
+          transaksi={riwayat}
+          memuat={memuatRiwayat}
+          galat={galatRiwayat}
+          onCobaLagi={ulangiRiwayat}
+        />
+      </div>
+      </section>
 
       <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
         <div
