@@ -1,9 +1,14 @@
 -- Sistem koin untuk fitur AI guru. Jalankan sekali di SQL Editor Supabase.
--- Akun guru mendapat 3 koin awal. Setiap generate Ubah Modul memakai 1 koin.
--- Top up dilakukan admin lewat fungsi tambah_koin (lihat deploy/README.md).
+-- Akun baru default 0 koin; akun demo guru mendapat 20 koin.
+-- Setiap generate Ubah Modul memakai 1 koin; top up lewat fungsi tambah_koin.
 
-alter table pengguna add column if not exists koin int not null default 3 check (koin >= 0);
-alter table pengguna alter column koin set default 3;
+alter table pengguna add column if not exists koin int not null default 0 check (koin >= 0);
+alter table pengguna alter column koin set default 0;
+
+-- Akun demo guru selalu punya saldo awal 20 koin.
+update pengguna
+set koin = 20
+where email = 'guru@demo.gurupintar.id' and peran = 'guru';
 
 create table if not exists transaksi_koin (
   id uuid primary key default gen_random_uuid(),

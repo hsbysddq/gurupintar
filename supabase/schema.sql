@@ -9,7 +9,7 @@ create table pengguna (
   nama text not null,
   email text,
   peran text not null check (peran in ('guru','siswa')),
-  koin int not null default 3 check (koin >= 0),
+  koin int not null default 0 check (koin >= 0),
   dibuat_pada timestamptz not null default now()
 );
 

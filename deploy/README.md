@@ -143,7 +143,7 @@ Catatan:
 - `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi. Jika keduanya kosong, fitur materi AI menampilkan error yang wajar dan materi cadangan tetap bisa dipakai.
 - Jika memakai proyek Supabase baru, jalankan `supabase/schema.sql` lalu `supabase/seed.sql` di SQL Editor Supabase.
 - Database yang sudah berjalan: jalankan `supabase/migrasi-perbaikan-kuis.sql` di SQL Editor Supabase. File ini membuat tabel `percobaan_kuis` dan `jadwal_kuis` yang belum ada, memperbaiki fungsi `simpan_hasil`, serta mengaktifkan jadwal buka/tutup otomatis. Aman dijalankan berulang.
-- Jalankan juga `supabase/migrasi-koin-guru.sql` untuk sistem koin Ubah Modul. Akun guru mendapat 3 koin awal dan setiap generate memakai 1 koin.
+- Jalankan juga `supabase/migrasi-koin-guru.sql` untuk sistem koin Ubah Modul. Akun baru default 0 koin, akun demo guru `guru@demo.gurupintar.id` mendapat 20 koin, dan setiap generate memakai 1 koin.
 - Jika siswa mendapat pesan **Jawaban belum terkirim** padahal jaringan normal, periksa dengan `node scripts/cek-migrasi-supabase.mjs`, lalu jalankan migrasi perbaikan di atas.
 - Setelah `WHATSAPP_ADMIN` diisi, tombol **Top up via WhatsApp** akan membuka chat admin.
 

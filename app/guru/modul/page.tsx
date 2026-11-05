@@ -102,6 +102,7 @@ function IsiHalamanUbahModul() {
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
+  const [percobaanModel, setPercobaanModel] = useState(0);
   const [koin, setKoin] = useState<number | null>(null);
   const [biayaKoin, setBiayaKoin] = useState(KOIN_PER_MODUL);
   const [whatsappAdmin, setWhatsappAdmin] = useState<string | null>(null);
@@ -120,6 +121,7 @@ function IsiHalamanUbahModul() {
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
   const grupModel = [...new Set(daftarModel.map((m) => m.grup))];
+  const modelTerpilih = daftarModel.find((m) => m.id === model) ?? null;
   const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
 
   useEffect(() => {
@@ -172,7 +174,13 @@ function IsiHalamanUbahModul() {
     return () => {
       aktif = false;
     };
-  }, []);
+  }, [percobaanModel]);
+
+  function ulangiModel() {
+    setMemuatModel(true);
+    setGalatModel(null);
+    setPercobaanModel((n) => n + 1);
+  }
 
   const muatKoin = useCallback(async () => {
     try {
@@ -639,70 +647,122 @@ function IsiHalamanUbahModul() {
             </div>
           )}
 
-          <div className="flex flex-col gap-4 border-t border-white/60 pt-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex min-w-0 flex-col gap-2 lg:max-w-md">
-              <label htmlFor={`${idDasar}-model`} className="flex flex-col gap-1">
-                <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                  Model AI
-                </span>
-                <select
-                  id={`${idDasar}-model`}
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  disabled={memuatModel || daftarModel.length === 0}
-                  className={`${KELAS_ISIAN} min-h-12 disabled:cursor-wait disabled:opacity-60`}
-                >
-                  {daftarModel.length === 0 ? (
-                    <option value="">{memuatModel ? "Memuat model…" : "Model belum tersedia"}</option>
-                  ) : (
-                    grupModel.map((grup) => (
-                      <optgroup key={grup} label={grup}>
-                        {daftarModel
-                          .filter((m) => m.grup === grup)
-                          .map((m) => (
-                            <option key={m.id} value={m.id}>
-                              {m.name}
-                            </option>
-                          ))}
-                      </optgroup>
-                    ))
-                  )}
-                </select>
-              </label>
-              {galatModel && (
-                <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
-                  {galatModel} Periksa koneksi lalu muat ulang halaman.
-                </p>
-              )}
-              {!memuatModel && !galatModel && daftarModel.length === 0 && (
-                <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
-                  Model AI belum tersedia. Hubungi admin untuk mengaktifkannya.
-                </p>
-              )}
-              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-                Biaya mengikuti model yang dipilih. Model murah seperti DeepSeek Flash biasanya cukup untuk materi
-                pelajaran.
-              </p>
-            </div>
+          <div className="rounded-2xl border border-aura-primary/15 bg-white/55 p-4 sm:p-5">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  </span>
+                  <div>
+                    <p className="font-display text-[14px] leading-snug font-bold text-aura-ink">Pengaturan AI</p>
+                    <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
+                      Pilih model untuk menyusun materi. Biaya {biayaKoin} koin per generate.
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <p className="flex items-start gap-1.5 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-                <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
-                Hasil disimpan setelah kamu menekan Simpan di pratinjau.
-              </p>
-              <button
-                type="button"
-                disabled={!siapKirim || memuat}
-                onClick={() => void ubah()}
-                className="aura-btn aura-btn-primary h-[52px] w-full shrink-0 px-6 text-[15px] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none sm:w-auto"
-              >
-                {memuat ? (
-                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                  <label htmlFor={`${idDasar}-model`} className="flex min-w-0 flex-col gap-1">
+                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                      Model
+                    </span>
+                    <select
+                      id={`${idDasar}-model`}
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                      disabled={memuatModel || daftarModel.length === 0}
+                      className={`${KELAS_ISIAN} min-h-12 ${
+                        memuatModel
+                          ? "cursor-wait"
+                          : daftarModel.length === 0
+                            ? "cursor-not-allowed"
+                            : "cursor-pointer"
+                      } disabled:opacity-60`}
+                    >
+                      {daftarModel.length === 0 ? (
+                        <option value="">{memuatModel ? "Memuat model…" : "Model belum tersedia"}</option>
+                      ) : (
+                        grupModel.map((grup) => (
+                          <optgroup key={grup} label={grup}>
+                            {daftarModel
+                              .filter((m) => m.grup === grup)
+                              .map((m) => (
+                                <option key={m.id} value={m.id}>
+                                  {m.name}
+                                </option>
+                              ))}
+                          </optgroup>
+                        ))
+                      )}
+                    </select>
+                  </label>
+
+                  {modelTerpilih && (
+                    <div className="min-w-[128px] rounded-xl border border-aura-primary/10 bg-white/65 px-3 py-2">
+                      <p className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                        Provider
+                      </p>
+                      <p className="mt-0.5 font-display text-[12px] leading-[18px] font-semibold text-aura-ink">
+                        {modelTerpilih.grup}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {galatModel ? (
+                  <div
+                    role="alert"
+                    className="flex flex-wrap items-center gap-2 rounded-xl border border-aura-red/15 bg-aura-red/5 px-3 py-2 font-body text-[12px] leading-[18px] font-medium text-aura-red"
+                  >
+                    <span>{galatModel}</span>
+                    <button type="button" onClick={ulangiModel} className="font-semibold underline underline-offset-2">
+                      Coba lagi
+                    </button>
+                  </div>
+                ) : !memuatModel && daftarModel.length === 0 ? (
+                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-aura-amber/20 bg-aura-amber/5 px-3 py-2 font-body text-[12px] leading-[18px] font-medium text-[#92400e]">
+                    <span>Model belum berhasil dimuat.</span>
+                    <button type="button" onClick={ulangiModel} className="font-semibold underline underline-offset-2">
+                      Muat ulang
+                    </button>
+                  </div>
                 ) : (
-                  <Sparkles aria-hidden="true" className="size-4" />
+                  <p className="font-body text-[12px] leading-[18px] text-aura-muted">
+                    Model murah seperti DeepSeek Flash biasanya cukup untuk materi pelajaran.
+                  </p>
                 )}
-                Ubah jadi 4 bentuk belajar
-              </button>
+              </div>
+
+              <div className="flex flex-col gap-2 lg:w-[240px] lg:shrink-0">
+                <button
+                  type="button"
+                  disabled={!siapKirim || memuat}
+                  onClick={() => void ubah()}
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-aura-primary to-aura-primary-deep px-5 font-display text-[14px] font-bold text-white shadow-[0_12px_28px_-14px_rgba(37,99,235,0.7)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:brightness-100"
+                >
+                  {memuat ? (
+                    <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  )}
+                  {memuat
+                    ? "Menyusun materi…"
+                    : memuatKoin
+                      ? "Memuat saldo…"
+                      : galatKoin
+                        ? "Koin belum aktif"
+                        : !koinCukup
+                          ? "Koin habis"
+                          : !model
+                            ? "Pilih model"
+                            : "Ubah jadi 4 bentuk belajar"}
+                </button>
+                <p className="flex items-start gap-1.5 font-body text-[11px] leading-[16px] text-aura-muted">
+                  <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
+                  Hasil disimpan setelah kamu menekan Simpan di pratinjau.
+                </p>
+              </div>
             </div>
           </div>
         </div>
