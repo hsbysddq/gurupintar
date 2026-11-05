@@ -85,16 +85,8 @@ select
 from auth.users u
 where u.email like '%@demo.gurupintar.id';
 
--- Akun demo guru mendapat 20 koin; akun baru/default tetap 0.
-do $$
-begin
-  if exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'pengguna' and column_name = 'koin'
-  ) then
-    update pengguna set koin = 20 where email = 'guru@demo.gurupintar.id' and peran = 'guru';
-  end if;
-end $$;
+-- Akun demo seed memakai default 0. Akun demo.guru@gurupintar.id diatur lewat
+-- supabase/migrasi-koin-guru.sql atau scripts/seed-demo-guru.mjs.
 
 insert into kelas (id, guru_id, nama, mapel, kode_undangan) values
 ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-000000000001',

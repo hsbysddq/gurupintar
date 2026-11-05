@@ -2,13 +2,21 @@
 -- Akun baru default 0 koin; akun demo guru mendapat 20 koin.
 -- Setiap generate Ubah Modul memakai 1 koin; top up lewat fungsi tambah_koin.
 
-alter table pengguna add column if not exists koin int not null default 0 check (koin >= 0);
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'pengguna' and column_name = 'koin'
+  ) then
+    alter table pengguna add column koin int not null default 0 check (koin >= 0);
+  end if;
+end $$;
 alter table pengguna alter column koin set default 0;
 
--- Akun demo guru selalu punya saldo awal 20 koin.
+-- Hanya akun demo ini yang mendapat 20 koin; akun lain tetap 0.
 update pengguna
 set koin = 20
-where email = 'guru@demo.gurupintar.id' and peran = 'guru';
+where email = 'demo.guru@gurupintar.id' and peran = 'guru';
 
 create table if not exists transaksi_koin (
   id uuid primary key default gen_random_uuid(),

@@ -166,8 +166,8 @@ async function main() {
   await must(
     supabase.from('pengguna').upsert(
       [
-        { id: guru.id, nama: guru.nama, email: guru.email, peran: 'guru' },
-        ...siswa.map((s) => ({ id: s.id, nama: s.nama, email: s.email, peran: 'siswa' })),
+        { id: guru.id, nama: guru.nama, email: guru.email, peran: 'guru', koin: 20 },
+        ...siswa.map((s) => ({ id: s.id, nama: s.nama, email: s.email, peran: 'siswa', koin: 0 })),
       ],
       { onConflict: 'id' },
     ),
