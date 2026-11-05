@@ -20,12 +20,14 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { RiwayatKoin } from "@/components/RiwayatKoin";
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
 import {
   ambilDaftarKelas,
   ambilKoin,
   ambilMateriPustaka,
   ambilModelAi,
+  ambilRiwayatKoin,
   simpanMateriPustaka,
   ubahMateriPustaka,
   ubahModul,
@@ -34,7 +36,7 @@ import {
 import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
 import { tautanTopUpKoin } from "@/lib/koin";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
-import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri } from "@/lib/tipe";
+import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri, TransaksiKoin } from "@/lib/tipe";
 
 type Keadaan =
   | { status: "diam" }
@@ -108,6 +110,10 @@ function IsiHalamanUbahModul() {
   const [whatsappAdmin, setWhatsappAdmin] = useState<string | null>(null);
   const [memuatKoin, setMemuatKoin] = useState(true);
   const [galatKoin, setGalatKoin] = useState<string | null>(null);
+  const [riwayat, setRiwayat] = useState<TransaksiKoin[]>([]);
+  const [memuatRiwayat, setMemuatRiwayat] = useState(true);
+  const [galatRiwayat, setGalatRiwayat] = useState<string | null>(null);
+  const [percobaanRiwayat, setPercobaanRiwayat] = useState(0);
   const kelasAwalParam = params.get("kelas");
   const materiAwalParam = params.get("materi");
 
@@ -218,6 +224,44 @@ function IsiHalamanUbahModul() {
     };
   }, []);
 
+  const muatRiwayat = useCallback(async () => {
+    try {
+      const data = await ambilRiwayatKoin();
+      setRiwayat(data.transaksi);
+      setGalatRiwayat(null);
+    } catch (err) {
+      setGalatRiwayat(err instanceof Error ? err.message : "Riwayat koin belum bisa dimuat.");
+    } finally {
+      setMemuatRiwayat(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let aktif = true;
+    ambilRiwayatKoin()
+      .then((data) => {
+        if (!aktif) return;
+        setRiwayat(data.transaksi);
+        setGalatRiwayat(null);
+      })
+      .catch((err: unknown) => {
+        if (!aktif) return;
+        setGalatRiwayat(err instanceof Error ? err.message : "Riwayat koin belum bisa dimuat.");
+      })
+      .finally(() => {
+        if (aktif) setMemuatRiwayat(false);
+      });
+    return () => {
+      aktif = false;
+    };
+  }, [percobaanRiwayat]);
+
+  function ulangiRiwayat() {
+    setMemuatRiwayat(true);
+    setGalatRiwayat(null);
+    setPercobaanRiwayat((n) => n + 1);
+  }
+
   function pilihBerkas(file: File | null) {
     setGalatBerkas(null);
     if (!file) return setBerkas(null);
@@ -254,6 +298,7 @@ function IsiHalamanUbahModul() {
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
       else void muatKoin();
+      void muatRiwayat();
       setSumberMateri(sumberHasil);
       setAsalMateri(sumber);
       // Nomor baru memasang ulang pratinjau agar tab dan jawaban latihan kembali ke awal.
@@ -262,6 +307,7 @@ function IsiHalamanUbahModul() {
       setKeadaan({ status: "siap", isi, nomor: berikut });
     } catch (err) {
       void muatKoin();
+      void muatRiwayat();
       setKeadaan({ status: "gagal", pesan: err instanceof Error ? err.message : "Materi belum berhasil dibuat." });
     }
   }
@@ -346,20 +392,15 @@ function IsiHalamanUbahModul() {
               Tempelkan teks atau unggah PDF modul, ubah menjadi video, audio, bacaan, dan PPT, lalu simpan
               hasilnya ke materi kelas.
             </p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
-                <Sparkles aria-hidden="true" className="size-4 text-aura-primary" />
-                4 bentuk belajar
-              </span>
-              <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
-                <FileText aria-hidden="true" className="size-4 text-aura-indigo" />
+            <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-body text-[12px] leading-[18px] text-aura-muted">
+              <span>4 bentuk belajar</span>
+              <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
+              <span>
                 {PANJANG_MODUL_MIN}–{PANJANG_MODUL_MAKS} karakter
               </span>
-              <span className="aura-glass-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-[12px] font-semibold text-aura-ink">
-                <FileUp aria-hidden="true" className="size-4 text-aura-violet" />
-                PDF maks 5 MB
-              </span>
-            </div>
+              <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
+              <span>PDF maks 5 MB</span>
+            </p>
           </div>
 
           <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:max-w-[252px]">
@@ -930,6 +971,14 @@ function IsiHalamanUbahModul() {
           <TabMateriSiswa key={keadaan.nomor} isi={keadaan.isi} formatAwal={null} />
         </section>
       )}
+
+      <RiwayatKoin
+        koin={koin}
+        transaksi={riwayat}
+        memuat={memuatRiwayat}
+        galat={galatRiwayat}
+        onCobaLagi={ulangiRiwayat}
+      />
     </div>
   );
 }

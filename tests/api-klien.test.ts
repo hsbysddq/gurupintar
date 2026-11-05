@@ -7,6 +7,7 @@ import {
   ambilHasil,
   ambilKoin,
   ambilModelAi,
+  ambilRiwayatKoin,
   ubahModul,
   ubahModulPdf,
   ambilDetailKelasSiswa,
@@ -198,18 +199,20 @@ describe('api-klien guru', () => {
     const palsu = stubFetch(async () => Response.json({}));
     await ambilKoin();
     await ambilModelAi();
+    await ambilRiwayatKoin();
     await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash');
     await ubahModulPdf('base64pdf', 'claude-haiku-4-5-20251001');
 
     const panggilan = palsu.mock.calls.map(([url, init]) => [url, init?.method, init?.body]);
     expect(panggilan[0]).toEqual(['/api/guru/koin', undefined, undefined]);
     expect(panggilan[1]).toEqual(['/api/guru/model-ai', undefined, undefined]);
-    expect(panggilan[2]).toEqual([
+    expect(panggilan[2]).toEqual(['/api/guru/koin/riwayat', undefined, undefined]);
+    expect(panggilan[3]).toEqual([
       '/api/guru/modul',
       'POST',
       JSON.stringify({ teks: 'teks modul', model: 'deepseek/deepseek-v4.1-flash' }),
     ]);
-    expect(panggilan[3]).toEqual([
+    expect(panggilan[4]).toEqual([
       '/api/guru/modul/pdf',
       'POST',
       JSON.stringify({ pdf: 'base64pdf', model: 'claude-haiku-4-5-20251001' }),

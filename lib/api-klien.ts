@@ -32,6 +32,7 @@ import type {
   MateriPustaka,
   MateriSiswa,
   Peran,
+  RiwayatKoin,
   SesiBaru,
   SesiBanyakBaru,
   SesiGuru,
@@ -280,6 +281,10 @@ export function ambilModelAi(signal?: AbortSignal): Promise<DaftarModelAi> {
 
 export function ambilKoin(signal?: AbortSignal): Promise<KoinGuru> {
   return minta('/api/guru/koin', { signal });
+}
+
+export function ambilRiwayatKoin(signal?: AbortSignal): Promise<RiwayatKoin> {
+  return minta('/api/guru/koin/riwayat', { signal });
 }
 
 export function ubahModul(

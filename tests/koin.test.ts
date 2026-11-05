@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalisasiNomorWhatsapp, tautanTopUpKoin } from '@/lib/koin';
+import { normalisasiNomorWhatsapp, susunGrafikKoin, tautanTopUpKoin } from '@/lib/koin';
 import { perluMigrasiKoin } from '@/lib/server/koin';
 
 describe('normalisasiNomorWhatsapp', () => {
@@ -30,6 +30,34 @@ describe('tautanTopUpKoin', () => {
   it('null jika nomor admin belum diatur', () => {
     expect(tautanTopUpKoin('', 3)).toBeNull();
     expect(tautanTopUpKoin(null, 0)).toBeNull();
+  });
+});
+
+describe('susunGrafikKoin', () => {
+  it('menghitung koin keluar dan masuk per hari selama 7 hari', () => {
+    const sekarang = new Date(2026, 10, 3, 12);
+    const grafik = susunGrafikKoin(
+      [
+        { jumlah: -1, dibuatPada: new Date(2026, 10, 3, 9).toISOString() },
+        { jumlah: 1, dibuatPada: new Date(2026, 10, 3, 10).toISOString() },
+        { jumlah: -2, dibuatPada: new Date(2026, 10, 1, 9).toISOString() },
+        { jumlah: 5, dibuatPada: new Date(2026, 9, 20, 9).toISOString() },
+      ],
+      sekarang,
+      7,
+    );
+
+    expect(grafik).toHaveLength(7);
+    expect(grafik[6]).toMatchObject({ keluar: 1, masuk: 1 });
+    expect(grafik[4]).toMatchObject({ keluar: 2, masuk: 0 });
+    expect(grafik.reduce((n, h) => n + h.keluar, 0)).toBe(3);
+    expect(grafik.reduce((n, h) => n + h.masuk, 0)).toBe(1);
+  });
+
+  it('mengembalikan tujuh hari kosong jika belum ada transaksi', () => {
+    const grafik = susunGrafikKoin([], new Date(2026, 10, 3, 12), 7);
+    expect(grafik).toHaveLength(7);
+    expect(grafik.every((h) => h.keluar === 0 && h.masuk === 0)).toBe(true);
   });
 });
 

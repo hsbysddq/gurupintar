@@ -187,6 +187,21 @@ export interface KoinGuru {
   whatsappAdmin: string | null;
 }
 
+export type JenisTransaksiKoin = 'bonus_awal' | 'topup' | 'generate_modul' | 'refund' | 'penyesuaian';
+
+/** GET /api/guru/koin/riwayat */
+export interface TransaksiKoin {
+  id: string;
+  jumlah: number;
+  jenis: JenisTransaksiKoin;
+  keterangan: string | null;
+  dibuatPada: string;
+}
+
+export interface RiwayatKoin {
+  transaksi: TransaksiKoin[];
+}
+
 /** GET /api/guru/topik: hanya topik dengan minimal satu soal */
 export interface TopikRingkas {
   id: string;

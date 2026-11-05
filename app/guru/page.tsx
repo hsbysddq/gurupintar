@@ -96,20 +96,49 @@ export default async function HalamanDaftarKelas({
         </div>
 
         {daftar.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
-              <School aria-hidden="true" className="size-4 text-aura-primary" />
-              {daftar.length} kelas
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
-              <Users aria-hidden="true" className="size-4 text-aura-indigo" />
-              {totalSiswa} siswa
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
-              <PlayCircle aria-hidden="true" className="size-4 text-aura-emerald" />
-              {jumlahKuisAktif} kuis aktif
-            </span>
-          </div>
+          <dl className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                label: 'Kelas',
+                nilai: daftar.length,
+                keterangan: 'kelas aktif',
+                ikon: School,
+                warna: 'bg-aura-primary/10 text-aura-primary',
+              },
+              {
+                label: 'Siswa',
+                nilai: totalSiswa,
+                keterangan: 'di semua kelas',
+                ikon: Users,
+                warna: 'bg-aura-indigo/10 text-aura-indigo',
+              },
+              {
+                label: 'Kuis aktif',
+                nilai: jumlahKuisAktif,
+                keterangan: 'sedang berjalan',
+                ikon: PlayCircle,
+                warna: 'bg-aura-emerald/10 text-aura-emerald',
+              },
+            ].map(({ label, nilai, keterangan, ikon: Ikon, warna }) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/55 p-3.5 backdrop-blur-sm"
+              >
+                <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${warna}`}>
+                  <Ikon aria-hidden="true" className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <dt className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                    {label}
+                  </dt>
+                  <dd className="font-display text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] tabular-nums text-aura-ink">
+                    {nilai}
+                    <span className="ml-1 font-body text-[11px] font-medium text-aura-muted">{keterangan}</span>
+                  </dd>
+                </div>
+              </div>
+            ))}
+          </dl>
         )}
       </header>
 
