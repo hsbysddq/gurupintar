@@ -6,11 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   BookOpen,
+  ChevronRight,
   CircleCheck,
   Coins,
   FileText,
   FileUp,
   Headphones,
+  HelpCircle,
   Loader2,
   PlayCircle,
   Plus,
@@ -37,6 +39,7 @@ import {
 } from "@/lib/api-klien";
 import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
 import { tautanTopUpKoin } from "@/lib/koin";
+import { formatKonteks } from "@/lib/pemilih-model";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
 import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri, TransaksiKoin } from "@/lib/tipe";
 
@@ -48,15 +51,18 @@ type Keadaan =
 
 type Sumber = "teks" | "pdf";
 
-const BENTUK: { label: string; ikon: LucideIcon }[] = [
-  { label: "Video", ikon: PlayCircle },
-  { label: "Audio", ikon: Headphones },
-  { label: "Bacaan", ikon: FileText },
-  { label: "PPT", ikon: Presentation },
+const BENTUK: { label: string; ikon: LucideIcon; deskripsi: string }[] = [
+  { label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
+  { label: "Audio", ikon: Headphones, deskripsi: "Narasi audio yang enak didengar saat belajar." },
+  { label: "Bacaan", ikon: FileText, deskripsi: "Teks bacaan terstruktur dengan poin penting." },
+  { label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
 ];
 
 const KELAS_ISIAN =
   "w-full rounded-2xl border border-white/70 bg-white/65 px-3.5 py-3 font-body text-base leading-relaxed text-aura-ink shadow-sm backdrop-blur-sm transition-colors placeholder:text-aura-muted/55 hover:bg-white/75 focus:bg-white/85";
+
+const CONTOH_MODUL =
+  "Teks deskripsi adalah teks yang menggambarkan suatu objek, tempat, atau peristiwa secara rinci sehingga pembaca dapat membayangkan seolah-olah melihatnya langsung. Ciri utamanya adalah penggunaan kata sifat, kalimat perincian, dan panca indera. Contoh: Pantai Kuta memiliki pasir putih yang halus, ombak biru yang bergulung, dan udara asin yang terasa di kulit. Struktur teks deskripsi terdiri dari identifikasi, deskripsi bagian, dan penutup.";
 
 function bacaSebagaiBase64(file: File): Promise<string> {
   return new Promise((selesai, gagal) => {
@@ -129,6 +135,9 @@ function IsiHalamanUbahModul() {
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
   const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
+  const rekomendasiModel = ["Anthropic", "OpenAI", "Google", "DeepSeek"]
+    .map((grup) => daftarModel.find((m) => m.grup === grup))
+    .filter((m): m is ModelAi => Boolean(m));
 
   useEffect(() => {
     let aktif = true;
@@ -262,6 +271,13 @@ function IsiHalamanUbahModul() {
     setPercobaanRiwayat((n) => n + 1);
   }
 
+  function gunakanContoh() {
+    setSumber("teks");
+    setTeks(CONTOH_MODUL);
+    setTersimpan(false);
+    setGalatSimpan(null);
+  }
+
   function pilihBerkas(file: File | null) {
     setGalatBerkas(null);
     if (!file) return setBerkas(null);
@@ -374,113 +390,133 @@ function IsiHalamanUbahModul() {
         <div className="absolute bottom-0 left-1/3 size-64 rounded-full bg-[#FB923C]/10 blur-[100px]" />
       </div>
 
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 font-body text-[12px] leading-[18px] text-aura-muted">
+        <Link href="/guru" className="transition-colors hover:text-aura-primary">
+          Beranda
+        </Link>
+        <ChevronRight aria-hidden="true" className="size-3.5" />
+        <span className="font-semibold text-aura-ink">Ubah Modul</span>
+      </nav>
+
       <section className="aura-glass relative overflow-hidden rounded-[28px]">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-br from-aura-primary/[0.07] via-transparent to-aura-violet/10"
         />
         <header className="relative p-5 sm:p-6">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-aura-primary/10 blur-3xl"
-        />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex max-w-2xl flex-col gap-2">
-            <span className="aura-eyebrow self-start">
-              <Sparkles aria-hidden="true" className="size-3.5" />
-              Ruang kerja AI
-            </span>
-            <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink">
-              Ubah modul
-            </h1>
-            <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-              Tempelkan teks atau unggah PDF modul, ubah menjadi video, audio, bacaan, dan PPT, lalu simpan
-              hasilnya ke materi kelas.
-            </p>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-body text-[12px] leading-[18px] text-aura-muted">
-              <span>4 bentuk belajar</span>
-              <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
-              <span>
-                {PANJANG_MODUL_MIN}–{PANJANG_MODUL_MAKS} karakter
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-aura-primary/10 blur-3xl"
+          />
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex max-w-2xl flex-col gap-2">
+              <span className="aura-eyebrow self-start">
+                <Sparkles aria-hidden="true" className="size-3.5" />
+                Ruang kerja AI
               </span>
-              <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
-              <span>PDF maks 5 MB</span>
-            </p>
-
-            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-2xl border border-aura-primary/15 bg-gradient-to-r from-aura-primary/[0.07] via-white/55 to-aura-violet/[0.08] px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
-                <Coins aria-hidden="true" className="size-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                  Koin kamu
-                </p>
-                <p className="font-display text-[22px] leading-[26px] font-extrabold tracking-[-0.02em] text-aura-ink">
-                  {memuatKoin ? "…" : (koin ?? "—")}
-                </p>
-              </div>
-              <span aria-hidden="true" className="hidden h-7 w-px bg-aura-ink/10 sm:block" />
-              <p className="font-body text-[12px] leading-[18px] text-aura-muted">
-                Biaya generate{" "}
-                <strong className="font-display font-bold text-aura-ink">{biayaKoin} koin</strong> per materi
+              <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[32px] sm:leading-[40px]">
+                Ubah modul ajar jadi 4 ragam belajar
+              </h1>
+              <p className="font-body text-[14px] leading-[22px] text-aura-muted">
+                Tempelkan teks atau unggah PDF modul, ubah menjadi video, audio, bacaan, dan PPT, lalu simpan
+                hasilnya ke materi kelas.
               </p>
+              <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-body text-[12px] leading-[18px] text-aura-muted">
+                <span>4 bentuk belajar</span>
+                <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
+                <span>
+                  {PANJANG_MODUL_MIN}–{PANJANG_MODUL_MAKS} karakter
+                </span>
+                <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
+                <span>PDF maks 5 MB</span>
+              </p>
+            </div>
+
+            <div className="flex w-full shrink-0 flex-col gap-2 sm:max-w-[252px]">
+              <Link
+                href="#format-output"
+                className="aura-btn aura-btn-secondary h-10 w-full px-3 text-[12px]"
+              >
+                <HelpCircle aria-hidden="true" className="size-3.5" />
+                Panduan
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                {BENTUK.map(({ label, ikon: Ikon }) => (
+                  <span
+                    key={label}
+                    className="flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border border-aura-primary/10 bg-white/50 px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-sm"
+                  >
+                    <Ikon aria-hidden="true" className="size-4 text-aura-primary" />
+                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-ink">
+                      {label}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </header>
+      </section>
+
+      <section className="aura-glass rounded-[24px] p-4 sm:p-5">
+        <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="flex h-full flex-col justify-between gap-5 rounded-[20px] bg-gradient-to-br from-[#FFF7DD] via-[#FFEFC2] to-[#FFE3A3] p-5 text-[#6B4A00] ring-1 ring-inset ring-white/70">
+            <div>
+              <span className="flex size-11 items-center justify-center rounded-2xl bg-white/70 text-[#B45309] shadow-sm ring-1 ring-inset ring-white/80">
+                <Coins aria-hidden="true" className="size-5" />
+              </span>
+              <p className="mt-4 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-[#8A5A00]">
+                Koin kamu
+              </p>
+              <p className="mt-1 font-display text-[42px] leading-[46px] font-extrabold tracking-[-0.04em] tabular-nums">
+                {memuatKoin ? "…" : (koin ?? "—")}
+              </p>
+              <p className="mt-1 font-body text-[12px] leading-[18px] text-[#7A5200]">
+                Biaya generate <strong className="font-display font-bold">{biayaKoin} koin</strong> per materi
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2">
               {topUpHref ? (
                 <a
                   href={topUpHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="aura-btn aura-btn-secondary ml-auto h-9 px-3 text-[11px]"
+                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-white/80 px-3 font-display text-[11px] font-bold text-[#8A5A00] ring-1 ring-inset ring-white/80 transition-colors hover:bg-white"
                 >
                   <Plus aria-hidden="true" className="size-3.5" />
                   Tambah koin
                 </a>
               ) : (
                 <span
-                  className="ml-auto inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-xl border border-aura-ink/10 bg-white/40 px-3 font-display text-[11px] font-semibold text-aura-muted"
+                  className="inline-flex min-h-10 cursor-not-allowed items-center justify-center gap-1.5 rounded-xl bg-white/50 px-3 font-display text-[11px] font-bold text-[#8A5A00]/70 ring-1 ring-inset ring-white/60"
                   title="Nomor admin belum diatur."
                 >
                   <Plus aria-hidden="true" className="size-3.5" />
                   Tambah koin
                 </span>
               )}
+              {galatKoin && (
+                <p role="alert" className="font-body text-[11px] leading-[16px] font-medium text-[#8A2E00]">
+                  {galatKoin}
+                </p>
+              )}
+              {!memuatKoin && koin !== null && !koinCukup && (
+                <p role="status" className="font-body text-[11px] leading-[16px] font-semibold text-[#8A2E00]">
+                  Koin tidak cukup untuk generate berikutnya.
+                </p>
+              )}
             </div>
-            {galatKoin && (
-              <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
-                {galatKoin}
-              </p>
-            )}
-            {!memuatKoin && koin !== null && !koinCukup && (
-              <p role="status" className="font-body text-[12px] leading-[18px] font-semibold text-aura-red">
-                Koin tidak cukup untuk generate berikutnya.
-              </p>
-            )}
-          </div>
+          </aside>
 
-          <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:max-w-[252px]">
-            {BENTUK.map(({ label, ikon: Ikon }) => (
-              <span
-                key={label}
-                className="flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border border-aura-primary/10 bg-white/50 px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-sm"
-              >
-                <Ikon aria-hidden="true" className="size-4 text-aura-primary" />
-                <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-ink">
-                  {label}
-                </span>
-              </span>
-            ))}
-          </div>
+          <RiwayatKoin
+            tertanam
+            transaksi={riwayat}
+            memuat={memuatRiwayat}
+            galat={galatRiwayat}
+            onCobaLagi={ulangiRiwayat}
+          />
         </div>
-      </header>
-
-      <div className="relative border-t border-aura-ink/10 bg-white/25 p-4 sm:p-5">
-        <RiwayatKoin
-          tertanam
-          transaksi={riwayat}
-          memuat={memuatRiwayat}
-          galat={galatRiwayat}
-          onCobaLagi={ulangiRiwayat}
-        />
-      </div>
       </section>
 
       <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
@@ -492,17 +528,27 @@ function IsiHalamanUbahModul() {
           <div className="flex flex-col gap-1">
             <span className="aura-eyebrow self-start">
               <BookOpen aria-hidden="true" className="size-3.5" />
-              Tujuan materi
+              Sempurnakan materi
             </span>
             <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-              Simpan ke kelas mana?
+              Sempurnakan Kalimat & Topik Materi
             </h2>
             <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-              Pilih kelas dan isi bab/topik. Materi baru tersimpan setelah kamu menekan tombol Simpan di pratinjau.
+              Lengkapi konteks kelas dan topik agar hasil empat bentuk belajar lebih tepat sasaran.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col gap-1">
+              <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                Mata pelajaran
+              </span>
+              <div className={`${KELAS_ISIAN} flex min-h-12 items-center gap-2 text-aura-muted`}>
+                <BookOpen aria-hidden="true" className="size-4 shrink-0 text-aura-primary" />
+                <span className="truncate">{kelasTerpilih?.mapel ?? "Pilih kelas dulu"}</span>
+              </div>
+            </div>
+
             <label className="flex flex-col gap-1">
               <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
                 Kelas
@@ -587,18 +633,27 @@ function IsiHalamanUbahModul() {
           className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-aura-violet/10 blur-3xl"
         />
         <div className="relative flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <span className="aura-eyebrow self-start">
-              <FileText aria-hidden="true" className="size-3.5" />
-              Sumber modul
-            </span>
-            <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-              Pilih cara memasukkan modul
-            </h2>
-            <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-              Tempel teks modul langsung atau unggah berkas PDF. Teks/PDF sumber tidak disimpan; hasil empat
-              bentuk bisa disimpan ke materi kelas.
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="aura-eyebrow self-start">
+                <FileText aria-hidden="true" className="size-3.5" />
+                Sumber modul
+              </span>
+              <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
+                Pilih cara memasukkan modul
+              </h2>
+              <p className="font-body text-[13px] leading-[20px] text-aura-muted">
+                Tempel teks modul langsung atau unggah berkas PDF. Teks/PDF sumber tidak disimpan; hasil empat
+                bentuk bisa disimpan ke materi kelas.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={gunakanContoh}
+              className="aura-btn aura-btn-secondary h-10 shrink-0 px-3 text-[11px]"
+            >
+              Gunakan contoh
+            </button>
           </div>
 
           <div
@@ -709,12 +764,52 @@ function IsiHalamanUbahModul() {
                     <Sparkles aria-hidden="true" className="size-4" />
                   </span>
                   <div>
-                    <p className="font-display text-[14px] leading-snug font-bold text-aura-ink">Pengaturan AI</p>
+                    <p className="font-display text-[16px] leading-snug font-bold text-aura-ink">
+                      Pilih Cara Memodelkan Materi AI
+                    </p>
                     <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
-                      Pilih model untuk menyusun materi. Biaya {biayaKoin} koin per generate.
+                      Pilih model yang paling cocok. Biaya {biayaKoin} koin per generate.
                     </p>
                   </div>
                 </div>
+
+                {rekomendasiModel.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <p className="font-display text-[10px] font-bold uppercase tracking-[0.06em] text-aura-muted">
+                      Rekomendasi
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                      {rekomendasiModel.map((m) => {
+                        const aktif = model === m.id;
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setModel(m.id)}
+                            className={`rounded-2xl border p-3 text-left transition-colors ${
+                              aktif
+                                ? "border-aura-primary/35 bg-aura-primary/[0.08] ring-1 ring-aura-primary/20"
+                                : "border-white/70 bg-white/55 hover:bg-white/80"
+                            }`}
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="truncate font-display text-[9px] font-bold uppercase tracking-[0.08em] text-aura-muted">
+                                {m.grup}
+                              </span>
+                              {aktif && <CircleCheck aria-hidden="true" className="size-3.5 shrink-0 text-aura-primary" />}
+                            </span>
+                            <span className="mt-1 block truncate font-display text-[12px] leading-[18px] font-semibold text-aura-ink">
+                              {m.name}
+                            </span>
+                            <span className="mt-0.5 block font-body text-[10px] leading-[14px] text-aura-muted">
+                              {formatKonteks(m.contextLength) ?? "—"} konteks
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex min-w-0 flex-col gap-1.5">
                   <span
@@ -912,7 +1007,7 @@ function IsiHalamanUbahModul() {
 
             {!bisaSimpan && !tersimpan && (
               <p className="relative mt-3 font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-                Lengkapi kelas dan bab/topik di bagian Tujuan materi untuk menyimpan hasil ini.
+                Lengkapi kelas dan bab/topik di bagian Sempurnakan materi untuk menyimpan hasil ini.
               </p>
             )}
             {galatSimpan && (
@@ -938,23 +1033,49 @@ function IsiHalamanUbahModul() {
               </div>
             )}
 
-            <div className="relative mt-4 flex flex-wrap gap-2">
-              {BENTUK.map(({ label, ikon: Ikon }) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted ring-1 ring-inset ring-white/70"
-                >
-                  <Ikon aria-hidden="true" className="size-3.5 text-aura-primary" />
-                  {label}
-                </span>
-              ))}
-            </div>
           </div>
 
           <TabMateriSiswa key={keadaan.nomor} isi={keadaan.isi} formatAwal={null} />
         </section>
       )}
 
+      <section
+        id="format-output"
+        aria-labelledby="judul-format-output"
+        className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-aura-primary/10 blur-3xl"
+        />
+        <div className="relative flex flex-col gap-1">
+          <span className="aura-eyebrow self-start">
+            <Sparkles aria-hidden="true" className="size-3.5" />
+            Hasil akhir
+          </span>
+          <h2
+            id="judul-format-output"
+            className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
+          >
+            4 Format Pembelajaran yang Akan Dihasilkan
+          </h2>
+          <p className="font-body text-[13px] leading-[20px] text-aura-muted">
+            Setiap generate menghasilkan empat versi materi yang siap dipakai di kelas.
+          </p>
+        </div>
+
+        <div className="relative mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {BENTUK.map(({ label, ikon: Ikon, deskripsi }) => (
+            <article key={label} className="rounded-2xl border border-white/70 bg-white/55 p-4">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
+                <Ikon aria-hidden="true" className="size-4" />
+              </span>
+              <h3 className="mt-3 font-display text-[14px] leading-[20px] font-bold text-aura-ink">{label}</h3>
+              <p className="mt-1 font-body text-[11px] leading-[17px] text-aura-muted">{deskripsi}</p>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
