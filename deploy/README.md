@@ -121,6 +121,18 @@ Pastikan hanya nama variabel yang tercetak, bukan nilainya:
 sudo -u gurupintar grep -o '^[A-Z_]*=' /var/www/gurupintar/.env.local
 ```
 
+Pastikan `COMMAND_CODE_API_KEY` benar-benar terisi (hasilnya harus `1`):
+
+```bash
+sudo -u gurupintar grep -c '^COMMAND_CODE_API_KEY=.' /var/www/gurupintar/.env.local
+```
+
+Service systemd membaca `.env.local` langsung lewat `EnvironmentFile`, jadi setelah mengubah env cukup restart:
+
+```bash
+sudo systemctl restart gurupintar
+```
+
 Variabel yang harus ada:
 
 ```text
@@ -145,7 +157,7 @@ Catatan:
 - Database yang sudah berjalan: jalankan `supabase/migrasi-perbaikan-kuis.sql` di SQL Editor Supabase. File ini membuat tabel `percobaan_kuis` dan `jadwal_kuis` yang belum ada, memperbaiki fungsi `simpan_hasil`, serta mengaktifkan jadwal buka/tutup otomatis. Aman dijalankan berulang.
 - Jalankan juga `supabase/migrasi-koin-guru.sql` untuk sistem koin Ubah Modul. Akun baru default 0 koin, akun demo guru `demo.guru@gurupintar.id` mendapat 20 koin, dan setiap generate memakai 1 koin.
 - Jika siswa mendapat pesan **Jawaban belum terkirim** padahal jaringan normal, periksa dengan `node scripts/cek-migrasi-supabase.mjs`, lalu jalankan migrasi perbaikan di atas.
-- Setelah `WHATSAPP_ADMIN` diisi, tombol **Top up via WhatsApp** akan membuka chat admin.
+- Setelah `WHATSAPP_ADMIN` diisi, tombol **Tambah koin** di header Ubah Modul akan membuka chat admin.
 
 Contoh top up manual oleh admin:
 
@@ -281,6 +293,8 @@ Kalau ingin menampilkan maintenance terjadwal, set `MAINTENANCE_MODE=1` lalu res
 | Build mati di tengah | RAM habis. Tambahkan swap 2 GB lalu build ulang. |
 | `EADDRINUSE :3000` | Ada proses lain di port 3000. Cek `ss -tulpn \| grep 3000` dan hentikan proses lama. |
 | Halaman error Supabase | `.env.local` salah atau build dilakukan sebelum env ada. Perbaiki env lalu build ulang. |
+| Model AI 503 “Layanan AI belum siap” | Proses service tidak membaca `COMMAND_CODE_API_KEY`. Cek `sudo -u gurupintar grep -c '^COMMAND_CODE_API_KEY=.' /var/www/gurupintar/.env.local`, lalu `sudo systemctl restart gurupintar`. Lihat juga `journalctl -u gurupintar -n 50 \| grep 'Model AI'`. |
+| Tombol Tambah koin tidak aktif | `WHATSAPP_ADMIN` masih kosong atau bukan format `628...`. Isi di `.env.local`, lalu restart service. |
 | Port 80 dipakai panel | Hentikan Apache/CyberPanel yang bentrok atau gunakan proxy panel tersebut. |
 
 ## 15. Catatan keamanan

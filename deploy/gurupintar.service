@@ -10,6 +10,8 @@ Group=gurupintar
 WorkingDirectory=/var/www/gurupintar
 Environment=NODE_ENV=production
 Environment=PORT=3000
+# Dibaca systemd sebagai root, jadi tidak gagal karena izin file milik pengguna service.
+EnvironmentFile=-/var/www/gurupintar/.env.local
 ExecStart=/usr/bin/node /var/www/gurupintar/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
 Restart=always
 RestartSec=5

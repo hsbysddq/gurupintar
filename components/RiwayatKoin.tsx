@@ -198,115 +198,113 @@ export function RiwayatKoin({
         />
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
-        <div className="rounded-2xl border border-white/70 bg-white/65 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">Aktivitas 7 hari</h3>
-              <p className="font-body text-[11px] leading-[16px] text-aura-muted">Koin keluar dan masuk per hari.</p>
-            </div>
-            <div className="flex items-center gap-3 font-body text-[10px] leading-[14px] font-medium text-aura-muted">
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="size-2 rounded-sm bg-[#F26A3D]" />
-                Keluar
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="size-2 rounded-sm bg-aura-emerald" />
-                Masuk
-              </span>
-            </div>
+      <div className="mt-4 rounded-2xl border border-white/70 bg-white/65 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">Aktivitas 7 hari</h3>
+            <p className="font-body text-[11px] leading-[16px] text-aura-muted">Koin keluar dan masuk per hari.</p>
           </div>
+          <div className="flex items-center gap-3 font-body text-[10px] leading-[14px] font-medium text-aura-muted">
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="size-2 rounded-sm bg-[#F26A3D]" />
+              Keluar
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="size-2 rounded-sm bg-aura-emerald" />
+              Masuk
+            </span>
+          </div>
+        </div>
 
-          {adaAktivitas ? (
-            <div
-              role="img"
-              aria-label="Grafik koin keluar dan masuk selama tujuh hari terakhir"
-              className="mt-4 flex h-40 items-end gap-1.5"
-            >
-              {grafik.map((hari) => (
-                <div key={hari.kunci} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-                  <div className="flex h-32 w-full items-end justify-center gap-1">
-                    <div
-                      title={`Keluar ${hari.keluar} koin`}
-                      className="w-2.5 rounded-t-md bg-[#F26A3D] transition-[height] duration-300 sm:w-3"
-                      style={{ height: `${(hari.keluar / maks) * 100}%`, minHeight: hari.keluar > 0 ? 3 : 0 }}
-                    />
-                    <div
-                      title={`Masuk ${hari.masuk} koin`}
-                      className="w-2.5 rounded-t-md bg-aura-emerald transition-[height] duration-300 sm:w-3"
-                      style={{ height: `${(hari.masuk / maks) * 100}%`, minHeight: hari.masuk > 0 ? 3 : 0 }}
-                    />
-                  </div>
-                  <span className="truncate font-display text-[10px] font-semibold text-aura-muted">{hari.label}</span>
+        {adaAktivitas ? (
+          <div
+            role="img"
+            aria-label="Grafik koin keluar dan masuk selama tujuh hari terakhir"
+            className="mt-4 flex h-44 items-end gap-1.5"
+          >
+            {grafik.map((hari) => (
+              <div key={hari.kunci} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+                <div className="flex h-36 w-full items-end justify-center gap-1">
+                  <div
+                    title={`Keluar ${hari.keluar} koin`}
+                    className="w-3 rounded-t-md bg-[#F26A3D] transition-[height] duration-300 sm:w-4"
+                    style={{ height: `${(hari.keluar / maks) * 100}%`, minHeight: hari.keluar > 0 ? 3 : 0 }}
+                  />
+                  <div
+                    title={`Masuk ${hari.masuk} koin`}
+                    className="w-3 rounded-t-md bg-aura-emerald transition-[height] duration-300 sm:w-4"
+                    style={{ height: `${(hari.masuk / maks) * 100}%`, minHeight: hari.masuk > 0 ? 3 : 0 }}
+                  />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-4 flex h-40 flex-col items-center justify-center rounded-xl border border-dashed border-aura-ink/10 bg-white/35 px-4 text-center">
-              <History aria-hidden="true" className="size-5 text-aura-muted" />
-              <p className="mt-2 font-body text-[12px] leading-[18px] text-aura-muted">
-                Belum ada aktivitas koin dalam 7 hari terakhir.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0 rounded-2xl border border-white/70 bg-white/65 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">Transaksi terbaru</h3>
-            <span className="font-body text-[11px] leading-[16px] text-aura-muted">{transaksi.length} aktivitas</span>
+                <span className="truncate font-display text-[10px] font-semibold text-aura-muted">{hari.label}</span>
+              </div>
+            ))}
           </div>
+        ) : (
+          <div className="mt-4 flex h-44 flex-col items-center justify-center rounded-xl border border-dashed border-aura-ink/10 bg-white/35 px-4 text-center">
+            <History aria-hidden="true" className="size-5 text-aura-muted" />
+            <p className="mt-2 font-body text-[12px] leading-[18px] text-aura-muted">
+              Belum ada aktivitas koin dalam 7 hari terakhir.
+            </p>
+          </div>
+        )}
+      </div>
 
-          {transaksi.length === 0 ? (
-            <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-aura-ink/10 bg-white/35 px-4 py-10 text-center">
-              <Coins aria-hidden="true" className="size-5 text-aura-muted" />
-              <p className="mt-2 font-body text-[12px] leading-[18px] text-aura-muted">
-                Belum ada riwayat. Generate materi pertama untuk mulai mencatat pemakaian koin.
-              </p>
-            </div>
-          ) : (
-            <ul className="mt-2 max-h-[420px] divide-y divide-aura-ink/5 overflow-y-auto pr-1">
-              {transaksi.map((item) => {
-                const info = JENIS[item.jenis] ?? JENIS.penyesuaian;
-                const Ikon = info.ikon;
-                const positif = item.jumlah > 0;
-                return (
-                  <li
-                    key={item.id}
-                    className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-1 last:pb-1"
-                  >
-                    <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${info.kelasIkon}`}>
-                      <Ikon aria-hidden="true" className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate font-display text-[12px] leading-[18px] font-semibold text-aura-ink">
-                        {info.label}
-                      </p>
-                      <p className="truncate font-body text-[11px] leading-[16px] text-aura-muted">
-                        {FORMAT_WAKTU.format(new Date(item.dibuatPada))}
-                        {item.keterangan ? ` · ${item.keterangan}` : ''}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1">
-                      <p
-                        className={`font-display text-[13px] leading-[18px] font-bold tabular-nums ${
-                          positif ? 'text-[#047857]' : 'text-[#92400e]'
-                        }`}
-                      >
-                        {formatKoin(item.jumlah)} koin
-                      </p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-[0.04em] ${info.kelasStatus}`}
-                      >
-                        {info.status}
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+      <div className="mt-4 min-w-0 rounded-2xl border border-white/70 bg-white/65 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">Transaksi terbaru</h3>
+          <span className="font-body text-[11px] leading-[16px] text-aura-muted">{transaksi.length} aktivitas</span>
         </div>
+
+        {transaksi.length === 0 ? (
+          <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-aura-ink/10 bg-white/35 px-4 py-10 text-center">
+            <Coins aria-hidden="true" className="size-5 text-aura-muted" />
+            <p className="mt-2 font-body text-[12px] leading-[18px] text-aura-muted">
+              Belum ada riwayat. Generate materi pertama untuk mulai mencatat pemakaian koin.
+            </p>
+          </div>
+        ) : (
+          <ul className="mt-2 max-h-[420px] divide-y divide-aura-ink/5 overflow-y-auto pr-1">
+            {transaksi.map((item) => {
+              const info = JENIS[item.jenis] ?? JENIS.penyesuaian;
+              const Ikon = info.ikon;
+              const positif = item.jumlah > 0;
+              return (
+                <li
+                  key={item.id}
+                  className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-1 last:pb-1"
+                >
+                  <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${info.kelasIkon}`}>
+                    <Ikon aria-hidden="true" className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-display text-[12px] leading-[18px] font-semibold text-aura-ink">
+                      {info.label}
+                    </p>
+                    <p className="truncate font-body text-[11px] leading-[16px] text-aura-muted">
+                      {FORMAT_WAKTU.format(new Date(item.dibuatPada))}
+                      {item.keterangan ? ` · ${item.keterangan}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <p
+                      className={`font-display text-[13px] leading-[18px] font-bold tabular-nums ${
+                        positif ? 'text-[#047857]' : 'text-[#92400e]'
+                      }`}
+                    >
+                      {formatKoin(item.jumlah)} koin
+                    </p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-[0.04em] ${info.kelasStatus}`}
+                    >
+                      {info.status}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       <p className="mt-3 font-body text-[11px] leading-[16px] text-aura-muted">

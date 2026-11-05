@@ -13,6 +13,7 @@ import {
   Headphones,
   Loader2,
   PlayCircle,
+  Plus,
   Presentation,
   RefreshCw,
   Save,
@@ -20,6 +21,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { PemilihModel } from "@/components/PemilihModel";
 import { RiwayatKoin } from "@/components/RiwayatKoin";
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
 import {
@@ -126,8 +128,6 @@ function IsiHalamanUbahModul() {
     (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "" && koinCukup;
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
-  const grupModel = [...new Set(daftarModel.map((m) => m.grup))];
-  const modelTerpilih = daftarModel.find((m) => m.id === model) ?? null;
   const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
 
   useEffect(() => {
@@ -401,6 +401,54 @@ function IsiHalamanUbahModul() {
               <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
               <span>PDF maks 5 MB</span>
             </p>
+
+            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-2xl border border-white/70 bg-white/50 px-3.5 py-2.5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
+                <Coins aria-hidden="true" className="size-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted">
+                  Koin kamu
+                </p>
+                <p className="font-display text-[22px] leading-[26px] font-extrabold tracking-[-0.02em] text-aura-ink">
+                  {memuatKoin ? "…" : (koin ?? "—")}
+                </p>
+              </div>
+              <span aria-hidden="true" className="hidden h-7 w-px bg-aura-ink/10 sm:block" />
+              <p className="font-body text-[12px] leading-[18px] text-aura-muted">
+                Biaya generate{" "}
+                <strong className="font-display font-bold text-aura-ink">{biayaKoin} koin</strong> per materi
+              </p>
+              {topUpHref ? (
+                <a
+                  href={topUpHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="aura-btn aura-btn-secondary ml-auto h-9 px-3 text-[11px]"
+                >
+                  <Plus aria-hidden="true" className="size-3.5" />
+                  Tambah koin
+                </a>
+              ) : (
+                <span
+                  className="ml-auto inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-xl border border-aura-ink/10 bg-white/40 px-3 font-display text-[11px] font-semibold text-aura-muted"
+                  title="Nomor admin belum diatur."
+                >
+                  <Plus aria-hidden="true" className="size-3.5" />
+                  Tambah koin
+                </span>
+              )}
+            </div>
+            {galatKoin && (
+              <p role="alert" className="font-body text-[12px] leading-[18px] font-medium text-aura-red">
+                {galatKoin}
+              </p>
+            )}
+            {!memuatKoin && koin !== null && !koinCukup && (
+              <p role="status" className="font-body text-[12px] leading-[18px] font-semibold text-aura-red">
+                Koin tidak cukup untuk generate berikutnya.
+              </p>
+            )}
           </div>
 
           <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:max-w-[252px]">
@@ -419,56 +467,13 @@ function IsiHalamanUbahModul() {
         </div>
       </header>
 
-      <section aria-label="Saldo koin" className="aura-glass rounded-[24px] p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-aura-primary/10 text-aura-primary">
-              <Coins aria-hidden="true" className="size-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                Koin kamu
-              </p>
-              <p className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em] text-aura-ink">
-                {memuatKoin ? "…" : (koin ?? "—")}
-              </p>
-            </div>
-            <div className="min-w-0 border-aura-ink/10 sm:border-l sm:pl-4">
-              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">Biaya generate</p>
-              <p className="font-display text-[14px] leading-[20px] font-bold text-aura-ink">
-                {biayaKoin} koin per materi
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start gap-1 sm:items-end">
-            {topUpHref ? (
-              <a
-                href={topUpHref}
-                target="_blank"
-                rel="noreferrer"
-                className="aura-btn aura-btn-secondary h-11 px-4 text-[12px]"
-              >
-                Top up via WhatsApp
-              </a>
-            ) : (
-              <p className="font-body text-[12px] leading-[18px] font-medium text-aura-muted">
-                Hubungi admin untuk top up.
-              </p>
-            )}
-            {!memuatKoin && koin !== null && !koinCukup && (
-              <p role="status" className="font-body text-[12px] leading-[18px] font-semibold text-aura-red">
-                Koin tidak cukup untuk generate berikutnya.
-              </p>
-            )}
-          </div>
-        </div>
-        {galatKoin && (
-          <p role="alert" className="mt-3 font-body text-[12px] leading-[18px] font-medium text-aura-red">
-            {galatKoin}
-          </p>
-        )}
-      </section>
+      <RiwayatKoin
+        koin={koin}
+        transaksi={riwayat}
+        memuat={memuatRiwayat}
+        galat={galatRiwayat}
+        onCobaLagi={ulangiRiwayat}
+      />
 
       <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
         <div
@@ -703,52 +708,22 @@ function IsiHalamanUbahModul() {
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                  <label htmlFor={`${idDasar}-model`} className="flex min-w-0 flex-col gap-1">
-                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                      Model
-                    </span>
-                    <select
-                      id={`${idDasar}-model`}
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      disabled={memuatModel || daftarModel.length === 0}
-                      className={`${KELAS_ISIAN} min-h-12 ${
-                        memuatModel
-                          ? "cursor-wait"
-                          : daftarModel.length === 0
-                            ? "cursor-not-allowed"
-                            : "cursor-pointer"
-                      } disabled:opacity-60`}
-                    >
-                      {daftarModel.length === 0 ? (
-                        <option value="">{memuatModel ? "Memuat model…" : "Model belum tersedia"}</option>
-                      ) : (
-                        grupModel.map((grup) => (
-                          <optgroup key={grup} label={grup}>
-                            {daftarModel
-                              .filter((m) => m.grup === grup)
-                              .map((m) => (
-                                <option key={m.id} value={m.id}>
-                                  {m.name}
-                                </option>
-                              ))}
-                          </optgroup>
-                        ))
-                      )}
-                    </select>
-                  </label>
-
-                  {modelTerpilih && (
-                    <div className="min-w-[128px] rounded-xl border border-aura-primary/10 bg-white/65 px-3 py-2">
-                      <p className="font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                        Provider
-                      </p>
-                      <p className="mt-0.5 font-display text-[12px] leading-[18px] font-semibold text-aura-ink">
-                        {modelTerpilih.grup}
-                      </p>
-                    </div>
-                  )}
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <span
+                    id={`${idDasar}-model-label`}
+                    className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted"
+                  >
+                    Model
+                  </span>
+                  <PemilihModel
+                    id={`${idDasar}-model`}
+                    labelId={`${idDasar}-model-label`}
+                    nilai={model}
+                    daftar={daftarModel}
+                    memuat={memuatModel}
+                    nonaktif={Boolean(galatModel) && daftarModel.length === 0}
+                    onPilih={setModel}
+                  />
                 </div>
 
                 {galatModel ? (
@@ -972,13 +947,6 @@ function IsiHalamanUbahModul() {
         </section>
       )}
 
-      <RiwayatKoin
-        koin={koin}
-        transaksi={riwayat}
-        memuat={memuatRiwayat}
-        galat={galatRiwayat}
-        onCobaLagi={ulangiRiwayat}
-      />
     </div>
   );
 }
