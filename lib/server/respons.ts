@@ -5,6 +5,7 @@ export const PESAN_SESI_DITUTUP = 'Kuis ini sudah ditutup.';
 export const PESAN_SESI_BELUM_DIBUKA = 'Kuis ini belum dibuka. Ikuti jadwal dari gurumu.';
 export const PESAN_DIBLOKIR = 'Kuismu diblokir karena terdeteksi meninggalkan halaman kuis. Minta gurumu membukanya.';
 export const PESAN_ERROR_UMUM = 'Terjadi kesalahan di server. Coba lagi sebentar.';
+export const PESAN_LAYANAN_BELUM_SIAP = 'Layanan ini belum siap. Coba lagi beberapa saat.';
 export const PESAN_INPUT_TIDAK_VALID = 'Data yang dikirim tidak valid.';
 
 /** Membaca body JSON; mengembalikan `undefined` jika body kosong atau bukan JSON. */

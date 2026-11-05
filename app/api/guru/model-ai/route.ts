@@ -4,7 +4,7 @@ import { responsError, responsOk } from '@/lib/server/respons';
 import type { DaftarModelAi } from '@/lib/tipe';
 
 const PESAN_MODEL_BELUM_DIATUR =
-  'Model AI belum dikonfigurasi di server. Isi COMMAND_CODE_API_KEY atau ANTHROPIC_MODEL.';
+  'Layanan AI belum siap. Coba lagi beberapa saat atau hubungi admin.';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,10 @@ export async function GET() {
   if (!auth.ok) return auth.respons;
 
   const daftar = await ambilDaftarModelAi();
-  if (daftar.length === 0) return responsError(PESAN_MODEL_BELUM_DIATUR, 503);
+  if (daftar.length === 0) {
+    console.error('Model AI kosong: COMMAND_CODE_API_KEY/ANTHROPIC_MODEL tidak terbaca oleh proses server.');
+    return responsError(PESAN_MODEL_BELUM_DIATUR, 503);
+  }
 
   const respons: DaftarModelAi = {
     modelDefault: daftar.some((m) => m.id === MODEL_DEFAULT) ? MODEL_DEFAULT : (daftar[0]?.id ?? ''),

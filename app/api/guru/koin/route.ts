@@ -14,7 +14,10 @@ export async function GET() {
 
   try {
     const koin = await bacaKoinGuru(ambilSupabase(), auth.profil.id);
-    if (koin === null) return responsError(PESAN_MIGRASI_KOIN, 503);
+    if (koin === null) {
+      console.error('Kolom pengguna.koin belum tersedia. Jalankan supabase/migrasi-koin-guru.sql.');
+      return responsError(PESAN_MIGRASI_KOIN, 503);
+    }
 
     const respons: KoinGuru = {
       koin,

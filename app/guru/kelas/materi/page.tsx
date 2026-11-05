@@ -48,11 +48,10 @@ function PemberitahuanMigrasi() {
         <AlertTriangle aria-hidden="true" className="size-5" />
       </span>
       <h2 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.01em] text-aura-ink">
-        Pustaka materi belum aktif
+        Pustaka materi belum siap
       </h2>
       <p className="max-w-2xl font-body text-[14px] leading-[22px] text-aura-muted">
-        Jalankan file <code className="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[12px]">supabase/migrasi-materi-pustaka.sql</code>{' '}
-        di Supabase SQL Editor, lalu muat ulang halaman ini.
+        Coba lagi beberapa saat atau hubungi admin untuk mengaktifkannya.
       </p>
     </section>
   );

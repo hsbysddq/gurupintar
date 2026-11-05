@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       const cek = await db.from('kelas').select('warna, sampul').limit(1);
       if (cek.error) {
         return responsError(
-          'Fitur warna/foto kelas belum aktif. Jalankan supabase/migrasi-sampul-kelas.sql di Supabase.',
+          'Layanan warna/foto kelas belum siap. Coba lagi beberapa saat.',
           503,
         );
       }
@@ -109,7 +109,7 @@ export async function PATCH(request: Request) {
       const cek = await db.from('kelas').select('diarsipkan_pada').eq('id', id).maybeSingle();
       if (cek.error && kolomArsipBelumAda(cek.error)) {
         return responsError(
-          'Fitur arsip belum aktif. Jalankan supabase/migrasi-arsip-kelas.sql di Supabase.',
+          'Layanan arsip kelas belum siap. Coba lagi beberapa saat.',
           503,
         );
       }

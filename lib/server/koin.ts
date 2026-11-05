@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const PESAN_KOIN_HABIS =
   'Koin kamu habis. Top up lewat WhatsApp admin untuk melanjutkan membuat materi.';
 export const PESAN_MIGRASI_KOIN =
-  'Fitur koin belum aktif di database. Jalankan supabase/migrasi-koin-guru.sql di SQL Editor Supabase.';
+  'Layanan koin belum siap. Hubungi admin untuk mengaktifkannya.';
 
 export type HasilPotongKoin =
   | { ok: true; sisa: number }

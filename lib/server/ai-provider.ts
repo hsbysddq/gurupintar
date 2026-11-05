@@ -94,9 +94,11 @@ export async function ambilDaftarModelAi(): Promise<ModelAi[]> {
   const key = kunciApi();
   if (!key) {
     const modelAnthropic = process.env.ANTHROPIC_MODEL?.trim();
-    return modelAnthropic
-      ? [{ id: modelAnthropic, name: modelAnthropic, grup: 'Anthropic', contextLength: null }]
-      : [];
+    if (modelAnthropic) {
+      return [{ id: modelAnthropic, name: modelAnthropic, grup: 'Anthropic', contextLength: null }];
+    }
+    console.error('Model AI: COMMAND_CODE_API_KEY tidak tersedia di runtime dan ANTHROPIC_MODEL kosong.');
+    return [];
   }
 
   if (cacheModel && Date.now() - cacheModel.waktu < TTL_MODEL_MS) return cacheModel.data;
@@ -113,8 +115,9 @@ export async function ambilDaftarModelAi(): Promise<ModelAi[]> {
       cacheModel = { waktu: Date.now(), data };
       return data;
     }
-  } catch {
+  } catch (err) {
     // Jangan gagalkan fitur hanya karena katalog model sedang tidak bisa dihubungi.
+    console.error('Model AI: katalog Command Code gagal dimuat:', err instanceof Error ? err.message : err);
   }
 
   return [

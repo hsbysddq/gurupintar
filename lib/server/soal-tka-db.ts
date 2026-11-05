@@ -3,10 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalisasiTipeSoal } from '@/lib/soal-tka';
 import type { DataPilihanSoal, Kelompok, TipeSoal } from '@/lib/tipe';
 
-export const PESAN_MIGRASI_SOAL_TKA =
-  'Fitur tipe soal TKA & gambar belum aktif di database. Jalankan supabase/migrasi-soal-tka.sql di SQL Editor Supabase.';
-export const PESAN_MIGRASI_PERCOBAAN_KUIS =
-  'Riwayat percobaan kuis belum aktif di database. Jalankan supabase/migrasi-perbaikan-kuis.sql di SQL Editor Supabase.';
+export const PESAN_MIGRASI_SOAL_TKA = 'Layanan kuis belum siap. Coba lagi beberapa saat.';
+export const PESAN_MIGRASI_PERCOBAAN_KUIS = 'Layanan kuis belum siap. Coba lagi beberapa saat.';
 
 function pesanError(err: unknown): string {
   return typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string'

@@ -287,11 +287,7 @@ function IsiPendampingan() {
         <section className="flex items-start gap-2 rounded-2xl border border-aura-amber/25 bg-aura-amber/10 px-4 py-3">
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#8A6400]" />
           <p className="font-body text-[12px] leading-[18px] font-medium text-aura-ink">
-            Keputusan guru belum bisa disimpan. Jalankan{' '}
-            <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[11px]">
-              supabase/migrasi-tindakan-pendampingan-kuis.sql
-            </code>{' '}
-            di Supabase SQL Editor.
+            Layanan pendampingan belum siap. Coba lagi beberapa saat atau hubungi admin.
           </p>
         </section>
       )}

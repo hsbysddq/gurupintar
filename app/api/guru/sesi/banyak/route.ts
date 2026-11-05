@@ -13,8 +13,7 @@ const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba lagi.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
 const PESAN_JUMLAH_SOAL = `Topik harus punya minimal ${SOAL_MINIMAL_TOPIK} soal.`;
 const PESAN_KELAS_TIDAK_ADA = 'Sebagian kelas tidak ditemukan.';
-const PESAN_MIGRASI_JADWAL =
-  'Fitur jadwal kuis belum aktif. Jalankan supabase/migrasi-jadwal-kuis.sql di Supabase.';
+const PESAN_MIGRASI_JADWAL = 'Layanan jadwal kuis belum siap. Coba lagi beberapa saat.';
 
 // POST /api/guru/sesi/banyak: buka satu topik untuk beberapa kelas sekaligus.
 // Setiap kelas mendapat sesi dan kode sendiri. Jika satu kelas gagal, kelas lain tetap diproses

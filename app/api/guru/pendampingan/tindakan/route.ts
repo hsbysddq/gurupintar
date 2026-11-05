@@ -18,7 +18,7 @@ const PESAN_TIDAK_PERLU = 'Siswa ini tidak memerlukan tindakan pendampingan.';
 const PESAN_EVALUASI = 'Evaluasi tanpa pendampingan hanya untuk siswa setengah paham.';
 const PESAN_SELESAI = 'Pendampingan belum dimulai untuk siswa ini.';
 const PESAN_MIGRASI =
-  'Fitur tindakan pendampingan belum aktif. Jalankan supabase/migrasi-tindakan-pendampingan-kuis.sql di Supabase SQL Editor.';
+  'Layanan pendampingan belum siap. Coba lagi beberapa saat.';
 
 // POST /api/guru/pendampingan/tindakan: keputusan guru untuk satu kuis.
 export async function POST(request: Request) {

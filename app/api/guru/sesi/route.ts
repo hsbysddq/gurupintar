@@ -19,8 +19,7 @@ const PESAN_KODE_GAGAL = 'Kode kelas belum berhasil dibuat. Coba buka kuis lagi.
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
 const PESAN_JUMLAH_SOAL = `Topik harus punya minimal ${SOAL_MINIMAL_TOPIK} soal.`;
 const PESAN_BELUM_PUNYA_KELAS = 'Buat kelas dulu sebelum membuka kuis.';
-const PESAN_MIGRASI_JADWAL =
-  'Fitur jadwal kuis belum aktif. Jalankan supabase/migrasi-jadwal-kuis.sql di Supabase.';
+const PESAN_MIGRASI_JADWAL = 'Layanan jadwal kuis belum siap. Coba lagi beberapa saat.';
 const PESAN_SESI_SELESAI = 'Kuis ini sudah ditutup, jadwalnya tidak bisa diubah lagi.';
 const PESAN_SUDAH_DIKERJAKAN =
   'Kuis ini sudah mulai dikerjakan. Waktu buka tidak bisa dipindah ke masa depan.';

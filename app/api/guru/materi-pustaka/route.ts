@@ -17,7 +17,7 @@ const KOLOM = 'id, kelas_id, bab, judul, isi, sumber, asal, dibuat_pada, diperba
 const PESAN_KELAS_TIDAK_ADA = 'Kelas tidak ditemukan.';
 const PESAN_MATERI_TIDAK_ADA = 'Materi tidak ditemukan.';
 const PESAN_MIGRASI =
-  'Fitur pustaka materi belum aktif. Jalankan supabase/migrasi-materi-pustaka.sql di Supabase SQL Editor.';
+  'Layanan pustaka materi belum siap. Coba lagi beberapa saat.';
 
 type BarisMateriPustaka = {
   id: string;

@@ -11,7 +11,7 @@ import type { TopikRingkas } from '@/lib/tipe';
 const PESAN_TOPIK_TIDAK_VALID = 'Isian topik atau soal belum sesuai. Periksa lagi form.';
 const PESAN_TOPIK_TIDAK_ADA = 'Topik tidak ditemukan.';
 const PESAN_TOPIK_DIPAKAI = 'Topik ini sudah dipakai kuis dan tidak bisa diubah atau dihapus. Buat topik baru untuk versi berbeda.';
-const PESAN_MIGRASI_UBAH = 'Fitur ubah topik belum aktif. Jalankan supabase/migrasi-ubah-topik.sql di Supabase.';
+const PESAN_MIGRASI_UBAH = 'Layanan ubah topik belum siap. Coba lagi beberapa saat.';
 
 // GET /api/guru/topik (PRD F-10): topik yang bisa dipakai kuis, tanpa isi soal.
 export async function GET() {

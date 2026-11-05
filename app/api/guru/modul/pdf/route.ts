@@ -60,7 +60,10 @@ export async function POST(request: Request) {
     const potong = await potongKoin(db, auth.profil.id, KOIN_PER_MODUL, 'Ubah modul dari PDF');
     if (!potong.ok) {
       if (potong.alasan === 'kurang') return responsError(PESAN_KOIN_HABIS, 402);
-      if (potong.alasan === 'migrasi') return responsError(PESAN_MIGRASI_KOIN, 503);
+      if (potong.alasan === 'migrasi') {
+        console.error('Migrasi koin belum dijalankan:', potong.error);
+        return responsError(PESAN_MIGRASI_KOIN, 503);
+      }
       return petakanErrorDb(potong.error);
     }
 
