@@ -21,6 +21,7 @@ import type {
 import type {
   DaftarModelAi,
   DataPendampingan,
+  FokusModul,
   Format,
   HasilGuru,
   HasilPelanggaran,
@@ -290,17 +291,30 @@ export function ambilRiwayatKoin(signal?: AbortSignal): Promise<RiwayatKoin> {
 export function ubahModul(
   teks: string,
   model?: string,
+  fokus?: FokusModul[],
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
-  return minta('/api/guru/modul', { method: 'POST', body: JSON.stringify({ teks, ...(model ? { model } : {}) }) });
+  return minta('/api/guru/modul', {
+    method: 'POST',
+    body: JSON.stringify({
+      teks,
+      ...(model ? { model } : {}),
+      ...(fokus && fokus.length > 0 ? { fokus } : {}),
+    }),
+  });
 }
 
 export function ubahModulPdf(
   pdfBase64: string,
   model?: string,
+  fokus?: FokusModul[],
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul/pdf', {
     method: 'POST',
-    body: JSON.stringify({ pdf: pdfBase64, ...(model ? { model } : {}) }),
+    body: JSON.stringify({
+      pdf: pdfBase64,
+      ...(model ? { model } : {}),
+      ...(fokus && fokus.length > 0 ? { fokus } : {}),
+    }),
   });
 }
 

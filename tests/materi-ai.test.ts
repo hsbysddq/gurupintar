@@ -7,6 +7,7 @@ import {
   buatMateriDariModul,
   buatMateriSemua,
   ErrorMateriAi,
+  INSTRUKSI_FOKUS,
   INSTRUKSI_SISTEM,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
@@ -269,6 +270,14 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
   it('tidak memuat data kelas atau kelompok', () => {
     const pesan = susunPesanModul(TEKS_MODUL);
     expect(pesan).not.toMatch(/Topik:|Jumlah siswa sasaran|kelompok/);
+  });
+
+  it('menambahkan arahan fokus pembelajaran yang dipilih guru', () => {
+    const pesan = susunPesanModul(TEKS_MODUL, ['hots', 'podcast']);
+    expect(pesan).toContain('Fokus tambahan dari guru:');
+    expect(pesan).toContain(INSTRUKSI_FOKUS.hots);
+    expect(pesan).toContain(INSTRUKSI_FOKUS.podcast);
+    expect(pesan).not.toContain(INSTRUKSI_FOKUS.metafora);
   });
 });
 

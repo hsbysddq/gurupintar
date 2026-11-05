@@ -44,7 +44,10 @@ export async function POST(request: Request) {
     }
 
     try {
-      const isi = await buatMateriDariModul(input.data.teks, { model: input.data.model });
+      const isi = await buatMateriDariModul(input.data.teks, {
+        model: input.data.model,
+        fokus: input.data.fokus,
+      });
       return responsOk({ isi, sumber: 'ai', koin: potong.sisa });
     } catch (err) {
       // AI gagal: kembalikan koin agar guru tidak dirugikan.

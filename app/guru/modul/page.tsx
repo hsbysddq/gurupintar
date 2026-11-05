@@ -21,6 +21,7 @@ import {
   Save,
   ShieldCheck,
   Sparkles,
+  Wand2,
   type LucideIcon,
 } from "lucide-react";
 import { PemilihModel } from "@/components/PemilihModel";
@@ -41,7 +42,7 @@ import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_
 import { tautanTopUpKoin } from "@/lib/koin";
 import { formatKonteks } from "@/lib/pemilih-model";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
-import type { IsiMateri, KelasRingkas, ModelAi, SumberMateri, TransaksiKoin } from "@/lib/tipe";
+import type { FokusModul, IsiMateri, KelasRingkas, ModelAi, SumberMateri, TransaksiKoin } from "@/lib/tipe";
 
 type Keadaan =
   | { status: "diam" }
@@ -61,8 +62,20 @@ const BENTUK: { label: string; ikon: LucideIcon; deskripsi: string }[] = [
 const KELAS_ISIAN =
   "w-full rounded-2xl border border-white/70 bg-white/65 px-3.5 py-3 font-body text-base leading-relaxed text-aura-ink shadow-sm backdrop-blur-sm transition-colors placeholder:text-aura-muted/55 hover:bg-white/75 focus:bg-white/85";
 
-const CONTOH_MODUL =
-  "Teks deskripsi adalah teks yang menggambarkan suatu objek, tempat, atau peristiwa secara rinci sehingga pembaca dapat membayangkan seolah-olah melihatnya langsung. Ciri utamanya adalah penggunaan kata sifat, kalimat perincian, dan panca indera. Contoh: Pantai Kuta memiliki pasir putih yang halus, ombak biru yang bergulung, dan udara asin yang terasa di kulit. Struktur teks deskripsi terdiri dari identifikasi, deskripsi bagian, dan penutup.";
+const CONTOH_MODUL = `CAPAIAN PEMBELAJARAN (FASE D - KELAS VII):
+Peserta didik dapat memahami konsep variabel, konstanta, dan koefisien dalam kalimat terbuka matematika, serta menyelesaikan persamaan linear satu variabel (PLSV) untuk memecahkan masalah kontekstual dalam kehidupan sehari-hari.
+
+TUJUAN PEMBELAJARAN HARIAN:
+1. Siswa mampu membedakan kalimat terbuka dan kalimat tertutup dengan analogi timbangan neraca seimbang.
+2. Siswa mampu menyusun model matematika sederhana dari cerita belanja Bu Ani.
+3. Siswa dapat menemukan nilai variabel dengan operasi hitung setara kedua ruas.`;
+
+const FOKUS_PILIHAN: { nilai: FokusModul; label: string; deskripsi: string }[] = [
+  { nilai: "sederhanakan", label: "Sederhanakan Bahasa", deskripsi: "Untuk siswa yang perlu remedial." },
+  { nilai: "metafora", label: "Metafora/Neraca Visual", deskripsi: "Analogi visual yang mudah dibayangkan." },
+  { nilai: "podcast", label: "Audio Gaya Podcast", deskripsi: "Narasi audio yang santai untuk remaja." },
+  { nilai: "hots", label: "Soal Tantangan (HOTS)", deskripsi: "Tambahan soal pengayaan dan pembahasan." },
+];
 
 function bacaSebagaiBase64(file: File): Promise<string> {
   return new Promise((selesai, gagal) => {
@@ -109,6 +122,7 @@ function IsiHalamanUbahModul() {
   const [memuatAwal, setMemuatAwal] = useState(true);
   const [galatAwal, setGalatAwal] = useState<string | null>(null);
   const [model, setModel] = useState("");
+  const [fokus, setFokus] = useState<FokusModul[]>([]);
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
@@ -278,6 +292,26 @@ function IsiHalamanUbahModul() {
     setGalatSimpan(null);
   }
 
+  function toggleFokus(nilai: FokusModul) {
+    setFokus((sebelumnya) =>
+      sebelumnya.includes(nilai) ? sebelumnya.filter((item) => item !== nilai) : [...sebelumnya, nilai],
+    );
+  }
+
+  function rapikanTeks() {
+    const rapi = teks
+      .replace(/[ \t]+/g, " ")
+      .replace(/[ \t]+([,.;:!?])/g, "$1")
+      .replace(/\n{3,}/g, "\n\n")
+      .split("\n")
+      .map((baris) => baris.trim())
+      .join("\n")
+      .trim();
+    setTeks(rapi);
+    setTersimpan(false);
+    setGalatSimpan(null);
+  }
+
   function pilihBerkas(file: File | null) {
     setGalatBerkas(null);
     if (!file) return setBerkas(null);
@@ -309,8 +343,8 @@ function IsiHalamanUbahModul() {
     try {
       const hasil =
         sumber === "teks"
-          ? await ubahModul(teks, model)
-          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model);
+          ? await ubahModul(teks, model, fokus)
+          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus);
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
       else void muatKoin();
@@ -525,17 +559,22 @@ function IsiHalamanUbahModul() {
           className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-aura-violet/10 blur-3xl"
         />
         <div className="relative flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <span className="aura-eyebrow self-start">
-              <BookOpen aria-hidden="true" className="size-3.5" />
-              Sempurnakan materi
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-aura-primary/10 font-display text-[13px] font-bold text-aura-primary ring-1 ring-aura-primary/15">
+              1
             </span>
-            <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-              Sempurnakan Kalimat & Topik Materi
-            </h2>
-            <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-              Lengkapi konteks kelas dan topik agar hasil empat bentuk belajar lebih tepat sasaran.
-            </p>
+            <div className="flex flex-col gap-1">
+              <span className="aura-eyebrow self-start">
+                <BookOpen aria-hidden="true" className="size-3.5" />
+                Sempurnakan materi
+              </span>
+              <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
+                Sempurnakan Kalimat & Topik Materi
+              </h2>
+              <p className="font-body text-[13px] leading-[20px] text-aura-muted">
+                Lengkapi konteks kelas dan topik agar hasil empat bentuk belajar lebih tepat sasaran.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -634,95 +673,119 @@ function IsiHalamanUbahModul() {
         />
         <div className="relative flex flex-col gap-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="aura-eyebrow self-start">
-                <FileText aria-hidden="true" className="size-3.5" />
-                Sumber modul
+            <div className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-aura-primary/10 font-display text-[13px] font-bold text-aura-primary ring-1 ring-aura-primary/15">
+                2
               </span>
-              <h2 className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
-                Pilih cara memasukkan modul
-              </h2>
-              <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-                Tempel teks modul langsung atau unggah berkas PDF. Teks/PDF sumber tidak disimpan; hasil empat
-                bentuk bisa disimpan ke materi kelas.
-              </p>
+              <div className="flex flex-col gap-1">
+                <h2 className="font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink">
+                  Pilih Cara Memasukkan Modul Ajar
+                </h2>
+                <p className="font-body text-[13px] leading-[20px] text-aura-muted">
+                  Mendukung teks materi, RPP, modul, atau dokumen PDF modul sekolah.
+                </p>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={gunakanContoh}
-              className="aura-btn aura-btn-secondary h-10 shrink-0 px-3 text-[11px]"
-            >
-              Gunakan contoh
-            </button>
-          </div>
 
-          <div
-            role="tablist"
-            aria-label="Sumber modul"
-            className="grid grid-cols-2 gap-1 rounded-full border border-white/60 bg-white/45 p-1 backdrop-blur-sm sm:max-w-sm"
-          >
-            {(
-              [
-                ["teks", "Tempel teks", FileText],
-                ["pdf", "Unggah PDF", FileUp],
-              ] as const
-            ).map(([nilai, label, Ikon]) => {
-              const terpilih = sumber === nilai;
-              return (
-                <button
-                  key={nilai}
-                  type="button"
-                  role="tab"
-                  aria-selected={terpilih}
-                  onClick={() => setSumber(nilai)}
-                  className={`flex min-h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-1.5 font-display text-[12px] font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-[13px] ${
-                    terpilih
-                      ? "bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]"
-                      : "text-aura-muted hover:bg-white/70 hover:text-aura-ink"
-                  }`}
-                >
-                  <Ikon aria-hidden="true" className="size-4" />
-                  {label}
-                </button>
-              );
-            })}
+            <div
+              role="tablist"
+              aria-label="Sumber modul"
+              className="flex flex-wrap gap-1 rounded-2xl border border-white/70 bg-white/55 p-1 backdrop-blur-sm"
+            >
+              {(
+                [
+                  ["teks", "Tempel Teks", FileText],
+                  ["pdf", "Unggah PDF", FileUp],
+                ] as const
+              ).map(([nilai, label, Ikon]) => {
+                const terpilih = sumber === nilai;
+                return (
+                  <button
+                    key={nilai}
+                    type="button"
+                    role="tab"
+                    aria-selected={terpilih}
+                    onClick={() => setSumber(nilai)}
+                    className={`inline-flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 font-display text-[12px] font-semibold transition-colors ${
+                      terpilih
+                        ? "bg-gradient-to-r from-aura-primary to-aura-primary-deep text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]"
+                        : "text-aura-muted hover:bg-white/70 hover:text-aura-ink"
+                    }`}
+                  >
+                    <Ikon aria-hidden="true" className="size-4" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {sumber === "teks" ? (
             <div className="flex flex-col gap-2">
-              <label
-                htmlFor={`${idDasar}-teks`}
-                className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted"
-              >
-                Teks modul
-              </label>
-              <textarea
-                id={`${idDasar}-teks`}
-                rows={12}
-                aria-describedby={`${idDasar}-bantuan ${idDasar}-hitung`}
-                className={`${KELAS_ISIAN} min-h-[240px] resize-y`}
-                value={teks}
-                onChange={(e) => setTeks(e.target.value)}
-              />
-              <div className="flex flex-wrap items-start justify-between gap-2 font-body text-[12px] leading-[18px] font-medium">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label
+                  htmlFor={`${idDasar}-teks`}
+                  className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted"
+                >
+                  Isi Teks Modul / Materi Dasar
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={gunakanContoh}
+                    className="font-display text-[10px] font-semibold text-aura-primary hover:underline"
+                  >
+                    Gunakan contoh
+                  </button>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-aura-emerald/10 px-2.5 py-1 font-display text-[9px] font-bold text-[#047857]">
+                    <ShieldCheck aria-hidden="true" className="size-3" />
+                    Data pribadi tidak disimpan
+                  </span>
+                  <span
+                    id={`${idDasar}-hitung`}
+                    aria-live="polite"
+                    className={`font-display text-[10px] font-semibold tabular-nums ${
+                      panjangSesuai || panjang === 0 ? "text-aura-muted" : "text-aura-red"
+                    }`}
+                  >
+                    {panjang} / {PANJANG_MODUL_MAKS} karakter
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <textarea
+                  id={`${idDasar}-teks`}
+                  rows={14}
+                  aria-describedby={`${idDasar}-bantuan ${idDasar}-hitung`}
+                  className={`${KELAS_ISIAN} min-h-[320px] resize-y pb-14`}
+                  placeholder={`Tempel materi di sini...\n\nCAPAIAN PEMBELAJARAN:\nTUJUAN PEMBELAJARAN:\nMATERI / LANGKAH KEGIATAN:`}
+                  value={teks}
+                  onChange={(e) => setTeks(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={rapikanTeks}
+                  className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-xl border border-aura-primary/15 bg-white/90 px-3 py-2 font-display text-[10px] font-semibold text-aura-primary shadow-sm transition-colors hover:bg-white"
+                >
+                  <Wand2 aria-hidden="true" className="size-3.5" />
+                  Rapikan teks
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-start justify-between gap-2 font-body text-[11px] leading-[17px] font-medium">
                 <p id={`${idDasar}-bantuan`} className="flex items-start gap-1.5 text-aura-muted">
                   <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
                   Jangan tempelkan nama siswa atau data pribadi. Panjang teks {PANJANG_MODUL_MIN}–{PANJANG_MODUL_MAKS}{" "}
                   karakter.
                 </p>
-                <p
-                  id={`${idDasar}-hitung`}
-                  aria-live="polite"
-                  className={`tabular-nums ${panjangSesuai || panjang === 0 ? "text-aura-muted" : "text-aura-red"}`}
-                >
-                  {panjang} / {PANJANG_MODUL_MAKS} karakter
-                </p>
+                <p className="text-aura-muted">PDF maksimal 5 MB jika menggunakan unggah file.</p>
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <p className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                File modul (PDF)
+                Unggah File Modul (PDF)
               </p>
               <input
                 id={`${idDasar}-pdf`}
@@ -765,10 +828,10 @@ function IsiHalamanUbahModul() {
                   </span>
                   <div>
                     <p className="font-display text-[16px] leading-snug font-bold text-aura-ink">
-                      Pilih Cara Memodelkan Materi AI
+                      Mesin Proses AI & Pedagogi
                     </p>
                     <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
-                      Pilih model yang paling cocok. Biaya {biayaKoin} koin per generate.
+                      Pilih model dan fokus pembelajaran. Biaya {biayaKoin} koin per generate.
                     </p>
                   </div>
                 </div>
@@ -851,6 +914,46 @@ function IsiHalamanUbahModul() {
                     Model murah seperti DeepSeek Flash biasanya cukup untuk materi pelajaran.
                   </p>
                 )}
+
+                <div className="flex flex-col gap-2">
+                  <p className="font-display text-[10px] font-bold uppercase tracking-[0.06em] text-aura-muted">
+                    Fokus Dimensi Pembelajaran (Opsional)
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {FOKUS_PILIHAN.map(({ nilai, label, deskripsi }) => {
+                      const aktif = fokus.includes(nilai);
+                      return (
+                        <label
+                          key={nilai}
+                          className={`flex cursor-pointer items-start gap-2 rounded-xl border p-2.5 transition-colors ${
+                            aktif
+                              ? "border-aura-primary/30 bg-aura-primary/[0.06]"
+                              : "border-white/70 bg-white/50 hover:bg-white/70"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={aktif}
+                            onChange={() => toggleFokus(nilai)}
+                            className="mt-0.5 size-4 shrink-0 accent-[#2563EB]"
+                          />
+                          <span className="min-w-0">
+                            <span className="block font-display text-[11px] leading-[16px] font-semibold text-aura-ink">
+                              {label}
+                            </span>
+                            <span className="mt-0.5 block font-body text-[10px] leading-[14px] text-aura-muted">
+                              {deskripsi}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <p className="font-body text-[10px] leading-[15px] text-aura-muted">
+                  Model dan fokus mengikuti pendekatan pembelajaran di kelas.
+                </p>
               </div>
 
               <div className="flex flex-col gap-2 lg:w-[240px] lg:shrink-0">

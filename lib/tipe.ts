@@ -189,6 +189,8 @@ export interface KoinGuru {
 
 export type JenisTransaksiKoin = 'bonus_awal' | 'topup' | 'generate_modul' | 'refund' | 'penyesuaian';
 
+export type FokusModul = 'sederhanakan' | 'metafora' | 'podcast' | 'hots';
+
 /** GET /api/guru/koin/riwayat */
 export interface TransaksiKoin {
   id: string;

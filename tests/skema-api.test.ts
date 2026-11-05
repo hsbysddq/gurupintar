@@ -201,6 +201,15 @@ describe('skemaBodyUbahModul (PRD F-9)', () => {
     expect(skemaBodyUbahModul.safeParse({ teks: 500 }).success).toBe(false);
     expect(skemaBodyUbahModul.safeParse(undefined).success).toBe(false);
   });
+
+  it('menerima fokus pembelajaran yang valid dan menolak yang tidak dikenal', () => {
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), fokus: ['hots', 'podcast'] }).success).toBe(true);
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), fokus: ['tidak-ada'] }).success).toBe(false);
+    expect(
+      skemaBodyUbahModul.safeParse({ teks: teks(200), fokus: ['hots', 'podcast', 'metafora', 'sederhanakan', 'hots'] })
+        .success,
+    ).toBe(false);
+  });
 });
 
 describe('skemaBodyTopikBaru (PRD F-10)', () => {
