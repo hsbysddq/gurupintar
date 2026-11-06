@@ -8,6 +8,7 @@ import {
   buatMateriSemua,
   ErrorMateriAi,
   INSTRUKSI_FOKUS,
+  INSTRUKSI_FORMAT,
   INSTRUKSI_SISTEM,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
@@ -292,6 +293,21 @@ describe('buatMateriDariModul', () => {
     expect(body.messages).toEqual([{ role: 'user', content: susunPesanModul(TEKS_MODUL) }]);
     expect(opsi?.signal).toBeInstanceOf(AbortSignal);
     expect(isi).toEqual(ISI_VALID);
+  });
+
+  it('memfokuskan prompt ke format pilihan dan menandai format utama', async () => {
+    const { klien, create } = klienTiruan(async () => responsTeks(JSON.stringify(ISI_VALID)));
+    const isi = await buatMateriDariModul(TEKS_MODUL, {
+      klien,
+      model: 'model-uji',
+      format: 'audio',
+      acak: TANPA_ACAK,
+    });
+
+    const prompt = create.mock.calls[0][0].messages[0].content as string;
+    expect(prompt).toContain('Format utama yang diminta guru:');
+    expect(prompt).toContain(INSTRUKSI_FORMAT.audio);
+    expect(isi.format_utama).toBe('audio');
   });
 
   it('mengacak posisi pilihan latihan dan menyesuaikan kunci', async () => {

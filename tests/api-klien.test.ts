@@ -221,13 +221,14 @@ describe('api-klien guru', () => {
 
   it('mengirim fokus pembelajaran saat Ubah Modul', async () => {
     const palsu = stubFetch(async () => Response.json({}));
-    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', ['hots', 'podcast']);
+    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', ['hots', 'podcast'], 'audio');
 
     expect(palsu.mock.calls[0][1]?.body).toBe(
       JSON.stringify({
         teks: 'teks modul',
         model: 'deepseek/deepseek-v4.1-flash',
         fokus: ['hots', 'podcast'],
+        format: 'audio',
       }),
     );
   });

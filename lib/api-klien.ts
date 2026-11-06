@@ -23,6 +23,7 @@ import type {
   DataPendampingan,
   FokusModul,
   Format,
+  FormatMateri,
   HasilGuru,
   HasilPelanggaran,
   IsiMateri,
@@ -292,6 +293,7 @@ export function ubahModul(
   teks: string,
   model?: string,
   fokus?: FokusModul[],
+  format?: FormatMateri,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul', {
     method: 'POST',
@@ -299,6 +301,7 @@ export function ubahModul(
       teks,
       ...(model ? { model } : {}),
       ...(fokus && fokus.length > 0 ? { fokus } : {}),
+      ...(format ? { format } : {}),
     }),
   });
 }
@@ -307,6 +310,7 @@ export function ubahModulPdf(
   pdfBase64: string,
   model?: string,
   fokus?: FokusModul[],
+  format?: FormatMateri,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul/pdf', {
     method: 'POST',
@@ -314,6 +318,7 @@ export function ubahModulPdf(
       pdf: pdfBase64,
       ...(model ? { model } : {}),
       ...(fokus && fokus.length > 0 ? { fokus } : {}),
+      ...(format ? { format } : {}),
     }),
   });
 }

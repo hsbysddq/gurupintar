@@ -5,11 +5,12 @@ import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones
 import { KartuKaca } from "@/components/KartuKaca";
 import { TombolDengarkan } from "@/components/TombolDengarkan";
 import { unduhPptx } from "@/lib/unduh-materi";
-import type { Format, IsiMateri } from "@/lib/tipe";
+import type { Format, FormatMateri, IsiMateri } from "@/lib/tipe";
 
 type TabMateriSiswaProps = {
   isi: IsiMateri;
   formatAwal: Format | null;
+  hanyaFormat?: FormatMateri | null;
 };
 
 const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
@@ -20,33 +21,35 @@ const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
-export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
+export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMateriSiswaProps) {
   const idDasar = useId();
-  const [aktif, setAktif] = useState<Format>(formatAwal ?? "bacaan");
+  const daftarTab = hanyaFormat ? TAB.filter((tab) => tab.format === hanyaFormat) : TAB;
+  const [aktif, setAktif] = useState<Format>(hanyaFormat ?? formatAwal ?? "bacaan");
   const tombolTab = useRef<(HTMLButtonElement | null)[]>([]);
 
   function tanganiTombol(e: KeyboardEvent, indeks: number) {
     let tujuan: number | null = null;
-    if (e.key === "ArrowRight") tujuan = (indeks + 1) % TAB.length;
-    else if (e.key === "ArrowLeft") tujuan = (indeks - 1 + TAB.length) % TAB.length;
+    if (e.key === "ArrowRight") tujuan = (indeks + 1) % daftarTab.length;
+    else if (e.key === "ArrowLeft") tujuan = (indeks - 1 + daftarTab.length) % daftarTab.length;
     else if (e.key === "Home") tujuan = 0;
-    else if (e.key === "End") tujuan = TAB.length - 1;
+    else if (e.key === "End") tujuan = daftarTab.length - 1;
     if (tujuan === null) return;
     e.preventDefault();
-    setAktif(TAB[tujuan].format);
+    setAktif(daftarTab[tujuan].format);
     tombolTab.current[tujuan]?.focus();
   }
 
   const urlYoutube = `https://www.youtube.com/results?search_query=${encodeURIComponent(isi.ide_video.kata_kunci_pencarian)}`;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+    <div className={hanyaFormat ? "min-w-0" : "grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start"}>
+      {!hanyaFormat && (
       <div
         role="tablist"
         aria-label="Bentuk materi"
         className="aura-glass grid grid-cols-4 gap-1 p-1 lg:sticky lg:top-6 lg:flex lg:flex-col lg:gap-1.5 lg:p-2"
       >
-        {TAB.map(({ format, label, ikon: Ikon }, i) => {
+        {daftarTab.map(({ format, label, ikon: Ikon }, i) => {
           const terpilih = aktif === format;
           return (
             <button
@@ -74,9 +77,10 @@ export function TabMateriSiswa({ isi, formatAwal }: TabMateriSiswaProps) {
           );
         })}
       </div>
+      )}
 
       <div className="min-w-0">
-        {TAB.map(({ format }) => (
+        {daftarTab.map(({ format }) => (
           <div
             key={format}
             id={`${idDasar}-panel-${format}`}

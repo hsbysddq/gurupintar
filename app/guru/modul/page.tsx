@@ -12,7 +12,6 @@ import {
   FileText,
   FileUp,
   Headphones,
-  HelpCircle,
   Loader2,
   PlayCircle,
   Plus,
@@ -42,7 +41,15 @@ import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_
 import { tautanTopUpKoin } from "@/lib/koin";
 import { formatKonteks } from "@/lib/pemilih-model";
 import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
-import type { FokusModul, IsiMateri, KelasRingkas, ModelAi, SumberMateri, TransaksiKoin } from "@/lib/tipe";
+import type {
+  FokusModul,
+  FormatMateri,
+  IsiMateri,
+  KelasRingkas,
+  ModelAi,
+  SumberMateri,
+  TransaksiKoin,
+} from "@/lib/tipe";
 
 type Keadaan =
   | { status: "diam" }
@@ -52,11 +59,11 @@ type Keadaan =
 
 type Sumber = "teks" | "pdf";
 
-const BENTUK: { label: string; ikon: LucideIcon; deskripsi: string }[] = [
-  { label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
-  { label: "Audio", ikon: Headphones, deskripsi: "Narasi audio yang enak didengar saat belajar." },
-  { label: "Bacaan", ikon: FileText, deskripsi: "Teks bacaan terstruktur dengan poin penting." },
-  { label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
+const BENTUK: { format: FormatMateri; label: string; ikon: LucideIcon; deskripsi: string }[] = [
+  { format: "video", label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
+  { format: "audio", label: "Audio", ikon: Headphones, deskripsi: "Narasi audio yang enak didengar saat belajar." },
+  { format: "bacaan", label: "Bacaan", ikon: FileText, deskripsi: "Teks bacaan terstruktur dengan poin penting." },
+  { format: "ppt", label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
 ];
 
 const KELAS_ISIAN =
@@ -123,6 +130,7 @@ function IsiHalamanUbahModul() {
   const [galatAwal, setGalatAwal] = useState<string | null>(null);
   const [model, setModel] = useState("");
   const [fokus, setFokus] = useState<FokusModul[]>([]);
+  const [formatPilihan, setFormatPilihan] = useState<FormatMateri | "">("");
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
@@ -144,8 +152,12 @@ function IsiHalamanUbahModul() {
   const panjangSesuai = panjang >= PANJANG_MODUL_MIN && panjang <= PANJANG_MODUL_MAKS;
   const memuat = keadaan.status === "memuat";
   const koinCukup = koin !== null && koin >= biayaKoin;
+  const labelFormat = BENTUK.find((bentuk) => bentuk.format === formatPilihan)?.label ?? "";
   const siapKirim =
-    (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "" && koinCukup;
+    (sumber === "teks" ? panjangSesuai : berkas !== null) &&
+    model !== "" &&
+    formatPilihan !== "" &&
+    koinCukup;
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
   const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
@@ -292,6 +304,16 @@ function IsiHalamanUbahModul() {
     setGalatSimpan(null);
   }
 
+  function pilihFormat(nilai: FormatMateri) {
+    if (memuat) return;
+    setFormatPilihan(nilai);
+    if (keadaan.status === "siap") {
+      setKeadaan({ status: "diam" });
+      setTersimpan(false);
+      setGalatSimpan(null);
+    }
+  }
+
   function toggleFokus(nilai: FokusModul) {
     setFokus((sebelumnya) =>
       sebelumnya.includes(nilai) ? sebelumnya.filter((item) => item !== nilai) : [...sebelumnya, nilai],
@@ -343,8 +365,8 @@ function IsiHalamanUbahModul() {
     try {
       const hasil =
         sumber === "teks"
-          ? await ubahModul(teks, model, fokus)
-          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus);
+          ? await ubahModul(teks, model, fokus, formatPilihan || undefined)
+          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus, formatPilihan || undefined);
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
       else void muatKoin();
@@ -449,14 +471,13 @@ function IsiHalamanUbahModul() {
                 Ruang kerja AI
               </span>
               <h1 className="font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[32px] sm:leading-[40px]">
-                Ubah modul ajar jadi 4 ragam belajar
+                Ubah modul ajar jadi satu format belajar
               </h1>
               <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-                Tempelkan teks atau unggah PDF modul, ubah menjadi video, audio, bacaan, dan PPT, lalu simpan
-                hasilnya ke materi kelas.
+                Tempelkan teks atau unggah PDF modul, pilih satu format hasil, lalu simpan ke materi kelas.
               </p>
               <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-body text-[12px] leading-[18px] text-aura-muted">
-                <span>4 bentuk belajar</span>
+                <span>1 format per generate</span>
                 <span aria-hidden="true" className="size-1 rounded-full bg-aura-muted/40" />
                 <span>
                   {PANJANG_MODUL_MIN}–{PANJANG_MODUL_MAKS} karakter
@@ -467,25 +488,43 @@ function IsiHalamanUbahModul() {
             </div>
 
             <div className="flex w-full shrink-0 flex-col gap-2 sm:max-w-[252px]">
-              <Link
-                href="#format-output"
-                className="aura-btn aura-btn-secondary h-10 w-full px-3 text-[12px]"
-              >
-                <HelpCircle aria-hidden="true" className="size-3.5" />
-                Panduan
-              </Link>
+              <p className="font-display text-[10px] font-bold uppercase tracking-[0.06em] text-aura-muted">
+                Pilih format hasil
+              </p>
               <div className="grid grid-cols-2 gap-2">
-                {BENTUK.map(({ label, ikon: Ikon }) => (
-                  <span
-                    key={label}
-                    className="flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border border-aura-primary/10 bg-white/50 px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-sm"
-                  >
-                    <Ikon aria-hidden="true" className="size-4 text-aura-primary" />
-                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-ink">
-                      {label}
-                    </span>
-                  </span>
-                ))}
+                {BENTUK.map(({ format, label, ikon: Ikon, deskripsi }) => {
+                  const dipilih = formatPilihan === format;
+                  return (
+                    <button
+                      key={format}
+                      type="button"
+                      aria-pressed={dipilih}
+                      title={deskripsi}
+                      disabled={memuat}
+                      onClick={() => pilihFormat(format)}
+                      className={`flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-[20px] border px-3 py-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                        dipilih
+                          ? "border-aura-primary/40 bg-aura-primary/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
+                          : "border-aura-primary/10 bg-white/50 hover:bg-white/80"
+                      }`}
+                    >
+                      <span className="flex items-center gap-1">
+                        <Ikon
+                          aria-hidden="true"
+                          className={`size-4 ${dipilih ? "text-aura-primary" : "text-aura-primary/80"}`}
+                        />
+                        {dipilih && <CircleCheck aria-hidden="true" className="size-3.5 text-aura-primary" />}
+                      </span>
+                      <span
+                        className={`font-display text-[11px] font-bold uppercase tracking-[0.04em] ${
+                          dipilih ? "text-aura-primary" : "text-aura-ink"
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -572,7 +611,7 @@ function IsiHalamanUbahModul() {
                 Sempurnakan Kalimat & Topik Materi
               </h2>
               <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-                Lengkapi konteks kelas dan topik agar hasil empat bentuk belajar lebih tepat sasaran.
+                Lengkapi konteks kelas dan topik agar hasil format yang dipilih lebih tepat sasaran.
               </p>
             </div>
           </div>
@@ -831,7 +870,7 @@ function IsiHalamanUbahModul() {
                       Mesin Proses AI & Pedagogi
                     </p>
                     <p className="mt-0.5 font-body text-[12px] leading-[18px] text-aura-muted">
-                      Pilih model dan fokus pembelajaran. Biaya {biayaKoin} koin per generate.
+                      Pilih model dan fokus untuk format yang dipilih. Biaya {biayaKoin} koin per generate.
                     </p>
                   </div>
                 </div>
@@ -976,9 +1015,11 @@ function IsiHalamanUbahModul() {
                         ? "Koin belum aktif"
                         : !koinCukup
                           ? "Koin habis"
-                          : !model
-                            ? "Pilih model"
-                            : "Ubah jadi 4 bentuk belajar"}
+                          : !formatPilihan
+                            ? "Pilih format"
+                            : !model
+                              ? "Pilih model"
+                              : `Ubah jadi ${labelFormat}`}
                 </button>
                 <p className="flex items-start gap-1.5 font-body text-[11px] leading-[16px] text-aura-muted">
                   <ShieldCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-aura-primary" />
@@ -1001,7 +1042,7 @@ function IsiHalamanUbahModul() {
                 Menyusun materi dari modul
               </h2>
               <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-                Empat bentuk belajar sedang disiapkan. Halaman ini akan diperbarui sendiri.
+                Format yang dipilih sedang disiapkan. Halaman ini akan diperbarui sendiri.
               </p>
             </div>
           </div>
@@ -1059,7 +1100,7 @@ function IsiHalamanUbahModul() {
                   id={`${idDasar}-pratinjau`}
                   className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
                 >
-                  Empat bentuk belajar siap diperiksa
+                  Format yang dipilih siap diperiksa
                 </h2>
                 <p className="font-body text-[13px] leading-[20px] text-aura-muted">
                   Periksa hasilnya, lalu simpan ke materi kelas agar mudah dibuka lagi.
@@ -1138,47 +1179,14 @@ function IsiHalamanUbahModul() {
 
           </div>
 
-          <TabMateriSiswa key={keadaan.nomor} isi={keadaan.isi} formatAwal={null} />
+          <TabMateriSiswa
+            key={keadaan.nomor}
+            isi={keadaan.isi}
+            formatAwal={null}
+            hanyaFormat={keadaan.isi.format_utama ?? (formatPilihan || null)}
+          />
         </section>
       )}
-
-      <section
-        id="format-output"
-        aria-labelledby="judul-format-output"
-        className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-aura-primary/10 blur-3xl"
-        />
-        <div className="relative flex flex-col gap-1">
-          <span className="aura-eyebrow self-start">
-            <Sparkles aria-hidden="true" className="size-3.5" />
-            Hasil akhir
-          </span>
-          <h2
-            id="judul-format-output"
-            className="mt-1 font-display text-[24px] leading-[32px] font-bold tracking-[-0.02em] text-aura-ink"
-          >
-            4 Format Pembelajaran yang Akan Dihasilkan
-          </h2>
-          <p className="font-body text-[13px] leading-[20px] text-aura-muted">
-            Setiap generate menghasilkan empat versi materi yang siap dipakai di kelas.
-          </p>
-        </div>
-
-        <div className="relative mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {BENTUK.map(({ label, ikon: Ikon, deskripsi }) => (
-            <article key={label} className="rounded-2xl border border-white/70 bg-white/55 p-4">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary">
-                <Ikon aria-hidden="true" className="size-4" />
-              </span>
-              <h3 className="mt-3 font-display text-[14px] leading-[20px] font-bold text-aura-ink">{label}</h3>
-              <p className="mt-1 font-body text-[11px] leading-[17px] text-aura-muted">{deskripsi}</p>
-            </article>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       const isi = await buatMateriDariModul(input.data.teks, {
         model: input.data.model,
         fokus: input.data.fokus,
+        format: input.data.format,
       });
       return responsOk({ isi, sumber: 'ai', koin: potong.sisa });
     } catch (err) {

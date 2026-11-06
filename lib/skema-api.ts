@@ -228,12 +228,14 @@ export const skemaQueryMateriSiswa = z.object({
 });
 
 const skemaFokusModul = z.enum(['sederhanakan', 'metafora', 'podcast', 'hots']);
+const skemaFormatModul = z.enum(['video', 'audio', 'bacaan', 'ppt']);
 
 // POST /api/guru/modul; panjang dihitung setelah spasi di awal dan akhir dibuang.
 export const skemaBodyUbahModul = z.object({
   teks: z.string().trim().min(PANJANG_MODUL_MIN).max(PANJANG_MODUL_MAKS),
   model: z.string().trim().min(1).max(200).optional(),
   fokus: z.array(skemaFokusModul).max(4).optional(),
+  format: skemaFormatModul.optional(),
 });
 
 // POST /api/guru/modul/pdf; PDF dikirim sebagai base64 (batas ukuran file diperiksa di route).
@@ -241,6 +243,7 @@ export const skemaBodyUbahModulPdf = z.object({
   pdf: z.string().min(100).max(Math.ceil((UKURAN_PDF_MAKS_BYTE * 4) / 3) + 8),
   model: z.string().trim().min(1).max(200).optional(),
   fokus: z.array(skemaFokusModul).max(4).optional(),
+  format: skemaFormatModul.optional(),
 });
 
 // Waktu jadwal dikirim sebagai ISO 8601. Nilai kosong berarti "buka sekarang" / "tanpa batas tutup".

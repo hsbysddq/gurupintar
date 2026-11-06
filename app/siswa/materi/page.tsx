@@ -118,7 +118,7 @@ function IsiMateriSiswa() {
           Materi untukmu: {data.namaTopik}
         </h1>
       </header>
-      <TabMateriSiswa isi={data.isi} formatAwal={data.format} />
+      <TabMateriSiswa isi={data.isi} formatAwal={data.format} hanyaFormat={data.isi.format_utama ?? null} />
     </KerangkaSiswa>
   );
 }

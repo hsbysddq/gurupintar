@@ -48,6 +48,8 @@ function isiValid(): IsiMateri {
 describe('skemaIsiMateri', () => {
   it('menerima isi yang valid', () => {
     expect(skemaIsiMateri.safeParse(isiValid()).success).toBe(true);
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), format_utama: 'video' }).success).toBe(true);
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), format_utama: 'latihan' }).success).toBe(false);
   });
 
   it('menolak ringkasan yang terlalu pendek', () => {

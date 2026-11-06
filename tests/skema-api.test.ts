@@ -210,6 +210,12 @@ describe('skemaBodyUbahModul (PRD F-9)', () => {
         .success,
     ).toBe(false);
   });
+
+  it('menerima satu format hasil yang didukung dan menolak format lain', () => {
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'audio' }).success).toBe(true);
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'ppt' }).success).toBe(true);
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'latihan' }).success).toBe(false);
+  });
 });
 
 describe('skemaBodyTopikBaru (PRD F-10)', () => {

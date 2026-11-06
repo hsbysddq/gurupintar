@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Skema isi materi (architecture.md 8.5). Dipakai untuk keluaran AI, materi cadangan, dan PATCH guru.
 export const skemaIsiMateri = z.object({
+  format_utama: z.enum(['video', 'audio', 'bacaan', 'ppt']).optional(),
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
   naskah_audio: z.string().min(50).max(900),
