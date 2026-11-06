@@ -12,7 +12,7 @@ import {
   Lightbulb,
   ListChecks,
   LockKeyhole,
-  Pencil,
+  PlayCircle,
   Presentation,
   ShieldCheck,
   SlidersHorizontal,
@@ -44,7 +44,7 @@ const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
   {
     judul: "Materi berbeda untuk tiap kelompok",
-    isi: "PPT, audio, bacaan, dan latihan disusun AI, lalu diperiksa guru sebelum dibagikan.",
+    isi: "Video, audio, bacaan, atau PPT disusun AI sesuai pilihan guru, lalu diperiksa sebelum dibagikan.",
     ikon: Sparkles,
   },
   {
@@ -87,31 +87,27 @@ const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
 ];
 
-// Ikon sama dengan tab di TabMateriSiswa.
-const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon; aksen: string }[] = [
+// Format yang sama dengan pilihan di halaman Ubah Modul.
+const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon }[] = [
   {
-    label: "PPT",
-    keterangan: "Lihat slide ringkas untuk diulang.",
-    ikon: Presentation,
-    aksen: "from-aura-primary to-aura-indigo",
+    label: "Video",
+    keterangan: "Naskah video dengan alur visual yang runtut.",
+    ikon: PlayCircle,
   },
   {
     label: "Audio",
-    keterangan: "Dengar penjelasan sambil menyimak.",
+    keterangan: "Narasi audio yang enak didengar saat belajar.",
     ikon: Headphones,
-    aksen: "from-aura-violet to-aura-primary",
   },
   {
     label: "Bacaan",
-    keterangan: "Baca ringkasan dengan contoh soal.",
+    keterangan: "Teks bacaan terstruktur dengan poin penting.",
     ikon: FileText,
-    aksen: "from-aura-emerald to-aura-primary",
   },
   {
-    label: "Latihan",
-    keterangan: "Kerjakan soal dengan pembahasan.",
-    ikon: Pencil,
-    aksen: "from-aura-amber to-aura-primary",
+    label: "PPT",
+    keterangan: "Slide ringkas siap dipakai untuk presentasi.",
+    ikon: Presentation,
   },
 ];
 
@@ -138,7 +134,7 @@ const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string
   },
   {
     judul: "Ubah modul",
-    isi: "Tempelkan teks modul matematika kelas 7, lalu lihat pratinjaunya dalam empat bentuk belajar.",
+    isi: "Tempelkan teks modul matematika kelas 7, pilih satu format belajar, lalu simpan hasilnya.",
     ikon: FileText,
     kelas: "lg:col-span-3",
   },
@@ -487,7 +483,7 @@ export default function Beranda() {
                   <div className="flex min-w-0 items-center gap-3">
                     <IkonKotak ikon={Sparkles} />
                     <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
-                      Materi AI dalam 4 bentuk
+                      Materi AI dalam format pilihan
                     </h3>
                   </div>
                   <span className="shrink-0 rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-primary">
@@ -495,16 +491,15 @@ export default function Beranda() {
                   </span>
                 </div>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-                  Satu materi untuk tiap kelompok. Siswa membukanya dalam bentuk yang mereka pilih.
+                  Guru memilih satu format—video, audio, bacaan, atau PPT. Siswa membukanya sesuai format itu.
                 </p>
               </div>
               <ul className="mt-auto grid grid-cols-2 gap-2.5">
-                {BENTUK_MATERI.map(({ label, keterangan, ikon: Ikon, aksen }) => (
+                {BENTUK_MATERI.map(({ label, keterangan, ikon: Ikon }) => (
                   <li
                     key={label}
                     className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60 p-3"
                   >
-                    <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${aksen}`} />
                     <div className="flex items-center gap-2.5">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-aura-primary/10 text-aura-primary ring-1 ring-white/70">
                         <Ikon aria-hidden="true" className="size-4" />

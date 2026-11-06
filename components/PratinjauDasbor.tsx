@@ -4,7 +4,7 @@ import {
   FileText,
   Headphones,
   ListChecks,
-  Pencil,
+  PlayCircle,
   Presentation,
   Send,
   Sparkles,
@@ -19,10 +19,10 @@ const KELOMPOK: { label: string; jumlah: number; persen: number; warna: string }
 ];
 
 const BENTUK: { label: string; ikon: LucideIcon }[] = [
-  { label: "PPT", ikon: Presentation },
+  { label: "Video", ikon: PlayCircle },
   { label: "Audio", ikon: Headphones },
   { label: "Bacaan", ikon: FileText },
-  { label: "Latihan", ikon: Pencil },
+  { label: "PPT", ikon: Presentation },
 ];
 
 const REKOMENDASI: { label: string; nilai: string; ikon: LucideIcon }[] = [
@@ -138,7 +138,7 @@ export function PratinjauDasbor() {
           <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
             <div className="rounded-2xl border border-white/60 bg-white/45 p-3">
               <p className="font-display text-[10px] leading-[15px] font-bold uppercase tracking-[0.04em] text-aura-muted">
-                Modul bisa di-convert menjadi 4 bentuk
+                Satu format pilihan untuk tiap modul
               </p>
               <ul className="mt-2 grid grid-cols-2 gap-1.5">
                 {BENTUK.map(({ label, ikon: Ikon }) => (
