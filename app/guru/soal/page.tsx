@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type ClipboardEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ClipboardEvent, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -30,6 +30,7 @@ import {
 } from "@/lib/api-klien";
 import { validasiJadwalIso, waktuLokalKeIso } from "@/lib/jadwal-kuis";
 import { fileGambarDariClipboard, kompresGambarSoal } from "@/lib/kompres-gambar";
+import { bacaDraftSoal, hapusDraftSoal, simpanDraftSoal } from "@/lib/draft-soal";
 import {
   PANJANG_MISKONSEPSI_MAKS,
   SOAL_AWAL_TOPIK,
@@ -90,6 +91,11 @@ const namaKelasLengkap = (k: KelasRingkas) => `${k.nama} · ${k.mapel}`;
 const KELAS_ISIAN =
   "w-full rounded-2xl border border-white/70 bg-white/65 px-3.5 py-2.5 font-body text-base leading-relaxed text-aura-ink shadow-sm backdrop-blur-sm transition-colors placeholder:text-aura-muted/55 hover:bg-white/75 focus:bg-white/85";
 
+const FORMAT_WAKTU_DRAFT = new Intl.DateTimeFormat("id-ID", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
 const soalKosong = (): IsianSoal => ({
   tipe: "pilgan",
   teks: "",
@@ -118,6 +124,23 @@ const isianKosong = (): Isian => ({
   nama: "",
   soal: Array.from({ length: SOAL_AWAL_TOPIK }, soalKosong),
 });
+
+function adaIsiDraft(data: Isian): boolean {
+  if (data.nama.trim()) return true;
+  return data.soal.some(
+    (soal) =>
+      Boolean(soal.teks.trim()) ||
+      Boolean(soal.gambar) ||
+      soal.pilihan.some((pilihan) => Boolean(pilihan.trim())) ||
+      Boolean(soal.kunci) ||
+      soal.kunciKompleks.length > 0 ||
+      soal.pernyataan.some((pernyataan) => Boolean(pernyataan.teks.trim()) || Boolean(pernyataan.kunci)) ||
+      soal.jawabanSingkat.some((jawaban) => Boolean(jawaban.trim())) ||
+      soal.pasangan.some((pasangan) => Boolean(pasangan.kiri.trim()) || Boolean(pasangan.kanan.trim())) ||
+      Boolean(soal.pedomanJawaban.trim()) ||
+      Boolean(soal.catatanMiskonsepsi.trim()),
+  );
+}
 
 function kePayloadSoal(s: IsianSoal): Record<string, unknown> {
   const dasar = {
@@ -237,6 +260,95 @@ export default function HalamanBuatSoal() {
   const [galatJadwal, setGalatJadwal] = useState<GalatJadwalForm>({});
   const [memprosesTempel, setMemprosesTempel] = useState<number | null>(null);
   const [galatTempel, setGalatTempel] = useState<Record<number, string>>({});
+  const [draftSiap, setDraftSiap] = useState(false);
+  const [draftInfo, setDraftInfo] = useState<{ disimpanPada: string } | null>(null);
+
+  const isianRef = useRef(isian);
+  const jadwalRef = useRef(jadwal);
+  const simpanDraftRef = useRef(false);
+  const mengubahRef = useRef<ModeUbah | null>(null);
+
+  useEffect(() => {
+    isianRef.current = isian;
+  }, [isian]);
+
+  useEffect(() => {
+    jadwalRef.current = jadwal;
+  }, [jadwal]);
+
+  useEffect(() => {
+    mengubahRef.current = mengubah;
+  }, [mengubah]);
+
+  useEffect(() => {
+    simpanDraftRef.current = draftSiap && !mengubah;
+  }, [draftSiap, mengubah]);
+
+  // Ambil draft yang tersimpan di browser saat halaman dibuka lagi.
+  useEffect(() => {
+    let aktif = true;
+    bacaDraftSoal<Isian, NilaiJadwalForm>()
+      .then((draft) => {
+        if (!aktif) return;
+        if (draft && adaIsiDraft(draft.isian)) {
+          if (!mengubahRef.current && !adaIsiDraft(isianRef.current)) {
+            setIsian((lama) => ({
+              ...draft.isian,
+              kelasId: lama.kelasId || draft.isian.kelasId,
+            }));
+            setJadwal(draft.jadwal ?? JADWAL_FORM_KOSONG);
+            setDraftInfo({ disimpanPada: draft.disimpanPada });
+          }
+        } else if (draft) {
+          void hapusDraftSoal();
+        }
+        setDraftSiap(true);
+      })
+      .catch(() => {
+        if (aktif) setDraftSiap(true);
+      });
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
+  // Simpan draft lokal otomatis; tidak bergantung pada koneksi ke server.
+  useEffect(() => {
+    if (!draftSiap || mengubah) return;
+    const timer = setTimeout(() => {
+      if (adaIsiDraft(isian)) void simpanDraftSoal(isian, jadwal);
+      else void hapusDraftSoal();
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [isian, jadwal, draftSiap, mengubah]);
+
+  useEffect(() => {
+    function simpanSaatKeluar() {
+      if (!simpanDraftRef.current) return;
+      if (adaIsiDraft(isianRef.current)) {
+        void simpanDraftSoal(isianRef.current, jadwalRef.current);
+      }
+    }
+    function saatVisibilitasBerubah() {
+      if (document.visibilityState === "hidden") simpanSaatKeluar();
+    }
+    window.addEventListener("pagehide", simpanSaatKeluar);
+    document.addEventListener("visibilitychange", saatVisibilitasBerubah);
+    return () => {
+      window.removeEventListener("pagehide", simpanSaatKeluar);
+      document.removeEventListener("visibilitychange", saatVisibilitasBerubah);
+    };
+  }, []);
+
+  async function buangDraft() {
+    await hapusDraftSoal();
+    setDraftInfo(null);
+    setIsian((lama) => ({ ...isianKosong(), kelasId: lama.kelasId }));
+    setJadwal(JADWAL_FORM_KOSONG);
+    setGalat({});
+    setGalatJadwal({});
+    setPengiriman({ status: "diam" });
+  }
 
   // Pilihan kelas diambil dari kelas yang sudah dibuat guru. Jika hanya ada satu, langsung terpilih.
   useEffect(() => {
@@ -251,7 +363,7 @@ export default function HalamanBuatSoal() {
         if (kelasId && daftar.some((k) => k.id === kelasId)) {
           setIsian((lama) => ({ ...lama, kelasId }));
         } else if (daftar.length === 1) {
-          setIsian((lama) => ({ ...lama, kelasId: daftar[0].id }));
+          setIsian((lama) => (lama.kelasId ? lama : { ...lama, kelasId: daftar[0].id }));
         }
       })
       .catch((err: unknown) => {
@@ -356,6 +468,7 @@ export default function HalamanBuatSoal() {
     setJadwal(JADWAL_FORM_KOSONG);
     setPengiriman({ status: "diam" });
     setPesanAksi(null);
+    setDraftInfo(null);
   }
 
   async function mulaiUbah(id: string) {
@@ -435,6 +548,7 @@ export default function HalamanBuatSoal() {
         setPengiriman({ status: "berhasil", jenis: "ubah", namaTopik: hasil.data.nama });
         setMengubah(null);
         setIsian(isianKosong());
+        setDraftInfo(null);
         setPercobaanTopik((n) => n + 1);
       } catch (err) {
         setPengiriman({
@@ -487,6 +601,8 @@ export default function HalamanBuatSoal() {
     setPengiriman({ status: "mengirim" });
     try {
       const topik = await simpanTopik(hasil.data);
+      void hapusDraftSoal();
+      setDraftInfo(null);
       let kode: string | null = null;
       let pesanKuis: string | undefined;
       try {
@@ -514,7 +630,8 @@ export default function HalamanBuatSoal() {
       });
       setPercobaanTopik((n) => n + 1);
     } catch (err) {
-      setPengiriman({ status: "gagal", pesan: err instanceof Error ? err.message : "Soal belum berhasil disimpan." });
+      const pesan = err instanceof Error ? err.message : "Soal belum berhasil disimpan.";
+      setPengiriman({ status: "gagal", pesan: `${pesan} Draft tetap tersimpan di browser ini.` });
     }
   }
 
@@ -701,6 +818,24 @@ export default function HalamanBuatSoal() {
       )}
 
       <form id="form-soal" noValidate onSubmit={(e) => void simpan(e)} className="flex scroll-mt-28 flex-col gap-6">
+        {!mengubah && draftInfo && (
+          <div
+            role="status"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-aura-primary/15 bg-aura-primary/5 px-4 py-3"
+          >
+            <p className="font-body text-[12px] leading-[18px] font-medium text-aura-ink">
+              Draft soal dari {FORMAT_WAKTU_DRAFT.format(new Date(draftInfo.disimpanPada))} dipulihkan.
+            </p>
+            <button
+              type="button"
+              onClick={() => void buangDraft()}
+              className="font-display text-[12px] font-semibold text-aura-primary hover:underline"
+            >
+              Hapus draft
+            </button>
+          </div>
+        )}
+
         {mengubah ? (
           <section className="aura-glass rounded-[24px] p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
