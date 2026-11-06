@@ -60,7 +60,7 @@ function tambahGaris(
 
 /** `denganLatihan: false` untuk siswa: hanya slide materi, tanpa soal latihan dan kunci jawabannya. */
 export async function unduhPptx(isi: IsiMateri, opsi: { denganLatihan?: boolean } = {}) {
-  const denganLatihan = opsi.denganLatihan ?? true;
+  const denganLatihan = opsi.denganLatihan ?? isi.format_utama !== 'ppt';
   const { default: Pptx } = await import('pptxgenjs');
   const ppt = new Pptx();
   ppt.layout = 'LAYOUT_16x9';

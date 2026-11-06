@@ -12,6 +12,7 @@ import {
   INSTRUKSI_GAYA_PPT,
   INSTRUKSI_PPT,
   INSTRUKSI_SISTEM,
+  INSTRUKSI_SISTEM_PPT,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
   PENANDA_AWAL_MODUL,
@@ -319,8 +320,10 @@ describe('buatMateriDariModul', () => {
     expect(isi.format_utama).toBe('audio');
   });
 
-  it('menyimpan gaya PPT yang dipilih pada slide_ppt', async () => {
-    const { klien, create } = klienTiruan(async () => responsTeks(JSON.stringify(ISI_VALID)));
+  it('memakai jalur PPT-only, menyimpan gaya, dan menyintesis field lain', async () => {
+    const { klien, create } = klienTiruan(async () =>
+      responsTeks(JSON.stringify({ slide_ppt: ISI_VALID.slide_ppt })),
+    );
     const isi = await buatMateriDariModul(TEKS_MODUL, {
       klien,
       model: 'model-uji',
@@ -329,9 +332,12 @@ describe('buatMateriDariModul', () => {
       acak: TANPA_ACAK,
     });
 
+    expect(create.mock.calls[0][0].system).toBe(INSTRUKSI_SISTEM_PPT);
+    expect(create.mock.calls[0][0].messages[0].content).toContain(INSTRUKSI_GAYA_PPT.swiss);
     expect(isi.format_utama).toBe('ppt');
     expect(isi.slide_ppt.gaya).toBe('swiss');
-    expect(create.mock.calls[0][0].messages[0].content).toContain(INSTRUKSI_GAYA_PPT.swiss);
+    expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
+    expect(isi.latihan).toHaveLength(3);
   });
 
   it('mengacak posisi pilihan latihan dan menyesuaikan kunci', async () => {

@@ -65,7 +65,8 @@ export async function POST(request: Request) {
       // Isi teks modul tidak dicatat di log.
       if (err instanceof ErrorMateriAi) {
         console.error('Pembuatan materi dari modul gagal:', err.message);
-        return responsError(PESAN_GAGAL_DIBUAT, 502);
+        const alasan = err.message.replace(/^Materi .* gagal dibuat:\s*/, '').trim();
+        return responsError(alasan || PESAN_GAGAL_DIBUAT, 502);
       }
       console.error('Error tak terduga di /api/guru/modul:', err instanceof Error ? err.message : err);
       return responsError(PESAN_ERROR_UMUM, 500);

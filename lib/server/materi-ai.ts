@@ -2,7 +2,13 @@ import 'server-only';
 import Anthropic from '@anthropic-ai/sdk';
 import { BATAS_WAKTU_AI_MS } from '@/lib/konstanta';
 import type { FokusModul, FormatMateri, GayaPpt, Kelompok } from '@/lib/tipe';
-import { acakPilihanLatihan, periksaIsiMateri, type HasilPeriksaMateri, type IsiMateri } from '@/lib/validasi-materi';
+import {
+  acakPilihanLatihan,
+  periksaIsiMateri,
+  skemaPptAi,
+  type HasilPeriksaMateri,
+  type IsiMateri,
+} from '@/lib/validasi-materi';
 import { buatKlienCommandCode, MODEL_DEFAULT, type KlienAi } from './ai-provider';
 
 export type { KlienAi };
@@ -120,6 +126,36 @@ export const INSTRUKSI_PPT = [
   'Aturan visual: tanpa shadow/gradient; aksen untuk highlight; blok kode monospace di latar gelap; blok banding buruk/baik; sudut 3–4px.',
   'Jaga keluaran tetap ringkas agar muat batas output DeepSeek: maksimal 8 slide, poin maksimal 140 karakter, jangan mengulang teks.',
 ].join('\n');
+
+export const INSTRUKSI_SISTEM_PPT = `Kamu adalah perancang slide presentasi materi pelajaran SMP di Indonesia.
+
+Balas HANYA dengan satu objek JSON valid. Tanpa teks pembuka, penutup, atau pagar kode.
+Bentuk JSON:
+{"slide_ppt":{"judul": string, "slide": [{"jenis": "cover"|"konten"|"kode"|"banding"|"opsi"|"langkah"|"kutipan"|"penutup", "judul": string, "subjudul"?: string, "nomor_besar"?: string, "highlight"?: string, "poin": [string, string], "kode"?: string, "banding"?: {"buruk": string, "baik": string}, "opsi"?: [{"nama": string, "deskripsi": string}], "langkah"?: [string], "kutipan"?: string, "penutup"?: {"pernyataan": string, "dukungan": string, "cta": string}}]}}
+
+Aturan struktur:
+- slide berisi 6–8 slide.
+- Setiap slide wajib punya "judul" (3–60 karakter) dan 2–4 "poin" (5–140 karakter per poin).
+- Slide pertama wajib jenis "cover" dengan nomor_besar dan highlight satu kata.
+- Slide terakhir wajib jenis "penutup" dengan penutup.cta.
+- Gunakan jenis blok lain hanya jika isinya memang cocok.
+- Bahasa Indonesia sederhana, tanpa label kelompok, tanpa LaTeX, tanpa tautan.
+- Jaga ringkas agar muat batas output DeepSeek.
+
+${INSTRUKSI_PPT}`;
+
+function uraiJson(teks: string): unknown | null {
+  const bersih = teks
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+  try {
+    return JSON.parse(bersih);
+  } catch {
+    return null;
+  }
+}
 
 /** Pesan pengguna untuk PRD F-9: teks modul hanya diperlakukan sebagai bahan, bukan perintah. */
 export function susunPesanModul(
@@ -291,16 +327,136 @@ export async function buatMateriSemua(
   });
 }
 
+function rapikanTeks(teks: string, min: number, max: number, cadangan: string): string {
+  let hasil = teks.replace(/\s+/g, ' ').trim();
+  while (hasil.length < min) hasil = `${hasil} ${cadangan}`.trim();
+  if (hasil.length > max) hasil = `${hasil.slice(0, max - 1).trimEnd()}…`;
+  return hasil;
+}
+
+/** Slide-only AI output dilengkapi field lain secara lokal agar IsiMateri tetap valid. */
+function sintesisIsiPpt(slide_ppt: IsiMateri['slide_ppt']): IsiMateri {
+  const semuaPoin = slide_ppt.slide
+    .flatMap((slide) => [slide.subjudul ?? '', ...slide.poin, slide.kutipan ?? '', ...(slide.langkah ?? [])])
+    .filter(Boolean);
+  const ringkasan = rapikanTeks(
+    semuaPoin.join(' '),
+    80,
+    1200,
+    'Materi ini merangkum poin utama dari slide yang telah disusun.',
+  );
+  const naskah_audio = rapikanTeks(
+    semuaPoin.join(' '),
+    50,
+    900,
+    'Simak poin utama materi berikut dengan saksama.',
+  );
+  const slidePertama = slide_ppt.slide[0];
+  const ide_video = {
+    judul: slide_ppt.judul,
+    deskripsi: rapikanTeks(
+      [slidePertama?.subjudul ?? '', ...(slidePertama?.poin ?? [])].join(' '),
+      20,
+      300,
+      'Penjelasan singkat materi ini.',
+    ),
+    kata_kunci_pencarian: slide_ppt.judul.slice(0, 80),
+  };
+
+  const kandidat = [
+    ...new Map(
+      slide_ppt.slide
+        .flatMap((slide) => slide.poin.map((poin) => ({ poin, judul: slide.judul })))
+        .filter((item) => item.poin.length >= 10)
+        .map((item) => [item.poin.toLowerCase(), item]),
+    ).values(),
+  ];
+  const cadanganPilihan = [
+    'Pilihan ini tidak dijelaskan pada slide.',
+    'Pilihan ini bukan poin utama materi.',
+    'Pilihan ini terlalu umum untuk materi.',
+  ];
+  const latihan = Array.from({ length: 3 }, (_, i) => {
+    const sumber = kandidat[i] ?? { poin: `Poin utama materi bagian ${i + 1}.`, judul: slide_ppt.judul };
+    const benar = sumber.poin.slice(0, 100);
+    const lain = kandidat
+      .filter((item) => item.poin !== sumber.poin)
+      .slice(0, 3)
+      .map((item) => item.poin.slice(0, 100));
+    const pilihan = [benar, ...lain, ...cadanganPilihan]
+      .filter((nilai, indeks, daftar) => daftar.findIndex((x) => x.toLowerCase() === nilai.toLowerCase()) === indeks)
+      .slice(0, 4);
+    while (pilihan.length < 4) pilihan.push(`Pilihan tambahan ${pilihan.length + 1}.`);
+    return {
+      soal: `Apa poin utama dari slide "${sumber.judul}"?`.slice(0, 300),
+      pilihan: pilihan as [string, string, string, string],
+      kunci: 'A' as const,
+      pembahasan: `Poin utama slide tersebut adalah ${benar}.`.slice(0, 400),
+    };
+  });
+
+  const hasil = periksaIsiMateri({
+    format_utama: 'ppt',
+    judul: slide_ppt.judul,
+    ringkasan,
+    naskah_audio,
+    ide_video,
+    slide_ppt,
+    latihan,
+  });
+  if (!hasil.ok) throw new ErrorMateriAi(`Materi PPT gagal dibuat: ${hasil.alasan}`);
+  return hasil.isi;
+}
+
+/** Jalur PPT khusus: AI hanya membuat slide, sehingga lebih cepat dan tidak menabrak batas waktu. */
+async function buatPptDariModul(teks: string, opsi: OpsiMateriAi): Promise<IsiMateri> {
+  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'ppt', opsi.gayaPpt);
+  const slide_ppt = await denganBatasWaktu(opsi, async (t) => {
+    let pesan = pesanAwal;
+    let alasan = 'waktu habis sebelum slide selesai dibuat';
+
+    for (let percobaan = 0; percobaan < 2; percobaan++) {
+      const sisa = t.tenggat - Date.now();
+      if (sisa <= 0 || t.signal.aborted) break;
+
+      const respons = await t.klien.messages.create(
+        {
+          model: t.model,
+          max_tokens: 3000,
+          system: INSTRUKSI_SISTEM_PPT,
+          messages: [{ role: 'user', content: pesan }],
+        },
+        { signal: t.signal, timeout: sisa },
+      );
+      const teksRespons = respons.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
+      const data = uraiJson(teksRespons);
+      if (data) {
+        const hasil = skemaPptAi.safeParse(data);
+        if (hasil.success) {
+          return { ...hasil.data.slide_ppt, gaya: opsi.gayaPpt ?? 'editorial' };
+        }
+        alasan = hasil.error.issues[0]?.message ?? 'Struktur slide tidak valid.';
+      } else {
+        alasan = 'Balasan bukan satu objek JSON yang valid.';
+      }
+      pesan = `${pesanAwal}\n\nBalasanmu sebelumnya ditolak karena: ${alasan}\nPerbaiki, lalu balas lagi hanya dengan satu objek JSON slide_ppt.`;
+    }
+
+    throw new ErrorMateriAi(`Materi PPT gagal dibuat: ${alasan}`);
+  });
+
+  return sintesisIsiPpt(slide_ppt);
+}
+
 /** PRD F-9: satu materi pratinjau dari teks modul guru, dengan batas waktu total yang sama. */
 export async function buatMateriDariModul(teks: string, opsi: OpsiMateriAi = {}): Promise<IsiMateri> {
+  if (opsi.format === 'ppt') return buatPptDariModul(teks, opsi);
+
   const isi = await denganBatasWaktu(opsi, (t) =>
     buatSatuMateri(t, susunPesanModul(teks, opsi.fokus, opsi.format, opsi.gayaPpt), 'dari modul'),
   );
-  const slide_ppt =
-    opsi.format === 'ppt' ? { ...isi.slide_ppt, gaya: opsi.gayaPpt ?? 'editorial' } : isi.slide_ppt;
   return {
     ...isi,
     ...(opsi.format ? { format_utama: opsi.format } : {}),
-    slide_ppt,
   };
 }

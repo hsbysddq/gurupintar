@@ -63,6 +63,9 @@ export const skemaIsiMateri = z.object({
 
 export type IsiMateri = z.infer<typeof skemaIsiMateri>;
 export type SlidePpt = IsiMateri['slide_ppt']['slide'][number];
+
+/** Keluaran khusus format PPT: hanya slide_ppt, tanpa memaksa AI mengisi ringkasan/audio/video/latihan. */
+export const skemaPptAi = z.object({ slide_ppt: skemaIsiMateri.shape.slide_ppt });
 type Latihan = IsiMateri['latihan'][number];
 
 export type HasilPeriksaMateri = { ok: true; isi: IsiMateri } | { ok: false; alasan: string };
