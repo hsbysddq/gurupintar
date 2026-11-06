@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ClipboardEvent } from 'react';
+import { useState } from 'react';
 import GambarNext from 'next/image';
 import { ClipboardPaste, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { kompresGambarSoal } from '@/lib/kompres-gambar';
@@ -10,12 +10,16 @@ export function UnggahGambarSoal({
   nomorSoal,
   gambar,
   galat,
+  memprosesTempel = false,
+  galatTempel,
   onUbah,
 }: {
   idInput: string;
   nomorSoal: number;
   gambar: string;
   galat?: string;
+  memprosesTempel?: boolean;
+  galatTempel?: string;
   onUbah: (gambarBaru: string) => void;
 }) {
   const [memproses, setMemproses] = useState(false);
@@ -34,19 +38,6 @@ export function UnggahGambarSoal({
     } finally {
       setMemproses(false);
     }
-  }
-
-  function fileDariClipboard(data: DataTransfer | null): File | null {
-    if (!data) return null;
-    for (const item of Array.from(data.items)) {
-      if (item.kind === 'file' && /^image\/(jpeg|png|webp)$/i.test(item.type)) {
-        return item.getAsFile();
-      }
-    }
-    for (const file of Array.from(data.files)) {
-      if (/^image\/(jpeg|png|webp)$/i.test(file.type)) return file;
-    }
-    return null;
   }
 
   async function tempelGambar() {
@@ -75,32 +66,18 @@ export function UnggahGambarSoal({
     }
   }
 
-  function tempelDariEvent(event: ClipboardEvent<HTMLElement>) {
-    const file = fileDariClipboard(event.clipboardData);
-    if (!file) {
-      if (event.clipboardData.getData('text/plain').trim()) {
-        setGalatLokal('Clipboard berisi teks, bukan gambar. Klik kanan gambar → Copy image, lalu tempel lagi.');
-      }
-      return;
-    }
-    event.preventDefault();
-    void pilihFile(file);
-  }
-
-  const pesanGalat = galat ?? galatLokal;
+  const sedangMemproses = memproses || membacaClipboard || memprosesTempel;
+  const pesanGalat = galat ?? galatTempel ?? galatLokal;
 
   return (
-    <div
-      onPaste={tempelDariEvent}
-      className="flex flex-col gap-2 rounded-2xl border border-dashed border-aura-primary/25 bg-white/45 p-3.5"
-    >
+    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-aura-primary/25 bg-white/45 p-3.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-col">
           <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
             Gambar soal <span className="font-body font-medium normal-case">(opsional)</span>
           </span>
           <span className="font-body text-[12px] leading-[18px] text-aura-muted">
-            Unggah file, atau klik kanan gambar di Google → Copy image lalu tekan Tempel gambar.
+            Unggah file, atau copy gambar dari Google lalu tekan Ctrl+V di kolom soal. Bisa juga klik Tempel gambar.
           </span>
         </div>
 
@@ -109,7 +86,7 @@ export function UnggahGambarSoal({
             id={idInput}
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            disabled={memproses}
+            disabled={sedangMemproses}
             onChange={(e) => {
               const file = e.target.files?.[0] ?? null;
               e.target.value = '';
@@ -121,26 +98,32 @@ export function UnggahGambarSoal({
             htmlFor={idInput}
             className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full border border-aura-primary/25 bg-white/80 px-3.5 font-display text-[12px] font-semibold text-aura-primary shadow-sm transition-colors hover:bg-white peer-disabled:cursor-wait peer-disabled:opacity-60"
           >
-            {memproses ? (
+            {sedangMemproses ? (
               <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
             ) : (
               <ImagePlus aria-hidden="true" className="size-3.5" />
             )}
-            {memproses ? 'Memproses…' : gambar ? 'Ganti gambar' : 'Unggah gambar'}
+            {memprosesTempel
+              ? 'Menempel…'
+              : memproses
+                ? 'Memproses…'
+                : gambar
+                  ? 'Ganti gambar'
+                  : 'Unggah gambar'}
           </label>
 
           <button
             type="button"
             onClick={() => void tempelGambar()}
-            disabled={memproses || membacaClipboard}
+            disabled={sedangMemproses}
             className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-aura-primary/20 bg-aura-primary/5 px-3.5 font-display text-[12px] font-semibold text-aura-primary transition-colors hover:bg-aura-primary/10 disabled:cursor-wait disabled:opacity-60"
           >
-            {membacaClipboard ? (
+            {sedangMemproses ? (
               <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
             ) : (
               <ClipboardPaste aria-hidden="true" className="size-3.5" />
             )}
-            {membacaClipboard ? 'Membaca clipboard…' : 'Tempel gambar'}
+            {memprosesTempel ? 'Menempel…' : membacaClipboard ? 'Membaca clipboard…' : 'Tempel gambar'}
           </button>
 
           {gambar && (
@@ -150,7 +133,8 @@ export function UnggahGambarSoal({
                 setGalatLokal(null);
                 onUbah('');
               }}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-aura-red/20 bg-aura-red/5 px-3 font-display text-[12px] font-semibold text-[#93000a] transition-colors hover:bg-aura-red/10"
+              disabled={sedangMemproses}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-aura-red/20 bg-aura-red/5 px-3 font-display text-[12px] font-semibold text-[#93000a] transition-colors hover:bg-aura-red/10 disabled:cursor-wait disabled:opacity-60"
             >
               <Trash2 aria-hidden="true" className="size-3.5" />
               Hapus

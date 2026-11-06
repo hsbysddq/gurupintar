@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type ClipboardEvent, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -29,6 +29,7 @@ import {
   ubahTopik,
 } from "@/lib/api-klien";
 import { validasiJadwalIso, waktuLokalKeIso } from "@/lib/jadwal-kuis";
+import { fileGambarDariClipboard, kompresGambarSoal } from "@/lib/kompres-gambar";
 import {
   PANJANG_MISKONSEPSI_MAKS,
   SOAL_AWAL_TOPIK,
@@ -234,6 +235,8 @@ export default function HalamanBuatSoal() {
   const [pesanAksi, setPesanAksi] = useState<PesanAksi | null>(null);
   const [jadwal, setJadwal] = useState<NilaiJadwalForm>(JADWAL_FORM_KOSONG);
   const [galatJadwal, setGalatJadwal] = useState<GalatJadwalForm>({});
+  const [memprosesTempel, setMemprosesTempel] = useState<number | null>(null);
+  const [galatTempel, setGalatTempel] = useState<Record<number, string>>({});
 
   // Pilihan kelas diambil dari kelas yang sudah dibuat guru. Jika hanya ada satu, langsung terpilih.
   useEffect(() => {
@@ -287,6 +290,50 @@ export default function HalamanBuatSoal() {
 
   function ubahSoal(i: number, ubah: (s: IsianSoal) => IsianSoal) {
     setIsian((lama) => ({ ...lama, soal: lama.soal.map((s, j) => (j === i ? ubah(s) : s)) }));
+  }
+
+  async function tempelGambarSoal(event: ClipboardEvent<HTMLElement>, i: number) {
+    const file = fileGambarDariClipboard(event.clipboardData);
+    if (!file) {
+      const teks = event.clipboardData.getData("text/plain").trim();
+      if (/^https?:\/\/.+\.(png|jpe?g|webp)(\?.*)?$/i.test(teks)) {
+        event.preventDefault();
+        setGalatTempel((lama) => ({
+          ...lama,
+          [i]: "Gunakan klik kanan → Copy image, bukan Copy image address.",
+        }));
+      }
+      return;
+    }
+
+    event.preventDefault();
+    if (memprosesTempel === i) return;
+    setMemprosesTempel(i);
+    setGalatTempel((lama) => {
+      if (!(i in lama)) return lama;
+      const baru = { ...lama };
+      delete baru[i];
+      return baru;
+    });
+    setGalat((lama) => {
+      const kunci = `soal.${i}.gambar`;
+      if (!(kunci in lama)) return lama;
+      const baru = { ...lama };
+      delete baru[kunci];
+      return baru;
+    });
+
+    try {
+      const hasil = await kompresGambarSoal(file);
+      ubahSoal(i, (soal) => ({ ...soal, gambar: hasil }));
+    } catch (err) {
+      setGalatTempel((lama) => ({
+        ...lama,
+        [i]: err instanceof Error ? err.message : "Gambar belum berhasil ditempel.",
+      }));
+    } finally {
+      setMemprosesTempel((aktif) => (aktif === i ? null : aktif));
+    }
   }
 
   function tambahSoal() {
@@ -820,7 +867,11 @@ export default function HalamanBuatSoal() {
             });
 
             return (
-              <article key={i} className="aura-glass rounded-[24px] p-5 sm:p-6">
+              <article
+                key={i}
+                onPaste={(event) => void tempelGambarSoal(event, i)}
+                className="aura-glass rounded-[24px] p-5 sm:p-6"
+              >
                 <fieldset className="flex flex-col gap-5">
                   <legend className="sr-only">Soal {i + 1}</legend>
                   <div className="flex w-full flex-wrap items-center justify-between gap-3">
@@ -903,6 +954,8 @@ export default function HalamanBuatSoal() {
                     nomorSoal={i + 1}
                     gambar={s.gambar}
                     galat={galat[jalur("gambar")]}
+                    memprosesTempel={memprosesTempel === i}
+                    galatTempel={galatTempel[i]}
                     onUbah={(gambarBaru) => ubahSoal(i, (x) => ({ ...x, gambar: gambarBaru }))}
                   />
 

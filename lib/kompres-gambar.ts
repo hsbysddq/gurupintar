@@ -1,5 +1,21 @@
 export const BATAS_KARAKTER_GAMBAR_SOAL = 800_000;
 
+const TIPE_GAMBAR_SOAL = /^image\/(jpeg|png|webp)$/i;
+
+/** Ambil file gambar pertama dari clipboard; null jika clipboard hanya berisi teks/link. */
+export function fileGambarDariClipboard(data: DataTransfer | null): File | null {
+  if (!data) return null;
+  for (const item of Array.from(data.items)) {
+    if (item.kind === 'file' && TIPE_GAMBAR_SOAL.test(item.type)) {
+      return item.getAsFile();
+    }
+  }
+  for (const file of Array.from(data.files)) {
+    if (TIPE_GAMBAR_SOAL.test(file.type)) return file;
+  }
+  return null;
+}
+
 /**
  * Mengompres gambar soal (JPEG/PNG/WebP) di browser menjadi data URL JPEG ringan
  * dengan latar putih agar diagram transparan (misalnya bangun datar PNG) tetap terbaca tajam.
