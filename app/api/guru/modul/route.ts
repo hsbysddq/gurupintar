@@ -9,6 +9,7 @@ import {
   tambahKoin,
 } from '@/lib/server/koin';
 import { buatMateriDariModul, ErrorMateriAi } from '@/lib/server/materi-ai';
+import { catatRiwayatModul } from '@/lib/server/riwayat-modul';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
 
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
         gayaPpt: input.data.gaya_ppt,
         gayaAudio: input.data.gaya_audio,
       });
+      await catatRiwayatModul(db, auth.profil.id, isi);
       return responsOk({ isi, sumber: 'ai', koin: potong.sisa });
     } catch (err) {
       // AI gagal: kembalikan koin agar guru tidak dirugikan.

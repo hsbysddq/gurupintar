@@ -48,6 +48,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    menambah kolom arsip, identitas siswa per kelas, serta fungsi ubah topik.
    Untuk sistem koin Ubah Modul, jalankan `supabase/migrasi-koin-guru.sql`.
    Untuk audio Gemini, jalankan `supabase/migrasi-audio-gemini.sql` agar bucket `materi-audio` siap.
+   Untuk riwayat pembuatan Ubah Modul, jalankan `supabase/migrasi-riwayat-modul.sql`.
 
 4. Jalankan aplikasi.
 

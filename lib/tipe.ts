@@ -394,6 +394,20 @@ export interface MateriGuru {
 
 export type AsalMateriPustaka = 'teks' | 'pdf';
 
+/** Satu pembuatan Ubah Modul yang berhasil, sebelum atau sesudah disimpan ke kelas. */
+export interface RiwayatModulRingkas {
+  id: string;
+  judul: string;
+  format: FormatMateri;
+  gayaAudio: GayaAudio | null;
+  gayaPpt: GayaPpt | null;
+  dibuatPada: string;
+}
+
+export interface RiwayatModulDetail extends RiwayatModulRingkas {
+  isi: IsiMateri;
+}
+
 /** Satu materi mandiri di pustaka kelas (hasil Ubah Modul). */
 export interface MateriPustaka {
   id: string;

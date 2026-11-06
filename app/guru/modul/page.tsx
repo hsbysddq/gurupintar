@@ -28,6 +28,7 @@ import { ModalGayaPpt } from "@/components/ModalGayaPpt";
 import { ModalPilihFormat } from "@/components/ModalPilihFormat";
 import { PemilihModel } from "@/components/PemilihModel";
 import { RiwayatKoin } from "@/components/RiwayatKoin";
+import { RiwayatModul } from "@/components/RiwayatModul";
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
 import {
   ambilDaftarKelas,
@@ -52,6 +53,7 @@ import type {
   IsiMateri,
   KelasRingkas,
   ModelAi,
+  RiwayatModulDetail,
   SumberMateri,
   TransaksiKoin,
 } from "@/lib/tipe";
@@ -402,6 +404,22 @@ function IsiHalamanUbahModul() {
     }
   }
 
+  function bukaRiwayat(detail: RiwayatModulDetail) {
+    setFormatPilihan(detail.format);
+    if (detail.format === "ppt") setGayaPpt(detail.gayaPpt ?? "editorial");
+    if (detail.format === "audio") setGayaAudio(detail.gayaAudio ?? "docu");
+    setMateriId(null);
+    setTersimpan(false);
+    setGalatSimpan(null);
+    setAsalMateri("teks");
+    const berikut = nomor + 1;
+    setNomor(berikut);
+    setKeadaan({ status: "siap", isi: detail.isi, nomor: berikut });
+    window.setTimeout(() => {
+      document.getElementById(`${idDasar}-pratinjau`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
+
   function pilihFormatDariModal(format: FormatMateri) {
     setFormatPilihan(format);
     setModalFormat(false);
@@ -644,6 +662,8 @@ function IsiHalamanUbahModul() {
           />
         </div>
       </section>
+
+      <RiwayatModul segarkan={nomor} onBuka={bukaRiwayat} />
 
       <section className="aura-glass relative overflow-hidden rounded-[24px] p-5 sm:p-6">
         <div

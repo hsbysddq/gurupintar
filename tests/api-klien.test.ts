@@ -12,10 +12,13 @@ import {
   ubahModulPdf,
   ambilDetailKelasSiswa,
   ambilKelasSiswa,
+  ambilDetailRiwayatModul,
   ambilMateriGuru,
   ambilMateriSiswa,
   ambilPendampingan,
+  ambilRiwayatModul,
   buatAudioMateri,
+  hapusRiwayatModul,
   bagikanMateri,
   buatKelas,
   buatMateri,
@@ -261,6 +264,18 @@ describe('api-klien guru', () => {
     expect(palsu.mock.calls[1][1]?.body).toBe(
       JSON.stringify({ sumber: 'siswa', sesi: '00000000-0000-4000-8000-000000000000' }),
     );
+  });
+
+  it('memakai rute riwayat Ubah Modul untuk daftar, detail, dan hapus', async () => {
+    const palsu = stubFetch(async () => Response.json([]));
+    await ambilRiwayatModul();
+    await ambilDetailRiwayatModul('r1');
+    await hapusRiwayatModul('r1');
+
+    expect(palsu.mock.calls[0]).toEqual(['/api/guru/modul/riwayat', expect.objectContaining({ cache: 'no-store' })]);
+    expect(palsu.mock.calls[1][0]).toBe('/api/guru/modul/riwayat?id=r1');
+    expect(palsu.mock.calls[2][0]).toBe('/api/guru/modul/riwayat?id=r1');
+    expect(palsu.mock.calls[2][1]?.method).toBe('DELETE');
   });
 
   it('bukaSesiBanyak memakai rute batch dan mengirim daftar kelas', async () => {

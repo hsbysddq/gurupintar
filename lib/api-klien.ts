@@ -38,6 +38,8 @@ import type {
   MateriSiswa,
   Peran,
   RiwayatKoin,
+  RiwayatModulDetail,
+  RiwayatModulRingkas,
   SesiBaru,
   SesiBanyakBaru,
   SesiGuru,
@@ -316,6 +318,20 @@ export function ubahModul(
       ...(gayaAudio ? { gaya_audio: gayaAudio } : {}),
     }),
   });
+}
+
+/** Daftar pembuatan Ubah Modul terbaru milik guru. */
+export function ambilRiwayatModul(signal?: AbortSignal): Promise<RiwayatModulRingkas[]> {
+  return minta('/api/guru/modul/riwayat', { signal });
+}
+
+/** Detail satu riwayat Ubah Modul, termasuk isi materi untuk dibuka lagi. */
+export function ambilDetailRiwayatModul(id: string): Promise<RiwayatModulDetail> {
+  return minta(`/api/guru/modul/riwayat?id=${encodeURIComponent(id)}`);
+}
+
+export function hapusRiwayatModul(id: string): Promise<{ ok: true }> {
+  return minta(`/api/guru/modul/riwayat?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
 export function ubahModulPdf(
