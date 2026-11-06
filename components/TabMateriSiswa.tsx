@@ -3,8 +3,8 @@
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
+import { PemutarAudioGemini } from "@/components/PemutarAudioGemini";
 import { SlidePptVisual } from "@/components/SlidePptVisual";
-import { TombolDengarkan } from "@/components/TombolDengarkan";
 import { ambilGayaAudio } from "@/lib/gaya-audio";
 import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, FormatMateri, IsiMateri } from "@/lib/tipe";
@@ -13,6 +13,8 @@ type TabMateriSiswaProps = {
   isi: IsiMateri;
   formatAwal: Format | null;
   hanyaFormat?: FormatMateri | null;
+  /** Diisi di halaman siswa agar server memvalidasi akses materi sebelum membuat audio. */
+  sesiId?: string;
 };
 
 const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
@@ -23,7 +25,7 @@ const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
-export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMateriSiswaProps) {
+export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: TabMateriSiswaProps) {
   const idDasar = useId();
   const daftarTab = hanyaFormat ? TAB.filter((tab) => tab.format === hanyaFormat) : TAB;
   const [aktif, setAktif] = useState<Format>(hanyaFormat ?? formatAwal ?? "bacaan");
@@ -43,7 +45,6 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMater
 
   const urlYoutube = `https://www.youtube.com/results?search_query=${encodeURIComponent(isi.ide_video.kata_kunci_pencarian)}`;
   const gayaAudio = ambilGayaAudio(isi.gaya_audio);
-  const teksDengar = isi.naskah_audio.replace(/^\s*(GURU|SISWA|NARATOR)\s*:\s*/gim, '');
   const judulAudio =
     gayaAudio.id === 'docu'
       ? 'Dengarkan ceritanya'
@@ -130,7 +131,7 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMater
                       </span>
                     </div>
                     <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{judulAudio}</h2>
-                    <TombolDengarkan teks={teksDengar} laju={lajuAudio} />
+                    <PemutarAudioGemini teks={isi.naskah_audio} gaya={gayaAudio.id} sesiId={sesiId} laju={lajuAudio} />
                     <div className="rounded-2xl border border-aura-ink/10 bg-white/45 p-4">
                       <p className="font-display text-[10px] font-bold uppercase tracking-[0.05em] text-aura-muted">
                         Transkrip naskah

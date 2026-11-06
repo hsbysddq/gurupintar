@@ -15,6 +15,7 @@ import {
   ambilMateriGuru,
   ambilMateriSiswa,
   ambilPendampingan,
+  buatAudioMateri,
   bagikanMateri,
   buatKelas,
   buatMateri,
@@ -245,6 +246,20 @@ describe('api-klien guru', () => {
         format: 'audio',
         gaya_audio: 'docu',
       }),
+    );
+  });
+
+  it('meminta audio guru dan siswa ke rute yang benar', async () => {
+    const palsu = stubFetch(async () => Response.json({ url: 'https://contoh/audio.wav' }));
+    await buatAudioMateri({ sumber: 'guru', teks: 'naskah', gaya: 'docu' });
+    await buatAudioMateri({ sumber: 'siswa', sesi: '00000000-0000-4000-8000-000000000000' });
+
+    expect(palsu.mock.calls[0][0]).toBe('/api/audio');
+    expect(palsu.mock.calls[0][1]?.body).toBe(
+      JSON.stringify({ sumber: 'guru', teks: 'naskah', gaya: 'docu' }),
+    );
+    expect(palsu.mock.calls[1][1]?.body).toBe(
+      JSON.stringify({ sumber: 'siswa', sesi: '00000000-0000-4000-8000-000000000000' }),
     );
   });
 

@@ -252,6 +252,20 @@ export const skemaBodyUbahModulPdf = z.object({
   gaya_audio: skemaGayaAudio.optional(),
 });
 
+export const skemaBodyAudio = z.discriminatedUnion('sumber', [
+  z.object({
+    sumber: z.literal('guru'),
+    teks: z.string().trim().min(50).max(6000),
+    gaya: skemaGayaAudio,
+  }),
+  z.object({
+    sumber: z.literal('siswa'),
+    sesi: z.uuid(),
+  }),
+]);
+
+export type BodyAudio = z.infer<typeof skemaBodyAudio>;
+
 // Waktu jadwal dikirim sebagai ISO 8601. Nilai kosong berarti "buka sekarang" / "tanpa batas tutup".
 const skemaWaktuIso = z
   .string()

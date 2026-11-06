@@ -25,6 +25,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    SUPABASE_SERVICE_ROLE_KEY=
    COMMAND_CODE_API_KEY=
    AI_MODEL=deepseek/deepseek-v4.1-flash
+   GEMINI_API_KEY=
    WHATSAPP_ADMIN=
    ANTHROPIC_API_KEY=
    ANTHROPIC_MODEL=
@@ -32,9 +33,10 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    ```
 
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` adalah kunci anon/publishable dari Supabase.
-   - `SUPABASE_SERVICE_ROLE_KEY`, `COMMAND_CODE_API_KEY`, dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
+   - `SUPABASE_SERVICE_ROLE_KEY`, `COMMAND_CODE_API_KEY`, `GEMINI_API_KEY`, dan `ANTHROPIC_API_KEY` hanya boleh ada di server.
    - `COMMAND_CODE_API_KEY` berasal dari Command Code Studio. Paket Provider bersifat pay-as-you-go; GOAT/Pro/Max/Team juga punya akses API.
    - `AI_MODEL` adalah model default untuk Ubah Modul dan materi lanjutan. Guru tetap bisa memilih model lain dari dropdown.
+   - `GEMINI_API_KEY` (atau `GOOGLE_API_KEY`) hanya dipakai untuk suara natural Gemini TTS. Bisa dari free tier Google AI Studio; tanpa key, pemutar audio memakai suara browser.
    - `WHATSAPP_ADMIN` adalah nomor WhatsApp admin untuk top up koin, format `628...`.
    - `ANTHROPIC_API_KEY` hanya cadangan lama jika `COMMAND_CODE_API_KEY` belum diisi.
    - `KODE_UNDANGAN_GURU` wajib untuk pendaftaran guru. Jika kosong, pendaftaran guru ditutup.
@@ -45,6 +47,7 @@ Aplikasi kelas untuk guru matematika SMP: siswa mengerjakan kuis 5 soal dari HP,
    `supabase/migrasi-identitas-siswa.sql`, dan `supabase/migrasi-ubah-topik.sql` untuk
    menambah kolom arsip, identitas siswa per kelas, serta fungsi ubah topik.
    Untuk sistem koin Ubah Modul, jalankan `supabase/migrasi-koin-guru.sql`.
+   Untuk audio Gemini, jalankan `supabase/migrasi-audio-gemini.sql` agar bucket `materi-audio` siap.
 
 4. Jalankan aplikasi.
 

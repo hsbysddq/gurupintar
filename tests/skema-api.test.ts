@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   normalisasiKode,
+  skemaBodyAudio,
   skemaBodyBagikanMateri,
   skemaBodyBukaSesi,
   skemaBodyBukaSesiBanyak,
@@ -225,6 +226,20 @@ describe('skemaBodyUbahModul (PRD F-9)', () => {
   it('menerima gaya audio A–D dan menolak gaya lain', () => {
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'audio', gaya_audio: 'docu' }).success).toBe(true);
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), gaya_audio: 'radio' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyAudio', () => {
+  it('menerima naskah guru dan sesi siswa', () => {
+    expect(skemaBodyAudio.safeParse({ sumber: 'guru', teks: 'x'.repeat(100), gaya: 'docu' }).success).toBe(true);
+    expect(
+      skemaBodyAudio.safeParse({ sumber: 'siswa', sesi: '00000000-0000-4000-8000-000000000000' }).success,
+    ).toBe(true);
+  });
+
+  it('menolak sumber, gaya, dan sesi yang tidak valid', () => {
+    expect(skemaBodyAudio.safeParse({ sumber: 'guru', teks: 'x'.repeat(100), gaya: 'radio' }).success).toBe(false);
+    expect(skemaBodyAudio.safeParse({ sumber: 'siswa', sesi: 'bukan-uuid' }).success).toBe(false);
   });
 });
 

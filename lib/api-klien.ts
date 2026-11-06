@@ -1,5 +1,6 @@
 // Fungsi fetch untuk halaman (browser). Tidak boleh mengimpor dari lib/server.
 import type {
+  BodyAudio,
   BodyBuatKelas,
   BodyBuatMateri,
   BodyBukaSesiBanyak,
@@ -178,6 +179,11 @@ export function kirimJawaban(
 
 export function ambilMateriSiswa(sesiId: string, signal?: AbortSignal): Promise<MateriSiswa> {
   return minta(`/api/materi?sesi=${encodeURIComponent(sesiId)}`, { signal });
+}
+
+/** Buat atau ambil audio Gemini yang sudah di-cache untuk satu materi. */
+export function buatAudioMateri(body: BodyAudio): Promise<{ url: string }> {
+  return minta('/api/audio', { method: 'POST', body: JSON.stringify(body) });
 }
 
 // ===== Guru =====
