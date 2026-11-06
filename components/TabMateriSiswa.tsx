@@ -4,6 +4,7 @@ import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
 import { PemutarAudioGemini } from "@/components/PemutarAudioGemini";
+import { PenampilBacaan } from "@/components/PenampilBacaan";
 import { SlidePptVisual } from "@/components/SlidePptVisual";
 import { ambilGayaAudio } from "@/lib/gaya-audio";
 import { unduhPptx } from "@/lib/unduh-materi";
@@ -144,12 +145,7 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
                     </div>
                   </>
                 )}
-                {format === "bacaan" && (
-                  <>
-                    <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{isi.judul}</h2>
-                    <p className="whitespace-pre-line text-aura-ink">{isi.ringkasan}</p>
-                  </>
-                )}
+                {format === "bacaan" && <PenampilBacaan isi={isi} />}
                 {format === "ppt" && <PenampilSlide isi={isi} />}
               </KartuKaca>
             )}

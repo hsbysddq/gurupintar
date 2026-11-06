@@ -8,12 +8,14 @@ import {
   buatMateriDariModul,
   buatMateriSemua,
   ErrorMateriAi,
+  INSTRUKSI_BACAAN,
   INSTRUKSI_FOKUS,
   INSTRUKSI_FORMAT,
   INSTRUKSI_GAYA_PPT,
   INSTRUKSI_PPT,
   INSTRUKSI_SISTEM,
   INSTRUKSI_SISTEM_AUDIO,
+  INSTRUKSI_SISTEM_BACAAN,
   INSTRUKSI_SISTEM_PPT,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
@@ -240,6 +242,40 @@ const TEKS_MODUL =
   'Pecahan senilai adalah pecahan yang nilainya sama walaupun pembilang dan penyebutnya berbeda. ' +
   'Contohnya 1/2 = 2/4 = 3/6. Kalikan atau bagi pembilang dan penyebut dengan bilangan yang sama.';
 
+const BACAAN_VALID = {
+  judul: 'Pecahan Senilai: Buku Kecil untuk Kelas 7',
+  subjudul: 'Memahami pecahan lewat kue, penggaris, dan cerita sehari-hari.',
+  bab: [
+    {
+      judul: 'Mengapa 1/2 lebih besar dari 1/3?',
+      paragraf: [
+        'Bayangkan dua kue yang ukurannya sama. Kue pertama dipotong menjadi dua bagian sama besar, sedangkan kue kedua dipotong menjadi tiga bagian sama besar.',
+        'Semakin banyak potongan, semakin kecil ukuran setiap potongan. Karena itu satu per dua lebih besar daripada satu per tiga.',
+      ],
+      poin: ['Penyebut menunjukkan jumlah bagian.', 'Semakin besar penyebut, semakin kecil satu bagian.'],
+      contoh: 'Satu per dua kue lebih besar daripada satu per tiga kue yang ukurannya sama.',
+    },
+    {
+      judul: 'Mencari pecahan yang nilainya sama',
+      paragraf: [
+        'Pecahan senilai adalah pecahan yang tulisannya berbeda tetapi nilainya sama. Kita bisa mengalikan pembilang dan penyebut dengan bilangan yang sama.',
+        'Misalnya satu per dua dikali dua per dua menjadi dua per empat. Nilainya tetap sama, hanya bentuk tulisannya yang berubah.',
+      ],
+      poin: ['Kalikan atas dan bawah dengan bilangan yang sama.', 'Nilai pecahan tidak berubah.'],
+      contoh: '1/2 = 2/4 = 4/8.',
+    },
+    {
+      judul: 'Menyederhanakan pecahan',
+      paragraf: [
+        'Kita juga bisa membagi pembilang dan penyebut dengan bilangan yang sama. Cara ini disebut menyederhanakan pecahan.',
+        'Enam per delapan dapat dibagi dua menjadi tiga per empat. Bentuk tiga per empat lebih sederhana, tetapi nilainya sama.',
+      ],
+      poin: ['Bagi atas dan bawah dengan faktor yang sama.', 'Berhenti saat tidak ada faktor yang sama.'],
+      contoh: '6/8 disederhanakan menjadi 3/4.',
+    },
+  ],
+};
+
 const NASKAH_AUDIO = [
   'Di sebuah kelas, seorang siswa memegang penggaris dan bertanya kenapa satu per dua lebih besar dari satu per tiga.',
   'Guru itu sempat diam, lalu mengajak siswa melihat dua potong kue yang ukurannya berbeda.',
@@ -313,6 +349,13 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).not.toContain(INSTRUKSI_GAYA_AUDIO.podcast);
     expect(susunPesanModul(TEKS_MODUL, [], 'ppt')).not.toContain(INSTRUKSI_AUDIO);
   });
+
+  it('menambahkan aturan e-book hanya untuk format bacaan', () => {
+    const pesan = susunPesanModul(TEKS_MODUL, [], 'bacaan');
+    expect(pesan).toContain(INSTRUKSI_BACAAN);
+    expect(pesan).not.toContain(INSTRUKSI_AUDIO);
+    expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_BACAAN);
+  });
 });
 
 describe('buatMateriDariModul', () => {
@@ -333,14 +376,14 @@ describe('buatMateriDariModul', () => {
     const isi = await buatMateriDariModul(TEKS_MODUL, {
       klien,
       model: 'model-uji',
-      format: 'bacaan',
+      format: 'video',
       acak: TANPA_ACAK,
     });
 
     const prompt = create.mock.calls[0][0].messages[0].content as string;
     expect(prompt).toContain('Format utama yang diminta guru:');
-    expect(prompt).toContain(INSTRUKSI_FORMAT.bacaan);
-    expect(isi.format_utama).toBe('bacaan');
+    expect(prompt).toContain(INSTRUKSI_FORMAT.video);
+    expect(isi.format_utama).toBe('video');
   });
 
   it('memakai jalur PPT-only, menyimpan gaya, dan menyintesis field lain', async () => {
@@ -387,6 +430,29 @@ describe('buatMateriDariModul', () => {
     expect(isi.naskah_audio.length).toBeGreaterThan(900);
     expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
     expect(isi.slide_ppt.slide).toHaveLength(3);
+    expect(isi.latihan).toHaveLength(3);
+  });
+
+  it('memakai jalur e-book, menyimpan bab, dan menyintesis field lain', async () => {
+    const { klien, create } = klienTiruan(async () =>
+      responsTeks(JSON.stringify({ bacaan: BACAAN_VALID })),
+    );
+    const isi = await buatMateriDariModul(TEKS_MODUL, {
+      klien,
+      model: 'model-uji',
+      format: 'bacaan',
+      acak: TANPA_ACAK,
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create.mock.calls[0][0].system).toBe(INSTRUKSI_SISTEM_BACAAN);
+    expect(create.mock.calls[0][0].max_tokens).toBe(3500);
+    const prompt = create.mock.calls[0][0].messages[0].content as string;
+    expect(prompt).toContain(INSTRUKSI_BACAAN);
+    expect(isi.format_utama).toBe('bacaan');
+    expect(isi.bacaan).toEqual(BACAAN_VALID);
+    expect(isi.bacaan?.bab).toHaveLength(3);
+    expect(isi.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);
     expect(isi.latihan).toHaveLength(3);
   });
 

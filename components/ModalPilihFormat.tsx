@@ -7,7 +7,7 @@ import type { FormatMateri } from '@/lib/tipe';
 const PILIHAN: { format: FormatMateri; label: string; deskripsi: string; ikon: LucideIcon }[] = [
   { format: 'video', label: 'Video', deskripsi: 'Naskah video dengan alur visual.', ikon: PlayCircle },
   { format: 'audio', label: 'Audio', deskripsi: 'Cerita audio dengan gaya pilihan.', ikon: Headphones },
-  { format: 'bacaan', label: 'Bacaan', deskripsi: 'Teks terstruktur dengan poin penting.', ikon: FileText },
+  { format: 'bacaan', label: 'Bacaan', deskripsi: 'E-book bertingkat dengan bab dan poin penting.', ikon: FileText },
   { format: 'ppt', label: 'PPT', deskripsi: 'Slide presentasi siap dipakai.', ikon: Presentation },
 ];
 

@@ -69,7 +69,7 @@ type Sumber = "teks" | "pdf";
 const BENTUK: { format: FormatMateri; label: string; ikon: LucideIcon; deskripsi: string }[] = [
   { format: "video", label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
   { format: "audio", label: "Audio", ikon: Headphones, deskripsi: "Cerita audio dengan gaya pilihan, bukan bacaan teks." },
-  { format: "bacaan", label: "Bacaan", ikon: FileText, deskripsi: "Teks bacaan terstruktur dengan poin penting." },
+  { format: "bacaan", label: "Bacaan", ikon: FileText, deskripsi: "E-book bertingkat dengan bab dan poin penting." },
   { format: "ppt", label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
 ];
 

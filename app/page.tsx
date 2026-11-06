@@ -101,7 +101,7 @@ const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon }[] =
   },
   {
     label: "Bacaan",
-    keterangan: "Teks bacaan terstruktur dengan poin penting.",
+    keterangan: "E-book bertingkat dengan bab dan poin penting.",
     ikon: FileText,
   },
   {

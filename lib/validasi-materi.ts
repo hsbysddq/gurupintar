@@ -7,6 +7,23 @@ export const skemaIsiMateri = z.object({
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
   naskah_audio: z.string().min(50).max(6000),
+  bacaan: z
+    .object({
+      judul: z.string().min(5).max(100),
+      subjudul: z.string().min(5).max(180).optional(),
+      bab: z
+        .array(
+          z.object({
+            judul: z.string().min(3).max(80),
+            paragraf: z.array(z.string().min(20).max(1200)).min(1).max(4),
+            poin: z.array(z.string().min(5).max(200)).max(5).optional(),
+            contoh: z.string().min(10).max(600).optional(),
+          }),
+        )
+        .min(3)
+        .max(6),
+    })
+    .optional(),
   ide_video: z.object({
     judul: z.string().min(5).max(80),
     deskripsi: z.string().min(20).max(300),
@@ -70,6 +87,9 @@ export const skemaPptAi = z.object({ slide_ppt: skemaIsiMateri.shape.slide_ppt }
 
 /** Keluaran khusus format Audio: hanya naskah_audio panjang; field lain disintesis lokal. */
 export const skemaAudioAi = z.object({ naskah_audio: z.string().min(500).max(6000) });
+
+/** Keluaran khusus format Bacaan: e-book bertingkat; field lain disintesis lokal. */
+export const skemaBacaanAi = z.object({ bacaan: skemaIsiMateri.shape.bacaan.unwrap() });
 type Latihan = IsiMateri['latihan'][number];
 
 export type HasilPeriksaMateri = { ok: true; isi: IsiMateri } | { ok: false; alasan: string };
@@ -108,6 +128,18 @@ function semuaTeks(isi: IsiMateri): string[] {
     isi.ide_video.judul,
     isi.ide_video.deskripsi,
     isi.ide_video.kata_kunci_pencarian,
+    ...(isi.bacaan
+      ? [
+          isi.bacaan.judul,
+          isi.bacaan.subjudul ?? '',
+          ...isi.bacaan.bab.flatMap((bab) => [
+            bab.judul,
+            ...bab.paragraf,
+            ...(bab.poin ?? []),
+            bab.contoh ?? '',
+          ]),
+        ]
+      : []),
     isi.slide_ppt.judul,
     ...isi.slide_ppt.slide.flatMap((s) => [
       s.judul,

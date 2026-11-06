@@ -74,6 +74,21 @@ describe('skemaIsiMateri', () => {
     expect(skemaIsiMateri.safeParse(kaya).success).toBe(true);
   });
 
+  it('menerima e-book dengan tiga bab dan menolak yang kurang dari tiga', () => {
+    const bab = {
+      judul: 'Bab pecahan',
+      paragraf: ['Pecahan senilai punya nilai yang sama walaupun tulisannya berbeda.', 'Kalikan atas dan bawah dengan bilangan yang sama.'],
+      poin: ['Nilai tidak berubah.', 'Bentuk tulisan berubah.'],
+    };
+    const bacaan = {
+      judul: 'Buku Pecahan Senilai',
+      subjudul: 'Belajar pecahan lewat cerita.',
+      bab: [bab, { ...bab, judul: 'Bab kedua' }, { ...bab, judul: 'Bab ketiga' }],
+    };
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), bacaan }).success).toBe(true);
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), bacaan: { ...bacaan, bab: bacaan.bab.slice(0, 2) } }).success).toBe(false);
+  });
+
   it('menolak ringkasan yang terlalu pendek', () => {
     expect(skemaIsiMateri.safeParse({ ...isiValid(), ringkasan: 'Terlalu pendek.' }).success).toBe(false);
   });
