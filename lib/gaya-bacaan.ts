@@ -7,6 +7,12 @@ export interface DefinisiGayaBacaan {
   deskripsi: string;
   cocok: string;
   contoh: string;
+  latar: string;
+  kertas: string;
+  teks: string;
+  muted: string;
+  aksen: string;
+  fontPdf: 'Helvetica' | 'Times-Roman';
 }
 
 export const GAYA_BACAAN: Record<GayaBacaan, DefinisiGayaBacaan> = {
@@ -17,6 +23,12 @@ export const GAYA_BACAAN: Record<GayaBacaan, DefinisiGayaBacaan> = {
     deskripsi: 'Seperti guru yang mengobrol langsung dengan siswa, memakai “kamu” dan contoh sehari-hari.',
     cocok: 'Belajar harian yang ingin terasa dekat dan tidak menggurui.',
     contoh: '“Kamu pernah bingung kenapa 1/2 lebih besar dari 1/3? Kita bedah pelan-pelan.”',
+    latar: '#F3F7FF',
+    kertas: '#FFFFFF',
+    teks: '#16243A',
+    muted: '#526071',
+    aksen: '#2563EB',
+    fontPdf: 'Helvetica',
   },
   bercerita: {
     id: 'bercerita',
@@ -25,6 +37,12 @@ export const GAYA_BACAAN: Record<GayaBacaan, DefinisiGayaBacaan> = {
     deskripsi: 'Satu cerita mengalir dengan tokoh, konflik kecil, dan contoh yang mudah dibayangkan.',
     cocok: 'Konsep abstrak yang lebih mudah dipahami lewat pengalaman tokoh.',
     contoh: '“Rani membagi tiga potong kue kepada empat temannya. Ia mulai bingung.”',
+    latar: '#FFF7ED',
+    kertas: '#FFFDF8',
+    teks: '#2A1A12',
+    muted: '#6B5E52',
+    aksen: '#C2410C',
+    fontPdf: 'Times-Roman',
   },
   catatan: {
     id: 'catatan',
@@ -33,6 +51,12 @@ export const GAYA_BACAAN: Record<GayaBacaan, DefinisiGayaBacaan> = {
     deskripsi: 'Ringkas, bertahap, dengan langkah bernomor dan kotak “Coba sendiri” yang santai.',
     cocok: 'Siswa yang suka membaca cepat lalu langsung mencoba.',
     contoh: '“Langkah 1: lihat penyebutnya. Coba sendiri: sebutkan dua pecahan senilai dengan 1/2.”',
+    latar: '#F2F8F3',
+    kertas: '#FFFFFF',
+    teks: '#23301F',
+    muted: '#5F6B5A',
+    aksen: '#2F7D4A',
+    fontPdf: 'Helvetica',
   },
 };
 

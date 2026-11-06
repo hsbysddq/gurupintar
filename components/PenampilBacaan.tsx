@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, List, Minus, Plus } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Download, List, Loader2, Minus, Plus } from 'lucide-react';
+import { IlustrasiBacaan } from '@/components/IlustrasiBacaan';
 import { ambilGayaBacaan } from '@/lib/gaya-bacaan';
+import { unduhPdfBacaan } from '@/lib/unduh-bacaan';
 import type { IsiMateri } from '@/lib/tipe';
 
 const UKURAN_MIN = 15;
@@ -11,8 +13,23 @@ const UKURAN_MAKS = 21;
 export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
   const [indeks, setIndeks] = useState(-1);
   const [ukuran, setUkuran] = useState(17);
+  const [mengunduh, setMengunduh] = useState(false);
+  const [galatUnduh, setGalatUnduh] = useState<string | null>(null);
   const bacaan = isi.bacaan;
   const gaya = ambilGayaBacaan(isi.gaya_bacaan);
+
+  async function unduh() {
+    if (mengunduh) return;
+    setMengunduh(true);
+    setGalatUnduh(null);
+    try {
+      await unduhPdfBacaan(isi);
+    } catch {
+      setGalatUnduh('PDF belum berhasil dibuat. Coba lagi sebentar.');
+    } finally {
+      setMengunduh(false);
+    }
+  }
 
   if (!bacaan) {
     return (
@@ -23,6 +40,20 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
         </span>
         <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{isi.judul}</h2>
         <p className="whitespace-pre-line text-[15px] leading-[1.8] text-aura-ink">{isi.ringkasan}</p>
+        <button
+          type="button"
+          onClick={() => void unduh()}
+          disabled={mengunduh}
+          className="inline-flex min-h-10 w-fit items-center gap-1.5 rounded-xl border border-aura-primary/20 px-3 font-display text-[11px] font-bold text-aura-primary transition-colors hover:bg-aura-primary/5 disabled:opacity-50"
+        >
+          {mengunduh ? <Loader2 aria-hidden="true" className="size-3.5 animate-spin" /> : <Download aria-hidden="true" className="size-3.5" />}
+          Unduh PDF
+        </button>
+        {galatUnduh && (
+          <p role="alert" className="font-body text-[11px] leading-[16px] text-aura-red">
+            {galatUnduh}
+          </p>
+        )}
       </div>
     );
   }
@@ -41,13 +72,27 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
     <div className="flex flex-col gap-4">
       {diSampul ? (
         <>
-          <div className="relative overflow-hidden rounded-[22px] border border-aura-primary/15 bg-gradient-to-br from-[#EEF2FF] via-[#FFFDF9] to-[#F5F3FF] p-6">
+          <div
+            className="relative overflow-hidden rounded-[22px] border p-6 sm:pr-44"
+            style={{
+              borderColor: `${gaya.aksen}33`,
+              background: `linear-gradient(135deg, ${gaya.latar} 0%, #FFFDF9 58%, ${gaya.latar} 100%)`,
+            }}
+          >
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-aura-primary/10 blur-3xl"
+              className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full blur-3xl"
+              style={{ backgroundColor: `${gaya.aksen}1A` }}
+            />
+            <IlustrasiBacaan
+              gaya={gaya.id}
+              className="pointer-events-none absolute -bottom-3 -right-2 hidden w-44 opacity-90 sm:block"
             />
             <div className="relative flex flex-col gap-4">
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.05em] text-aura-primary ring-1 ring-aura-primary/15">
+              <span
+                className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.05em] ring-1"
+                style={{ color: gaya.aksen, borderColor: `${gaya.aksen}26` }}
+              >
                 <BookOpen aria-hidden="true" className="size-3" />
                 E-book · {gaya.kode} {gaya.nama}
               </span>
@@ -66,14 +111,36 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
                 </span>
                 <span className="rounded-full bg-white/75 px-2.5 py-1 ring-1 ring-aura-ink/5">{totalKata} kata</span>
               </div>
-              <button
-                type="button"
-                onClick={() => ke(0)}
-                className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl bg-aura-primary px-4 font-display text-[12px] font-bold text-white transition-colors hover:brightness-105"
-              >
-                Mulai membaca
-                <ChevronRight aria-hidden="true" className="size-4" />
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => ke(0)}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 font-display text-[12px] font-bold text-white transition-colors hover:brightness-105"
+                  style={{ backgroundColor: gaya.aksen }}
+                >
+                  Mulai membaca
+                  <ChevronRight aria-hidden="true" className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void unduh()}
+                  disabled={mengunduh}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border bg-white/70 px-4 font-display text-[12px] font-bold transition-colors hover:bg-white disabled:opacity-50"
+                  style={{ borderColor: `${gaya.aksen}33`, color: gaya.aksen }}
+                >
+                  {mengunduh ? (
+                    <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                  ) : (
+                    <Download aria-hidden="true" className="size-4" />
+                  )}
+                  {mengunduh ? 'Menyiapkan PDF…' : 'Unduh PDF'}
+                </button>
+              </div>
+              {galatUnduh && (
+                <p role="alert" className="font-body text-[11px] leading-[16px] text-aura-red">
+                  {galatUnduh}
+                </p>
+              )}
             </div>
           </div>
 
@@ -119,6 +186,19 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
             <div className="flex items-center gap-1">
               <button
                 type="button"
+                onClick={() => void unduh()}
+                disabled={mengunduh}
+                aria-label="Unduh PDF"
+                className="mr-1 flex size-8 items-center justify-center rounded-lg text-aura-muted transition-colors hover:bg-aura-ink/5 hover:text-aura-ink disabled:opacity-40"
+              >
+                {mengunduh ? (
+                  <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+                ) : (
+                  <Download aria-hidden="true" className="size-3.5" />
+                )}
+              </button>
+              <button
+                type="button"
                 onClick={() => setUkuran((nilai) => Math.max(UKURAN_MIN, nilai - 1))}
                 disabled={ukuran <= UKURAN_MIN}
                 aria-label="Perkecil ukuran teks"
@@ -139,8 +219,11 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
             </div>
           </div>
 
-          <div className="h-1.5 overflow-hidden rounded-full bg-aura-primary/10">
-            <div className="h-full rounded-full bg-aura-primary transition-[width]" style={{ width: `${persen}%` }} />
+          <div className="h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: `${gaya.aksen}1A` }}>
+            <div
+              className="h-full rounded-full transition-[width]"
+              style={{ width: `${persen}%`, backgroundColor: gaya.aksen }}
+            />
           </div>
 
           <article aria-live="polite" className="rounded-[22px] border border-aura-ink/10 bg-white/60 p-5">
