@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GayaAudio } from '@/lib/tipe';
 
 const BUCKET_AUDIO = 'materi-audio';
-const MODEL_TTS = process.env.GEMINI_TTS_MODEL?.trim() || 'gemini-3.1-flash-tts-preview';
+const MODEL_TTS = process.env.GEMINI_TTS_MODEL?.trim() || 'gemini-3.8-flash-tts';
 const SAMPEL_PER_DETIK = 24_000;
 
 export const PESAN_AUDIO_BELUM_SIAP = 'Suara natural belum aktif. Hubungi admin.';
@@ -101,6 +101,35 @@ export function bungkusWav(pcm: Buffer): Buffer {
   return Buffer.concat([header, pcm]);
 }
 
+function ringkasanBalasan(data: unknown): string {
+  if (typeof data !== 'object' || data === null) return 'bukan objek';
+  const kandidat = (data as { candidates?: unknown }).candidates;
+  if (!Array.isArray(kandidat) || kandidat.length === 0) return 'tanpa candidates';
+
+  const pertama = kandidat[0];
+  if (typeof pertama !== 'object' || pertama === null) return 'candidate tidak valid';
+  const isi = (pertama as { content?: { parts?: unknown } }).content;
+  const bagian = Array.isArray(isi?.parts) ? isi.parts : [];
+  const kunciBagian = bagian.flatMap((bagianItem) =>
+    typeof bagianItem === 'object' && bagianItem !== null ? Object.keys(bagianItem) : [],
+  );
+  const teks = bagian
+    .map((bagianItem) =>
+      typeof bagianItem === 'object' && bagianItem !== null && 'text' in bagianItem && typeof bagianItem.text === 'string'
+        ? bagianItem.text
+        : '',
+    )
+    .join('')
+    .slice(0, 180);
+
+  return JSON.stringify({
+    finishReason: (pertama as { finishReason?: unknown }).finishReason ?? null,
+    promptFeedback: (data as { promptFeedback?: unknown }).promptFeedback ?? null,
+    kunciBagian,
+    teks: teks || null,
+  });
+}
+
 /** Ambil inlineData audio dari balasan Gemini; kalau masih PCM, bungkus sebagai WAV. */
 export function uraikanAudioGemini(data: unknown): Buffer {
   if (typeof data !== 'object' || data === null) {
@@ -131,7 +160,7 @@ export function uraikanAudioGemini(data: unknown): Buffer {
     }
   }
 
-  throw new ErrorAudioAi(PESAN_AUDIO_GAGAL, 'Gemini tidak mengembalikan audio.');
+  throw new ErrorAudioAi(PESAN_AUDIO_GAGAL, `Gemini tidak mengembalikan audio. ${ringkasanBalasan(data)}`);
 }
 
 export function hashAudio(teks: string, gaya: GayaAudio): string {
