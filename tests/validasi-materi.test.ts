@@ -52,6 +52,8 @@ describe('skemaIsiMateri', () => {
     expect(skemaIsiMateri.safeParse({ ...isiValid(), format_utama: 'latihan' }).success).toBe(false);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_audio: 'docu' }).success).toBe(true);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_audio: 'radio' }).success).toBe(false);
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_bacaan: 'catatan' }).success).toBe(true);
+    expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_bacaan: 'formal' }).success).toBe(false);
 
     const dasar = isiValid();
     const kaya = {

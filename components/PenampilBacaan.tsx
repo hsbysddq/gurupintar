@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, List, Minus, Plus } from 'lucide-react';
+import { ambilGayaBacaan } from '@/lib/gaya-bacaan';
 import type { IsiMateri } from '@/lib/tipe';
 
 const UKURAN_MIN = 15;
@@ -11,13 +12,14 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
   const [indeks, setIndeks] = useState(-1);
   const [ukuran, setUkuran] = useState(17);
   const bacaan = isi.bacaan;
+  const gaya = ambilGayaBacaan(isi.gaya_bacaan);
 
   if (!bacaan) {
     return (
       <div className="flex flex-col gap-3">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-primary">
           <BookOpen aria-hidden="true" className="size-3" />
-          Bacaan
+          Bacaan · {gaya.nama}
         </span>
         <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{isi.judul}</h2>
         <p className="whitespace-pre-line text-[15px] leading-[1.8] text-aura-ink">{isi.ringkasan}</p>
@@ -47,7 +49,7 @@ export function PenampilBacaan({ isi }: { isi: IsiMateri }) {
             <div className="relative flex flex-col gap-4">
               <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.05em] text-aura-primary ring-1 ring-aura-primary/15">
                 <BookOpen aria-hidden="true" className="size-3" />
-                E-book
+                E-book · {gaya.kode} {gaya.nama}
               </span>
               <div>
                 <h2 className="font-display text-[26px] leading-[34px] font-extrabold tracking-[-0.02em] text-aura-ink">

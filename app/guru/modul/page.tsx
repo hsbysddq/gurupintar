@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ModalGayaAudio } from "@/components/ModalGayaAudio";
+import { ModalGayaBacaan } from "@/components/ModalGayaBacaan";
 import { ModalGayaPpt } from "@/components/ModalGayaPpt";
 import { ModalPilihFormat } from "@/components/ModalPilihFormat";
 import { PemilihModel } from "@/components/PemilihModel";
@@ -49,6 +50,7 @@ import type {
   FokusModul,
   FormatMateri,
   GayaAudio,
+  GayaBacaan,
   GayaPpt,
   IsiMateri,
   KelasRingkas,
@@ -142,8 +144,11 @@ function IsiHalamanUbahModul() {
   const [gayaSementara, setGayaSementara] = useState<GayaPpt>("editorial");
   const [gayaAudio, setGayaAudio] = useState<GayaAudio>("docu");
   const [gayaAudioSementara, setGayaAudioSementara] = useState<GayaAudio>("docu");
+  const [gayaBacaan, setGayaBacaan] = useState<GayaBacaan>("santai");
+  const [gayaBacaanSementara, setGayaBacaanSementara] = useState<GayaBacaan>("santai");
   const [modalGaya, setModalGaya] = useState(false);
   const [modalGayaAudio, setModalGayaAudio] = useState(false);
+  const [modalGayaBacaan, setModalGayaBacaan] = useState(false);
   const [modalFormat, setModalFormat] = useState(false);
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
@@ -368,17 +373,26 @@ function IsiHalamanUbahModul() {
     }
   }
 
-  async function ubah(gayaPptPilihan?: GayaPpt, gayaAudioPilihan?: GayaAudio) {
+  async function ubah(gayaPptPilihan?: GayaPpt, gayaAudioPilihan?: GayaAudio, gayaBacaanPilihan?: GayaBacaan) {
     if (!siapKirim) return;
     const gayaPptFinal = formatPilihan === "ppt" ? (gayaPptPilihan ?? gayaPpt) : undefined;
     const gayaAudioFinal = formatPilihan === "audio" ? (gayaAudioPilihan ?? gayaAudio) : undefined;
+    const gayaBacaanFinal = formatPilihan === "bacaan" ? (gayaBacaanPilihan ?? gayaBacaan) : undefined;
     setKeadaan({ status: "memuat" });
     setTersimpan(false);
     setGalatSimpan(null);
     try {
       const hasil =
         sumber === "teks"
-          ? await ubahModul(teks, model, fokus, formatPilihan || undefined, gayaPptFinal, gayaAudioFinal)
+          ? await ubahModul(
+              teks,
+              model,
+              fokus,
+              formatPilihan || undefined,
+              gayaPptFinal,
+              gayaAudioFinal,
+              gayaBacaanFinal,
+            )
           : await ubahModulPdf(
               await bacaSebagaiBase64(berkas!),
               model,
@@ -386,6 +400,7 @@ function IsiHalamanUbahModul() {
               formatPilihan || undefined,
               gayaPptFinal,
               gayaAudioFinal,
+              gayaBacaanFinal,
             );
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
@@ -408,6 +423,7 @@ function IsiHalamanUbahModul() {
     setFormatPilihan(detail.format);
     if (detail.format === "ppt") setGayaPpt(detail.gayaPpt ?? "editorial");
     if (detail.format === "audio") setGayaAudio(detail.gayaAudio ?? "docu");
+    if (detail.format === "bacaan") setGayaBacaan(detail.isi.gaya_bacaan ?? "santai");
     setMateriId(null);
     setTersimpan(false);
     setGalatSimpan(null);
@@ -431,6 +447,10 @@ function IsiHalamanUbahModul() {
       setGayaAudioSementara(gayaAudio);
       setModalGayaAudio(true);
     }
+    if (format === "bacaan") {
+      setGayaBacaanSementara(gayaBacaan);
+      setModalGayaBacaan(true);
+    }
   }
 
   function tanganiGenerate() {
@@ -447,6 +467,11 @@ function IsiHalamanUbahModul() {
     if (formatPilihan === "audio") {
       setGayaAudioSementara(gayaAudio);
       setModalGayaAudio(true);
+      return;
+    }
+    if (formatPilihan === "bacaan") {
+      setGayaBacaanSementara(gayaBacaan);
+      setModalGayaBacaan(true);
       return;
     }
     void ubah();
@@ -1291,6 +1316,19 @@ function IsiHalamanUbahModul() {
           setGayaAudio(gayaAudioSementara);
           setModalGayaAudio(false);
           void ubah(undefined, gayaAudioSementara);
+        }}
+      />
+
+      <ModalGayaBacaan
+        terbuka={modalGayaBacaan}
+        nilai={gayaBacaanSementara}
+        memuat={memuat}
+        onPilih={setGayaBacaanSementara}
+        onTutup={() => setModalGayaBacaan(false)}
+        onBuat={() => {
+          setGayaBacaan(gayaBacaanSementara);
+          setModalGayaBacaan(false);
+          void ubah(undefined, undefined, gayaBacaanSementara);
         }}
       />
     </div>

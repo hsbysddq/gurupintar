@@ -26,6 +26,7 @@ import type {
   Format,
   FormatMateri,
   GayaAudio,
+  GayaBacaan,
   GayaPpt,
   HasilGuru,
   HasilPelanggaran,
@@ -306,6 +307,7 @@ export function ubahModul(
   format?: FormatMateri,
   gayaPpt?: GayaPpt,
   gayaAudio?: GayaAudio,
+  gayaBacaan?: GayaBacaan,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul', {
     method: 'POST',
@@ -316,6 +318,7 @@ export function ubahModul(
       ...(format ? { format } : {}),
       ...(gayaPpt ? { gaya_ppt: gayaPpt } : {}),
       ...(gayaAudio ? { gaya_audio: gayaAudio } : {}),
+      ...(gayaBacaan ? { gaya_bacaan: gayaBacaan } : {}),
     }),
   });
 }
@@ -341,6 +344,7 @@ export function ubahModulPdf(
   format?: FormatMateri,
   gayaPpt?: GayaPpt,
   gayaAudio?: GayaAudio,
+  gayaBacaan?: GayaBacaan,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul/pdf', {
     method: 'POST',
@@ -351,6 +355,7 @@ export function ubahModulPdf(
       ...(format ? { format } : {}),
       ...(gayaPpt ? { gaya_ppt: gayaPpt } : {}),
       ...(gayaAudio ? { gaya_audio: gayaAudio } : {}),
+      ...(gayaBacaan ? { gaya_bacaan: gayaBacaan } : {}),
     }),
   });
 }

@@ -231,6 +231,7 @@ const skemaFokusModul = z.enum(['sederhanakan', 'metafora', 'podcast', 'hots']);
 const skemaFormatModul = z.enum(['video', 'audio', 'bacaan', 'ppt']);
 const skemaGayaPpt = z.enum(['editorial', 'swiss', 'dark', 'kelas', 'data']);
 const skemaGayaAudio = z.enum(['docu', 'podcast', 'dialog', 'cerita']);
+const skemaGayaBacaan = z.enum(['santai', 'bercerita', 'catatan']);
 
 // POST /api/guru/modul; panjang dihitung setelah spasi di awal dan akhir dibuang.
 export const skemaBodyUbahModul = z.object({
@@ -240,6 +241,7 @@ export const skemaBodyUbahModul = z.object({
   format: skemaFormatModul.optional(),
   gaya_ppt: skemaGayaPpt.optional(),
   gaya_audio: skemaGayaAudio.optional(),
+  gaya_bacaan: skemaGayaBacaan.optional(),
 });
 
 // POST /api/guru/modul/pdf; PDF dikirim sebagai base64 (batas ukuran file diperiksa di route).
@@ -250,6 +252,7 @@ export const skemaBodyUbahModulPdf = z.object({
   format: skemaFormatModul.optional(),
   gaya_ppt: skemaGayaPpt.optional(),
   gaya_audio: skemaGayaAudio.optional(),
+  gaya_bacaan: skemaGayaBacaan.optional(),
 });
 
 export const skemaBodyAudio = z.discriminatedUnion('sumber', [

@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         format: input.data.format,
         gayaPpt: input.data.gaya_ppt,
         gayaAudio: input.data.gaya_audio,
+        gayaBacaan: input.data.gaya_bacaan,
       });
       await catatRiwayatModul(db, auth.profil.id, isi);
       return responsOk({ isi, sumber: 'ai', koin: potong.sisa });

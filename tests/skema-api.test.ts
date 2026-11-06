@@ -227,6 +227,11 @@ describe('skemaBodyUbahModul (PRD F-9)', () => {
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'audio', gaya_audio: 'docu' }).success).toBe(true);
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), gaya_audio: 'radio' }).success).toBe(false);
   });
+
+  it('menerima gaya bacaan A–C dan menolak gaya lain', () => {
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'bacaan', gaya_bacaan: 'catatan' }).success).toBe(true);
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), gaya_bacaan: 'formal' }).success).toBe(false);
+  });
 });
 
 describe('skemaBodyAudio', () => {

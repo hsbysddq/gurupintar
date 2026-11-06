@@ -4,6 +4,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import materiCadangan from '@/data/materi-cadangan.json';
 import { INSTRUKSI_AUDIO, INSTRUKSI_GAYA_AUDIO } from '@/lib/gaya-audio';
+import { INSTRUKSI_GAYA_BACAAN } from '@/lib/gaya-bacaan';
 import {
   buatMateriDariModul,
   buatMateriSemua,
@@ -355,6 +356,9 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).toContain(INSTRUKSI_BACAAN);
     expect(pesan).not.toContain(INSTRUKSI_AUDIO);
     expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_BACAAN);
+    expect(susunPesanModul(TEKS_MODUL, [], 'bacaan', undefined, undefined, 'catatan')).toContain(
+      INSTRUKSI_GAYA_BACAAN.catatan,
+    );
   });
 });
 
@@ -441,6 +445,7 @@ describe('buatMateriDariModul', () => {
       klien,
       model: 'model-uji',
       format: 'bacaan',
+      gayaBacaan: 'catatan',
       acak: TANPA_ACAK,
     });
 
@@ -449,7 +454,9 @@ describe('buatMateriDariModul', () => {
     expect(create.mock.calls[0][0].max_tokens).toBe(3500);
     const prompt = create.mock.calls[0][0].messages[0].content as string;
     expect(prompt).toContain(INSTRUKSI_BACAAN);
+    expect(prompt).toContain(INSTRUKSI_GAYA_BACAAN.catatan);
     expect(isi.format_utama).toBe('bacaan');
+    expect(isi.gaya_bacaan).toBe('catatan');
     expect(isi.bacaan).toEqual(BACAAN_VALID);
     expect(isi.bacaan?.bab).toHaveLength(3);
     expect(isi.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);

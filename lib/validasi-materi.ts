@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const skemaIsiMateri = z.object({
   format_utama: z.enum(['video', 'audio', 'bacaan', 'ppt']).optional(),
   gaya_audio: z.enum(['docu', 'podcast', 'dialog', 'cerita']).optional(),
+  gaya_bacaan: z.enum(['santai', 'bercerita', 'catatan']).optional(),
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
   naskah_audio: z.string().min(50).max(6000),
