@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
+import { SlidePptVisual } from "@/components/SlidePptVisual";
 import { TombolDengarkan } from "@/components/TombolDengarkan";
 import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, FormatMateri, IsiMateri } from "@/lib/tipe";
@@ -153,18 +154,7 @@ function PenampilSlide({ isi }: { isi: IsiMateri }) {
     <>
       <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{isi.slide_ppt.judul}</h2>
 
-      <section
-        aria-roledescription="slide"
-        aria-label={`Slide ${indeks + 1} dari ${slide.length}: ${ini.judul}`}
-        className="flex min-h-56 flex-col gap-3 rounded-2xl border border-aura-primary/15 bg-aura-primary/5 p-5"
-      >
-        <h3 className="font-display text-lg leading-snug font-bold text-aura-primary">{ini.judul}</h3>
-        <ul className="flex list-disc flex-col gap-2 pl-5 text-aura-ink">
-          {ini.poin.map((poin) => (
-            <li key={poin}>{poin}</li>
-          ))}
-        </ul>
-      </section>
+      <SlidePptVisual isi={isi} slide={ini} indeks={indeks} total={slide.length} />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p aria-live="polite" className="order-first text-center text-[13px] leading-normal font-medium text-aura-muted sm:order-none">

@@ -23,6 +23,7 @@ import {
   Wand2,
   type LucideIcon,
 } from "lucide-react";
+import { ModalGayaPpt } from "@/components/ModalGayaPpt";
 import { PemilihModel } from "@/components/PemilihModel";
 import { RiwayatKoin } from "@/components/RiwayatKoin";
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
@@ -44,6 +45,7 @@ import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
 import type {
   FokusModul,
   FormatMateri,
+  GayaPpt,
   IsiMateri,
   KelasRingkas,
   ModelAi,
@@ -131,6 +133,9 @@ function IsiHalamanUbahModul() {
   const [model, setModel] = useState("");
   const [fokus, setFokus] = useState<FokusModul[]>([]);
   const [formatPilihan, setFormatPilihan] = useState<FormatMateri | "">("");
+  const [gayaPpt, setGayaPpt] = useState<GayaPpt>("editorial");
+  const [gayaSementara, setGayaSementara] = useState<GayaPpt>("editorial");
+  const [modalGaya, setModalGaya] = useState(false);
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
@@ -357,16 +362,17 @@ function IsiHalamanUbahModul() {
     }
   }
 
-  async function ubah() {
-    if (!siapKirim || memuat) return;
+  async function ubah(gayaPptPilihan?: GayaPpt) {
+    if (!siapKirim) return;
+    const gaya = formatPilihan === "ppt" ? (gayaPptPilihan ?? gayaPpt) : undefined;
     setKeadaan({ status: "memuat" });
     setTersimpan(false);
     setGalatSimpan(null);
     try {
       const hasil =
         sumber === "teks"
-          ? await ubahModul(teks, model, fokus, formatPilihan || undefined)
-          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus, formatPilihan || undefined);
+          ? await ubahModul(teks, model, fokus, formatPilihan || undefined, gaya)
+          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus, formatPilihan || undefined, gaya);
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
       else void muatKoin();
@@ -382,6 +388,16 @@ function IsiHalamanUbahModul() {
       void muatRiwayat();
       setKeadaan({ status: "gagal", pesan: err instanceof Error ? err.message : "Materi belum berhasil dibuat." });
     }
+  }
+
+  function tanganiGenerate() {
+    if (memuat) return;
+    if (formatPilihan === "ppt") {
+      setGayaSementara(gayaPpt);
+      setModalGaya(true);
+      return;
+    }
+    void ubah();
   }
 
   async function simpan() {
@@ -999,7 +1015,7 @@ function IsiHalamanUbahModul() {
                 <button
                   type="button"
                   disabled={!siapKirim || memuat}
-                  onClick={() => void ubah()}
+                  onClick={tanganiGenerate}
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-aura-primary to-aura-primary-deep px-5 font-display text-[14px] font-bold text-white shadow-[0_12px_28px_-14px_rgba(37,99,235,0.7)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:brightness-100"
                 >
                   {memuat ? (
@@ -1187,6 +1203,19 @@ function IsiHalamanUbahModul() {
           />
         </section>
       )}
+
+      <ModalGayaPpt
+        terbuka={modalGaya}
+        nilai={gayaSementara}
+        memuat={memuat}
+        onPilih={setGayaSementara}
+        onTutup={() => setModalGaya(false)}
+        onBuat={() => {
+          setGayaPpt(gayaSementara);
+          setModalGaya(false);
+          void ubah(gayaSementara);
+        }}
+      />
     </div>
   );
 }

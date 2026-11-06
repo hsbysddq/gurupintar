@@ -17,6 +17,17 @@ export type Kelompok = 'sudah' | 'setengah' | 'belum';
 export type Format = 'video' | 'audio' | 'bacaan' | 'ppt' | 'latihan';
 export type FormatMateri = 'video' | 'audio' | 'bacaan' | 'ppt';
 
+export type GayaPpt = 'editorial' | 'swiss' | 'dark' | 'kelas' | 'data';
+export type JenisSlidePpt =
+  | 'cover'
+  | 'konten'
+  | 'kode'
+  | 'banding'
+  | 'opsi'
+  | 'langkah'
+  | 'kutipan'
+  | 'penutup';
+
 export type KodePilihan = 'A' | 'B' | 'C' | 'D';
 
 export type TipeSoal =

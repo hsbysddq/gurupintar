@@ -50,6 +50,26 @@ describe('skemaIsiMateri', () => {
     expect(skemaIsiMateri.safeParse(isiValid()).success).toBe(true);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), format_utama: 'video' }).success).toBe(true);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), format_utama: 'latihan' }).success).toBe(false);
+
+    const dasar = isiValid();
+    const kaya = {
+      ...dasar,
+      slide_ppt: {
+        ...dasar.slide_ppt,
+        gaya: 'dark',
+        slide: [
+          {
+            ...dasar.slide_ppt.slide[0],
+            jenis: 'cover',
+            nomor_besar: '01',
+            highlight: 'Pecahan',
+            subjudul: 'Pecahan senilai untuk kelas 7',
+          },
+          ...dasar.slide_ppt.slide.slice(1),
+        ],
+      },
+    };
+    expect(skemaIsiMateri.safeParse(kaya).success).toBe(true);
   });
 
   it('menolak ringkasan yang terlalu pendek', () => {

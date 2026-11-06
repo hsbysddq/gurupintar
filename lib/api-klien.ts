@@ -24,6 +24,7 @@ import type {
   FokusModul,
   Format,
   FormatMateri,
+  GayaPpt,
   HasilGuru,
   HasilPelanggaran,
   IsiMateri,
@@ -294,6 +295,7 @@ export function ubahModul(
   model?: string,
   fokus?: FokusModul[],
   format?: FormatMateri,
+  gayaPpt?: GayaPpt,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul', {
     method: 'POST',
@@ -302,6 +304,7 @@ export function ubahModul(
       ...(model ? { model } : {}),
       ...(fokus && fokus.length > 0 ? { fokus } : {}),
       ...(format ? { format } : {}),
+      ...(gayaPpt ? { gaya_ppt: gayaPpt } : {}),
     }),
   });
 }
@@ -311,6 +314,7 @@ export function ubahModulPdf(
   model?: string,
   fokus?: FokusModul[],
   format?: FormatMateri,
+  gayaPpt?: GayaPpt,
 ): Promise<{ isi: IsiMateri; sumber: SumberMateri; koin?: number }> {
   return minta('/api/guru/modul/pdf', {
     method: 'POST',
@@ -319,6 +323,7 @@ export function ubahModulPdf(
       ...(model ? { model } : {}),
       ...(fokus && fokus.length > 0 ? { fokus } : {}),
       ...(format ? { format } : {}),
+      ...(gayaPpt ? { gaya_ppt: gayaPpt } : {}),
     }),
   });
 }

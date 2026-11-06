@@ -72,6 +72,7 @@ export async function POST(request: Request) {
         model: input.data.model,
         fokus: input.data.fokus,
         format: input.data.format,
+        gayaPpt: input.data.gaya_ppt,
       });
       return responsOk({ isi, sumber: 'ai', koin: potong.sisa });
     } catch (err) {

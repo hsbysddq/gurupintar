@@ -13,10 +13,45 @@ export const skemaIsiMateri = z.object({
   }),
   slide_ppt: z.object({
     judul: z.string().min(5).max(80),
-    slide: z.array(z.object({
-      judul: z.string().min(3).max(60),
-      poin: z.array(z.string().min(5).max(160)).min(2).max(4),
-    })).min(3).max(8),
+    gaya: z.enum(['editorial', 'swiss', 'dark', 'kelas', 'data']).optional(),
+    slide: z.array(
+      z.object({
+        jenis: z
+          .enum(['cover', 'konten', 'kode', 'banding', 'opsi', 'langkah', 'kutipan', 'penutup'])
+          .optional(),
+        judul: z.string().min(3).max(60),
+        subjudul: z.string().min(3).max(140).optional(),
+        nomor_besar: z.string().min(1).max(12).optional(),
+        highlight: z.string().min(1).max(40).optional(),
+        poin: z.array(z.string().min(5).max(160)).min(2).max(4),
+        kode: z.string().min(5).max(500).optional(),
+        banding: z
+          .object({
+            buruk: z.string().min(5).max(200),
+            baik: z.string().min(5).max(200),
+          })
+          .optional(),
+        opsi: z
+          .array(
+            z.object({
+              nama: z.string().min(2).max(60),
+              deskripsi: z.string().min(5).max(160),
+            }),
+          )
+          .min(2)
+          .max(4)
+          .optional(),
+        langkah: z.array(z.string().min(5).max(160)).min(2).max(5).optional(),
+        kutipan: z.string().min(5).max(300).optional(),
+        penutup: z
+          .object({
+            pernyataan: z.string().min(5).max(120),
+            dukungan: z.string().min(5).max(160),
+            cta: z.string().min(3).max(80),
+          })
+          .optional(),
+      }),
+    ).min(3).max(8),
   }),
   latihan: z.array(z.object({
     soal: z.string().min(10).max(300),
@@ -67,7 +102,22 @@ function semuaTeks(isi: IsiMateri): string[] {
     isi.ide_video.deskripsi,
     isi.ide_video.kata_kunci_pencarian,
     isi.slide_ppt.judul,
-    ...isi.slide_ppt.slide.flatMap((s) => [s.judul, ...s.poin]),
+    ...isi.slide_ppt.slide.flatMap((s) => [
+      s.judul,
+      ...s.poin,
+      s.subjudul ?? '',
+      s.nomor_besar ?? '',
+      s.highlight ?? '',
+      s.kode ?? '',
+      s.banding?.buruk ?? '',
+      s.banding?.baik ?? '',
+      ...(s.opsi ?? []).flatMap((o) => [o.nama, o.deskripsi]),
+      ...(s.langkah ?? []),
+      s.kutipan ?? '',
+      s.penutup?.pernyataan ?? '',
+      s.penutup?.dukungan ?? '',
+      s.penutup?.cta ?? '',
+    ]),
     ...isi.latihan.flatMap((l) => [l.soal, ...l.pilihan, l.pembahasan]),
   ];
 }

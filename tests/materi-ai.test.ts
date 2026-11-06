@@ -9,6 +9,8 @@ import {
   ErrorMateriAi,
   INSTRUKSI_FOKUS,
   INSTRUKSI_FORMAT,
+  INSTRUKSI_GAYA_PPT,
+  INSTRUKSI_PPT,
   INSTRUKSI_SISTEM,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
@@ -280,6 +282,13 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).toContain(INSTRUKSI_FOKUS.podcast);
     expect(pesan).not.toContain(INSTRUKSI_FOKUS.metafora);
   });
+
+  it('menambahkan instruksi PPT dan gaya visual hanya untuk format PPT', () => {
+    const pesan = susunPesanModul(TEKS_MODUL, [], 'ppt', 'dark');
+    expect(pesan).toContain(INSTRUKSI_PPT);
+    expect(pesan).toContain(INSTRUKSI_GAYA_PPT.dark);
+    expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_PPT);
+  });
 });
 
 describe('buatMateriDariModul', () => {
@@ -308,6 +317,21 @@ describe('buatMateriDariModul', () => {
     expect(prompt).toContain('Format utama yang diminta guru:');
     expect(prompt).toContain(INSTRUKSI_FORMAT.audio);
     expect(isi.format_utama).toBe('audio');
+  });
+
+  it('menyimpan gaya PPT yang dipilih pada slide_ppt', async () => {
+    const { klien, create } = klienTiruan(async () => responsTeks(JSON.stringify(ISI_VALID)));
+    const isi = await buatMateriDariModul(TEKS_MODUL, {
+      klien,
+      model: 'model-uji',
+      format: 'ppt',
+      gayaPpt: 'swiss',
+      acak: TANPA_ACAK,
+    });
+
+    expect(isi.format_utama).toBe('ppt');
+    expect(isi.slide_ppt.gaya).toBe('swiss');
+    expect(create.mock.calls[0][0].messages[0].content).toContain(INSTRUKSI_GAYA_PPT.swiss);
   });
 
   it('mengacak posisi pilihan latihan dan menyesuaikan kunci', async () => {
