@@ -295,7 +295,10 @@ async function denganBatasWaktu<T>(
     return await kerja(t, () => pengendali.abort());
   } catch (err) {
     if (err instanceof ErrorMateriAi) throw err;
-    const pesan = pengendali.signal.aborted ? 'Batas waktu pembuatan materi habis atau dibatalkan.' : 'Panggilan AI gagal.';
+    const detail = err instanceof Error ? err.message : String(err);
+    const pesan = pengendali.signal.aborted
+      ? 'Batas waktu pembuatan materi habis atau dibatalkan.'
+      : `Panggilan AI gagal: ${detail}`;
     throw new ErrorMateriAi(pesan, { cause: err });
   } finally {
     clearTimeout(penghitung);

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ClipboardEvent } from 'react';
 import GambarNext from 'next/image';
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import { ClipboardPaste, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { kompresGambarSoal } from '@/lib/kompres-gambar';
 
 export function UnggahGambarSoal({
@@ -19,6 +19,7 @@ export function UnggahGambarSoal({
   onUbah: (gambarBaru: string) => void;
 }) {
   const [memproses, setMemproses] = useState(false);
+  const [membacaClipboard, setMembacaClipboard] = useState(false);
   const [galatLokal, setGalatLokal] = useState<string | null>(null);
 
   async function pilihFile(file: File | null) {
@@ -35,17 +36,71 @@ export function UnggahGambarSoal({
     }
   }
 
+  function fileDariClipboard(data: DataTransfer | null): File | null {
+    if (!data) return null;
+    for (const item of Array.from(data.items)) {
+      if (item.kind === 'file' && /^image\/(jpeg|png|webp)$/i.test(item.type)) {
+        return item.getAsFile();
+      }
+    }
+    for (const file of Array.from(data.files)) {
+      if (/^image\/(jpeg|png|webp)$/i.test(file.type)) return file;
+    }
+    return null;
+  }
+
+  async function tempelGambar() {
+    setGalatLokal(null);
+    if (!navigator.clipboard?.read) {
+      setGalatLokal('Browser ini belum mendukung tempel gambar. Klik kanan gambar → Copy image, lalu gunakan Ctrl+V di tombol Tempel gambar.');
+      return;
+    }
+
+    setMembacaClipboard(true);
+    try {
+      const daftar = await navigator.clipboard.read();
+      for (const item of daftar) {
+        const tipe = item.types.find((jenis) => /^image\/(jpeg|png|webp)$/i.test(jenis));
+        if (!tipe) continue;
+        const blob = await item.getType(tipe);
+        const ekstensi = tipe === 'image/jpeg' ? 'jpg' : tipe.split('/')[1];
+        await pilihFile(new File([blob], `tempel.${ekstensi}`, { type: tipe }));
+        return;
+      }
+      setGalatLokal('Clipboard tidak berisi gambar. Klik kanan gambar di Google → Copy image, lalu coba lagi.');
+    } catch {
+      setGalatLokal('Akses clipboard ditolak. Klik tombol Tempel gambar lagi, atau tekan Ctrl+V saat tombol ini aktif.');
+    } finally {
+      setMembacaClipboard(false);
+    }
+  }
+
+  function tempelDariEvent(event: ClipboardEvent<HTMLElement>) {
+    const file = fileDariClipboard(event.clipboardData);
+    if (!file) {
+      if (event.clipboardData.getData('text/plain').trim()) {
+        setGalatLokal('Clipboard berisi teks, bukan gambar. Klik kanan gambar → Copy image, lalu tempel lagi.');
+      }
+      return;
+    }
+    event.preventDefault();
+    void pilihFile(file);
+  }
+
   const pesanGalat = galat ?? galatLokal;
 
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-aura-primary/25 bg-white/45 p-3.5">
+    <div
+      onPaste={tempelDariEvent}
+      className="flex flex-col gap-2 rounded-2xl border border-dashed border-aura-primary/25 bg-white/45 p-3.5"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-col">
           <span className="font-display text-[11px] font-bold uppercase tracking-[0.04em] text-aura-muted">
             Gambar soal <span className="font-body font-medium normal-case">(opsional)</span>
           </span>
           <span className="font-body text-[12px] leading-[18px] text-aura-muted">
-            Tambahkan ilustrasi seperti bangun datar segitiga, grafik, tabel, atau diagram (JPEG/PNG/WebP).
+            Unggah file, atau klik kanan gambar di Google → Copy image lalu tekan Tempel gambar.
           </span>
         </div>
 
@@ -73,6 +128,20 @@ export function UnggahGambarSoal({
             )}
             {memproses ? 'Memproses…' : gambar ? 'Ganti gambar' : 'Unggah gambar'}
           </label>
+
+          <button
+            type="button"
+            onClick={() => void tempelGambar()}
+            disabled={memproses || membacaClipboard}
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-aura-primary/20 bg-aura-primary/5 px-3.5 font-display text-[12px] font-semibold text-aura-primary transition-colors hover:bg-aura-primary/10 disabled:cursor-wait disabled:opacity-60"
+          >
+            {membacaClipboard ? (
+              <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+            ) : (
+              <ClipboardPaste aria-hidden="true" className="size-3.5" />
+            )}
+            {membacaClipboard ? 'Membaca clipboard…' : 'Tempel gambar'}
+          </button>
 
           {gambar && (
             <button
