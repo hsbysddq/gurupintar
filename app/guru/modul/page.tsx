@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ModalGayaPpt } from "@/components/ModalGayaPpt";
+import { ModalPilihFormat } from "@/components/ModalPilihFormat";
 import { PemilihModel } from "@/components/PemilihModel";
 import { RiwayatKoin } from "@/components/RiwayatKoin";
 import { TabMateriSiswa } from "@/components/TabMateriSiswa";
@@ -136,6 +137,7 @@ function IsiHalamanUbahModul() {
   const [gayaPpt, setGayaPpt] = useState<GayaPpt>("editorial");
   const [gayaSementara, setGayaSementara] = useState<GayaPpt>("editorial");
   const [modalGaya, setModalGaya] = useState(false);
+  const [modalFormat, setModalFormat] = useState(false);
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
   const [galatModel, setGalatModel] = useState<string | null>(null);
@@ -158,11 +160,8 @@ function IsiHalamanUbahModul() {
   const memuat = keadaan.status === "memuat";
   const koinCukup = koin !== null && koin >= biayaKoin;
   const labelFormat = BENTUK.find((bentuk) => bentuk.format === formatPilihan)?.label ?? "";
-  const siapKirim =
-    (sumber === "teks" ? panjangSesuai : berkas !== null) &&
-    model !== "" &&
-    formatPilihan !== "" &&
-    koinCukup;
+  const bisaGenerate = (sumber === "teks" ? panjangSesuai : berkas !== null) && model !== "" && koinCukup;
+  const siapKirim = bisaGenerate && formatPilihan !== "";
   const kelasTerpilih = daftarKelas.find((k) => k.id === kelasId);
   const bisaSimpan = kelasId !== "" && bab.trim().length > 0 && keadaan.status === "siap";
   const topUpHref = tautanTopUpKoin(whatsappAdmin, koin);
@@ -390,8 +389,21 @@ function IsiHalamanUbahModul() {
     }
   }
 
+  function pilihFormatDariModal(format: FormatMateri) {
+    setFormatPilihan(format);
+    setModalFormat(false);
+    if (format === "ppt") {
+      setGayaSementara(gayaPpt);
+      setModalGaya(true);
+    }
+  }
+
   function tanganiGenerate() {
     if (memuat) return;
+    if (!formatPilihan) {
+      setModalFormat(true);
+      return;
+    }
     if (formatPilihan === "ppt") {
       setGayaSementara(gayaPpt);
       setModalGaya(true);
@@ -1017,7 +1029,7 @@ function IsiHalamanUbahModul() {
               <div className="flex flex-col gap-2 lg:w-[240px] lg:shrink-0">
                 <button
                   type="button"
-                  disabled={!siapKirim || memuat}
+                  disabled={!bisaGenerate || memuat}
                   onClick={tanganiGenerate}
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-aura-primary to-aura-primary-deep px-5 font-display text-[14px] font-bold text-white shadow-[0_12px_28px_-14px_rgba(37,99,235,0.7)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:brightness-100"
                 >
@@ -1206,6 +1218,13 @@ function IsiHalamanUbahModul() {
           />
         </section>
       )}
+
+      <ModalPilihFormat
+        terbuka={modalFormat}
+        nilai={formatPilihan}
+        onPilih={pilihFormatDariModal}
+        onTutup={() => setModalFormat(false)}
+      />
 
       <ModalGayaPpt
         terbuka={modalGaya}
