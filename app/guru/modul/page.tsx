@@ -473,7 +473,7 @@ function IsiHalamanUbahModul() {
       <section className="aura-glass relative overflow-hidden rounded-[28px]">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-br from-aura-primary/[0.07] via-transparent to-aura-violet/10"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-aura-primary/[0.07] via-transparent to-aura-violet/10"
         />
         <header className="relative p-5 sm:p-6">
           <div
