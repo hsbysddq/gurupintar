@@ -58,6 +58,7 @@ export function susunPromptTts(teks: string, gaya: GayaAudio): string {
 function speechConfig(gaya: GayaAudio): Record<string, unknown> {
   if (gaya === 'dialog') {
     return {
+      languageCode: 'id-ID',
       multiSpeakerVoiceConfig: {
         speakerVoiceConfigs: [
           {
@@ -74,6 +75,7 @@ function speechConfig(gaya: GayaAudio): Record<string, unknown> {
   }
 
   return {
+    languageCode: 'id-ID',
     voiceConfig: {
       prebuiltVoiceConfig: { voiceName: SUARA_GAYA[gaya] },
     },
@@ -136,9 +138,20 @@ export function hashAudio(teks: string, gaya: GayaAudio): string {
   return createHash('sha256').update(`${gaya}\n${teks.trim()}`).digest('hex');
 }
 
+/** Google AI Studio memakai dua format key: AIza (lama) dan AQ. (auth key baru). */
+export function kunciGeminiValid(kunci: string): boolean {
+  return /^(AIza|AQ\.)/.test(kunci);
+}
+
 export async function panggilGeminiTts(teks: string, gaya: GayaAudio): Promise<Buffer> {
   const kunci = process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim();
   if (!kunci) throw new ErrorAudioAi(PESAN_AUDIO_BELUM_SIAP, 'GEMINI_API_KEY belum diisi.');
+  if (!kunciGeminiValid(kunci)) {
+    throw new ErrorAudioAi(
+      PESAN_AUDIO_BELUM_SIAP,
+      'GEMINI_API_KEY bukan API key Google AI Studio (harus diawali AIza atau AQ.).',
+    );
+  }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_TTS}:generateContent`;
   let respons: Response;

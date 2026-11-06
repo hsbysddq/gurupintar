@@ -377,7 +377,7 @@ describe('buatMateriDariModul', () => {
 
     expect(create).toHaveBeenCalledTimes(1);
     expect(create.mock.calls[0][0].system).toBe(INSTRUKSI_SISTEM_AUDIO);
-    expect(create.mock.calls[0][0].max_tokens).toBe(3500);
+    expect(create.mock.calls[0][0].max_tokens).toBe(3000);
     const prompt = create.mock.calls[0][0].messages[0].content as string;
     expect(prompt).toContain(INSTRUKSI_AUDIO);
     expect(prompt).toContain(INSTRUKSI_GAYA_AUDIO.docu);

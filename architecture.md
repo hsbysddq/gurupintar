@@ -143,7 +143,7 @@ export const TOPIK_DEMO_ID = '00000000-0000-4000-8000-000000000002';
 export const BATAS_SETENGAH = 0.6;          // PRD A-2
 export const INTERVAL_POLLING_GURU_MS = 3000;
 export const INTERVAL_POLLING_SISWA_MS = 5000;
-export const BATAS_WAKTU_AI_MS = 60000;
+export const BATAS_WAKTU_AI_MS = 85000;
 export const JUMLAH_SOAL_TOPIK = 5;         // PRD F-3, F-10
 export const PANJANG_MODUL_MIN = 200;       // PRD F-9
 export const PANJANG_MODUL_MAKS = 8000;
@@ -645,8 +645,8 @@ export function cadanganTersedia(topikId: string): boolean;
 - Ambil teks dari blok `content` bertipe `text`, hapus pagar kode (```` ```json ```` dan ```` ``` ````), `JSON.parse`, lalu `periksaIsiMateri`.
 - Setelah lolos `periksaIsiMateri`, urutan empat pilihan tiap soal latihan diacak di server dengan `acakPilihanLatihan` (`lib/validasi-materi.ts`) dan `kunci` disesuaikan, agar posisi jawaban benar tidak bisa ditebak. Materi cadangan tidak diacak.
 - Jika parsing atau validasi gagal: coba **satu kali lagi** dengan menambahkan alasan kegagalan ke pesan pengguna. Percobaan ulang (dari SDK maupun karena format tidak valid) hanya dilakukan selama waktu masih tersisa. Jika masih gagal atau waktu habis → lempar error → API `502`, sehingga guru bisa memilih "Gunakan materi cadangan".
-- Route `app/api/guru/materi/route.ts` mengekspor `maxDuration = 70` (detik), sedikit di atas batas 60 detik, agar platform tidak memutus sebelum API sempat membalas `502`.
-- **Ubah Modul (PRD F-9):** `buatMateriDariModul(teks)` memakai inti yang sama dengan pembuatan materi kelompok (`INSTRUKSI_SISTEM` 9.3, `max_tokens: 2000`, `periksaIsiMateri`, `acakPilihanLatihan`, satu kali coba ulang, batas waktu total `BATAS_WAKTU_AI_MS`), dengan pesan pengguna dari templat modul di 9.4. Satu panggilan, tanpa materi cadangan. `app/api/guru/modul/route.ts` juga mengekspor `maxDuration = 70`.
+- Route `app/api/guru/materi/route.ts` mengekspor `maxDuration = 90` (detik), sedikit di atas batas 85 detik, agar platform tidak memutus sebelum API sempat membalas `502`.
+- **Ubah Modul (PRD F-9):** `buatMateriDariModul(teks)` memakai inti yang sama dengan pembuatan materi kelompok (`INSTRUKSI_SISTEM` 9.3, `max_tokens: 2000`, `periksaIsiMateri`, `acakPilihanLatihan`, satu kali coba ulang, batas waktu total `BATAS_WAKTU_AI_MS`), dengan pesan pengguna dari templat modul di 9.4. Satu panggilan, tanpa materi cadangan. `app/api/guru/modul/route.ts` juga mengekspor `maxDuration = 90`.
 
 ### 9.2 Data yang boleh dan tidak boleh dikirim ke AI
 

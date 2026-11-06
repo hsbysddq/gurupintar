@@ -536,10 +536,11 @@ async function buatAudioDariModul(teks: string, opsi: OpsiMateriAi): Promise<Isi
       const sisa = t.tenggat - Date.now();
       if (sisa <= 0 || t.signal.aborted) break;
 
+      const mulai = Date.now();
       const respons = await t.klien.messages.create(
         {
           model: t.model,
-          max_tokens: 3500,
+          max_tokens: 3000,
           system: INSTRUKSI_SISTEM_AUDIO,
           messages: [{ role: 'user', content: pesan }],
         },
@@ -549,7 +550,12 @@ async function buatAudioDariModul(teks: string, opsi: OpsiMateriAi): Promise<Isi
       const data = uraiJson(teksRespons);
       if (data) {
         const hasil = skemaAudioAi.safeParse(data);
-        if (hasil.success) return hasil.data.naskah_audio;
+        if (hasil.success) {
+          console.info(
+            `Naskah audio selesai dalam ${Date.now() - mulai} ms (${hasil.data.naskah_audio.length} karakter, model ${t.model}).`,
+          );
+          return hasil.data.naskah_audio;
+        }
         alasan = hasil.error.issues[0]?.message ?? 'Struktur naskah audio tidak valid.';
       } else {
         alasan = 'Balasan bukan satu objek JSON yang valid.';

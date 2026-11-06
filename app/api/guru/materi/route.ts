@@ -19,8 +19,8 @@ import {
 } from '@/lib/server/respons';
 import type { Kelompok, MateriGuru, StatusMateri, SumberMateri } from '@/lib/tipe';
 
-// Sedikit di atas BATAS_WAKTU_AI_MS (60 detik) agar API sempat membalas 502 (architecture.md 9.1).
-export const maxDuration = 70;
+// Sedikit di atas BATAS_WAKTU_AI_MS (85 detik) agar API sempat membalas 502.
+export const maxDuration = 90;
 
 const PESAN_SEDANG_DIBUAT = 'Materi sedang dibuat. Tunggu sebentar.';
 const PESAN_GAGAL_DIBUAT = 'Materi belum berhasil dibuat.';

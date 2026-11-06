@@ -53,7 +53,6 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
         : gayaAudio.id === 'dialog'
           ? 'Dengarkan dialog'
           : 'Dengarkan cerita';
-  const lajuAudio = gayaAudio.id === 'docu' ? 0.92 : gayaAudio.id === 'cerita' ? 0.96 : 1;
 
   return (
     <div className={hanyaFormat ? "min-w-0" : "grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start"}>
@@ -131,7 +130,12 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
                       </span>
                     </div>
                     <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{judulAudio}</h2>
-                    <PemutarAudioGemini teks={isi.naskah_audio} gaya={gayaAudio.id} sesiId={sesiId} laju={lajuAudio} />
+                    <PemutarAudioGemini
+                      key={`${gayaAudio.id}:${sesiId ?? 'guru'}:${isi.naskah_audio.length}:${isi.naskah_audio.slice(0, 40)}`}
+                      teks={isi.naskah_audio}
+                      gaya={gayaAudio.id}
+                      sesiId={sesiId}
+                    />
                     <div className="rounded-2xl border border-aura-ink/10 bg-white/45 p-4">
                       <p className="font-display text-[10px] font-bold uppercase tracking-[0.05em] text-aura-muted">
                         Transkrip naskah

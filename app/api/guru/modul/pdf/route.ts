@@ -20,7 +20,7 @@ import {
   responsOk,
 } from '@/lib/server/respons';
 
-export const maxDuration = 70;
+export const maxDuration = 90;
 
 const PESAN_PDF_TIDAK_VALID = 'File harus berupa PDF dengan ukuran maksimal 5 MB.';
 const PESAN_PDF_TANPA_TEKS =

@@ -13,8 +13,8 @@ import { catatRiwayatModul } from '@/lib/server/riwayat-modul';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_ERROR_UMUM, responsError, responsOk } from '@/lib/server/respons';
 
-// Sedikit di atas BATAS_WAKTU_AI_MS (60 detik) agar API sempat membalas 502 (architecture.md 9.1).
-export const maxDuration = 70;
+// Sedikit di atas BATAS_WAKTU_AI_MS (85 detik) agar API sempat membalas 502.
+export const maxDuration = 90;
 
 const PESAN_PANJANG_MODUL = `Teks modul harus ${PANJANG_MODUL_MIN}–${PANJANG_MODUL_MAKS} karakter.`;
 const PESAN_MODEL_TIDAK_VALID = 'Model AI yang dipilih tidak tersedia. Muat ulang halaman lalu pilih lagi.';

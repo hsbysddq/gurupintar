@@ -64,7 +64,7 @@ export const INSTRUKSI_GAYA_AUDIO: Record<GayaAudio, string> = {
 
 export const INSTRUKSI_AUDIO = [
   'Untuk format audio, buat hanya naskah_audio. Jangan membuat ringkasan, slide, ide video, atau latihan.',
-  'Panjang 600–1.000 kata (sekitar 3.500–6.000 karakter), cukup untuk 5–8 menit mendengarkan.',
+  'Panjang 500–800 kata (sekitar 3.000–5.000 karakter), cukup untuk 4–6 menit mendengarkan.',
   'Tulis narasi utuh yang enak dibacakan. Gunakan kalimat pendek, satu gagasan per kalimat, dan paragraf 2–4 kalimat.',
   'Jangan menyalin kalimat modul. Ambil konsepnya, lalu tulis ulang dengan cerita, analogi, dan contoh sendiri.',
   'Jangan memakai bullet, heading, penanda teknis, placeholder, atau teks dalam tanda kurung siku.',

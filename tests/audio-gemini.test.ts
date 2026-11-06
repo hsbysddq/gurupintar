@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   bungkusWav,
   ErrorAudioAi,
   hashAudio,
+  kunciGeminiValid,
+  PESAN_AUDIO_BELUM_SIAP,
+  panggilGeminiTts,
   susunPromptTts,
   uraikanAudioGemini,
 } from '@/lib/server/audio-gemini';
@@ -21,7 +24,24 @@ function balasanAudio(data: string, mimeType = 'audio/L16;codec=pcm;rate=24000')
   };
 }
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe('audio Gemini', () => {
+  it('menerima format key lama AIza dan format auth key baru AQ.', () => {
+    expect(kunciGeminiValid('AIzaSyContoh')).toBe(true);
+    expect(kunciGeminiValid('AQ.Ab8Contoh')).toBe(true);
+    expect(kunciGeminiValid('user_bukan_key_google')).toBe(false);
+  });
+
+  it('menolak key yang bukan format Google AI Studio tanpa memanggil jaringan', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'user_bukan_key_google');
+    await expect(panggilGeminiTts('Halo, ini tes.', 'docu')).rejects.toMatchObject({
+      pesanAman: PESAN_AUDIO_BELUM_SIAP,
+    });
+  });
+
   it('membungkus PCM 24 kHz mono 16-bit menjadi WAV yang valid', () => {
     const wav = bungkusWav(PCM);
     expect(wav.subarray(0, 4).toString()).toBe('RIFF');

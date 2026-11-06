@@ -288,7 +288,7 @@ Kalau ingin menampilkan maintenance terjadwal, set `MAINTENANCE_MODE=1` lalu res
 | Gejala | Penyebab dan solusi |
 | --- | --- |
 | `502 Bad Gateway` | Layanan mati. Cek `systemctl status gurupintar` dan `journalctl -u gurupintar -n 100`. |
-| `504` saat membuat materi AI | Nginx memotong request 60 detik. Pastikan `proxy_read_timeout 90s` dan service sudah di-reload. |
+| `504` saat membuat materi AI | Nginx memotong request terlalu cepat. Pastikan `proxy_read_timeout 120s` dan service sudah di-reload. |
 | `413` saat unggah PDF | `client_max_body_size` terlalu kecil. Pastikan `12M`, lalu `nginx -t && systemctl reload nginx`. |
 | Build mati di tengah | RAM habis. Tambahkan swap 2 GB lalu build ulang. |
 | `EADDRINUSE :3000` | Ada proses lain di port 3000. Cek `ss -tulpn \| grep 3000` dan hentikan proses lama. |
