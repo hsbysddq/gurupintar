@@ -548,24 +548,27 @@ function IsiHalamanUbahModul() {
       </section>
 
       <section className="aura-glass rounded-[24px] p-4 sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="flex h-full flex-col justify-between gap-5 rounded-[20px] bg-gradient-to-br from-[#FFF7DD] via-[#FFEFC2] to-[#FFE3A3] p-5 text-[#6B4A00] ring-1 ring-inset ring-white/70">
-            <div>
-              <span className="flex size-11 items-center justify-center rounded-2xl bg-white/70 text-[#B45309] shadow-sm ring-1 ring-inset ring-white/80">
+        <div className="flex flex-col gap-4">
+          <aside className="flex flex-col gap-4 rounded-[20px] bg-gradient-to-br from-[#FFF7DD] via-[#FFEFC2] to-[#FFE3A3] p-4 text-[#6B4A00] ring-1 ring-inset ring-white/70 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 text-[#B45309] shadow-sm ring-1 ring-inset ring-white/80">
                 <Coins aria-hidden="true" className="size-5" />
               </span>
-              <p className="mt-4 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-[#8A5A00]">
-                Koin kamu
-              </p>
-              <p className="mt-1 font-display text-[42px] leading-[46px] font-extrabold tracking-[-0.04em] tabular-nums">
-                {memuatKoin ? "…" : (koin ?? "—")}
-              </p>
-              <p className="mt-1 font-body text-[12px] leading-[18px] text-[#7A5200]">
-                Biaya generate <strong className="font-display font-bold">{biayaKoin} koin</strong> per materi
-              </p>
+              <div>
+                <p className="font-display text-[10px] font-bold uppercase tracking-[0.08em] text-[#8A5A00]">
+                  Koin kamu
+                </p>
+                <p className="font-display text-[32px] leading-[36px] font-extrabold tracking-[-0.04em] tabular-nums">
+                  {memuatKoin ? "…" : (koin ?? "—")}
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <p className="font-body text-[12px] leading-[18px] text-[#7A5200] sm:border-l sm:border-[#C99A2E]/30 sm:pl-4">
+              Biaya generate <strong className="font-display font-bold">{biayaKoin} koin</strong> per materi
+            </p>
+
+            <div className="flex flex-col gap-2 sm:items-end">
               {topUpHref ? (
                 <a
                   href={topUpHref}
