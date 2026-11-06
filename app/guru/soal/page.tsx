@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { FormJadwalKuis, JADWAL_FORM_KOSONG, type GalatJadwalForm, type NilaiJadwalForm } from "@/components/JadwalKuis";
+import { UnggahGambarPilihan } from "@/components/UnggahGambarPilihan";
 import { UnggahGambarSoal } from "@/components/UnggahGambarSoal";
 import {
   ambilDaftarKelas,
@@ -59,6 +60,7 @@ type IsianSoal = {
   teks: string;
   gambar: string;
   pilihan: Empat;
+  pilihanGambar: Empat;
   kunci: KodePilihan | "";
   kunciKompleks: KodePilihan[];
   miskonsepsi: Empat;
@@ -101,6 +103,7 @@ const soalKosong = (): IsianSoal => ({
   teks: "",
   gambar: "",
   pilihan: ["", "", "", ""],
+  pilihanGambar: ["", "", "", ""],
   kunci: "",
   kunciKompleks: [],
   miskonsepsi: ["", "", "", ""],
@@ -132,6 +135,7 @@ function adaIsiDraft(data: Isian): boolean {
       Boolean(soal.teks.trim()) ||
       Boolean(soal.gambar) ||
       soal.pilihan.some((pilihan) => Boolean(pilihan.trim())) ||
+      Boolean((soal as Partial<IsianSoal>).pilihanGambar?.some(Boolean)) ||
       Boolean(soal.kunci) ||
       soal.kunciKompleks.length > 0 ||
       soal.pernyataan.some((pernyataan) => Boolean(pernyataan.teks.trim()) || Boolean(pernyataan.kunci)) ||
@@ -153,6 +157,7 @@ function kePayloadSoal(s: IsianSoal): Record<string, unknown> {
     return {
       ...dasar,
       pilihan: s.pilihan,
+      ...(s.pilihanGambar.some(Boolean) ? { pilihan_gambar: s.pilihanGambar } : {}),
       kunci: s.kunci,
       miskonsepsi: s.miskonsepsi,
     };
@@ -161,6 +166,7 @@ function kePayloadSoal(s: IsianSoal): Record<string, unknown> {
     return {
       ...dasar,
       pilihan: s.pilihan,
+      ...(s.pilihanGambar.some(Boolean) ? { pilihan_gambar: s.pilihanGambar } : {}),
       kunciKompleks: s.kunciKompleks,
       miskonsepsi: s.miskonsepsi,
     };
@@ -207,11 +213,13 @@ function isianDariDetail(detail: TopikDetail): Isian {
       if (dasar.tipe === "pilgan") {
         const daftar = ambilDaftarPilihan(s.pilihan);
         dasar.pilihan = [0, 1, 2, 3].map((idx) => daftar[idx]?.teks ?? "") as Empat;
+        dasar.pilihanGambar = [0, 1, 2, 3].map((idx) => daftar[idx]?.gambar ?? "") as Empat;
         dasar.kunci = (s.kunci as KodePilihan) || "";
         dasar.miskonsepsi = KODE_PILIHAN.map((k) => s.miskonsepsi[k] ?? "") as Empat;
       } else if (dasar.tipe === "pilgan_kompleks") {
         const daftar = ambilDaftarPilihan(s.pilihan);
         dasar.pilihan = [0, 1, 2, 3].map((idx) => daftar[idx]?.teks ?? "") as Empat;
+        dasar.pilihanGambar = [0, 1, 2, 3].map((idx) => daftar[idx]?.gambar ?? "") as Empat;
         dasar.kunciKompleks = uraiPilganKompleks(s.kunci);
         dasar.miskonsepsi = KODE_PILIHAN.map((k) => s.miskonsepsi[k] ?? "") as Empat;
       } else if (dasar.tipe === "benar_salah") {
@@ -258,8 +266,8 @@ export default function HalamanBuatSoal() {
   const [pesanAksi, setPesanAksi] = useState<PesanAksi | null>(null);
   const [jadwal, setJadwal] = useState<NilaiJadwalForm>(JADWAL_FORM_KOSONG);
   const [galatJadwal, setGalatJadwal] = useState<GalatJadwalForm>({});
-  const [memprosesTempel, setMemprosesTempel] = useState<number | null>(null);
-  const [galatTempel, setGalatTempel] = useState<Record<number, string>>({});
+  const [memprosesTempel, setMemprosesTempel] = useState<string | null>(null);
+  const [galatTempel, setGalatTempel] = useState<Record<string, string>>({});
   const [draftSiap, setDraftSiap] = useState(false);
   const [draftInfo, setDraftInfo] = useState<{ disimpanPada: string } | null>(null);
 
@@ -295,6 +303,12 @@ export default function HalamanBuatSoal() {
             setIsian((lama) => ({
               ...draft.isian,
               kelasId: lama.kelasId || draft.isian.kelasId,
+              soal: draft.isian.soal.map((soal) => ({
+                ...soalKosong(),
+                ...soal,
+                pilihanGambar:
+                  (soal as Partial<IsianSoal>).pilihanGambar ?? soalKosong().pilihanGambar,
+              })),
             }));
             setJadwal(draft.jadwal ?? JADWAL_FORM_KOSONG);
             setDraftInfo({ disimpanPada: draft.disimpanPada });
@@ -405,46 +419,59 @@ export default function HalamanBuatSoal() {
   }
 
   async function tempelGambarSoal(event: ClipboardEvent<HTMLElement>, i: number) {
+    const target = event.target as HTMLElement | null;
+    const wadahOpsi = target?.closest?.("[data-opsi-gambar]") as HTMLElement | null;
+    const nomorOpsi = wadahOpsi ? Number(wadahOpsi.dataset.opsiGambar) : null;
+    const opsi = nomorOpsi !== null && Number.isInteger(nomorOpsi) ? nomorOpsi : null;
+    const kunci = opsi === null ? `${i}-soal` : `${i}-opsi-${opsi}`;
     const file = fileGambarDariClipboard(event.clipboardData);
+
     if (!file) {
       const teks = event.clipboardData.getData("text/plain").trim();
       if (/^https?:\/\/.+\.(png|jpe?g|webp)(\?.*)?$/i.test(teks)) {
         event.preventDefault();
         setGalatTempel((lama) => ({
           ...lama,
-          [i]: "Gunakan klik kanan → Copy image, bukan Copy image address.",
+          [kunci]: "Gunakan klik kanan → Copy image, bukan Copy image address.",
         }));
       }
       return;
     }
 
     event.preventDefault();
-    if (memprosesTempel === i) return;
-    setMemprosesTempel(i);
+    if (memprosesTempel === kunci) return;
+    setMemprosesTempel(kunci);
     setGalatTempel((lama) => {
-      if (!(i in lama)) return lama;
-      const baru = { ...lama };
-      delete baru[i];
-      return baru;
-    });
-    setGalat((lama) => {
-      const kunci = `soal.${i}.gambar`;
       if (!(kunci in lama)) return lama;
       const baru = { ...lama };
       delete baru[kunci];
       return baru;
     });
+    setGalat((lama) => {
+      const jalurGalat = opsi === null ? `soal.${i}.gambar` : `soal.${i}.pilihan_gambar.${opsi}`;
+      if (!(jalurGalat in lama)) return lama;
+      const baru = { ...lama };
+      delete baru[jalurGalat];
+      return baru;
+    });
 
     try {
       const hasil = await kompresGambarSoal(file);
-      ubahSoal(i, (soal) => ({ ...soal, gambar: hasil }));
+      if (opsi === null) {
+        ubahSoal(i, (soal) => ({ ...soal, gambar: hasil }));
+      } else {
+        ubahSoal(i, (soal) => ({
+          ...soal,
+          pilihanGambar: soal.pilihanGambar.map((gambarLama, idx) => (idx === opsi ? hasil : gambarLama)) as Empat,
+        }));
+      }
     } catch (err) {
       setGalatTempel((lama) => ({
         ...lama,
-        [i]: err instanceof Error ? err.message : "Gambar belum berhasil ditempel.",
+        [kunci]: err instanceof Error ? err.message : "Gambar belum berhasil ditempel.",
       }));
     } finally {
-      setMemprosesTempel((aktif) => (aktif === i ? null : aktif));
+      setMemprosesTempel((aktif) => (aktif === kunci ? null : aktif));
     }
   }
 
@@ -1089,8 +1116,8 @@ export default function HalamanBuatSoal() {
                     nomorSoal={i + 1}
                     gambar={s.gambar}
                     galat={galat[jalur("gambar")]}
-                    memprosesTempel={memprosesTempel === i}
-                    galatTempel={galatTempel[i]}
+                    memprosesTempel={memprosesTempel === `${i}-soal`}
+                    galatTempel={galatTempel[`${i}-soal`]}
                     onUbah={(gambarBaru) => ubahSoal(i, (x) => ({ ...x, gambar: gambarBaru }))}
                   />
 
@@ -1099,25 +1126,43 @@ export default function HalamanBuatSoal() {
                     <>
                       <div className="grid gap-3 md:grid-cols-2">
                         {KODE_PILIHAN.map((kode, j) => (
-                          <Kolom
-                            key={kode}
-                            id={idKolom(jalur(`pilihan.${j}`))}
-                            label={`Pilihan ${kode}`}
-                            galat={galat[jalur(`pilihan.${j}`)]}
-                          >
-                            <input
+                          <div key={kode} data-opsi-gambar={j} className="flex flex-col gap-2">
+                            <Kolom
                               id={idKolom(jalur(`pilihan.${j}`))}
-                              className={KELAS_ISIAN}
-                              value={s.pilihan[j]}
-                              {...propsGalat(`pilihan.${j}`)}
-                              onChange={(e) =>
-                                ubahSoal(i, (x) => ({
-                                  ...x,
-                                  pilihan: x.pilihan.map((p, k) => (k === j ? e.target.value : p)) as Empat,
-                                }))
-                              }
-                            />
-                          </Kolom>
+                              label={`Pilihan ${kode}`}
+                              galat={galat[jalur(`pilihan.${j}`)]}
+                            >
+                              <input
+                                id={idKolom(jalur(`pilihan.${j}`))}
+                                className={KELAS_ISIAN}
+                                value={s.pilihan[j]}
+                                {...propsGalat(`pilihan.${j}`)}
+                                onChange={(e) =>
+                                  ubahSoal(i, (x) => ({
+                                    ...x,
+                                    pilihan: x.pilihan.map((p, k) => (k === j ? e.target.value : p)) as Empat,
+                                  }))
+                                }
+                              />
+                              <UnggahGambarPilihan
+                                idInput={idKolom(jalur(`pilihan_gambar.${j}`))}
+                                kode={kode}
+                                gambar={s.pilihanGambar[j]}
+                                memproses={memprosesTempel === `${i}-opsi-${j}`}
+                                galat={
+                                  galatTempel[`${i}-opsi-${j}`] ?? galat[jalur(`pilihan_gambar.${j}`)]
+                                }
+                                onUbah={(gambarBaru) =>
+                                  ubahSoal(i, (x) => ({
+                                    ...x,
+                                    pilihanGambar: x.pilihanGambar.map((gambarLama, idx) =>
+                                      idx === j ? gambarBaru : gambarLama,
+                                    ) as Empat,
+                                  }))
+                                }
+                              />
+                            </Kolom>
+                          </div>
                         ))}
                       </div>
 

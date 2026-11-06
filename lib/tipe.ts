@@ -48,11 +48,13 @@ export type SumberMateri = 'ai' | 'cadangan';
 export interface PilihanSoal {
   kode: KodePilihan;
   teks: string;
+  gambar?: string | null;
 }
 
 export interface ButirPilihan {
   kode: string;
   teks: string;
+  gambar?: string | null;
 }
 
 export interface PilihanMenjodohkan {

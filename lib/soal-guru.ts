@@ -14,6 +14,7 @@ export interface SoalPilganBaru {
   teks: string;
   gambar?: string;
   pilihan: [string, string, string, string];
+  pilihan_gambar?: [string?, string?, string?, string?];
   kunci: KodePilihan;
   /** String kosong = tidak ada miskonsepsi untuk pilihan itu. */
   miskonsepsi: [string, string, string, string];
@@ -24,6 +25,7 @@ export interface SoalPilganKompleksBaru {
   teks: string;
   gambar?: string;
   pilihan: [string, string, string, string];
+  pilihan_gambar?: [string?, string?, string?, string?];
   kunciKompleks: KodePilihan[];
   miskonsepsi?: [string, string, string, string];
 }
@@ -112,7 +114,11 @@ export function keBarisSoal(topikId: string, daftar: SoalBaru[]): BarisSoalBaru[
         tipe: 'pilgan',
         teks,
         gambar,
-        pilihan: KODE_PILIHAN.map((kode, j) => ({ kode, teks: sp.pilihan[j].trim() })),
+        pilihan: KODE_PILIHAN.map((kode, j) => ({
+          kode,
+          teks: sp.pilihan[j].trim(),
+          ...(sp.pilihan_gambar?.[j]?.trim() ? { gambar: sp.pilihan_gambar[j]!.trim() } : {}),
+        })),
         kunci: sp.kunci,
         miskonsepsi,
       };
@@ -134,7 +140,11 @@ export function keBarisSoal(topikId: string, daftar: SoalBaru[]): BarisSoalBaru[
         tipe: 'pilgan_kompleks',
         teks,
         gambar,
-        pilihan: KODE_PILIHAN.map((kode, j) => ({ kode, teks: spk.pilihan[j].trim() })),
+        pilihan: KODE_PILIHAN.map((kode, j) => ({
+          kode,
+          teks: spk.pilihan[j].trim(),
+          ...(spk.pilihan_gambar?.[j]?.trim() ? { gambar: spk.pilihan_gambar[j]!.trim() } : {}),
+        })),
         kunci: normalisasiPilganKompleks(spk.kunciKompleks),
         miskonsepsi,
       };

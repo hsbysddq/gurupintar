@@ -21,6 +21,10 @@ const soal = (ubah: Partial<SoalPilganBaru> = {}): SoalPilganBaru => ({
   ...ubah,
 });
 
+function gambarPilihan(baris: ReturnType<typeof keBarisSoal>[number], indeks: number) {
+  return Array.isArray(baris.pilihan) ? baris.pilihan[indeks] : undefined;
+}
+
 describe('keBarisSoal (PRD F-10)', () => {
   it('menyusun baris tabel soal: nomor 1–5 sesuai urutan, pilihan berkode A–D', () => {
     const daftar = [1, 2, 3, 4, 5].map((n) => soal({ teks: `Soal nomor ${n}` }));
@@ -44,6 +48,27 @@ describe('keBarisSoal (PRD F-10)', () => {
       kunci: 'A',
       miskonsepsi: { B: 'Hanya mengalikan penyebut.', C: 'Menambah 2 pada pembilang.' },
     });
+  });
+
+  it('menyimpan gambar per pilihan A–D tanpa mengubah pilihan lain', () => {
+    const [baris] = keBarisSoal(TOPIK_ID, [
+      soal({
+        pilihan_gambar: ['data:image/png;base64,AAA=', '', 'data:image/webp;base64,BBB=', ''],
+      }),
+    ]);
+
+    expect(gambarPilihan(baris, 0)).toEqual({
+      kode: 'A',
+      teks: '2/6',
+      gambar: 'data:image/png;base64,AAA=',
+    });
+    expect(gambarPilihan(baris, 1)).toEqual({ kode: 'B', teks: '1/6' });
+    expect(gambarPilihan(baris, 2)).toEqual({
+      kode: 'C',
+      teks: '3/6',
+      gambar: 'data:image/webp;base64,BBB=',
+    });
+    expect(gambarPilihan(baris, 3)).toEqual({ kode: 'D', teks: '2/3' });
   });
 
   it('membuang spasi di awal dan akhir teks soal, pilihan, dan miskonsepsi', () => {
@@ -148,6 +173,19 @@ describe('pesanGalatTopik', () => {
 
   it('isian valid → tidak ada pesan', () => {
     expect(pesanGalatTopik(skemaBodyTopikBaru.safeParse(isian()))).toEqual({});
+  });
+
+  it('menerima gambar per pilihan A–D', () => {
+    const dasar = isian();
+    const b = {
+      ...dasar,
+      soal: dasar.soal.map((soal, i) =>
+        i === 0
+          ? { ...soal, pilihan_gambar: ['data:image/png;base64,AAA=', undefined, undefined, undefined] }
+          : soal,
+      ),
+    };
+    expect(skemaBodyTopikBaru.safeParse(b).success).toBe(true);
   });
 
   it('memetakan setiap kolom yang salah ke pesan bahasa Indonesia, satu pesan per kolom', () => {

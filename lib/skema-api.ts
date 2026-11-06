@@ -320,6 +320,14 @@ const skemaSoalPilgan = z
     teks: z.string().trim().min(5).max(300),
     gambar: skemaGambarSoalOpsional,
     pilihan: z.tuple([skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan()]),
+    pilihan_gambar: z
+      .tuple([
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+      ])
+      .optional(),
     kunci: skemaKodePilihan,
     miskonsepsi: z.tuple([
       skemaTeksMiskonsepsi(),
@@ -338,6 +346,14 @@ const skemaSoalPilganKompleks = z
     teks: z.string().trim().min(5).max(300),
     gambar: skemaGambarSoalOpsional,
     pilihan: z.tuple([skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan(), skemaTeksPilihan()]),
+    pilihan_gambar: z
+      .tuple([
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+        skemaGambarSoalOpsional,
+      ])
+      .optional(),
     kunciKompleks: z
       .array(skemaKodePilihan)
       .min(2, 'Pilih minimal 2 kunci jawaban yang benar.')

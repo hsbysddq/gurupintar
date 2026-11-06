@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Check } from "lucide-react";
 import { GambarSoal } from "@/components/GambarSoal";
 import { KartuKaca } from "@/components/KartuKaca";
@@ -79,7 +80,19 @@ export function KartuSoalKuis({
                 >
                   {p.kode}
                 </span>
-                <span className="min-w-0">{p.teks}</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-2">
+                  <span>{p.teks}</span>
+                  {p.gambar && (
+                    <Image
+                      src={p.gambar}
+                      alt={`Gambar pilihan ${p.kode}`}
+                      width={320}
+                      height={200}
+                      unoptimized
+                      className="max-h-28 w-auto max-w-full rounded-lg object-contain"
+                    />
+                  )}
+                </span>
               </button>
             );
           })}
@@ -119,7 +132,19 @@ export function KartuSoalKuis({
                 >
                   {dipilih ? <Check aria-hidden="true" className="size-4" /> : p.kode}
                 </span>
-                <span className="min-w-0 flex-1">{p.teks}</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-2">
+                  <span>{p.teks}</span>
+                  {p.gambar && (
+                    <Image
+                      src={p.gambar}
+                      alt={`Gambar pilihan ${p.kode}`}
+                      width={320}
+                      height={200}
+                      unoptimized
+                      className="max-h-28 w-auto max-w-full rounded-lg object-contain"
+                    />
+                  )}
+                </span>
               </button>
             );
           })}
