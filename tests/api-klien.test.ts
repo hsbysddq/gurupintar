@@ -234,6 +234,20 @@ describe('api-klien guru', () => {
     );
   });
 
+  it('mengirim gaya audio saat Ubah Modul', async () => {
+    const palsu = stubFetch(async () => Response.json({}));
+    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', undefined, 'audio', undefined, 'docu');
+
+    expect(palsu.mock.calls[0][1]?.body).toBe(
+      JSON.stringify({
+        teks: 'teks modul',
+        model: 'deepseek/deepseek-v4.1-flash',
+        format: 'audio',
+        gaya_audio: 'docu',
+      }),
+    );
+  });
+
   it('bukaSesiBanyak memakai rute batch dan mengirim daftar kelas', async () => {
     const palsu = stubFetch(async () => Response.json({ sesi: [], gagal: [] }));
     await bukaSesiBanyak({ kelasIds: ['k1', 'k2'], topikId: 't1' });

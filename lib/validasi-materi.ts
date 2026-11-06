@@ -3,9 +3,10 @@ import { z } from 'zod';
 // Skema isi materi (architecture.md 8.5). Dipakai untuk keluaran AI, materi cadangan, dan PATCH guru.
 export const skemaIsiMateri = z.object({
   format_utama: z.enum(['video', 'audio', 'bacaan', 'ppt']).optional(),
+  gaya_audio: z.enum(['docu', 'podcast', 'dialog', 'cerita']).optional(),
   judul: z.string().min(5).max(80),
   ringkasan: z.string().min(80).max(1200),
-  naskah_audio: z.string().min(50).max(900),
+  naskah_audio: z.string().min(50).max(6000),
   ide_video: z.object({
     judul: z.string().min(5).max(80),
     deskripsi: z.string().min(20).max(300),
@@ -66,6 +67,9 @@ export type SlidePpt = IsiMateri['slide_ppt']['slide'][number];
 
 /** Keluaran khusus format PPT: hanya slide_ppt, tanpa memaksa AI mengisi ringkasan/audio/video/latihan. */
 export const skemaPptAi = z.object({ slide_ppt: skemaIsiMateri.shape.slide_ppt });
+
+/** Keluaran khusus format Audio: hanya naskah_audio panjang; field lain disintesis lokal. */
+export const skemaAudioAi = z.object({ naskah_audio: z.string().min(500).max(6000) });
 type Latihan = IsiMateri['latihan'][number];
 
 export type HasilPeriksaMateri = { ok: true; isi: IsiMateri } | { ok: false; alasan: string };

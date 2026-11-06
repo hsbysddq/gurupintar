@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones
 import { KartuKaca } from "@/components/KartuKaca";
 import { SlidePptVisual } from "@/components/SlidePptVisual";
 import { TombolDengarkan } from "@/components/TombolDengarkan";
+import { ambilGayaAudio } from "@/lib/gaya-audio";
 import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, FormatMateri, IsiMateri } from "@/lib/tipe";
 
@@ -41,6 +42,17 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMater
   }
 
   const urlYoutube = `https://www.youtube.com/results?search_query=${encodeURIComponent(isi.ide_video.kata_kunci_pencarian)}`;
+  const gayaAudio = ambilGayaAudio(isi.gaya_audio);
+  const teksDengar = isi.naskah_audio.replace(/^\s*(GURU|SISWA|NARATOR)\s*:\s*/gim, '');
+  const judulAudio =
+    gayaAudio.id === 'docu'
+      ? 'Dengarkan ceritanya'
+      : gayaAudio.id === 'podcast'
+        ? 'Dengarkan podcast'
+        : gayaAudio.id === 'dialog'
+          ? 'Dengarkan dialog'
+          : 'Dengarkan cerita';
+  const lajuAudio = gayaAudio.id === 'docu' ? 0.92 : gayaAudio.id === 'cerita' ? 0.96 : 1;
 
   return (
     <div className={hanyaFormat ? "min-w-0" : "grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start"}>
@@ -109,9 +121,22 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null }: TabMater
                 )}
                 {format === "audio" && (
                   <>
-                    <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">Dengarkan penjelasan</h2>
-                    <TombolDengarkan teks={isi.naskah_audio} />
-                    <p className="whitespace-pre-line text-aura-ink">{isi.naskah_audio}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-full border border-aura-primary/15 bg-aura-primary/5 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-primary">
+                        {gayaAudio.kode} — {gayaAudio.nama}
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-aura-ink/5 px-2.5 py-1 font-display text-[10px] font-semibold text-aura-muted">
+                        {gayaAudio.suara}
+                      </span>
+                    </div>
+                    <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{judulAudio}</h2>
+                    <TombolDengarkan teks={teksDengar} laju={lajuAudio} />
+                    <div className="rounded-2xl border border-aura-ink/10 bg-white/45 p-4">
+                      <p className="font-display text-[10px] font-bold uppercase tracking-[0.05em] text-aura-muted">
+                        Transkrip naskah
+                      </p>
+                      <p className="mt-2 whitespace-pre-line text-aura-ink">{isi.naskah_audio}</p>
+                    </div>
                   </>
                 )}
                 {format === "bacaan" && (

@@ -96,7 +96,7 @@ const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon }[] =
   },
   {
     label: "Audio",
-    keterangan: "Narasi audio yang enak didengar saat belajar.",
+    keterangan: "Cerita audio dengan gaya pilihan, bukan bacaan teks.",
     ikon: Headphones,
   },
   {

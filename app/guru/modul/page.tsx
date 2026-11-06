@@ -23,6 +23,7 @@ import {
   Wand2,
   type LucideIcon,
 } from "lucide-react";
+import { ModalGayaAudio } from "@/components/ModalGayaAudio";
 import { ModalGayaPpt } from "@/components/ModalGayaPpt";
 import { ModalPilihFormat } from "@/components/ModalPilihFormat";
 import { PemilihModel } from "@/components/PemilihModel";
@@ -46,6 +47,7 @@ import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
 import type {
   FokusModul,
   FormatMateri,
+  GayaAudio,
   GayaPpt,
   IsiMateri,
   KelasRingkas,
@@ -64,7 +66,7 @@ type Sumber = "teks" | "pdf";
 
 const BENTUK: { format: FormatMateri; label: string; ikon: LucideIcon; deskripsi: string }[] = [
   { format: "video", label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
-  { format: "audio", label: "Audio", ikon: Headphones, deskripsi: "Narasi audio yang enak didengar saat belajar." },
+  { format: "audio", label: "Audio", ikon: Headphones, deskripsi: "Cerita audio dengan gaya pilihan, bukan bacaan teks." },
   { format: "bacaan", label: "Bacaan", ikon: FileText, deskripsi: "Teks bacaan terstruktur dengan poin penting." },
   { format: "ppt", label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
 ];
@@ -83,7 +85,7 @@ TUJUAN PEMBELAJARAN HARIAN:
 const FOKUS_PILIHAN: { nilai: FokusModul; label: string; deskripsi: string }[] = [
   { nilai: "sederhanakan", label: "Sederhanakan Bahasa", deskripsi: "Untuk siswa yang perlu remedial." },
   { nilai: "metafora", label: "Metafora/Neraca Visual", deskripsi: "Analogi visual yang mudah dibayangkan." },
-  { nilai: "podcast", label: "Audio Gaya Podcast", deskripsi: "Narasi audio yang santai untuk remaja." },
+  { nilai: "podcast", label: "Audio Bercerita", deskripsi: "Narasi audio yang mengalir seperti cerita." },
   { nilai: "hots", label: "Soal Tantangan (HOTS)", deskripsi: "Tambahan soal pengayaan dan pembahasan." },
 ];
 
@@ -136,7 +138,10 @@ function IsiHalamanUbahModul() {
   const [formatPilihan, setFormatPilihan] = useState<FormatMateri | "">("");
   const [gayaPpt, setGayaPpt] = useState<GayaPpt>("editorial");
   const [gayaSementara, setGayaSementara] = useState<GayaPpt>("editorial");
+  const [gayaAudio, setGayaAudio] = useState<GayaAudio>("docu");
+  const [gayaAudioSementara, setGayaAudioSementara] = useState<GayaAudio>("docu");
   const [modalGaya, setModalGaya] = useState(false);
+  const [modalGayaAudio, setModalGayaAudio] = useState(false);
   const [modalFormat, setModalFormat] = useState(false);
   const [daftarModel, setDaftarModel] = useState<ModelAi[]>([]);
   const [memuatModel, setMemuatModel] = useState(true);
@@ -361,17 +366,25 @@ function IsiHalamanUbahModul() {
     }
   }
 
-  async function ubah(gayaPptPilihan?: GayaPpt) {
+  async function ubah(gayaPptPilihan?: GayaPpt, gayaAudioPilihan?: GayaAudio) {
     if (!siapKirim) return;
-    const gaya = formatPilihan === "ppt" ? (gayaPptPilihan ?? gayaPpt) : undefined;
+    const gayaPptFinal = formatPilihan === "ppt" ? (gayaPptPilihan ?? gayaPpt) : undefined;
+    const gayaAudioFinal = formatPilihan === "audio" ? (gayaAudioPilihan ?? gayaAudio) : undefined;
     setKeadaan({ status: "memuat" });
     setTersimpan(false);
     setGalatSimpan(null);
     try {
       const hasil =
         sumber === "teks"
-          ? await ubahModul(teks, model, fokus, formatPilihan || undefined, gaya)
-          : await ubahModulPdf(await bacaSebagaiBase64(berkas!), model, fokus, formatPilihan || undefined, gaya);
+          ? await ubahModul(teks, model, fokus, formatPilihan || undefined, gayaPptFinal, gayaAudioFinal)
+          : await ubahModulPdf(
+              await bacaSebagaiBase64(berkas!),
+              model,
+              fokus,
+              formatPilihan || undefined,
+              gayaPptFinal,
+              gayaAudioFinal,
+            );
       const { isi, sumber: sumberHasil, koin: sisaKoin } = hasil;
       if (typeof sisaKoin === "number") setKoin(sisaKoin);
       else void muatKoin();
@@ -396,6 +409,10 @@ function IsiHalamanUbahModul() {
       setGayaSementara(gayaPpt);
       setModalGaya(true);
     }
+    if (format === "audio") {
+      setGayaAudioSementara(gayaAudio);
+      setModalGayaAudio(true);
+    }
   }
 
   function tanganiGenerate() {
@@ -407,6 +424,11 @@ function IsiHalamanUbahModul() {
     if (formatPilihan === "ppt") {
       setGayaSementara(gayaPpt);
       setModalGaya(true);
+      return;
+    }
+    if (formatPilihan === "audio") {
+      setGayaAudioSementara(gayaAudio);
+      setModalGayaAudio(true);
       return;
     }
     void ubah();
@@ -1236,6 +1258,19 @@ function IsiHalamanUbahModul() {
           setGayaPpt(gayaSementara);
           setModalGaya(false);
           void ubah(gayaSementara);
+        }}
+      />
+
+      <ModalGayaAudio
+        terbuka={modalGayaAudio}
+        nilai={gayaAudioSementara}
+        memuat={memuat}
+        onPilih={setGayaAudioSementara}
+        onTutup={() => setModalGayaAudio(false)}
+        onBuat={() => {
+          setGayaAudio(gayaAudioSementara);
+          setModalGayaAudio(false);
+          void ubah(undefined, gayaAudioSementara);
         }}
       />
     </div>

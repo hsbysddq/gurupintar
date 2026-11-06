@@ -18,6 +18,7 @@ export type Format = 'video' | 'audio' | 'bacaan' | 'ppt' | 'latihan';
 export type FormatMateri = 'video' | 'audio' | 'bacaan' | 'ppt';
 
 export type GayaPpt = 'editorial' | 'swiss' | 'dark' | 'kelas' | 'data';
+export type GayaAudio = 'docu' | 'podcast' | 'dialog' | 'cerita';
 export type JenisSlidePpt =
   | 'cover'
   | 'konten'

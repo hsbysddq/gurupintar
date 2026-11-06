@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import type Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import materiCadangan from '@/data/materi-cadangan.json';
+import { INSTRUKSI_AUDIO, INSTRUKSI_GAYA_AUDIO } from '@/lib/gaya-audio';
 import {
   buatMateriDariModul,
   buatMateriSemua,
@@ -12,6 +13,7 @@ import {
   INSTRUKSI_GAYA_PPT,
   INSTRUKSI_PPT,
   INSTRUKSI_SISTEM,
+  INSTRUKSI_SISTEM_AUDIO,
   INSTRUKSI_SISTEM_PPT,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
@@ -238,6 +240,19 @@ const TEKS_MODUL =
   'Pecahan senilai adalah pecahan yang nilainya sama walaupun pembilang dan penyebutnya berbeda. ' +
   'Contohnya 1/2 = 2/4 = 3/6. Kalikan atau bagi pembilang dan penyebut dengan bilangan yang sama.';
 
+const NASKAH_AUDIO = [
+  'Di sebuah kelas, seorang siswa memegang penggaris dan bertanya kenapa satu per dua lebih besar dari satu per tiga.',
+  'Guru itu sempat diam, lalu mengajak siswa melihat dua potong kue yang ukurannya berbeda.',
+  'Potongan pertama dibagi menjadi dua bagian yang sama besar, sedangkan potongan kedua dibagi menjadi tiga bagian.',
+  'Siswa mulai melihat bahwa semakin banyak bagian, semakin kecil ukuran setiap bagian.',
+  'Guru menjelaskan bahwa pecahan senilai adalah pecahan yang nilainya sama walaupun tulisannya berbeda.',
+  'Mereka mencoba mengalikan pembilang dan penyebut dengan bilangan yang sama.',
+  'Satu per dua dikali dua per dua menjadi dua per empat, dan nilainya tetap sama.',
+  'Lalu mereka membagi pembilang dan penyebut dengan bilangan yang sama untuk menyederhanakan pecahan.',
+  'Siswa mencatat bahwa operasi itu tidak mengubah nilai, hanya bentuk tulisannya.',
+  'Di akhir pelajaran, guru mengajak mereka mencari satu contoh pecahan senilai di rumah.',
+].join('\n\n');
+
 describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
   it('mengikuti templat: petunjuk anti-perintah, teks modul di antara penanda, lalu tujuan', () => {
     expect(susunPesanModul(TEKS_MODUL)).toBe(
@@ -290,6 +305,14 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).toContain(INSTRUKSI_GAYA_PPT.dark);
     expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_PPT);
   });
+
+  it('menambahkan aturan dan gaya audio hanya untuk format audio', () => {
+    const pesan = susunPesanModul(TEKS_MODUL, [], 'audio', undefined, 'docu');
+    expect(pesan).toContain(INSTRUKSI_AUDIO);
+    expect(pesan).toContain(INSTRUKSI_GAYA_AUDIO.docu);
+    expect(pesan).not.toContain(INSTRUKSI_GAYA_AUDIO.podcast);
+    expect(susunPesanModul(TEKS_MODUL, [], 'ppt')).not.toContain(INSTRUKSI_AUDIO);
+  });
 });
 
 describe('buatMateriDariModul', () => {
@@ -310,14 +333,14 @@ describe('buatMateriDariModul', () => {
     const isi = await buatMateriDariModul(TEKS_MODUL, {
       klien,
       model: 'model-uji',
-      format: 'audio',
+      format: 'bacaan',
       acak: TANPA_ACAK,
     });
 
     const prompt = create.mock.calls[0][0].messages[0].content as string;
     expect(prompt).toContain('Format utama yang diminta guru:');
-    expect(prompt).toContain(INSTRUKSI_FORMAT.audio);
-    expect(isi.format_utama).toBe('audio');
+    expect(prompt).toContain(INSTRUKSI_FORMAT.bacaan);
+    expect(isi.format_utama).toBe('bacaan');
   });
 
   it('memakai jalur PPT-only, menyimpan gaya, dan menyintesis field lain', async () => {
@@ -337,6 +360,33 @@ describe('buatMateriDariModul', () => {
     expect(isi.format_utama).toBe('ppt');
     expect(isi.slide_ppt.gaya).toBe('swiss');
     expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
+    expect(isi.latihan).toHaveLength(3);
+  });
+
+  it('memakai jalur audio-only, menyimpan gaya, dan menyintesis field lain', async () => {
+    const { klien, create } = klienTiruan(async () =>
+      responsTeks(JSON.stringify({ naskah_audio: NASKAH_AUDIO })),
+    );
+    const isi = await buatMateriDariModul(TEKS_MODUL, {
+      klien,
+      model: 'model-uji',
+      format: 'audio',
+      gayaAudio: 'docu',
+      acak: TANPA_ACAK,
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create.mock.calls[0][0].system).toBe(INSTRUKSI_SISTEM_AUDIO);
+    expect(create.mock.calls[0][0].max_tokens).toBe(3500);
+    const prompt = create.mock.calls[0][0].messages[0].content as string;
+    expect(prompt).toContain(INSTRUKSI_AUDIO);
+    expect(prompt).toContain(INSTRUKSI_GAYA_AUDIO.docu);
+    expect(isi.format_utama).toBe('audio');
+    expect(isi.gaya_audio).toBe('docu');
+    expect(isi.naskah_audio).toBe(NASKAH_AUDIO);
+    expect(isi.naskah_audio.length).toBeGreaterThan(900);
+    expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
+    expect(isi.slide_ppt.slide).toHaveLength(3);
     expect(isi.latihan).toHaveLength(3);
   });
 

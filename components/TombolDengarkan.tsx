@@ -6,12 +6,13 @@ import { Tombol } from "@/components/Tombol";
 
 type TombolDengarkanProps = {
   teks: string;
+  laju?: number;
 };
 
 const tanpaLangganan = () => () => {};
 
 // PRD AC-7.4, design.md 4.14: suara bawaan browser berbahasa Indonesia; disembunyikan jika tidak didukung.
-export function TombolDengarkan({ teks }: TombolDengarkanProps) {
+export function TombolDengarkan({ teks, laju = 1 }: TombolDengarkanProps) {
   const didukung = useSyncExternalStore(
     tanpaLangganan,
     () => "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined",
@@ -36,6 +37,7 @@ export function TombolDengarkan({ teks }: TombolDengarkanProps) {
     }
     const ucapan = new SpeechSynthesisUtterance(teks);
     ucapan.lang = "id-ID";
+    ucapan.rate = laju;
     const suaraIndonesia = suara.getVoices().find((v) => v.lang.replace("_", "-").toLowerCase().startsWith("id"));
     if (suaraIndonesia) ucapan.voice = suaraIndonesia;
     ucapan.onend = () => setBerbicara(false);
