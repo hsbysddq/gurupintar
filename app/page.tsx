@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  Check,
   Clock3,
   EyeOff,
   FileText,
@@ -25,31 +26,59 @@ import { PratinjauDasbor } from "@/components/PratinjauDasbor";
 import { TeksBerputar } from "@/components/TeksBerputar";
 
 export const metadata: Metadata = {
-  title: "Guru Pintarku: tahu siapa yang tertinggal hari ini",
+  title: "Guru Pintarku — ruang kerja guru untuk tahu siapa yang tertinggal",
   description:
-    "Cek pemahaman kilat 5 soal dari HP siswa, peta kelas dalam hitungan menit, dan materi lanjutan per kelompok yang dibuat dengan bantuan AI lalu diperiksa guru.",
+    "Guru Pintarku mengubah kuis 5 soal menjadi peta pemahaman kelas, materi berbeda untuk tiap kelompok, dan daftar siswa yang perlu dibantu. AI menyusun draf, guru memutuskan.",
 };
 
-const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
+const PILAR: { judul: string; isi: string; ikon: LucideIcon }[] = [
   {
-    judul: "Hasil dalam hitungan menit",
-    isi: "Kuis 5 soal dari HP siswa langsung dipetakan, tanpa koreksi manual.",
-    ikon: Clock3,
+    judul: "Cek pemahaman",
+    isi: "Kuis 5 soal dari HP siswa, tanpa koreksi manual dan tanpa aplikasi tambahan.",
+    ikon: ListChecks,
   },
   {
-    judul: "Tahu siapa yang perlu dibantu",
-    isi: "Tiga kelompok pemahaman, soal tersulit, dan miskonsepsi terlihat dalam satu layar.",
+    judul: "Pahami kelas",
+    isi: "Peta tiga kelompok, soal tersulit, dan miskonsepsi muncul dalam satu layar.",
+    ikon: LayoutGrid,
+  },
+  {
+    judul: "Tindak lanjuti",
+    isi: "Materi berbeda untuk tiap kelompok disusun AI, lalu diperiksa dan dibagikan guru.",
+    ikon: Sparkles,
+  },
+];
+
+const KEUNGGULAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
+  {
+    judul: "Dari nilai ke peta pemahaman",
+    isi: "Bukan cuma skor. Guru melihat siapa yang paham, setengah paham, belum paham, soal tersulit, dan miskonsepsi yang muncul.",
     ikon: LayoutGrid,
   },
   {
     judul: "Materi berbeda untuk tiap kelompok",
-    isi: "Video, audio, atau bacaan disusun AI sesuai pilihan guru, lalu diperiksa sebelum dibagikan.",
+    isi: "Satu kelas tidak harus belajar dengan bahan yang sama. AI menyiapkan draf video, audio, atau bacaan untuk masing-masing kelompok.",
     ikon: Sparkles,
   },
   {
-    judul: "Siswa tidak merasa dihakimi",
-    isi: "Siswa hanya melihat materi untuknya, bukan label kelompok atau peringkat.",
-    ikon: HeartHandshake,
+    judul: "Tindakan hari itu, bukan setelah ulangan",
+    isi: "Begitu kuis selesai, guru sudah tahu siapa yang perlu pendampingan dan bagian mana yang perlu diluruskan.",
+    ikon: Clock3,
+  },
+  {
+    judul: "Guru tetap pemegang keputusan",
+    isi: "AI hanya menyusun draf. Guru memeriksa, mengedit, lalu menekan Bagikan sebelum siswa melihat materi.",
+    ikon: ShieldCheck,
+  },
+  {
+    judul: "Siswa tidak diberi label",
+    isi: "Siswa hanya melihat “Materi untukmu”. Tidak ada label kelompok, peringkat, atau diagnosis yang membuat mereka merasa dihakimi.",
+    ikon: EyeOff,
+  },
+  {
+    judul: "Langsung dipakai, tanpa instal",
+    isi: "Guru dan siswa masuk lewat browser. Siswa bergabung dengan kode kelas dari HP, tanpa mengunduh aplikasi.",
+    ikon: Users,
   },
 ];
 
@@ -76,12 +105,12 @@ const LANGKAH: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
   {
     judul: "Petakan",
-    isi: "Jawaban langsung terpetakan menjadi tiga kelompok, lengkap dengan soal yang paling banyak salah.",
+    isi: "Jawaban langsung menjadi peta tiga kelompok, lengkap dengan soal tersulit dan miskonsepsi yang muncul.",
     ikon: LayoutGrid,
   },
   {
-    judul: "Tindak lanjut",
-    isi: "AI menyusun materi lanjutan untuk tiap kelompok. Guru memeriksa dan menyesuaikannya, lalu membagikannya.",
+    judul: "Tindak lanjuti",
+    isi: "AI menyusun draf video, audio, atau bacaan untuk tiap kelompok. Guru memeriksa, menyesuaikan, lalu membagikan.",
     ikon: Sparkles,
   },
 ];
@@ -128,7 +157,7 @@ const FITUR_KECIL: { judul: string; isi: string; ikon: LucideIcon; kelas: string
   },
   {
     judul: "Ubah modul",
-    isi: "Tempelkan teks modul matematika kelas 7, pilih satu format belajar, lalu simpan hasilnya.",
+    isi: "Tempelkan teks modul pelajaran, pilih video, audio, atau bacaan, lalu simpan hasilnya.",
     ikon: FileText,
     kelas: "lg:col-span-3",
   },
@@ -235,13 +264,30 @@ export default function Beranda() {
               id="judul-hero"
               className="text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] text-aura-ink sm:text-[34px] sm:leading-[42px] sm:tracking-[-0.03em] md:text-[40px] md:leading-[1.12] lg:text-[52px] lg:leading-[1.05]"
             >
-              Tahu siapa yang tertinggal <span className="text-aura-primary">hari ini</span>, bukan saat ulangan.
+              Tahu siapa yang tertinggal <span className="text-aura-primary">hari ini</span>, lalu beri materi yang tepat untuknya.
             </h1>
 
-            <p className="max-w-[560px] font-body text-[16px] leading-[26px] text-aura-muted">
-              Cek pemahaman kilat 5 soal dari HP siswa, lalu materi lanjutan untuk tiap kelompok disusun dengan bantuan AI
-              dan diperiksa guru.
+            <p className="max-w-[580px] font-body text-[16px] leading-[26px] text-aura-muted">
+              Guru Pintarku adalah ruang kerja guru untuk memetakan pemahaman kelas dari kuis 5 soal, menemukan
+              miskonsepsi, dan menyiapkan materi berbeda untuk tiap kelompok. AI menyusun draf; guru tetap memeriksa dan
+              memutuskan.
             </p>
+
+            <ul className="grid w-full gap-2 sm:grid-cols-3">
+              {[
+                "5 soal → peta 3 kelompok",
+                "Video, audio, atau bacaan",
+                "Siswa cukup buka dari HP",
+              ].map((poin) => (
+                <li
+                  key={poin}
+                  className="flex items-start gap-2 rounded-2xl border border-white/65 bg-white/50 px-3 py-2.5 font-body text-[12px] leading-[18px] font-medium text-aura-ink backdrop-blur-sm sm:text-[13px]"
+                >
+                  <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-aura-primary" />
+                  {poin}
+                </li>
+              ))}
+            </ul>
 
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <Link href="/masuk" className="aura-btn aura-btn-primary h-[52px] w-full px-6 text-[15px] sm:w-auto">
@@ -259,24 +305,25 @@ export default function Beranda() {
           <PratinjauDasbor />
         </section>
 
-        <section id="mengapa" aria-labelledby="judul-mengapa" className="flex scroll-mt-28 flex-col gap-8">
+        <section id="apa-itu" aria-labelledby="judul-apa-itu" className="flex scroll-mt-28 flex-col gap-8">
           <JudulBagian
-            id="judul-mengapa"
-            eyebrow="Mengapa Guru Pintarku"
-            title="Bukan sekadar kuis. Satu alur dari diagnosis sampai tindak lanjut."
-            description="Guru Pintarku mengubah jawaban 5 soal menjadi peta pemahaman, materi yang berbeda untuk tiap kelompok, dan daftar siswa yang perlu dibantu."
+            id="judul-apa-itu"
+            eyebrow="Apa itu Guru Pintarku"
+            title="Bukan bank soal. Bukan chatbot. Ruang kerja untuk mengambil keputusan di kelas."
+            description="Guru Pintarku menyatukan tiga hal yang biasanya terpisah: cek pemahaman, peta kelas, dan tindak lanjut. Semuanya dalam satu alur, bukan tiga aplikasi berbeda."
           />
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {ALASAN.map(({ judul, isi, ikon: Ikon }) => (
-              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5`}>
-                <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:text-center md:flex-row md:items-center md:text-left lg:flex-col lg:items-center lg:text-center">
-                  <IkonKotak ikon={Ikon} />
-                  <h3 className="font-display text-[16px] leading-[24px] font-semibold tracking-[-0.01em] text-aura-ink">
-                    {judul}
-                  </h3>
-                </div>
-                <p className="font-body text-[14px] leading-[22px] text-aura-muted">{isi}</p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {PILAR.map(({ judul, isi, ikon: Ikon }, i) => (
+              <article key={judul} className={`${KARTU} relative flex h-full flex-col gap-4 p-5 sm:p-6`}>
+                <span className="absolute top-5 right-5 font-display text-[11px] font-bold tracking-[0.08em] text-aura-primary/50">
+                  0{i + 1}
+                </span>
+                <IkonKotak ikon={Ikon} />
+                <h3 className="font-display text-[19px] leading-[26px] font-bold tracking-[-0.015em] text-aura-ink">
+                  {judul}
+                </h3>
+                <p className="font-body text-[14px] leading-[23px] text-aura-muted">{isi}</p>
               </article>
             ))}
           </div>
@@ -392,12 +439,77 @@ export default function Beranda() {
           </div>
         </section>
 
+        <section id="mengapa" aria-labelledby="judul-mengapa" className="flex scroll-mt-28 flex-col gap-8">
+          <JudulBagian
+            id="judul-mengapa"
+            eyebrow="Keunggulan"
+            title="Kenapa Guru Pintarku, bukan kuis biasa?"
+            description="Kami tidak berhenti di nilai. Alurnya berlanjut sampai guru tahu apa yang perlu dilakukan besok."
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {KEUNGGULAN.map(({ judul, isi, ikon: Ikon }) => (
+              <article key={judul} className={`${KARTU} flex h-full flex-col gap-4 p-5 sm:p-6`}>
+                <IkonKotak ikon={Ikon} />
+                <h3 className="font-display text-[17px] leading-[24px] font-bold tracking-[-0.01em] text-aura-ink">
+                  {judul}
+                </h3>
+                <p className="font-body text-[14px] leading-[23px] text-aura-muted">{isi}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <article className={`${KARTU} flex flex-col gap-4 p-5 sm:p-6`}>
+              <span className="inline-flex w-fit items-center rounded-full bg-aura-red/10 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-red">
+                Sebelumnya
+              </span>
+              <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+                Data ada, tetapi keputusan tetap menebak.
+              </h3>
+              <ul className="flex flex-col gap-2.5">
+                {[
+                  "Koreksi satu per satu; hasil baru keluar setelah kelas selesai.",
+                  "Semua siswa mendapat bahan yang sama, padahal kebutuhannya berbeda.",
+                  "Kesulitan baru terlihat saat nilai ulangan turun.",
+                ].map((teks) => (
+                  <li key={teks} className="flex gap-2.5 font-body text-[14px] leading-[22px] text-aura-muted">
+                    <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-aura-red/70" />
+                    {teks}
+                  </li>
+                ))}
+              </ul>
+            </article>
+
+            <article className={`${KARTU} flex flex-col gap-4 border-aura-primary/20 bg-aura-primary/[0.045] p-5 sm:p-6`}>
+              <span className="inline-flex w-fit items-center rounded-full bg-aura-primary/10 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.04em] text-aura-primary">
+                Dengan Guru Pintarku
+              </span>
+              <h3 className="font-display text-[20px] leading-[28px] font-bold tracking-[-0.015em] text-aura-ink">
+                Data langsung berubah menjadi tindakan.
+              </h3>
+              <ul className="flex flex-col gap-2.5">
+                {[
+                  "Peta pemahaman kelas muncul dalam hitungan menit.",
+                  "Tiap kelompok mendapat draf materi yang relevan; guru tetap memeriksa.",
+                  "Bantuan diberikan sebelum kesenjangan melebar.",
+                ].map((teks) => (
+                  <li key={teks} className="flex gap-2.5 font-body text-[14px] leading-[22px] text-aura-ink">
+                    <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-aura-emerald" />
+                    {teks}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+        </section>
+
         <section id="cara-kerja" aria-labelledby="judul-cara" className="flex scroll-mt-28 flex-col gap-8">
           <JudulBagian
             id="judul-cara"
             eyebrow="Cara kerja"
-            title="Tiga langkah, satu siklus yang jelas"
-            description="Dari kuis singkat sampai materi yang tepat sasaran, semuanya terjadi dalam alur yang sama."
+            title="Dari kuis ke tindakan, dalam satu alur"
+            description="Tidak perlu pindah aplikasi. Dari jawaban siswa sampai materi yang dibagikan, semuanya terjadi di ruang kerja yang sama."
           />
 
           <ol className="relative grid gap-4 md:grid-cols-3">
@@ -425,9 +537,9 @@ export default function Beranda() {
         <section id="fitur" aria-labelledby="judul-fitur" className="flex scroll-mt-28 flex-col gap-8">
           <JudulBagian
             id="judul-fitur"
-            eyebrow="Fitur"
-            title="Yang bisa dilakukan guru"
-            description="Diagnosis kelas, materi yang bisa disesuaikan, dan alat bantu mengajar dalam satu ruang kerja."
+            eyebrow="Ruang kerja"
+            title="Satu ruang kerja, bukan lima aplikasi"
+            description="Peta kelas, materi AI, Ubah Modul, dan bank soal buatan sendiri berada dalam alur yang sama."
           />
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
@@ -488,7 +600,7 @@ export default function Beranda() {
                   Guru memilih satu format—video, audio, atau bacaan. Siswa membukanya sesuai format itu.
                 </p>
               </div>
-              <ul className="mt-auto grid grid-cols-2 gap-2.5">
+              <ul className="mt-auto grid gap-2.5 sm:grid-cols-3">
                 {BENTUK_MATERI.map(({ label, keterangan, ikon: Ikon }) => (
                   <li
                     key={label}
@@ -600,16 +712,17 @@ export default function Beranda() {
                 id="judul-penutup"
                 className="mt-4 text-balance font-display text-[28px] leading-[36px] font-extrabold tracking-[-0.025em] md:text-[34px] md:leading-[42px]"
               >
-                Coba satu siklus dalam lima menit
+                Coba satu siklus. Lihat siapa yang perlu dibantu hari ini.
               </h2>
               <p className="mt-3 font-body text-[15px] leading-[26px] text-white/80">
-                Buka kuis, lihat peta kelas, lalu bagikan materi lanjutan. Akun guru dan siswa terpisah, tanpa instal.
+                Masuk sebagai guru, buat kuis 5 soal, dan buka peta kelas pertamamu. Tanpa instalasi; siswa cukup
+                bergabung dengan kode kelas.
               </p>
             </div>
 
             <div className="flex w-full sm:w-auto">
               <Link href="/masuk" className="aura-btn aura-btn-light h-[52px] w-full px-6 text-[15px] sm:w-auto">
-                Mulai sekarang
+                Mulai sebagai guru
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </div>

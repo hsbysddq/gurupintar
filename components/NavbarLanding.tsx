@@ -3,7 +3,8 @@ import { Menu } from "lucide-react";
 import { TulisanGuruPintar } from "@/components/LogoGuruPintar";
 
 const TAUTAN: { href: string; label: string }[] = [
-  { href: "#masalah", label: "Masalah" },
+  { href: "#apa-itu", label: "Apa itu" },
+  { href: "#mengapa", label: "Keunggulan" },
   { href: "#cara-kerja", label: "Cara kerja" },
   { href: "#fitur", label: "Fitur" },
   { href: "#prinsip", label: "Prinsip" },

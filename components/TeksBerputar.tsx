@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 const KALIMAT = [
-  "Siapkan pembelajaran lebih tepat",
-  "Bantu Guru, Pahami Siswa",
-  "Inovasi dalam Mengajar",
+  "Ruang kerja guru SMP",
+  "Dari diagnosis ke tindakan",
+  "AI draf, guru memutuskan",
 ];
 
 const JEDA_MS = 1500;
