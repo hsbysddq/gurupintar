@@ -15,7 +15,7 @@ export function normalisasiKode(kode: string): string {
   return kode.replace(/\s+/g, '').toUpperCase();
 }
 
-const skemaFormat = z.enum(['video', 'audio', 'bacaan', 'ppt']);
+const skemaFormat = z.enum(['video', 'audio', 'bacaan']);
 const skemaKodePilihan = z.enum(['A', 'B', 'C', 'D']);
 const skemaEmail = z.string().trim().max(254).pipe(z.email()).transform(normalisasiEmail);
 const skemaSandi = z.string().min(PANJANG_SANDI_MIN).max(PANJANG_SANDI_MAKS);
@@ -228,8 +228,7 @@ export const skemaQueryMateriSiswa = z.object({
 });
 
 const skemaFokusModul = z.enum(['sederhanakan', 'metafora', 'podcast', 'hots']);
-const skemaFormatModul = z.enum(['video', 'audio', 'bacaan', 'ppt']);
-const skemaGayaPpt = z.enum(['editorial', 'swiss', 'dark', 'kelas', 'data']);
+const skemaFormatModul = z.enum(['video', 'audio', 'bacaan']);
 const skemaGayaAudio = z.enum(['docu', 'podcast', 'dialog', 'cerita']);
 const skemaGayaBacaan = z.enum(['santai', 'bercerita', 'catatan']);
 
@@ -239,7 +238,6 @@ export const skemaBodyUbahModul = z.object({
   model: z.string().trim().min(1).max(200).optional(),
   fokus: z.array(skemaFokusModul).max(4).optional(),
   format: skemaFormatModul.optional(),
-  gaya_ppt: skemaGayaPpt.optional(),
   gaya_audio: skemaGayaAudio.optional(),
   gaya_bacaan: skemaGayaBacaan.optional(),
 });
@@ -250,7 +248,6 @@ export const skemaBodyUbahModulPdf = z.object({
   model: z.string().trim().min(1).max(200).optional(),
   fokus: z.array(skemaFokusModul).max(4).optional(),
   format: skemaFormatModul.optional(),
-  gaya_ppt: skemaGayaPpt.optional(),
   gaya_audio: skemaGayaAudio.optional(),
   gaya_bacaan: skemaGayaBacaan.optional(),
 });

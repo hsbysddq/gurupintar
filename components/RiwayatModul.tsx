@@ -7,14 +7,12 @@ import {
   History,
   Loader2,
   PlayCircle,
-  Presentation,
   RefreshCw,
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
 import { ambilDetailRiwayatModul, ambilRiwayatModul, hapusRiwayatModul } from '@/lib/api-klien';
 import { ambilGayaAudio } from '@/lib/gaya-audio';
-import { ambilGayaPpt } from '@/lib/gaya-ppt';
 import type { FormatMateri, RiwayatModulDetail, RiwayatModulRingkas } from '@/lib/tipe';
 
 const FORMAT_WAKTU = new Intl.DateTimeFormat('id-ID', {
@@ -29,12 +27,10 @@ const FORMAT: Record<FormatMateri, { label: string; ikon: LucideIcon; kelas: str
   video: { label: 'Video', ikon: PlayCircle, kelas: 'bg-aura-primary/10 text-aura-primary' },
   audio: { label: 'Audio', ikon: Headphones, kelas: 'bg-aura-violet/10 text-aura-violet' },
   bacaan: { label: 'Bacaan', ikon: FileText, kelas: 'bg-aura-emerald/10 text-[#047857]' },
-  ppt: { label: 'PPT', ikon: Presentation, kelas: 'bg-aura-amber/10 text-[#92400e]' },
 };
 
 function labelGaya(item: RiwayatModulRingkas): string | null {
   if (item.format === 'audio' && item.gayaAudio) return ambilGayaAudio(item.gayaAudio).nama;
-  if (item.format === 'ppt' && item.gayaPpt) return ambilGayaPpt(item.gayaPpt).nama;
   return null;
 }
 

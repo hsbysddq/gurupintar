@@ -13,7 +13,6 @@ import {
   ListChecks,
   LockKeyhole,
   PlayCircle,
-  Presentation,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -44,7 +43,7 @@ const ALASAN: { judul: string; isi: string; ikon: LucideIcon }[] = [
   },
   {
     judul: "Materi berbeda untuk tiap kelompok",
-    isi: "Video, audio, bacaan, atau PPT disusun AI sesuai pilihan guru, lalu diperiksa sebelum dibagikan.",
+    isi: "Video, audio, atau bacaan disusun AI sesuai pilihan guru, lalu diperiksa sebelum dibagikan.",
     ikon: Sparkles,
   },
   {
@@ -103,11 +102,6 @@ const BENTUK_MATERI: { label: string; keterangan: string; ikon: LucideIcon }[] =
     label: "Bacaan",
     keterangan: "E-book bertingkat dengan bab dan poin penting.",
     ikon: FileText,
-  },
-  {
-    label: "PPT",
-    keterangan: "Slide ringkas siap dipakai untuk presentasi.",
-    ikon: Presentation,
   },
 ];
 
@@ -491,7 +485,7 @@ export default function Beranda() {
                   </span>
                 </div>
                 <p className="font-body text-[14px] leading-[22px] text-aura-muted">
-                  Guru memilih satu format—video, audio, bacaan, atau PPT. Siswa membukanya sesuai format itu.
+                  Guru memilih satu format—video, audio, atau bacaan. Siswa membukanya sesuai format itu.
                 </p>
               </div>
               <ul className="mt-auto grid grid-cols-2 gap-2.5">

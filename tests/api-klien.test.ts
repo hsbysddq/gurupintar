@@ -225,22 +225,20 @@ describe('api-klien guru', () => {
 
   it('mengirim fokus pembelajaran saat Ubah Modul', async () => {
     const palsu = stubFetch(async () => Response.json({}));
-    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', ['hots', 'podcast'], 'ppt', 'dark');
+    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', ['hots', 'podcast']);
 
     expect(palsu.mock.calls[0][1]?.body).toBe(
       JSON.stringify({
         teks: 'teks modul',
         model: 'deepseek/deepseek-v4.1-flash',
         fokus: ['hots', 'podcast'],
-        format: 'ppt',
-        gaya_ppt: 'dark',
       }),
     );
   });
 
   it('mengirim gaya audio saat Ubah Modul', async () => {
     const palsu = stubFetch(async () => Response.json({}));
-    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', undefined, 'audio', undefined, 'docu');
+    await ubahModul('teks modul', 'deepseek/deepseek-v4.1-flash', undefined, 'audio', 'docu');
 
     expect(palsu.mock.calls[0][1]?.body).toBe(
       JSON.stringify({

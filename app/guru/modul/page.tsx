@@ -15,7 +15,6 @@ import {
   Loader2,
   PlayCircle,
   Plus,
-  Presentation,
   RefreshCw,
   Save,
   ShieldCheck,
@@ -25,7 +24,6 @@ import {
 } from "lucide-react";
 import { ModalGayaAudio } from "@/components/ModalGayaAudio";
 import { ModalGayaBacaan } from "@/components/ModalGayaBacaan";
-import { ModalGayaPpt } from "@/components/ModalGayaPpt";
 import { ModalPilihFormat } from "@/components/ModalPilihFormat";
 import { PemilihModel } from "@/components/PemilihModel";
 import { RiwayatKoin } from "@/components/RiwayatKoin";
@@ -45,13 +43,12 @@ import {
 import { KOIN_PER_MODUL, PANJANG_MODUL_MAKS, PANJANG_MODUL_MIN, UKURAN_PDF_MAKS_BYTE } from "@/lib/konstanta";
 import { tautanTopUpKoin } from "@/lib/koin";
 import { formatKonteks } from "@/lib/pemilih-model";
-import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
+import { unduhDocx } from "@/lib/unduh-materi";
 import type {
   FokusModul,
   FormatMateri,
   GayaAudio,
   GayaBacaan,
-  GayaPpt,
   IsiMateri,
   KelasRingkas,
   ModelAi,
@@ -72,7 +69,6 @@ const BENTUK: { format: FormatMateri; label: string; ikon: LucideIcon; deskripsi
   { format: "video", label: "Video", ikon: PlayCircle, deskripsi: "Naskah video dengan alur visual yang runtut." },
   { format: "audio", label: "Audio", ikon: Headphones, deskripsi: "Cerita audio dengan gaya pilihan, bukan bacaan teks." },
   { format: "bacaan", label: "Bacaan", ikon: FileText, deskripsi: "E-book bertingkat dengan bab dan poin penting." },
-  { format: "ppt", label: "PPT", ikon: Presentation, deskripsi: "Slide ringkas siap dipakai untuk presentasi." },
 ];
 
 const KELAS_ISIAN =
@@ -125,7 +121,7 @@ function IsiHalamanUbahModul() {
   const [sumber, setSumber] = useState<Sumber>("teks");
   const [berkas, setBerkas] = useState<File | null>(null);
   const [galatBerkas, setGalatBerkas] = useState<string | null>(null);
-  const [mengunduh, setMengunduh] = useState<"pptx" | "docx" | null>(null);
+  const [mengunduh, setMengunduh] = useState<"docx" | null>(null);
   const [daftarKelas, setDaftarKelas] = useState<KelasRingkas[]>([]);
   const [kelasId, setKelasId] = useState("");
   const [bab, setBab] = useState("");
@@ -140,13 +136,10 @@ function IsiHalamanUbahModul() {
   const [model, setModel] = useState("");
   const [fokus, setFokus] = useState<FokusModul[]>([]);
   const [formatPilihan, setFormatPilihan] = useState<FormatMateri | "">("");
-  const [gayaPpt, setGayaPpt] = useState<GayaPpt>("editorial");
-  const [gayaSementara, setGayaSementara] = useState<GayaPpt>("editorial");
   const [gayaAudio, setGayaAudio] = useState<GayaAudio>("docu");
   const [gayaAudioSementara, setGayaAudioSementara] = useState<GayaAudio>("docu");
   const [gayaBacaan, setGayaBacaan] = useState<GayaBacaan>("santai");
   const [gayaBacaanSementara, setGayaBacaanSementara] = useState<GayaBacaan>("santai");
-  const [modalGaya, setModalGaya] = useState(false);
   const [modalGayaAudio, setModalGayaAudio] = useState(false);
   const [modalGayaBacaan, setModalGayaBacaan] = useState(false);
   const [modalFormat, setModalFormat] = useState(false);
@@ -364,18 +357,17 @@ function IsiHalamanUbahModul() {
     setBerkas(file);
   }
 
-  async function unduh(jenis: "pptx" | "docx", isi: IsiMateri) {
-    setMengunduh(jenis);
+  async function unduh(isi: IsiMateri) {
+    setMengunduh("docx");
     try {
-      await (jenis === "pptx" ? unduhPptx(isi) : unduhDocx(isi));
+      await unduhDocx(isi);
     } finally {
       setMengunduh(null);
     }
   }
 
-  async function ubah(gayaPptPilihan?: GayaPpt, gayaAudioPilihan?: GayaAudio, gayaBacaanPilihan?: GayaBacaan) {
+  async function ubah(gayaAudioPilihan?: GayaAudio, gayaBacaanPilihan?: GayaBacaan) {
     if (!siapKirim) return;
-    const gayaPptFinal = formatPilihan === "ppt" ? (gayaPptPilihan ?? gayaPpt) : undefined;
     const gayaAudioFinal = formatPilihan === "audio" ? (gayaAudioPilihan ?? gayaAudio) : undefined;
     const gayaBacaanFinal = formatPilihan === "bacaan" ? (gayaBacaanPilihan ?? gayaBacaan) : undefined;
     setKeadaan({ status: "memuat" });
@@ -389,7 +381,6 @@ function IsiHalamanUbahModul() {
               model,
               fokus,
               formatPilihan || undefined,
-              gayaPptFinal,
               gayaAudioFinal,
               gayaBacaanFinal,
             )
@@ -398,7 +389,6 @@ function IsiHalamanUbahModul() {
               model,
               fokus,
               formatPilihan || undefined,
-              gayaPptFinal,
               gayaAudioFinal,
               gayaBacaanFinal,
             );
@@ -420,8 +410,8 @@ function IsiHalamanUbahModul() {
   }
 
   function bukaRiwayat(detail: RiwayatModulDetail) {
+    if (!BENTUK.some((bentuk) => bentuk.format === detail.format)) return;
     setFormatPilihan(detail.format);
-    if (detail.format === "ppt") setGayaPpt(detail.gayaPpt ?? "editorial");
     if (detail.format === "audio") setGayaAudio(detail.gayaAudio ?? "docu");
     if (detail.format === "bacaan") setGayaBacaan(detail.isi.gaya_bacaan ?? "santai");
     setMateriId(null);
@@ -439,10 +429,6 @@ function IsiHalamanUbahModul() {
   function pilihFormatDariModal(format: FormatMateri) {
     setFormatPilihan(format);
     setModalFormat(false);
-    if (format === "ppt") {
-      setGayaSementara(gayaPpt);
-      setModalGaya(true);
-    }
     if (format === "audio") {
       setGayaAudioSementara(gayaAudio);
       setModalGayaAudio(true);
@@ -457,11 +443,6 @@ function IsiHalamanUbahModul() {
     if (memuat) return;
     if (!formatPilihan) {
       setModalFormat(true);
-      return;
-    }
-    if (formatPilihan === "ppt") {
-      setGayaSementara(gayaPpt);
-      setModalGaya(true);
       return;
     }
     if (formatPilihan === "audio") {
@@ -1207,21 +1188,8 @@ function IsiHalamanUbahModul() {
               <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:shrink-0">
                 <button
                   type="button"
-                  disabled={mengunduh === "pptx"}
-                  onClick={() => void unduh("pptx", keadaan.isi)}
-                  className="aura-btn aura-btn-secondary h-12 px-4 text-[13px] disabled:opacity-60"
-                >
-                  {mengunduh === "pptx" ? (
-                    <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-                  ) : (
-                    <Presentation aria-hidden="true" className="size-4" />
-                  )}
-                  Unduh PPT
-                </button>
-                <button
-                  type="button"
                   disabled={mengunduh === "docx"}
-                  onClick={() => void unduh("docx", keadaan.isi)}
+                  onClick={() => void unduh(keadaan.isi)}
                   className="aura-btn aura-btn-secondary h-12 px-4 text-[13px] disabled:opacity-60"
                 >
                   {mengunduh === "docx" ? (
@@ -1293,19 +1261,6 @@ function IsiHalamanUbahModul() {
         onTutup={() => setModalFormat(false)}
       />
 
-      <ModalGayaPpt
-        terbuka={modalGaya}
-        nilai={gayaSementara}
-        memuat={memuat}
-        onPilih={setGayaSementara}
-        onTutup={() => setModalGaya(false)}
-        onBuat={() => {
-          setGayaPpt(gayaSementara);
-          setModalGaya(false);
-          void ubah(gayaSementara);
-        }}
-      />
-
       <ModalGayaAudio
         terbuka={modalGayaAudio}
         nilai={gayaAudioSementara}
@@ -1315,7 +1270,7 @@ function IsiHalamanUbahModul() {
         onBuat={() => {
           setGayaAudio(gayaAudioSementara);
           setModalGayaAudio(false);
-          void ubah(undefined, gayaAudioSementara);
+          void ubah(gayaAudioSementara);
         }}
       />
 
@@ -1328,7 +1283,7 @@ function IsiHalamanUbahModul() {
         onBuat={() => {
           setGayaBacaan(gayaBacaanSementara);
           setModalGayaBacaan(false);
-          void ubah(undefined, undefined, gayaBacaanSementara);
+          void ubah(undefined, gayaBacaanSementara);
         }}
       />
     </div>

@@ -5,7 +5,6 @@ import {
   Headphones,
   ListChecks,
   PlayCircle,
-  Presentation,
   Send,
   Sparkles,
   Users,
@@ -22,7 +21,6 @@ const BENTUK: { label: string; ikon: LucideIcon }[] = [
   { label: "Video", ikon: PlayCircle },
   { label: "Audio", ikon: Headphones },
   { label: "Bacaan", ikon: FileText },
-  { label: "PPT", ikon: Presentation },
 ];
 
 const REKOMENDASI: { label: string; nilai: string; ikon: LucideIcon }[] = [

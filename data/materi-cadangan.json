@@ -8,43 +8,6 @@
       "deskripsi": "Video pendek yang menunjukkan satu pizza dipotong menjadi 2, 4, dan 8 bagian untuk memperlihatkan bahwa 1/2, 2/4, dan 4/8 bernilai sama.",
       "kata_kunci_pencarian": "pecahan senilai kelas 7 dengan gambar"
     },
-    "slide_ppt": {
-      "judul": "Pecahan Senilai Langkah demi Langkah",
-      "slide": [
-        {
-          "judul": "Apa itu pecahan senilai?",
-          "poin": [
-            "Pecahan senilai tulisannya berbeda, tetapi nilainya sama.",
-            "Contoh: 1/2 pizza sama banyak dengan 2/4 pizza.",
-            "Potongan pizza lebih banyak, tetapi tiap potongan lebih kecil."
-          ]
-        },
-        {
-          "judul": "Cara pertama: dikali",
-          "poin": [
-            "Kalikan pembilang dan penyebut dengan bilangan yang sama.",
-            "Contoh: 1/2 dikali 3 di atas dan di bawah menjadi 3/6.",
-            "Hasilnya senilai, yaitu 1/2 = 3/6."
-          ]
-        },
-        {
-          "judul": "Cara kedua: dibagi",
-          "poin": [
-            "Bagi pembilang dan penyebut dengan bilangan yang sama.",
-            "Contoh: 6/8 dibagi 2 di atas dan di bawah menjadi 3/4.",
-            "Cara ini juga dipakai untuk menyederhanakan pecahan."
-          ]
-        },
-        {
-          "judul": "Hati-hati, jangan ditambah",
-          "poin": [
-            "Menambah angka yang sama tidak menghasilkan pecahan senilai.",
-            "Contoh: 1/2 ditambah 1 di atas dan bawah menjadi 2/3.",
-            "Nilai 2/3 lebih besar dari 1/2, jadi tidak senilai."
-          ]
-        }
-      ]
-    },
     "latihan": [
       {
         "soal": "Pecahan yang senilai dengan 1/2 adalah …",
@@ -90,43 +53,6 @@
       "deskripsi": "Video yang membahas contoh cara yang keliru dan cara yang benar dalam mencari pecahan senilai serta menyederhanakan pecahan dengan FPB.",
       "kata_kunci_pencarian": "menyederhanakan pecahan dengan FPB"
     },
-    "slide_ppt": {
-      "judul": "Meluruskan Pecahan Senilai",
-      "slide": [
-        {
-          "judul": "Kesalahan 1: menambah",
-          "poin": [
-            "Jangan menambah angka yang sama pada pembilang dan penyebut.",
-            "Contoh: 2/5 tidak sama dengan 3/6.",
-            "Pecahan senilai hanya dari perkalian atau pembagian."
-          ]
-        },
-        {
-          "judul": "Kesalahan 2: satu bagian saja",
-          "poin": [
-            "Jika penyebut dikali 2, pembilang juga harus dikali 2.",
-            "Contoh: 2/3 menjadi 4/6, bukan 2/6.",
-            "Ubah pembilang dan penyebut dengan cara yang sama."
-          ]
-        },
-        {
-          "judul": "Kesalahan 3: berhenti terlalu cepat",
-          "poin": [
-            "12/18 dibagi 2 menjadi 6/9, tetapi masih bisa dibagi 3.",
-            "Bentuk paling sederhananya adalah 2/3.",
-            "Cara cepat: bagi dengan FPB pembilang dan penyebut."
-          ]
-        },
-        {
-          "judul": "Cara memeriksa jawabanmu",
-          "poin": [
-            "Kalikan silang kedua pecahan dan bandingkan hasilnya.",
-            "Jika hasilnya sama, kedua pecahan senilai.",
-            "Biasakan memeriksa sebelum menjawab soal."
-          ]
-        }
-      ]
-    },
     "latihan": [
       {
         "soal": "Rina menulis 2/5 = 3/6 karena pembilang dan penyebut sama-sama ditambah 1. Apakah cara Rina benar?",
@@ -171,43 +97,6 @@
       "judul": "Membandingkan Pecahan dalam Soal Cerita",
       "deskripsi": "Video tentang penerapan pecahan senilai untuk membandingkan nilai ulangan, bagian buku yang dibaca, dan mencari bilangan yang hilang.",
       "kata_kunci_pencarian": "soal cerita pecahan senilai SMP"
-    },
-    "slide_ppt": {
-      "judul": "Tantangan Pecahan Senilai",
-      "slide": [
-        {
-          "judul": "Membandingkan hasil",
-          "poin": [
-            "Budi benar 15 dari 20 soal, Tiara benar 18 dari 24 soal.",
-            "Sederhanakan: 15/20 menjadi 3/4 dan 18/24 menjadi 3/4.",
-            "Hasil mereka sama baiknya."
-          ]
-        },
-        {
-          "judul": "Mencari bilangan yang hilang",
-          "poin": [
-            "Jika 3/n = 12/20, sederhanakan 12/20 menjadi 3/5.",
-            "Pembilangnya sama-sama 3, jadi n = 5.",
-            "Cara ini lebih cepat daripada menebak."
-          ]
-        },
-        {
-          "judul": "Strategi membandingkan",
-          "poin": [
-            "Ubah pecahan ke bentuk paling sederhana.",
-            "Atau samakan penyebutnya, lalu bandingkan pembilangnya.",
-            "Pilih cara yang paling cepat untuk soalnya."
-          ]
-        },
-        {
-          "judul": "Tantangan untukmu",
-          "poin": [
-            "Cari soal cerita yang memakai pecahan senilai di sekitarmu.",
-            "Contohnya nilai ulangan, resep, atau bagian buku yang dibaca.",
-            "Ceritakan jawabanmu kepada temanmu."
-          ]
-        }
-      ]
     },
     "latihan": [
       {

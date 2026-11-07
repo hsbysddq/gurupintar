@@ -1,13 +1,11 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Headphones, Loader2, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
+import { ExternalLink, FileText, Headphones, PlayCircle, type LucideIcon } from "lucide-react";
 import { KartuKaca } from "@/components/KartuKaca";
 import { PemutarAudioGemini } from "@/components/PemutarAudioGemini";
 import { PenampilBacaan } from "@/components/PenampilBacaan";
-import { SlidePptVisual } from "@/components/SlidePptVisual";
 import { ambilGayaAudio } from "@/lib/gaya-audio";
-import { unduhPptx } from "@/lib/unduh-materi";
 import type { Format, FormatMateri, IsiMateri } from "@/lib/tipe";
 
 type TabMateriSiswaProps = {
@@ -22,14 +20,15 @@ const TAB: { format: Format; label: string; ikon: LucideIcon }[] = [
   { format: "video", label: "Video", ikon: PlayCircle },
   { format: "audio", label: "Audio", ikon: Headphones },
   { format: "bacaan", label: "Bacaan", ikon: FileText },
-  { format: "ppt", label: "PPT", ikon: Presentation },
 ];
 
 // PRD AC-7.2 s.d. AC-7.6, design.md 4.14.
 export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: TabMateriSiswaProps) {
   const idDasar = useId();
-  const daftarTab = hanyaFormat ? TAB.filter((tab) => tab.format === hanyaFormat) : TAB;
-  const [aktif, setAktif] = useState<Format>(hanyaFormat ?? formatAwal ?? "bacaan");
+  const hanyaFormatAman = TAB.some((tab) => tab.format === hanyaFormat) ? hanyaFormat : null;
+  const formatAwalAman = TAB.some((tab) => tab.format === formatAwal) ? formatAwal : null;
+  const daftarTab = hanyaFormatAman ? TAB.filter((tab) => tab.format === hanyaFormatAman) : TAB;
+  const [aktif, setAktif] = useState<Format>(hanyaFormatAman ?? formatAwalAman ?? "bacaan");
   const tombolTab = useRef<(HTMLButtonElement | null)[]>([]);
 
   function tanganiTombol(e: KeyboardEvent, indeks: number) {
@@ -61,7 +60,7 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
       <div
         role="tablist"
         aria-label="Bentuk materi"
-        className="aura-glass grid grid-cols-4 gap-1 p-1 lg:sticky lg:top-6 lg:flex lg:flex-col lg:gap-1.5 lg:p-2"
+        className="aura-glass grid grid-cols-3 gap-1 p-1 lg:sticky lg:top-6 lg:flex lg:flex-col lg:gap-1.5 lg:p-2"
       >
         {daftarTab.map(({ format, label, ikon: Ikon }, i) => {
           const terpilih = aktif === format;
@@ -146,7 +145,6 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
                   </>
                 )}
                 {format === "bacaan" && <PenampilBacaan isi={isi} />}
-                {format === "ppt" && <PenampilSlide isi={isi} />}
               </KartuKaca>
             )}
           </div>
@@ -156,77 +154,3 @@ export function TabMateriSiswa({ isi, formatAwal, hanyaFormat = null, sesiId }: 
   );
 }
 
-/** Slide materi satu per satu dengan tombol Sebelumnya/Berikutnya; bisa diunduh sebagai PPTX (tanpa kunci latihan). */
-function PenampilSlide({ isi }: { isi: IsiMateri }) {
-  const slide = isi.slide_ppt.slide;
-  const [indeks, setIndeks] = useState(0);
-  const [mengunduh, setMengunduh] = useState(false);
-  const [galat, setGalat] = useState<string | null>(null);
-  const ini = slide[indeks];
-
-  async function unduh() {
-    setMengunduh(true);
-    setGalat(null);
-    try {
-      await unduhPptx(isi, { denganLatihan: false });
-    } catch {
-      setGalat("File PPT belum berhasil dibuat. Coba lagi sebentar.");
-    } finally {
-      setMengunduh(false);
-    }
-  }
-
-  return (
-    <>
-      <h2 className="font-display text-xl leading-snug font-bold text-aura-ink">{isi.slide_ppt.judul}</h2>
-
-      <SlidePptVisual isi={isi} slide={ini} indeks={indeks} total={slide.length} />
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p aria-live="polite" className="order-first text-center text-[13px] leading-normal font-medium text-aura-muted sm:order-none">
-          Slide {indeks + 1} dari {slide.length}
-        </p>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-          <button
-            type="button"
-            onClick={() => setIndeks((i) => Math.max(0, i - 1))}
-            disabled={indeks === 0}
-            className="inline-flex min-h-12 items-center justify-center gap-1 rounded-full px-3 font-semibold text-aura-primary hover:bg-aura-primary/10 disabled:opacity-40"
-          >
-            <ChevronLeft aria-hidden="true" className="size-5" />
-            Sebelumnya
-          </button>
-          <button
-            type="button"
-            onClick={() => setIndeks((i) => Math.min(slide.length - 1, i + 1))}
-            disabled={indeks === slide.length - 1}
-            className="inline-flex min-h-12 items-center justify-center gap-1 rounded-full px-3 font-semibold text-aura-primary hover:bg-aura-primary/10 disabled:opacity-40"
-          >
-            Berikutnya
-            <ChevronRight aria-hidden="true" className="size-5" />
-          </button>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={unduh}
-        disabled={mengunduh}
-        aria-busy={mengunduh || undefined}
-        className="inline-flex min-h-12 items-center gap-2 self-start font-semibold text-aura-primary hover:underline disabled:opacity-60"
-      >
-        {mengunduh ? (
-          <Loader2 aria-hidden="true" className="size-5 animate-spin" />
-        ) : (
-          <Download aria-hidden="true" className="size-5" />
-        )}
-        {mengunduh ? "Menyiapkan file…" : "Unduh PPT"}
-      </button>
-      {galat && (
-        <p role="alert" className="text-[13px] leading-normal font-medium text-belum-teks">
-          {galat}
-        </p>
-      )}
-    </>
-  );
-}

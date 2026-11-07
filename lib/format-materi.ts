@@ -5,5 +5,5 @@ import type { Format } from './tipe';
  * Nilai lama yang tidak lagi ditawarkan (misalnya "latihan") dianggap belum memilih.
  */
 export function normalisasiFormat(nilai: unknown): Format | null {
-  return nilai === 'video' || nilai === 'audio' || nilai === 'bacaan' || nilai === 'ppt' ? nilai : null;
+  return nilai === 'video' || nilai === 'audio' || nilai === 'bacaan' ? nilai : null;
 }

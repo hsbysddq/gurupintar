@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { normalisasiFormat } from '@/lib/format-materi';
 
 describe('normalisasiFormat', () => {
-  it('mengenali keempat format', () => {
-    for (const f of ['video', 'audio', 'bacaan', 'ppt']) expect(normalisasiFormat(f)).toBe(f);
+  it('mengenali tiga format', () => {
+    for (const f of ['video', 'audio', 'bacaan']) expect(normalisasiFormat(f)).toBe(f);
   });
 
   it('pilihan lama latihan dianggap belum memilih', () => {

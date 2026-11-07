@@ -73,7 +73,6 @@ export async function POST(request: Request) {
         model: input.data.model,
         fokus: input.data.fokus,
         format: input.data.format,
-        gayaPpt: input.data.gaya_ppt,
         gayaAudio: input.data.gaya_audio,
         gayaBacaan: input.data.gaya_bacaan,
       });

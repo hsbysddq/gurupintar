@@ -17,7 +17,6 @@ export async function catatRiwayatModul(
     judul: isi.judul,
     format: isi.format_utama ?? 'bacaan',
     gaya_audio: isi.gaya_audio ?? null,
-    gaya_ppt: isi.slide_ppt.gaya ?? null,
     isi,
     sumber,
   });

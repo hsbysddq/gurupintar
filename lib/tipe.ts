@@ -14,21 +14,11 @@ export interface Profil {
 
 export type Kelompok = 'sudah' | 'setengah' | 'belum';
 
-export type Format = 'video' | 'audio' | 'bacaan' | 'ppt' | 'latihan';
-export type FormatMateri = 'video' | 'audio' | 'bacaan' | 'ppt';
+export type Format = 'video' | 'audio' | 'bacaan' | 'latihan';
+export type FormatMateri = 'video' | 'audio' | 'bacaan';
 
-export type GayaPpt = 'editorial' | 'swiss' | 'dark' | 'kelas' | 'data';
 export type GayaAudio = 'docu' | 'podcast' | 'dialog' | 'cerita';
 export type GayaBacaan = 'santai' | 'bercerita' | 'catatan';
-export type JenisSlidePpt =
-  | 'cover'
-  | 'konten'
-  | 'kode'
-  | 'banding'
-  | 'opsi'
-  | 'langkah'
-  | 'kutipan'
-  | 'penutup';
 
 export type KodePilihan = 'A' | 'B' | 'C' | 'D';
 
@@ -401,7 +391,6 @@ export interface RiwayatModulRingkas {
   judul: string;
   format: FormatMateri;
   gayaAudio: GayaAudio | null;
-  gayaPpt: GayaPpt | null;
   dibuatPada: string;
 }
 

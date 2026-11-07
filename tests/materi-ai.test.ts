@@ -12,12 +12,9 @@ import {
   INSTRUKSI_BACAAN,
   INSTRUKSI_FOKUS,
   INSTRUKSI_FORMAT,
-  INSTRUKSI_GAYA_PPT,
-  INSTRUKSI_PPT,
   INSTRUKSI_SISTEM,
   INSTRUKSI_SISTEM_AUDIO,
   INSTRUKSI_SISTEM_BACAAN,
-  INSTRUKSI_SISTEM_PPT,
   MAKS_TOKEN_MATERI,
   PENANDA_AKHIR_MODUL,
   PENANDA_AWAL_MODUL,
@@ -336,19 +333,12 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).not.toContain(INSTRUKSI_FOKUS.metafora);
   });
 
-  it('menambahkan instruksi PPT dan gaya visual hanya untuk format PPT', () => {
-    const pesan = susunPesanModul(TEKS_MODUL, [], 'ppt', 'dark');
-    expect(pesan).toContain(INSTRUKSI_PPT);
-    expect(pesan).toContain(INSTRUKSI_GAYA_PPT.dark);
-    expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_PPT);
-  });
-
   it('menambahkan aturan dan gaya audio hanya untuk format audio', () => {
-    const pesan = susunPesanModul(TEKS_MODUL, [], 'audio', undefined, 'docu');
+    const pesan = susunPesanModul(TEKS_MODUL, [], 'audio', 'docu');
     expect(pesan).toContain(INSTRUKSI_AUDIO);
     expect(pesan).toContain(INSTRUKSI_GAYA_AUDIO.docu);
     expect(pesan).not.toContain(INSTRUKSI_GAYA_AUDIO.podcast);
-    expect(susunPesanModul(TEKS_MODUL, [], 'ppt')).not.toContain(INSTRUKSI_AUDIO);
+    expect(susunPesanModul(TEKS_MODUL, [], 'bacaan')).not.toContain(INSTRUKSI_AUDIO);
   });
 
   it('menambahkan aturan e-book hanya untuk format bacaan', () => {
@@ -356,7 +346,7 @@ describe('susunPesanModul (architecture.md 9.4, PRD F-9)', () => {
     expect(pesan).toContain(INSTRUKSI_BACAAN);
     expect(pesan).not.toContain(INSTRUKSI_AUDIO);
     expect(susunPesanModul(TEKS_MODUL, [], 'audio')).not.toContain(INSTRUKSI_BACAAN);
-    expect(susunPesanModul(TEKS_MODUL, [], 'bacaan', undefined, undefined, 'catatan')).toContain(
+    expect(susunPesanModul(TEKS_MODUL, [], 'bacaan', undefined, 'catatan')).toContain(
       INSTRUKSI_GAYA_BACAAN.catatan,
     );
   });
@@ -390,26 +380,6 @@ describe('buatMateriDariModul', () => {
     expect(isi.format_utama).toBe('video');
   });
 
-  it('memakai jalur PPT-only, menyimpan gaya, dan menyintesis field lain', async () => {
-    const { klien, create } = klienTiruan(async () =>
-      responsTeks(JSON.stringify({ slide_ppt: ISI_VALID.slide_ppt })),
-    );
-    const isi = await buatMateriDariModul(TEKS_MODUL, {
-      klien,
-      model: 'model-uji',
-      format: 'ppt',
-      gayaPpt: 'swiss',
-      acak: TANPA_ACAK,
-    });
-
-    expect(create.mock.calls[0][0].system).toBe(INSTRUKSI_SISTEM_PPT);
-    expect(create.mock.calls[0][0].messages[0].content).toContain(INSTRUKSI_GAYA_PPT.swiss);
-    expect(isi.format_utama).toBe('ppt');
-    expect(isi.slide_ppt.gaya).toBe('swiss');
-    expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
-    expect(isi.latihan).toHaveLength(3);
-  });
-
   it('memakai jalur audio-only, menyimpan gaya, dan menyintesis field lain', async () => {
     const { klien, create } = klienTiruan(async () =>
       responsTeks(JSON.stringify({ naskah_audio: NASKAH_AUDIO })),
@@ -433,7 +403,6 @@ describe('buatMateriDariModul', () => {
     expect(isi.naskah_audio).toBe(NASKAH_AUDIO);
     expect(isi.naskah_audio.length).toBeGreaterThan(900);
     expect(isi.ringkasan.length).toBeGreaterThanOrEqual(80);
-    expect(isi.slide_ppt.slide).toHaveLength(3);
     expect(isi.latihan).toHaveLength(3);
   });
 
@@ -459,7 +428,6 @@ describe('buatMateriDariModul', () => {
     expect(isi.gaya_bacaan).toBe('catatan');
     expect(isi.bacaan).toEqual(BACAAN_VALID);
     expect(isi.bacaan?.bab).toHaveLength(3);
-    expect(isi.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);
     expect(isi.latihan).toHaveLength(3);
   });
 

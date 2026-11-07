@@ -5,9 +5,8 @@ create table if not exists riwayat_modul (
   id uuid primary key default gen_random_uuid(),
   guru_id uuid not null references pengguna(id) on delete cascade,
   judul text not null,
-  format text not null check (format in ('video', 'audio', 'bacaan', 'ppt')),
+  format text not null check (format in ('video', 'audio', 'bacaan')),
   gaya_audio text,
-  gaya_ppt text,
   isi jsonb not null,
   sumber text not null default 'ai',
   dibuat_pada timestamptz not null default now()

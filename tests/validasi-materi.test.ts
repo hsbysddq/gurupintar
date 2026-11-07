@@ -14,14 +14,6 @@ function isiValid(): IsiMateri {
       deskripsi: 'Video pendek yang memotong pizza menjadi beberapa bagian sama besar.',
       kata_kunci_pencarian: 'pecahan senilai pizza',
     },
-    slide_ppt: {
-      judul: 'Pecahan Senilai dengan Pizza',
-      slide: [
-        { judul: 'Apa itu pecahan senilai?', poin: ['Tulisannya berbeda tetapi nilainya sama.', 'Contoh: 1/2 pizza sama dengan 2/4 pizza.'] },
-        { judul: 'Cara mencarinya', poin: ['Kalikan pembilang dan penyebut dengan bilangan yang sama.', 'Atau bagi keduanya dengan bilangan yang sama.'] },
-        { judul: 'Rangkuman', poin: ['Pecahan senilai punya nilai yang sama.', 'Coba cari tiga pecahan yang senilai dengan 1/3.'] },
-      ],
-    },
     latihan: [
       {
         soal: 'Pecahan manakah yang senilai dengan 1/2?',
@@ -54,26 +46,6 @@ describe('skemaIsiMateri', () => {
     expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_audio: 'radio' }).success).toBe(false);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_bacaan: 'catatan' }).success).toBe(true);
     expect(skemaIsiMateri.safeParse({ ...isiValid(), gaya_bacaan: 'formal' }).success).toBe(false);
-
-    const dasar = isiValid();
-    const kaya = {
-      ...dasar,
-      slide_ppt: {
-        ...dasar.slide_ppt,
-        gaya: 'dark',
-        slide: [
-          {
-            ...dasar.slide_ppt.slide[0],
-            jenis: 'cover',
-            nomor_besar: '01',
-            highlight: 'Pecahan',
-            subjudul: 'Pecahan senilai untuk kelas 7',
-          },
-          ...dasar.slide_ppt.slide.slice(1),
-        ],
-      },
-    };
-    expect(skemaIsiMateri.safeParse(kaya).success).toBe(true);
   });
 
   it('menerima e-book dengan tiga bab dan menolak yang kurang dari tiga', () => {
@@ -146,8 +118,20 @@ describe('periksaIsiMateri', () => {
       ['belum paham', (isi: IsiMateri) => ({ ...isi, judul: 'Materi untuk yang belum paham' })],
       ['Setengah Paham', (isi: IsiMateri) => ({ ...isi, ringkasan: `${isi.ringkasan} Cocok untuk Setengah Paham.` })],
       ['SUDAH PAHAM', (isi: IsiMateri) => ({ ...isi, naskah_audio: `${isi.naskah_audio} Kamu SUDAH PAHAM.` })],
-      ['kelompok', (isi: IsiMateri) => ({ ...isi, slide_ppt: { ...isi.slide_ppt, judul: 'Belajar bersama kelompok belajarmu' } })],
-      ['Kelompok', (isi: IsiMateri) => ({ ...isi, slide_ppt: { ...isi.slide_ppt, slide: [{ judul: 'Kelompok pecahan', poin: isi.slide_ppt.slide[0].poin }, ...isi.slide_ppt.slide.slice(1)] } })],
+      [
+        'kelompok di judul bacaan',
+        (isi: IsiMateri) => ({
+          ...isi,
+          bacaan: {
+            judul: 'Belajar bersama kelompok belajarmu',
+            bab: [
+              { judul: 'Bab satu', paragraf: ['Paragraf pertama yang cukup panjang.'] },
+              { judul: 'Bab dua', paragraf: ['Paragraf kedua yang cukup panjang.'] },
+              { judul: 'Bab tiga', paragraf: ['Paragraf ketiga yang cukup panjang.'] },
+            ],
+          },
+        }),
+      ],
       [
         'belum  paham (spasi ganda) di pembahasan',
         (isi: IsiMateri) => ({
@@ -281,7 +265,7 @@ describe('data/materi-cadangan.json (architecture.md 9.5)', () => {
 });
 
 describe('lengkapiIsiMateri', () => {
-  const tanpa = (kunci: 'slide_ppt' | 'ide_video') => {
+  const tanpa = (kunci: 'ide_video') => {
     const { [kunci]: _dibuang, ...sisa } = isiValid();
     void _dibuang;
     return sisa;
@@ -292,16 +276,8 @@ describe('lengkapiIsiMateri', () => {
     expect(lengkapiIsiMateri(isi)).toBe(isi);
   });
 
-  it('materi lama tanpa slide_ppt mendapat slide yang valid dan ide_video tetap', () => {
-    const hasil = lengkapiIsiMateri(tanpa('slide_ppt'));
-    expect(hasil.ide_video).toEqual(isiValid().ide_video);
-    expect(periksaIsiMateri(hasil).ok).toBe(true);
-    expect(hasil.slide_ppt.slide.length).toBeGreaterThanOrEqual(3);
-  });
-
   it('materi tanpa ide_video mendapat ide video dari judul dan ringkasan', () => {
     const hasil = lengkapiIsiMateri(tanpa('ide_video'));
-    expect(hasil.slide_ppt).toEqual(isiValid().slide_ppt);
     expect(hasil.ide_video.kata_kunci_pencarian).toBe(isiValid().judul);
     expect(periksaIsiMateri(hasil).ok).toBe(true);
   });

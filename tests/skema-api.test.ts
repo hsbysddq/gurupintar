@@ -73,7 +73,7 @@ describe('skemaQuerySoal', () => {
 });
 
 describe('skemaBodyFormat', () => {
-  it.each(['video', 'audio', 'bacaan', 'ppt'])('menerima format %s', (format) => {
+  it.each(['video', 'audio', 'bacaan'])('menerima format %s', (format) => {
     expect(skemaBodyFormat.safeParse({ sesiId: SESI_ID, format }).success).toBe(true);
   });
 
@@ -214,13 +214,8 @@ describe('skemaBodyUbahModul (PRD F-9)', () => {
 
   it('menerima satu format hasil yang didukung dan menolak format lain', () => {
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'audio' }).success).toBe(true);
-    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'ppt' }).success).toBe(true);
+    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'gambar' }).success).toBe(false);
     expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'latihan' }).success).toBe(false);
-  });
-
-  it('menerima gaya PPT A–E dan menolak gaya lain', () => {
-    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), format: 'ppt', gaya_ppt: 'dark' }).success).toBe(true);
-    expect(skemaBodyUbahModul.safeParse({ teks: teks(200), gaya_ppt: 'neon' }).success).toBe(false);
   });
 
   it('menerima gaya audio A–D dan menolak gaya lain', () => {

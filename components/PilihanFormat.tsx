@@ -1,4 +1,4 @@
-import { Check, FileText, Headphones, PlayCircle, Presentation, type LucideIcon } from "lucide-react";
+import { Check, FileText, Headphones, PlayCircle, type LucideIcon } from "lucide-react";
 import type { Format } from "@/lib/tipe";
 
 type PilihanFormatProps = {
@@ -9,8 +9,7 @@ type PilihanFormatProps = {
 const DAFTAR: { format: Format; label: string; deskripsi: string; ikon: LucideIcon }[] = [
   { format: "video", label: "Video", deskripsi: "Tonton penjelasan", ikon: PlayCircle },
   { format: "audio", label: "Audio", deskripsi: "Dengarkan materi", ikon: Headphones },
-  { format: "bacaan", label: "Bacaan", deskripsi: "Baca ringkasan", ikon: FileText },
-  { format: "ppt", label: "PPT", deskripsi: "Lihat slide", ikon: Presentation },
+  { format: "bacaan", label: "Bacaan", deskripsi: "Baca e-book", ikon: FileText },
 ];
 
 // Latihan tetap didukung untuk materi lama, tetapi bukan pilihan gaya belajar awal.
@@ -18,7 +17,6 @@ export const LABEL_FORMAT: Record<Format, string> = {
   video: "Video",
   audio: "Audio",
   bacaan: "Bacaan",
-  ppt: "PPT",
   latihan: "Latihan",
 };
 

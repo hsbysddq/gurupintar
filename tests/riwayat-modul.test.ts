@@ -3,14 +3,10 @@ import materiCadangan from '@/data/materi-cadangan.json';
 import { catatRiwayatModul } from '@/lib/server/riwayat-modul';
 import type { IsiMateri } from '@/lib/validasi-materi';
 
-function isiPpt(): IsiMateri {
+function isiBacaan(): IsiMateri {
   return {
     ...(materiCadangan.belum as IsiMateri),
-    format_utama: 'ppt',
-    slide_ppt: {
-      ...materiCadangan.belum.slide_ppt,
-      gaya: 'dark',
-    },
+    format_utama: 'bacaan',
   };
 }
 
@@ -19,7 +15,7 @@ describe('catatRiwayatModul', () => {
     const insert = vi.fn().mockResolvedValue({ error: null });
     const db = { from: vi.fn(() => ({ insert })) };
 
-    const isi = isiPpt();
+    const isi = isiBacaan();
     await catatRiwayatModul(db as never, 'guru-1', isi);
 
     expect(db.from).toHaveBeenCalledWith('riwayat_modul');
@@ -27,9 +23,8 @@ describe('catatRiwayatModul', () => {
       expect.objectContaining({
         guru_id: 'guru-1',
         judul: isi.judul,
-        format: 'ppt',
+        format: 'bacaan',
         gaya_audio: null,
-        gaya_ppt: 'dark',
         isi,
         sumber: 'ai',
       }),
@@ -44,7 +39,7 @@ describe('catatRiwayatModul', () => {
     };
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    await expect(catatRiwayatModul(db as never, 'guru-1', isiPpt())).resolves.toBeUndefined();
+    await expect(catatRiwayatModul(db as never, 'guru-1', isiBacaan())).resolves.toBeUndefined();
     expect(error).toHaveBeenCalled();
     error.mockRestore();
   });

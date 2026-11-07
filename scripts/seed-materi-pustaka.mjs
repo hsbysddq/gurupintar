@@ -24,15 +24,11 @@ const HARI = 86_400_000;
 
 const cadangan = JSON.parse(readFileSync(new URL('../data/materi-cadangan.json', import.meta.url), 'utf8'));
 
-function isi({ judul, ringkasan, naskah, slides, latihan }) {
+function isi({ judul, ringkasan, naskah, latihan }) {
   return {
     judul,
     ringkasan,
     naskah_audio: naskah,
-    slide_ppt: {
-      judul,
-      slide: slides.map(([judulSlide, poin]) => ({ judul: judulSlide, poin })),
-    },
     latihan: latihan.map(([soal, pilihan, kunci, pembahasan]) => ({ soal, pilihan, kunci, pembahasan })),
   };
 }

@@ -11,8 +11,9 @@ import {
 import { lengkapiIsiMateri } from '@/lib/validasi-materi';
 import type { FormatMateri, RiwayatModulDetail, RiwayatModulRingkas } from '@/lib/tipe';
 
-const KOLOM = 'id, judul, format, gaya_audio, gaya_ppt, dibuat_pada';
+const KOLOM = 'id, judul, format, gaya_audio, dibuat_pada';
 const BATAS_RIWAYAT = 20;
+const FORMAT_DIIZINKAN = new Set(['video', 'audio', 'bacaan']);
 const PESAN_RIWAYAT_BELUM_SIAP = 'Riwayat Ubah Modul belum siap. Coba lagi beberapa saat.';
 const PESAN_RIWAYAT_TIDAK_ADA = 'Riwayat tidak ditemukan.';
 
@@ -21,7 +22,6 @@ type BarisRingkas = {
   judul: string;
   format: FormatMateri;
   gaya_audio: string | null;
-  gaya_ppt: string | null;
   dibuat_pada: string;
 };
 
@@ -33,7 +33,6 @@ function keRingkas(baris: BarisRingkas): RiwayatModulRingkas {
     judul: baris.judul,
     format: baris.format,
     gayaAudio: baris.gaya_audio as RiwayatModulRingkas['gayaAudio'],
-    gayaPpt: baris.gaya_ppt as RiwayatModulRingkas['gayaPpt'],
     dibuatPada: baris.dibuat_pada,
   };
 }
@@ -67,6 +66,7 @@ export async function GET(request: Request) {
       if (!data) return responsError(PESAN_RIWAYAT_TIDAK_ADA, 404);
 
       const baris = data as BarisDetail;
+      if (!FORMAT_DIIZINKAN.has(String(baris.format))) return responsError(PESAN_RIWAYAT_TIDAK_ADA, 404);
       return responsOk<RiwayatModulDetail>({
         ...keRingkas(baris),
         isi: lengkapiIsiMateri(baris.isi),
@@ -80,7 +80,9 @@ export async function GET(request: Request) {
       .order('dibuat_pada', { ascending: false })
       .limit(BATAS_RIWAYAT);
     if (error) return galatRiwayat(error);
-    return responsOk<RiwayatModulRingkas[]>((data as BarisRingkas[]).map(keRingkas));
+    return responsOk<RiwayatModulRingkas[]>(
+      (data as BarisRingkas[]).filter((baris) => FORMAT_DIIZINKAN.has(String(baris.format))).map(keRingkas),
+    );
   } catch (err) {
     return galatRiwayat(err);
   }

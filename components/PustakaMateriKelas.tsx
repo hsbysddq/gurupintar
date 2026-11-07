@@ -12,13 +12,12 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Presentation,
   Search,
   Sparkles,
   Trash2,
 } from "lucide-react";
 import { hapusMateriPustaka } from "@/lib/api-klien";
-import { unduhDocx, unduhPptx } from "@/lib/unduh-materi";
+import { unduhDocx } from "@/lib/unduh-materi";
 import type { KelasRingkas, MateriPustaka } from "@/lib/tipe";
 
 const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", {
@@ -27,7 +26,7 @@ const FORMAT_TANGGAL = new Intl.DateTimeFormat("id-ID", {
   year: "numeric",
 });
 
-type JenisUnduh = "pptx" | "docx";
+type JenisUnduh = "docx";
 
 export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daftar: MateriPustaka[] }) {
   const router = useRouter();
@@ -62,7 +61,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
     setMengunduh(kunci);
     setGalat(null);
     try {
-      await (jenis === "pptx" ? unduhPptx(materi.isi) : unduhDocx(materi.isi));
+      await unduhDocx(materi.isi);
     } catch (err) {
       setGalat(err instanceof Error ? err.message : "Materi belum berhasil diunduh.");
     } finally {
@@ -101,7 +100,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
               Materi kelas
             </h2>
             <p className="mt-1 max-w-2xl font-body text-[14px] leading-[22px] text-aura-muted">
-              Kumpulan modul {kelas.mapel} yang sudah diubah menjadi PPT, audio, bacaan, dan latihan. Simpan hasil
+              Kumpulan modul {kelas.mapel} yang sudah diubah menjadi audio, bacaan, atau e-book. Simpan hasil
               Ubah Modul di sini agar mudah dibuka lagi.
             </p>
           </div>
@@ -120,7 +119,7 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
             {daftar.length} materi
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
-            <Presentation aria-hidden="true" className="size-3.5 text-aura-indigo" />
+            <BookOpen aria-hidden="true" className="size-3.5 text-aura-indigo" />
             {jumlahBab} bab/topik
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-display text-[12px] font-semibold text-aura-ink backdrop-blur-sm">
@@ -218,10 +217,6 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
 
                         <div className="flex flex-wrap gap-1.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-white/55 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.03em] text-aura-muted ring-1 ring-inset ring-white/70">
-                            <Presentation aria-hidden="true" className="size-3 text-aura-primary" />
-                            PPT {m.isi.slide_ppt.slide.length}
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white/55 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.03em] text-aura-muted ring-1 ring-inset ring-white/70">
                             <Headphones aria-hidden="true" className="size-3 text-aura-primary" />
                             Audio
                           </span>
@@ -248,19 +243,6 @@ export function PustakaMateriKelas({ kelas, daftar }: { kelas: KelasRingkas; daf
                             <ArrowUpRight aria-hidden="true" className="size-3.5" />
                             Buka
                           </Link>
-                          <button
-                            type="button"
-                            onClick={() => void unduh("pptx", m)}
-                            disabled={mengunduh === `${m.id}:pptx`}
-                            className="aura-btn aura-btn-secondary h-10 px-3 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {mengunduh === `${m.id}:pptx` ? (
-                              <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
-                            ) : (
-                              <Download aria-hidden="true" className="size-3.5" />
-                            )}
-                            PPT
-                          </button>
                           <button
                             type="button"
                             onClick={() => void unduh("docx", m)}

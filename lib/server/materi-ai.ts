@@ -3,13 +3,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import { BATAS_WAKTU_AI_MS } from '@/lib/konstanta';
 import { INSTRUKSI_AUDIO, INSTRUKSI_GAYA_AUDIO } from '@/lib/gaya-audio';
 import { INSTRUKSI_GAYA_BACAAN } from '@/lib/gaya-bacaan';
-import type { FokusModul, FormatMateri, GayaAudio, GayaBacaan, GayaPpt, Kelompok } from '@/lib/tipe';
+import type { FokusModul, FormatMateri, GayaAudio, GayaBacaan, Kelompok } from '@/lib/tipe';
 import {
   acakPilihanLatihan,
   periksaIsiMateri,
   skemaAudioAi,
   skemaBacaanAi,
-  skemaPptAi,
   type HasilPeriksaMateri,
   type IsiMateri,
 } from '@/lib/validasi-materi';
@@ -28,7 +27,6 @@ Aturan keluaran:
 - Struktur JSON:
   {"judul": string, "ringkasan": string, "naskah_audio": string,
    "ide_video": {"judul": string, "deskripsi": string, "kata_kunci_pencarian": string},
-   "slide_ppt": {"judul": string, "slide": [{"judul": string, "poin": [string, string]}]},
    "latihan": [{"soal": string, "pilihan": [string, string, string, string], "kunci": "A"|"B"|"C"|"D", "pembahasan": string}]}
 - "latihan" berisi tepat 3 soal. Setiap soal punya tepat satu jawaban benar, empat pilihan yang berbeda, dan "kunci" menunjuk pilihan yang benar (A = pilihan pertama).
 - Di "pembahasan", jangan menyebut huruf pilihan (A, B, C, D); sebut nilai jawabannya.
@@ -39,7 +37,6 @@ Aturan isi:
 - "ringkasan": 80–1200 karakter, menjelaskan konsep dengan contoh sehari-hari (kue, pizza, uang, dsb.).
 - "naskah_audio": 50–900 karakter, gaya bertutur seperti guru berbicara. Tulis pecahan dengan kata, misalnya "dua per tiga", agar enak dibacakan.
 - "ide_video": ide video pendek yang bisa dicari siswa di YouTube; "kata_kunci_pencarian" dalam bahasa Indonesia.
-- "slide_ppt": kerangka presentasi 4–6 slide untuk dipelajari siswa. Tiap slide punya "judul" singkat (maksimal 60 karakter) dan 2–4 "poin" berupa kalimat pendek (maksimal 160 karakter). Slide pertama mengenalkan konsep, slide terakhir berisi rangkuman atau tantangan kecil.
 - Jangan pernah menyebut label kelompok, tingkat kemampuan, atau kata "kelompok", "belum paham", "setengah paham", "sudah paham".
 - Jangan menyertakan tautan, nama orang sungguhan, atau informasi pribadi.
 - Periksa ulang semua hitungan sebelum menjawab. Kunci jawaban harus benar secara matematis.`;
@@ -88,7 +85,7 @@ export const PENANDA_AWAL_MODUL = '<<<AWAL MODUL>>>';
 export const PENANDA_AKHIR_MODUL = '<<<AKHIR MODUL>>>';
 
 export const TUJUAN_MODUL =
-  'Ubah isi modul di atas menjadi materi belajar singkat untuk siswa kelas 7: ringkasan bacaan, naskah audio, ide video, kerangka slide PPT, dan 3 soal latihan. Gunakan hanya konsep yang ada di teks modul, dan sesuaikan contoh serta soal latihan dengan isi modul.';
+  'Ubah isi modul di atas menjadi materi belajar singkat untuk siswa kelas 7: ringkasan bacaan, naskah audio, ide video, dan 3 soal latihan. Gunakan hanya konsep yang ada di teks modul, dan sesuaikan contoh serta soal latihan dengan isi modul.';
 
 export const INSTRUKSI_FOKUS: Record<FokusModul, string> = {
   sederhanakan: 'Sederhanakan bahasa dan langkah penjelasan untuk siswa yang perlu remedial.',
@@ -101,52 +98,7 @@ export const INSTRUKSI_FORMAT: Record<FormatMateri, string> = {
   video: 'Video adalah format utama. Buat ide_video paling lengkap dan operasional, termasuk alur visual dan kata kunci pencarian yang tepat.',
   audio: 'Audio adalah format utama. Buat naskah_audio panjang, mengalir, dan enak dibacakan mengikuti gaya audio yang dipilih guru.',
   bacaan: 'Bacaan adalah format utama. Buat e-book bertingkat dengan 3–6 bab, bukan satu blok ringkasan.',
-  ppt: 'PPT adalah format utama. Buat slide_ppt paling lengkap dengan alur 6–8 slide yang siap dipresentasikan.',
 };
-
-export const INSTRUKSI_GAYA_PPT: Record<GayaPpt, string> = {
-  editorial:
-    'Gaya A Editorial Klasik: latar krem #F7F3EC, teks #1A1A1A, aksen terracotta #C2410C, serif Georgia, angka besar dan satu kata judul di-highlight.',
-  swiss:
-    'Gaya B Swiss Modern: latar putih, teks #111111, aksen biru #1B4FDB, sans-serif Arial, grid tegas dan banyak ruang kosong.',
-  dark: 'Gaya C Dark Tech: latar #1A1A1A, teks #F5F5F5, aksen biru neon #7DD3FC, blok kode monospace, kontras tinggi.',
-  kelas:
-    'Gaya D Kelas Ceria: latar hijau lembut #F3F7EE, teks #23301F, aksen hijau #2F7D4A, bahasa hangat dan blok banding yang jelas.',
-  data: 'Gaya E Laporan Data: latar abu-biru #F4F6FA, teks #16243A, aksen teal #0F766E, angka dan struktur laporan yang rapi.',
-};
-
-export const INSTRUKSI_PPT = [
-  'Untuk format PPT, abaikan batas 4–6 slide pada instruksi sistem; buat 6–8 slide dengan struktur visual berikut.',
-  'Field opsional di bawah boleh ditambahkan meskipun tidak tercantum di skema JSON dasar.',
-  '- Slide 1 cover: jenis "cover", nomor_besar "01", judul maksimal 60 karakter, highlight satu kata dari judul, subjudul maksimal 120 karakter, poin 2 baris meta.',
-  '- Slide isi: pilih jenis "konten", "kode", "banding", "opsi", "langkah", atau "kutipan".',
-  '  * konten: 2–4 poin.',
-  '  * kode: isi "kode" singkat dan 2 poin.',
-  '  * banding: isi "banding": {buruk, baik} dan 2 poin.',
-  '  * opsi: isi "opsi": 2–4 {nama, deskripsi}.',
-  '  * langkah: isi "langkah": 2–5 langkah.',
-  '  * kutipan: isi "kutipan" dan 2 poin.',
-  '- Slide terakhir penutup: jenis "penutup", judul pernyataan, subjudul dukungan, dan "penutup": {pernyataan, dukungan, cta}.',
-  'Aturan visual: tanpa shadow/gradient; aksen untuk highlight; blok kode monospace di latar gelap; blok banding buruk/baik; sudut 3–4px.',
-  'Jaga keluaran tetap ringkas agar muat batas output DeepSeek: maksimal 8 slide, poin maksimal 140 karakter, jangan mengulang teks.',
-].join('\n');
-
-export const INSTRUKSI_SISTEM_PPT = `Kamu adalah perancang slide presentasi materi pelajaran SMP di Indonesia.
-
-Balas HANYA dengan satu objek JSON valid. Tanpa teks pembuka, penutup, atau pagar kode.
-Bentuk JSON:
-{"slide_ppt":{"judul": string, "slide": [{"jenis": "cover"|"konten"|"kode"|"banding"|"opsi"|"langkah"|"kutipan"|"penutup", "judul": string, "subjudul"?: string, "nomor_besar"?: string, "highlight"?: string, "poin": [string, string], "kode"?: string, "banding"?: {"buruk": string, "baik": string}, "opsi"?: [{"nama": string, "deskripsi": string}], "langkah"?: [string], "kutipan"?: string, "penutup"?: {"pernyataan": string, "dukungan": string, "cta": string}}]}}
-
-Aturan struktur:
-- slide berisi 6–8 slide.
-- Setiap slide wajib punya "judul" (3–60 karakter) dan 2–4 "poin" (5–140 karakter per poin).
-- Slide pertama wajib jenis "cover" dengan nomor_besar dan highlight satu kata.
-- Slide terakhir wajib jenis "penutup" dengan penutup.cta.
-- Gunakan jenis blok lain hanya jika isinya memang cocok.
-- Bahasa Indonesia sederhana, tanpa label kelompok, tanpa LaTeX, tanpa tautan.
-- Jaga ringkas agar muat batas output DeepSeek.
-
-${INSTRUKSI_PPT}`;
 
 export const INSTRUKSI_BACAAN = [
   'Untuk format bacaan, buat e-book bertingkat, bukan satu blok ringkasan.',
@@ -210,7 +162,6 @@ export function susunPesanModul(
   teks: string,
   fokus: readonly FokusModul[] = [],
   format?: FormatMateri,
-  gayaPpt?: GayaPpt,
   gayaAudio?: GayaAudio,
   gayaBacaan?: GayaBacaan,
 ): string {
@@ -227,7 +178,6 @@ export function susunPesanModul(
         'Buat format utama itu paling lengkap. Bagian format lain tetap diisi secukupnya agar struktur JSON lengkap.',
       ]
     : [];
-  const arahanPpt = format === 'ppt' ? ['', INSTRUKSI_PPT, ...(gayaPpt ? ['', INSTRUKSI_GAYA_PPT[gayaPpt]] : [])] : [];
   const arahanAudio =
     format === 'audio' ? ['', INSTRUKSI_AUDIO, ...(gayaAudio ? ['', INSTRUKSI_GAYA_AUDIO[gayaAudio]] : [])] : [];
   const arahanBacaan =
@@ -246,7 +196,6 @@ export function susunPesanModul(
     TUJUAN_MODUL,
     ...arahanFokus,
     ...arahanFormat,
-    ...arahanPpt,
     ...arahanAudio,
     ...arahanBacaan,
   ].join('\n');
@@ -330,7 +279,6 @@ export type OpsiMateriAi = {
   acak?: () => number;
   fokus?: FokusModul[];
   format?: FormatMateri;
-  gayaPpt?: GayaPpt;
   gayaAudio?: GayaAudio;
   gayaBacaan?: GayaBacaan;
 };
@@ -397,80 +345,6 @@ function rapikanTeks(teks: string, min: number, max: number, cadangan: string): 
   return hasil;
 }
 
-/** Slide-only AI output dilengkapi field lain secara lokal agar IsiMateri tetap valid. */
-function sintesisIsiPpt(slide_ppt: IsiMateri['slide_ppt']): IsiMateri {
-  const semuaPoin = slide_ppt.slide
-    .flatMap((slide) => [slide.subjudul ?? '', ...slide.poin, slide.kutipan ?? '', ...(slide.langkah ?? [])])
-    .filter(Boolean);
-  const ringkasan = rapikanTeks(
-    semuaPoin.join(' '),
-    80,
-    1200,
-    'Materi ini merangkum poin utama dari slide yang telah disusun.',
-  );
-  const naskah_audio = rapikanTeks(
-    semuaPoin.join(' '),
-    50,
-    900,
-    'Simak poin utama materi berikut dengan saksama.',
-  );
-  const slidePertama = slide_ppt.slide[0];
-  const ide_video = {
-    judul: slide_ppt.judul,
-    deskripsi: rapikanTeks(
-      [slidePertama?.subjudul ?? '', ...(slidePertama?.poin ?? [])].join(' '),
-      20,
-      300,
-      'Penjelasan singkat materi ini.',
-    ),
-    kata_kunci_pencarian: slide_ppt.judul.slice(0, 80),
-  };
-
-  const kandidat = [
-    ...new Map(
-      slide_ppt.slide
-        .flatMap((slide) => slide.poin.map((poin) => ({ poin, judul: slide.judul })))
-        .filter((item) => item.poin.length >= 10)
-        .map((item) => [item.poin.toLowerCase(), item]),
-    ).values(),
-  ];
-  const cadanganPilihan = [
-    'Pilihan ini tidak dijelaskan pada slide.',
-    'Pilihan ini bukan poin utama materi.',
-    'Pilihan ini terlalu umum untuk materi.',
-  ];
-  const latihan = Array.from({ length: 3 }, (_, i) => {
-    const sumber = kandidat[i] ?? { poin: `Poin utama materi bagian ${i + 1}.`, judul: slide_ppt.judul };
-    const benar = sumber.poin.slice(0, 100);
-    const lain = kandidat
-      .filter((item) => item.poin !== sumber.poin)
-      .slice(0, 3)
-      .map((item) => item.poin.slice(0, 100));
-    const pilihan = [benar, ...lain, ...cadanganPilihan]
-      .filter((nilai, indeks, daftar) => daftar.findIndex((x) => x.toLowerCase() === nilai.toLowerCase()) === indeks)
-      .slice(0, 4);
-    while (pilihan.length < 4) pilihan.push(`Pilihan tambahan ${pilihan.length + 1}.`);
-    return {
-      soal: `Apa poin utama dari slide "${sumber.judul}"?`.slice(0, 300),
-      pilihan: pilihan as [string, string, string, string],
-      kunci: 'A' as const,
-      pembahasan: `Poin utama slide tersebut adalah ${benar}.`.slice(0, 400),
-    };
-  });
-
-  const hasil = periksaIsiMateri({
-    format_utama: 'ppt',
-    judul: slide_ppt.judul,
-    ringkasan,
-    naskah_audio,
-    ide_video,
-    slide_ppt,
-    latihan,
-  });
-  if (!hasil.ok) throw new ErrorMateriAi(`Materi PPT gagal dibuat: ${hasil.alasan}`);
-  return hasil.isi;
-}
-
 function kalimatAudio(naskah: string): string[] {
   return naskah
     .replace(/^\s*(GURU|SISWA|NARATOR)\s*:\s*/gim, '')
@@ -478,17 +352,6 @@ function kalimatAudio(naskah: string): string[] {
     .map((kalimat) => kalimat.replace(/\s+/g, ' ').trim())
     .filter((kalimat) => kalimat.length >= 5)
     .map((kalimat) => (kalimat.length <= 160 ? kalimat : `${kalimat.slice(0, 159).trimEnd()}…`));
-}
-
-function poinSlideAudio(teks: string[]): string[] {
-  const poin = [...new Set(teks.filter((kalimat) => kalimat.length >= 5))].slice(0, 3);
-  const cadangan = [
-    'Perhatikan contoh yang dibacakan pada bagian ini.',
-    'Simak bagaimana konsep itu digunakan dalam cerita.',
-    'Hubungkan penjelasan ini dengan pengalamanmu sendiri.',
-  ];
-  while (poin.length < 2) poin.push(cadangan[poin.length]);
-  return poin;
 }
 
 function latihanDariKalimat(kalimat: string[], konteks: string): IsiMateri['latihan'] {
@@ -541,16 +404,6 @@ function sintesisIsiAudio(naskah_audio: string, gaya: GayaAudio): IsiMateri {
     kata_kunci_pencarian: judulAman.slice(0, 80),
   };
 
-  const tengah = Math.max(0, Math.floor(kalimat.length / 3));
-  const slide_ppt = {
-    judul: judulAman,
-    slide: [
-      { judul: 'Pembuka', poin: poinSlideAudio(kalimat.slice(0, 3)) },
-      { judul: 'Poin utama', poin: poinSlideAudio(kalimat.slice(tengah, tengah + 3)) },
-      { judul: 'Refleksi', poin: poinSlideAudio(kalimat.slice(-3)) },
-    ],
-  };
-
   const latihan = latihanDariKalimat(kalimat, 'audio');
 
   const hasil = periksaIsiMateri({
@@ -560,7 +413,6 @@ function sintesisIsiAudio(naskah_audio: string, gaya: GayaAudio): IsiMateri {
     ringkasan,
     naskah_audio: naskah,
     ide_video,
-    slide_ppt,
     latihan,
   });
   if (!hasil.ok) throw new ErrorMateriAi(`Materi Audio gagal dibuat: ${hasil.alasan}`);
@@ -570,7 +422,7 @@ function sintesisIsiAudio(naskah_audio: string, gaya: GayaAudio): IsiMateri {
 /** Jalur audio khusus: AI hanya menulis naskah panjang, field lain disintesis lokal. */
 async function buatAudioDariModul(teks: string, opsi: OpsiMateriAi): Promise<IsiMateri> {
   const gayaAudio = opsi.gayaAudio ?? 'docu';
-  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'audio', undefined, gayaAudio);
+  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'audio', gayaAudio);
   const naskah_audio = await denganBatasWaktu(opsi, async (t) => {
     let pesan = pesanAwal;
     let alasan = 'waktu habis sebelum naskah audio selesai dibuat';
@@ -639,21 +491,6 @@ function sintesisIsiBacaan(bacaan: NonNullable<IsiMateri['bacaan']>, gaya: GayaB
     kata_kunci_pencarian: judul.slice(0, 80),
   };
 
-  const slide_ppt = {
-    judul,
-    slide: bacaan.bab.slice(0, 6).map((bab) => {
-      const poin = [...(bab.poin ?? []), ...bab.paragraf]
-        .map((item) => (item.length <= 160 ? item : `${item.slice(0, 159).trimEnd()}…`))
-        .filter((item) => item.length >= 5)
-        .slice(0, 3);
-      while (poin.length < 2) poin.push('Baca bab ini untuk penjelasan lengkap.');
-      return {
-        judul: bab.judul.slice(0, 60),
-        poin,
-      };
-    }),
-  };
-
   const latihan = latihanDariKalimat(paragraf, 'e-book');
   const hasil = periksaIsiMateri({
     format_utama: 'bacaan',
@@ -663,7 +500,6 @@ function sintesisIsiBacaan(bacaan: NonNullable<IsiMateri['bacaan']>, gaya: GayaB
     naskah_audio,
     bacaan,
     ide_video,
-    slide_ppt,
     latihan,
   });
   if (!hasil.ok) throw new ErrorMateriAi(`Materi Bacaan gagal dibuat: ${hasil.alasan}`);
@@ -673,7 +509,7 @@ function sintesisIsiBacaan(bacaan: NonNullable<IsiMateri['bacaan']>, gaya: GayaB
 /** Jalur bacaan khusus: AI hanya menulis e-book bertingkat, field lain disintesis lokal. */
 async function buatBacaanDariModul(teks: string, opsi: OpsiMateriAi): Promise<IsiMateri> {
   const gayaBacaan = opsi.gayaBacaan ?? 'santai';
-  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'bacaan', undefined, undefined, gayaBacaan);
+  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'bacaan', undefined, gayaBacaan);
   const bacaan = await denganBatasWaktu(opsi, async (t) => {
     let pesan = pesanAwal;
     let alasan = 'waktu habis sebelum e-book selesai dibuat';
@@ -720,54 +556,13 @@ async function buatBacaanDariModul(teks: string, opsi: OpsiMateriAi): Promise<Is
   return acakPilihanLatihan(sintesisIsiBacaan(bacaan, gayaBacaan), opsi.acak ?? Math.random);
 }
 
-/** Jalur PPT khusus: AI hanya membuat slide, sehingga lebih cepat dan tidak menabrak batas waktu. */
-async function buatPptDariModul(teks: string, opsi: OpsiMateriAi): Promise<IsiMateri> {
-  const pesanAwal = susunPesanModul(teks, opsi.fokus, 'ppt', opsi.gayaPpt);
-  const slide_ppt = await denganBatasWaktu(opsi, async (t) => {
-    let pesan = pesanAwal;
-    let alasan = 'waktu habis sebelum slide selesai dibuat';
-
-    for (let percobaan = 0; percobaan < 2; percobaan++) {
-      const sisa = t.tenggat - Date.now();
-      if (sisa <= 0 || t.signal.aborted) break;
-
-      const respons = await t.klien.messages.create(
-        {
-          model: t.model,
-          max_tokens: 3000,
-          system: INSTRUKSI_SISTEM_PPT,
-          messages: [{ role: 'user', content: pesan }],
-        },
-        { signal: t.signal, timeout: sisa },
-      );
-      const teksRespons = respons.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
-      const data = uraiJson(teksRespons);
-      if (data) {
-        const hasil = skemaPptAi.safeParse(data);
-        if (hasil.success) {
-          return { ...hasil.data.slide_ppt, gaya: opsi.gayaPpt ?? 'editorial' };
-        }
-        alasan = hasil.error.issues[0]?.message ?? 'Struktur slide tidak valid.';
-      } else {
-        alasan = 'Balasan bukan satu objek JSON yang valid.';
-      }
-      pesan = `${pesanAwal}\n\nBalasanmu sebelumnya ditolak karena: ${alasan}\nPerbaiki, lalu balas lagi hanya dengan satu objek JSON slide_ppt.`;
-    }
-
-    throw new ErrorMateriAi(`Materi PPT gagal dibuat: ${alasan}`);
-  });
-
-  return sintesisIsiPpt(slide_ppt);
-}
-
 /** PRD F-9: satu materi pratinjau dari teks modul guru, dengan batas waktu total yang sama. */
 export async function buatMateriDariModul(teks: string, opsi: OpsiMateriAi = {}): Promise<IsiMateri> {
-  if (opsi.format === 'ppt') return buatPptDariModul(teks, opsi);
   if (opsi.format === 'audio') return buatAudioDariModul(teks, opsi);
   if (opsi.format === 'bacaan') return buatBacaanDariModul(teks, opsi);
 
   const isi = await denganBatasWaktu(opsi, (t) =>
-    buatSatuMateri(t, susunPesanModul(teks, opsi.fokus, opsi.format, opsi.gayaPpt), 'dari modul'),
+    buatSatuMateri(t, susunPesanModul(teks, opsi.fokus, opsi.format), 'dari modul'),
   );
   return {
     ...isi,

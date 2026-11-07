@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Skema isi materi (architecture.md 8.5). Dipakai untuk keluaran AI, materi cadangan, dan PATCH guru.
 export const skemaIsiMateri = z.object({
-  format_utama: z.enum(['video', 'audio', 'bacaan', 'ppt']).optional(),
+  format_utama: z.enum(['video', 'audio', 'bacaan']).optional(),
   gaya_audio: z.enum(['docu', 'podcast', 'dialog', 'cerita']).optional(),
   gaya_bacaan: z.enum(['santai', 'bercerita', 'catatan']).optional(),
   judul: z.string().min(5).max(80),
@@ -30,48 +30,6 @@ export const skemaIsiMateri = z.object({
     deskripsi: z.string().min(20).max(300),
     kata_kunci_pencarian: z.string().min(3).max(80),
   }),
-  slide_ppt: z.object({
-    judul: z.string().min(5).max(80),
-    gaya: z.enum(['editorial', 'swiss', 'dark', 'kelas', 'data']).optional(),
-    slide: z.array(
-      z.object({
-        jenis: z
-          .enum(['cover', 'konten', 'kode', 'banding', 'opsi', 'langkah', 'kutipan', 'penutup'])
-          .optional(),
-        judul: z.string().min(3).max(60),
-        subjudul: z.string().min(3).max(140).optional(),
-        nomor_besar: z.string().min(1).max(12).optional(),
-        highlight: z.string().min(1).max(40).optional(),
-        poin: z.array(z.string().min(5).max(160)).min(2).max(4),
-        kode: z.string().min(5).max(500).optional(),
-        banding: z
-          .object({
-            buruk: z.string().min(5).max(200),
-            baik: z.string().min(5).max(200),
-          })
-          .optional(),
-        opsi: z
-          .array(
-            z.object({
-              nama: z.string().min(2).max(60),
-              deskripsi: z.string().min(5).max(160),
-            }),
-          )
-          .min(2)
-          .max(4)
-          .optional(),
-        langkah: z.array(z.string().min(5).max(160)).min(2).max(5).optional(),
-        kutipan: z.string().min(5).max(300).optional(),
-        penutup: z
-          .object({
-            pernyataan: z.string().min(5).max(120),
-            dukungan: z.string().min(5).max(160),
-            cta: z.string().min(3).max(80),
-          })
-          .optional(),
-      }),
-    ).min(3).max(8),
-  }),
   latihan: z.array(z.object({
     soal: z.string().min(10).max(300),
     pilihan: z.tuple([z.string().min(1), z.string().min(1), z.string().min(1), z.string().min(1)]),
@@ -81,10 +39,6 @@ export const skemaIsiMateri = z.object({
 });
 
 export type IsiMateri = z.infer<typeof skemaIsiMateri>;
-export type SlidePpt = IsiMateri['slide_ppt']['slide'][number];
-
-/** Keluaran khusus format PPT: hanya slide_ppt, tanpa memaksa AI mengisi ringkasan/audio/video/latihan. */
-export const skemaPptAi = z.object({ slide_ppt: skemaIsiMateri.shape.slide_ppt });
 
 /** Keluaran khusus format Audio: hanya naskah_audio panjang; field lain disintesis lokal. */
 export const skemaAudioAi = z.object({ naskah_audio: z.string().min(500).max(6000) });
@@ -141,23 +95,6 @@ function semuaTeks(isi: IsiMateri): string[] {
           ]),
         ]
       : []),
-    isi.slide_ppt.judul,
-    ...isi.slide_ppt.slide.flatMap((s) => [
-      s.judul,
-      ...s.poin,
-      s.subjudul ?? '',
-      s.nomor_besar ?? '',
-      s.highlight ?? '',
-      s.kode ?? '',
-      s.banding?.buruk ?? '',
-      s.banding?.baik ?? '',
-      ...(s.opsi ?? []).flatMap((o) => [o.nama, o.deskripsi]),
-      ...(s.langkah ?? []),
-      s.kutipan ?? '',
-      s.penutup?.pernyataan ?? '',
-      s.penutup?.dukungan ?? '',
-      s.penutup?.cta ?? '',
-    ]),
     ...isi.latihan.flatMap((l) => [l.soal, ...l.pilihan, l.pembahasan]),
   ];
 }
@@ -200,57 +137,31 @@ export function periksaIsiMateri(data: unknown): HasilPeriksaMateri {
 
 const KODE_PILIHAN = ['A', 'B', 'C', 'D'] as const;
 
-const BATAS_POIN = 160;
-
-function kalimatDari(teks: string): string[] {
-  return teks
-    .split(/\n+/)
-    .flatMap((baris) => baris.split(/(?<=[.!?])\s+/))
-    .map((k) => k.trim())
-    .filter((k) => k.length >= 5)
-    .map((k) => (k.length <= BATAS_POIN ? k : `${k.slice(0, BATAS_POIN - 1).trimEnd()}…`));
-}
-
 /**
- * Melengkapi materi yang dibuat sebelum bentuk Video dan PPT sama-sama ada.
- * - Materi tanpa `slide_ppt` (dibuat sebelum PPT): slide disusun dari ringkasan, naskah, dan soal latihan.
- * - Materi tanpa `ide_video` (dibuat saat Video sempat dihapus): ide video disusun dari judul dan ringkasan.
+ * Melengkapi materi lama yang belum punya `ide_video`.
  * Materi yang sudah lengkap dikembalikan apa adanya (objek yang sama).
  */
 export function lengkapiIsiMateri(data: unknown): IsiMateri {
   if (typeof data !== 'object' || data === null) return data as IsiMateri;
   const mentah = data as Record<string, unknown>;
-  const adaSlide = 'slide_ppt' in mentah;
-  const adaVideo = 'ide_video' in mentah;
-  if (adaSlide && adaVideo) return data as IsiMateri;
-  if (typeof mentah.judul !== 'string' || typeof mentah.ringkasan !== 'string' || typeof mentah.naskah_audio !== 'string' || !Array.isArray(mentah.latihan)) {
+  if ('ide_video' in mentah) return data as IsiMateri;
+  if (
+    typeof mentah.judul !== 'string' ||
+    typeof mentah.ringkasan !== 'string' ||
+    typeof mentah.naskah_audio !== 'string' ||
+    !Array.isArray(mentah.latihan)
+  ) {
     return data as IsiMateri;
   }
 
-  const hasil: Record<string, unknown> = { ...mentah };
-
-  if (!adaSlide) {
-    const kumpulan = [...kalimatDari(mentah.ringkasan), ...kalimatDari(mentah.naskah_audio)];
-    const soal = (mentah.latihan as { soal?: unknown }[])
-      .map((l) => (typeof l.soal === 'string' ? kalimatDari(l.soal)[0] ?? l.soal : ''))
-      .filter((t) => t.length >= 5);
-    const slide = [
-      { judul: 'Ringkasan materi', poin: kumpulan.slice(0, 3) },
-      { judul: 'Penjelasan', poin: kumpulan.length >= 5 ? kumpulan.slice(3, 6) : kumpulan.slice(-2) },
-      { judul: 'Latihan', poin: soal.slice(0, 4) },
-    ].filter((s) => s.poin.length >= 2);
-    hasil.slide_ppt = { judul: mentah.judul.slice(0, 80), slide };
-  }
-
-  if (!adaVideo) {
-    hasil.ide_video = {
+  return {
+    ...mentah,
+    ide_video: {
       judul: mentah.judul.slice(0, 80),
       deskripsi: mentah.ringkasan.slice(0, 300).trim(),
       kata_kunci_pencarian: mentah.judul.slice(0, 80),
-    };
-  }
-
-  return hasil as IsiMateri;
+    },
+  } as IsiMateri;
 }
 
 /**
