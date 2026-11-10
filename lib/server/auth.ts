@@ -127,6 +127,37 @@ export async function keluarDariAkun(): Promise<void> {
 }
 
 /**
+ * Mengirim kode OTP recovery ke email. Respons ke client tetap generik di route,
+ * termasuk saat email tidak terdaftar atau pengiriman gagal.
+ */
+export async function kirimKodeResetSandi(email: string, redirectTo: string): Promise<void> {
+  const supabase = await buatKlienAuth();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) console.error('Kirim kode reset sandi gagal:', error.message);
+}
+
+/** Verifikasi kode recovery lalu ganti sandi. Semua sesi lama dicabut setelah berhasil. */
+export async function aturUlangSandi(email: string, token: string, password: string): Promise<void> {
+  const supabase = await buatKlienAuth();
+  const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'recovery' });
+  if (error || !data.user) {
+    throw new GalatAuth('Kode tidak valid atau sudah kedaluwarsa. Minta kode baru.', 400);
+  }
+
+  const { error: galatSandi } = await supabase.auth.updateUser({ password });
+  if (galatSandi) {
+    await supabase.auth.signOut({ scope: 'global' });
+    const pesan = galatSandi.message.toLowerCase();
+    if (pesan.includes('password')) {
+      throw new GalatAuth('Kata sandi belum memenuhi syarat. Gunakan minimal 8 karakter.', 400);
+    }
+    throw new GalatAuth('Kata sandi belum berhasil diubah. Coba lagi.', 500);
+  }
+
+  await supabase.auth.signOut({ scope: 'global' });
+}
+
+/**
  * Membuat akun Auth dengan peran di `app_metadata` (hanya bisa ditulis service role),
  * lalu baris `pengguna`. Jika profil gagal dibuat, akun Auth dihapus lagi.
  */

@@ -12,6 +12,7 @@ import {
   KeyRound,
   Loader2,
   Mail,
+  ShieldCheck,
   Sparkles,
   Users,
 } from 'lucide-react';
@@ -44,6 +45,7 @@ function FormMasuk() {
   const [lihatSandi, setLihatSandi] = useState(false);
   const [memuat, setMemuat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  const resetBerhasil = params.get('reset') === '1';
 
   async function kirim(e: FormEvent) {
     e.preventDefault();
@@ -201,6 +203,16 @@ function FormMasuk() {
                 </p>
               </header>
 
+              {resetBerhasil && (
+                <div
+                  role="status"
+                  className="flex items-start gap-2 rounded-2xl border border-aura-emerald/20 bg-aura-emerald/10 px-4 py-3 font-body text-[13px] leading-[20px] font-medium text-[#047857]"
+                >
+                  <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                  Kata sandi berhasil diubah. Masuk dengan kata sandi baru.
+                </div>
+              )}
+
               <form onSubmit={kirim} className="flex flex-col gap-4" noValidate>
                 <div className="flex flex-col gap-1.5">
                   <label
@@ -273,6 +285,15 @@ function FormMasuk() {
                       )}
                     </button>
                   </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Link
+                    href="/lupa-sandi"
+                    className="font-display text-[12px] font-semibold text-aura-primary hover:underline"
+                  >
+                    Lupa kata sandi?
+                  </Link>
                 </div>
 
                 {galat && (

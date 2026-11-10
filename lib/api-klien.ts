@@ -4,9 +4,11 @@ import type {
   BodyBuatKelas,
   BodyBuatMateri,
   BodyBukaSesiBanyak,
+  BodyAturSandi,
   BodyDaftarGuru,
   BodyDaftarSiswa,
   BodyHapusSiswa,
+  BodyLupaSandi,
   BodyBukaBlokir,
   BodyJadwalSesi,
   BodyJawaban,
@@ -111,6 +113,14 @@ export function daftarSiswa(body: BodyDaftarSiswa): Promise<HasilDaftar> {
 
 export function daftarGuru(body: BodyDaftarGuru): Promise<HasilDaftar> {
   return minta('/api/auth/daftar-guru', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function kirimKodeResetSandi(body: BodyLupaSandi): Promise<{ ok: true }> {
+  return minta('/api/auth/lupa-sandi', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function aturUlangSandi(body: BodyAturSandi): Promise<{ ok: true }> {
+  return minta('/api/auth/atur-sandi', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function keluar(): Promise<{ ok: true }> {

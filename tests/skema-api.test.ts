@@ -4,10 +4,12 @@ import {
   skemaBodyAudio,
   skemaBodyBagikanMateri,
   skemaBodyBukaSesi,
+  skemaBodyAturSandi,
   skemaBodyBukaSesiBanyak,
   skemaBodyBuatKelas,
   skemaBodyBuatMateri,
   skemaBodyDaftarGuru,
+  skemaBodyLupaSandi,
   skemaBodyDaftarSiswa,
   skemaBodyGabungKelas,
   skemaBodyGabungSesi,
@@ -617,6 +619,20 @@ describe('skema autentikasi', () => {
   it('menolak email tidak valid', () => {
     expect(skemaBodyDaftarSiswa.safeParse({ ...valid, email: 'bukan-email' }).success).toBe(false);
     expect(skemaBodyMasuk.safeParse({ email: 'bukan-email', password: 'x' }).success).toBe(false);
+  });
+
+  it('menormalkan email untuk lupa sandi dan atur sandi', () => {
+    expect(skemaBodyLupaSandi.parse({ email: ' Budi@Example.com ' }).email).toBe('budi@example.com');
+    expect(
+      skemaBodyAturSandi.parse({ email: ' Budi@Example.com ', token: '123456', password: 'rahasia123' }).email,
+    ).toBe('budi@example.com');
+  });
+
+  it('mewajibkan kode 6 digit dan sandi minimal 8 karakter saat atur sandi', () => {
+    expect(skemaBodyAturSandi.safeParse({ email: valid.email, token: '12345', password: 'rahasia123' }).success).toBe(false);
+    expect(skemaBodyAturSandi.safeParse({ email: valid.email, token: 'abcdef', password: 'rahasia123' }).success).toBe(false);
+    expect(skemaBodyAturSandi.safeParse({ email: valid.email, token: '123456', password: 'pendek' }).success).toBe(false);
+    expect(skemaBodyAturSandi.safeParse({ email: valid.email, token: '123456', password: 'rahasia123' }).success).toBe(true);
   });
 
   it('kode kelas opsional: string kosong menjadi undefined, kode dinormalkan', () => {

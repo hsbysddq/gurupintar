@@ -66,6 +66,18 @@ export const skemaBodyDaftarGuru = z.object({
   mapel: z.string().trim().min(3).max(40).optional(),
 });
 
+// POST /api/auth/lupa-sandi; respons selalu generik agar tidak membocorkan status email.
+export const skemaBodyLupaSandi = z.object({
+  email: skemaEmail,
+});
+
+// POST /api/auth/atur-sandi; kode OTP recovery dari email Supabase.
+export const skemaBodyAturSandi = z.object({
+  email: skemaEmail,
+  token: z.string().trim().regex(/^\d{6}$/, 'Kode harus terdiri dari 6 digit.'),
+  password: skemaSandi,
+});
+
 // POST /api/guru/kelas
 export const skemaBodyBuatKelas = z.object({
   nama: z.string().trim().min(3).max(80),
@@ -553,6 +565,8 @@ export type BodyUbahTopik = z.infer<typeof skemaBodyUbahTopik>;
 export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
 export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
+export type BodyLupaSandi = z.infer<typeof skemaBodyLupaSandi>;
+export type BodyAturSandi = z.infer<typeof skemaBodyAturSandi>;
 export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
 export type BodyUbahKelas = z.infer<typeof skemaBodyUbahKelas>;
 export type BodyHapusSiswa = z.infer<typeof skemaBodyHapusSiswa>;
