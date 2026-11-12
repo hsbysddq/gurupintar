@@ -115,13 +115,22 @@ export function BerandaSiswa({ nama, ringkasan }: Props) {
             Halo, {namaDepan(nama)}!
           </h1>
           <p className="text-aura-muted">Yuk, lanjutkan belajar dan pantau progresmu hari ini.</p>
-          <Link
-            href="/siswa/performa"
-            className="aura-btn aura-btn-secondary mt-2 inline-flex h-10 w-fit items-center gap-1.5 px-3 text-[12px]"
-          >
-            Lihat performa
-            <ArrowRight aria-hidden="true" className="size-3.5" />
-          </Link>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link
+              href="/siswa/performa"
+              className="aura-btn aura-btn-secondary inline-flex h-10 w-fit items-center gap-1.5 px-3 text-[12px]"
+            >
+              Lihat performa
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
+            <Link
+              href="/siswa/ujian"
+              className="aura-btn aura-btn-secondary inline-flex h-10 w-fit items-center gap-1.5 px-3 text-[12px]"
+            >
+              Ujian
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
+          </div>
         </div>
         <IlustrasiBelajar className="hidden h-28 w-auto shrink-0 sm:block" />
       </header>

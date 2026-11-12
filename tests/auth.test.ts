@@ -8,9 +8,11 @@ import {
 } from '@/lib/auth';
 
 describe('tujuanSetelahMasuk', () => {
-  it('mengarahkan guru dan siswa ke areanya masing-masing', () => {
+  it('mengarahkan setiap peran ke areanya masing-masing', () => {
     expect(tujuanSetelahMasuk('guru')).toBe('/guru');
     expect(tujuanSetelahMasuk('siswa')).toBe('/siswa');
+    expect(tujuanSetelahMasuk('admin_sekolah')).toBe('/admin');
+    expect(tujuanSetelahMasuk('super_admin')).toBe('/super-admin');
   });
 });
 
@@ -18,6 +20,8 @@ describe('peranDariMetadata', () => {
   it('membaca peran dari app_metadata', () => {
     expect(peranDariMetadata({ peran: 'guru' })).toBe('guru');
     expect(peranDariMetadata({ peran: 'siswa' })).toBe('siswa');
+    expect(peranDariMetadata({ peran: 'admin_sekolah' })).toBe('admin_sekolah');
+    expect(peranDariMetadata({ peran: 'super_admin' })).toBe('super_admin');
   });
 
   it.each([null, undefined, {}, { peran: 'admin' }, { peran: 1 }, 'guru'])(

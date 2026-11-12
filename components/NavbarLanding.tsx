@@ -36,14 +36,8 @@ export function NavbarLanding() {
         </ul>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Link
-            href="/masuk"
-            className="hidden min-h-12 items-center rounded-full px-3 font-display text-[14px] font-semibold text-aura-muted transition-colors hover:bg-white/65 hover:text-aura-primary sm:flex"
-          >
+          <Link href="/masuk" className="aura-btn aura-btn-primary h-12 px-4 text-[13px]">
             Masuk
-          </Link>
-          <Link href="/daftar/guru" className="aura-btn aura-btn-primary h-12 px-4 text-[13px]">
-            Daftar guru
           </Link>
           <details className="relative md:hidden">
             <summary

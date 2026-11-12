@@ -332,17 +332,8 @@ function FormMasuk() {
                 <span aria-hidden="true" className="h-px flex-1 bg-aura-outline/50" />
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Link href="/daftar/siswa" className="aura-btn aura-btn-secondary h-12 px-4 text-[13px]">
-                  Daftar siswa
-                </Link>
-                <Link href="/daftar/guru" className="aura-btn aura-btn-secondary h-12 px-4 text-[13px]">
-                  Daftar guru
-                </Link>
-              </div>
-
               <p className="text-center font-body text-[12px] leading-[18px] text-aura-muted">
-                Akun guru dan siswa terpisah. Sistem akan mengarahkan ke ruang yang sesuai.
+                Akun guru dan siswa dibuat oleh admin sekolah. Hubungi admin sekolah jika belum punya akun.
               </p>
             </div>
           </div>

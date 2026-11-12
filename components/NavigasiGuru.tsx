@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   BarChart3,
   ChevronDown,
+  ClipboardCheck,
   FileText,
   LayoutDashboard,
   ListChecks,
@@ -46,6 +47,12 @@ export function NavigasiGuru({ kelas }: { kelas: KelasNav[] }) {
       label: 'Bank Soal',
       ikon: ListChecks,
       aktif: (path) => path.startsWith('/guru/soal'),
+    },
+    {
+      href: '/guru/ujian',
+      label: 'Ujian',
+      ikon: ClipboardCheck,
+      aktif: (path) => path.startsWith('/guru/ujian'),
     },
     {
       href: '/guru/modul',

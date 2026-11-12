@@ -4,14 +4,24 @@ import type {
   BodyBuatKelas,
   BodyBuatMateri,
   BodyBukaSesiBanyak,
+  BodyAdminSekolah,
+  BodyAkunGuru,
+  BodyAkunSiswa,
   BodyAturSandi,
   BodyDaftarGuru,
   BodyDaftarSiswa,
   BodyHapusSiswa,
   BodyLupaSandi,
+  BodySekolahBaru,
   BodyBukaBlokir,
+  BodyBukaBlokirUjian,
   BodyJadwalSesi,
   BodyJawaban,
+  BodyJawabanUjian,
+  BodyMulaiUjian,
+  BodyNilaiEsaiUjian,
+  BodyPelanggaranUjian,
+  BodyUjianBaru,
   BodyNilaiEsai,
   BodyMasuk,
   BodyMateriPustaka,
@@ -38,8 +48,10 @@ import type {
   MateriGuru,
   MateriPustaka,
   MateriSiswa,
+  PenggunaSekolah,
   Peran,
   RiwayatKoin,
+  Sekolah,
   RiwayatModulDetail,
   RiwayatModulRingkas,
   SesiBaru,
@@ -48,9 +60,14 @@ import type {
   SesiSiswa,
   SesiUntukSiswa,
   RincianJawabanSiswa,
+  HasilUjianSiswa,
   SoalUntukSiswa,
+  SoalUjianSiswa,
   SumberMateri,
   TopikDetail,
+  UjianDetailGuru,
+  UjianRingkas,
+  UjianSiswa,
   TopikRingkas,
 } from './tipe';
 
@@ -123,8 +140,110 @@ export function aturUlangSandi(body: BodyAturSandi): Promise<{ ok: true }> {
   return minta('/api/auth/atur-sandi', { method: 'POST', body: JSON.stringify(body) });
 }
 
+// ===== Super-admin dan admin sekolah =====
+
+export function buatSekolah(body: BodySekolahBaru): Promise<Sekolah> {
+  return minta('/api/super-admin/sekolah', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function buatAdminSekolah(body: BodyAdminSekolah): Promise<{ id: string }> {
+  return minta('/api/super-admin/admin', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function buatGuruSekolah(body: BodyAkunGuru): Promise<{ id: string }> {
+  return minta('/api/admin/guru', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function buatSiswaSekolah(body: BodyAkunSiswa): Promise<{ id: string }> {
+  return minta('/api/admin/siswa', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ambilGuruSekolah(signal?: AbortSignal): Promise<PenggunaSekolah[]> {
+  return minta('/api/admin/guru', { signal });
+}
+
+export function ambilSiswaSekolah(
+  signal?: AbortSignal,
+): Promise<{ siswa: PenggunaSekolah[]; kelas: { id: string; nama: string; mapel: string }[] }> {
+  return minta('/api/admin/siswa', { signal });
+}
+
 export function keluar(): Promise<{ ok: true }> {
   return minta('/api/auth/keluar', { method: 'POST' });
+}
+
+// ===== Ujian guru =====
+
+export function ambilUjianGuru(signal?: AbortSignal): Promise<UjianRingkas[]> {
+  return minta('/api/guru/ujian', { signal });
+}
+
+export function buatUjian(body: BodyUjianBaru): Promise<UjianRingkas> {
+  return minta('/api/guru/ujian', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ambilDetailUjian(ujianId: string, signal?: AbortSignal): Promise<UjianDetailGuru> {
+  return minta(`/api/guru/ujian/hasil?ujian=${encodeURIComponent(ujianId)}`, { signal });
+}
+
+export function nilaiEsaiUjian(body: BodyNilaiEsaiUjian): Promise<{ ok: true }> {
+  return minta('/api/guru/ujian/jawaban', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function rilisUjian(ujianId: string): Promise<{ ok: true }> {
+  return minta('/api/guru/ujian/rilis', { method: 'POST', body: JSON.stringify({ ujianId }) });
+}
+
+// ===== Ujian siswa =====
+
+export function ambilUjianSiswa(signal?: AbortSignal): Promise<UjianSiswa[]> {
+  return minta('/api/siswa/ujian', { signal });
+}
+
+export function mulaiUjian(body: BodyMulaiUjian): Promise<{
+  soal: SoalUjianSiswa[];
+  batasPada: string;
+  status: string;
+  jawaban: Record<string, string>;
+}> {
+  return minta('/api/siswa/ujian/mulai', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ambilSoalUjian(
+  ujianId: string,
+  signal?: AbortSignal,
+): Promise<{ soal: SoalUjianSiswa[]; batasPada: string; jawaban: Record<string, string> }> {
+  return minta(`/api/siswa/ujian/soal?ujian=${encodeURIComponent(ujianId)}`, { signal });
+}
+
+export function simpanJawabanUjian(body: BodyJawabanUjian): Promise<{ ok: true }> {
+  return minta('/api/siswa/ujian/jawaban', { method: 'PUT', body: JSON.stringify(body) });
+}
+
+export function selesaikanUjian(ujianId: string): Promise<{ ok: true }> {
+  return minta('/api/siswa/ujian/selesai', { method: 'POST', body: JSON.stringify({ ujianId }) });
+}
+
+export function laporPelanggaranUjian(body: BodyPelanggaranUjian): Promise<{ terblokir: boolean; jumlah: number }> {
+  return minta('/api/siswa/ujian/pelanggaran', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function ambilHasilUjian(ujianId: string, signal?: AbortSignal): Promise<HasilUjianSiswa> {
+  return minta(`/api/siswa/ujian/hasil?ujian=${encodeURIComponent(ujianId)}`, { signal });
+}
+
+// ===== Ujian admin sekolah =====
+
+export function ambilUjianAdmin(signal?: AbortSignal): Promise<UjianRingkas[]> {
+  return minta('/api/admin/ujian', { signal });
+}
+
+export function ambilDetailUjianAdmin(ujianId: string, signal?: AbortSignal): Promise<UjianDetailGuru> {
+  return minta(`/api/admin/ujian?ujian=${encodeURIComponent(ujianId)}`, { signal });
+}
+
+export function bukaBlokirUjian(body: BodyBukaBlokirUjian): Promise<{ ok: true }> {
+  return minta('/api/admin/ujian/buka-blokir', { method: 'POST', body: JSON.stringify(body) });
 }
 
 // ===== Siswa =====

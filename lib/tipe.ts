@@ -3,13 +3,139 @@ import type { IsiMateri } from './validasi-materi';
 
 export type { IsiMateri };
 
-export type Peran = 'guru' | 'siswa';
+export type Peran = 'super_admin' | 'admin_sekolah' | 'guru' | 'siswa';
 
 export interface Profil {
   id: string;
   nama: string;
   email: string;
   peran: Peran;
+  sekolahId: string | null;
+}
+
+export interface Sekolah {
+  id: string;
+  nama: string;
+  alamat: string | null;
+  kode: string;
+  dibuatPada: string;
+  jumlahPengguna?: number;
+  jumlahKelas?: number;
+}
+
+export type StatusUjian = 'draf' | 'terjadwal' | 'aktif' | 'selesai';
+export type TipeSoalUjian = 'pilgan' | 'pilgan_kompleks' | 'esai';
+export type StatusPesertaUjian = 'belum' | 'mengerjakan' | 'selesai' | 'diblokir';
+
+export interface PenggunaSekolah {
+  id: string;
+  nama: string;
+  email: string | null;
+  peran: 'guru' | 'siswa';
+  kelas?: string[];
+}
+
+export interface KelasSekolah {
+  id: string;
+  nama: string;
+  mapel: string;
+}
+
+export interface UjianRingkas {
+  id: string;
+  judul: string;
+  kelasId: string;
+  namaKelas: string;
+  status: StatusUjian;
+  token: string;
+  mulaiPada: string;
+  selesaiPada: string;
+  durasiMenit: number;
+  jumlahPeserta: number;
+  jumlahMengerjakan: number;
+  jumlahSelesai: number;
+  jumlahDiblokir: number;
+  dirilisPada: string | null;
+}
+
+export interface SoalUjianGuru {
+  id: string;
+  nomor: number;
+  tipe: TipeSoalUjian;
+  teks: string;
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
+  bobot: number;
+}
+
+export interface PesertaUjianGuru {
+  siswaId: string;
+  nama: string;
+  status: StatusPesertaUjian;
+  mulaiPada: string | null;
+  batasPada: string | null;
+  dikumpulkanPada: string | null;
+  skor: number;
+  total: number;
+  persen: number | null;
+  jumlahPelanggaran: number;
+}
+
+export interface JawabanEsaiUjianGuru {
+  soalId: string;
+  nomorSoal: number;
+  siswaId: string;
+  namaSiswa: string;
+  jawaban: string;
+  benar: boolean | null;
+}
+
+export interface UjianDetailGuru {
+  ujian: UjianRingkas;
+  soal: SoalUjianGuru[];
+  peserta: PesertaUjianGuru[];
+  esai: JawabanEsaiUjianGuru[];
+}
+
+export interface UjianSiswa {
+  id: string;
+  judul: string;
+  namaKelas: string;
+  status: StatusUjian;
+  mulaiPada: string;
+  selesaiPada: string;
+  durasiMenit: number;
+  statusPeserta: StatusPesertaUjian;
+  batasPada: string | null;
+  perluToken: boolean;
+  dirilisPada: string | null;
+}
+
+export interface SoalUjianSiswa {
+  id: string;
+  nomor: number;
+  tipe: TipeSoalUjian;
+  teks: string;
+  gambar: string | null;
+  pilihan: DataPilihanSoal;
+}
+
+export interface JawabanUjianSiswa {
+  soalId: string;
+  jawaban: string;
+  benar: boolean | null;
+  bobotDidapat: number;
+}
+
+export interface HasilUjianSiswa {
+  ujianId: string;
+  judul: string;
+  namaKelas: string;
+  skor: number;
+  total: number;
+  persen: number;
+  soal: SoalUjianSiswa[];
+  jawaban: JawabanUjianSiswa[];
 }
 
 export type Kelompok = 'sudah' | 'setengah' | 'belum';
@@ -219,6 +345,7 @@ export interface TopikRingkas {
 
 /** GET /api/guru/topik/detail */
 export interface SoalTopikDetail {
+  id: string;
   nomor: number;
   tipe: TipeSoal;
   teks: string;

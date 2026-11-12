@@ -68,7 +68,7 @@ async function profilDariUser(user: User): Promise<Profil | null> {
 
   const { data, error } = await ambilSupabase()
     .from('pengguna')
-    .select('id, nama, peran')
+    .select('id, nama, peran, sekolah_id')
     .eq('id', user.id)
     .maybeSingle();
   if (error || !data) return null;
@@ -79,7 +79,14 @@ async function profilDariUser(user: User): Promise<Profil | null> {
     nama: data.nama,
     email: user.email ?? '',
     peran: peranMeta,
+    sekolahId: (data.sekolah_id as string | null) ?? null,
   };
+}
+
+/** Profil yang wajib terikat ke satu sekolah; super-admin tidak boleh memakai endpoint sekolah. */
+export function wajibSekolah(profil: Profil): string {
+  if (!profil.sekolahId) throw new GalatAuth('Akun ini tidak terikat ke sekolah.', 403);
+  return profil.sekolahId;
 }
 
 /** Profil pengguna yang sedang login, atau `null`. */
@@ -115,8 +122,8 @@ export async function masukDenganSandi(email: string, password: string): Promise
   if (error || !data.user) return null;
 
   const profil = await profilDariUser(data.user);
-  if (!profil) {
-    throw new GalatAuth('Akun ini belum terdaftar sebagai guru atau siswa. Hubungi pengelola sekolah.', 403);
+    if (!profil) {
+    throw new GalatAuth('Akun ini belum terdaftar. Hubungi admin sekolah.', 403);
   }
   return profil;
 }
@@ -161,7 +168,13 @@ export async function aturUlangSandi(email: string, token: string, password: str
  * Membuat akun Auth dengan peran di `app_metadata` (hanya bisa ditulis service role),
  * lalu baris `pengguna`. Jika profil gagal dibuat, akun Auth dihapus lagi.
  */
-export async function buatAkun(nama: string, email: string, password: string, peran: Peran): Promise<string> {
+export async function buatAkun(
+  nama: string,
+  email: string,
+  password: string,
+  peran: Peran,
+  sekolahId: string | null = null,
+): Promise<string> {
   const admin = ambilSupabase();
   const { data, error } = await admin.auth.admin.createUser({
     email,
@@ -181,12 +194,16 @@ export async function buatAkun(nama: string, email: string, password: string, pe
     throw new GalatAuth('Akun belum berhasil dibuat. Coba lagi sebentar.', 500);
   }
 
-  const { error: galatProfil } = await admin.from('pengguna').insert({ id: data.user.id, nama, email, peran });
+  const { error: galatProfil } = await admin
+    .from('pengguna')
+    .insert({ id: data.user.id, nama, email, peran, sekolah_id: sekolahId });
   if (galatProfil) {
     const pesan = galatProfil.message ?? '';
     const kolomEmailHilang = pesan.includes('email') && (pesan.includes('does not exist') || pesan.includes('schema cache'));
     if (kolomEmailHilang) {
-      const { error: galatCadangan } = await admin.from('pengguna').insert({ id: data.user.id, nama, peran });
+      const { error: galatCadangan } = await admin
+        .from('pengguna')
+        .insert({ id: data.user.id, nama, peran, sekolah_id: sekolahId });
       if (!galatCadangan) return data.user.id;
     }
     await admin.auth.admin.deleteUser(data.user.id);

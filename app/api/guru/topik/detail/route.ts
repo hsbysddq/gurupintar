@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { TOPIK_DEMO_ID } from '@/lib/konstanta';
 import { skemaQueryDetailTopik } from '@/lib/skema-api';
 import { wajibPeranApi } from '@/lib/server/auth';
 import { bacaSoalTopik } from '@/lib/server/soal-tka-db';
@@ -21,7 +22,16 @@ export async function GET(request: NextRequest) {
 
   try {
     const db = ambilSupabase();
-    const topik = await topikMilikGuru(db, auth.profil.id, input.data.topik);
+    let topik = await topikMilikGuru(db, auth.profil.id, input.data.topik);
+    if (!topik && input.data.topik === TOPIK_DEMO_ID) {
+      const demo = await db
+        .from('topik')
+        .select('id, nama, capaian_pembelajaran')
+        .eq('id', TOPIK_DEMO_ID)
+        .maybeSingle();
+      if (demo.error) return petakanErrorDb(demo.error);
+      topik = demo.data as { id: string; nama: string; capaian_pembelajaran: string } | null;
+    }
     if (!topik) return responsError(PESAN_TOPIK_TIDAK_ADA, 404);
 
     const soal = await bacaSoalTopik(db, topik.id, { sertakanRahasia: true });
@@ -35,6 +45,7 @@ export async function GET(request: NextRequest) {
       capaianPembelajaran: topik.capaian_pembelajaran,
       dipakai,
       soal: soal.data.map((s) => ({
+        id: s.id,
         nomor: s.nomor,
         tipe: s.tipe,
         teks: s.teks,

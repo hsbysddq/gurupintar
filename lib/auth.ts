@@ -7,13 +7,15 @@ export const PESAN_MASUK_DIPERLUKAN = 'Silakan masuk terlebih dahulu.';
 export const PESAN_AKSES_DITOLAK = 'Halaman ini tidak tersedia untuk akunmu.';
 export const PESAN_KREDENSIAL_SALAH = 'Email atau kata sandi salah.';
 
-const PETA_TUJUAN: Record<Peran, '/guru' | '/siswa'> = {
+const PETA_TUJUAN: Record<Peran, '/super-admin' | '/admin' | '/guru' | '/siswa'> = {
+  super_admin: '/super-admin',
+  admin_sekolah: '/admin',
   guru: '/guru',
   siswa: '/siswa',
 };
 
 /** Halaman awal sesuai peran. Peran selalu berasal dari server, bukan pilihan di browser. */
-export function tujuanSetelahMasuk(peran: Peran): '/guru' | '/siswa' {
+export function tujuanSetelahMasuk(peran: Peran): '/super-admin' | '/admin' | '/guru' | '/siswa' {
   return PETA_TUJUAN[peran];
 }
 
@@ -21,7 +23,9 @@ export function tujuanSetelahMasuk(peran: Peran): '/guru' | '/siswa' {
 export function peranDariMetadata(metadata: unknown): Peran | null {
   if (typeof metadata !== 'object' || metadata === null || !('peran' in metadata)) return null;
   const peran = metadata.peran;
-  return peran === 'guru' || peran === 'siswa' ? peran : null;
+  return peran === 'super_admin' || peran === 'admin_sekolah' || peran === 'guru' || peran === 'siswa'
+    ? peran
+    : null;
 }
 
 /**
@@ -34,7 +38,14 @@ export function lanjutAman(lanjut: string | null | undefined, peran: Peran): str
   if (!lanjut.startsWith('/') || lanjut.startsWith('//') || lanjut.includes('\\')) return bawaan;
   if (lanjut.includes('..')) return bawaan;
 
-  const area = peran === 'guru' ? /^\/guru(?:\/|\?|#|$)/ : /^\/siswa(?:\/|\?|#|$)/;
+  const area =
+    peran === 'super_admin'
+      ? /^\/super-admin(?:\/|\?|#|$)/
+      : peran === 'admin_sekolah'
+        ? /^\/admin(?:\/|\?|#|$)/
+        : peran === 'guru'
+          ? /^\/guru(?:\/|\?|#|$)/
+          : /^\/siswa(?:\/|\?|#|$)/;
   return area.test(lanjut) ? lanjut : bawaan;
 }
 

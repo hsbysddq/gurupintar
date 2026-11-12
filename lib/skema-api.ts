@@ -78,6 +78,39 @@ export const skemaBodyAturSandi = z.object({
   password: skemaSandi,
 });
 
+// POST /api/super-admin/sekolah: buat sekolah + admin pertama.
+export const skemaBodySekolahBaru = z.object({
+  nama: z.string().trim().min(3).max(120),
+  alamat: z.string().trim().max(300).optional(),
+  kode: z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,40}$/, 'Kode sekolah tidak valid.'),
+  namaAdmin: z.string().trim().min(2).max(80),
+  emailAdmin: skemaEmail,
+  sandiAdmin: skemaSandi,
+});
+
+// POST /api/super-admin/admin: tambah admin ke sekolah yang sudah ada.
+export const skemaBodyAdminSekolah = z.object({
+  sekolahId: z.uuid(),
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+});
+
+// POST /api/admin/guru
+export const skemaBodyAkunGuru = z.object({
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+});
+
+// POST /api/admin/siswa
+export const skemaBodyAkunSiswa = z.object({
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+  kelasIds: z.array(z.uuid()).max(20).optional(),
+});
+
 // POST /api/guru/kelas
 export const skemaBodyBuatKelas = z.object({
   nama: z.string().trim().min(3).max(80),
@@ -325,6 +358,56 @@ export const skemaBodyJadwalSesi = z.object({
   tutupPada: skemaWaktuIsoNullable,
 });
 
+// ===== Ujian formal =====
+
+export const skemaBodyUjianBaru = z.object({
+  kelasId: z.uuid(),
+  topikId: z.uuid(),
+  judul: z.string().trim().min(3).max(120),
+  deskripsi: z.string().trim().max(500).optional(),
+  token: z.string().trim().transform(normalisasiKode).pipe(z.string().regex(/^[A-Z0-9]{6,10}$/)).optional(),
+  mulaiPada: skemaWaktuIso,
+  selesaiPada: skemaWaktuIso,
+  durasiMenit: z.number().int().min(5).max(300),
+  acakSoal: z.boolean().optional(),
+  soal: z
+    .array(z.object({ soalId: z.uuid(), bobot: z.number().int().min(1).max(100) }))
+    .min(1)
+    .max(100),
+});
+
+export const skemaBodyMulaiUjian = z.object({
+  ujianId: z.uuid(),
+  token: z.string().trim().transform(normalisasiKode).pipe(z.string().regex(/^[A-Z0-9]{6,10}$/)),
+});
+
+export const skemaBodyJawabanUjian = z.object({
+  ujianId: z.uuid(),
+  soalId: z.uuid(),
+  jawaban: z.string().max(5000),
+});
+
+export const skemaBodyPelanggaranUjian = z.object({
+  ujianId: z.uuid(),
+  jenis: z.enum(['pindah_tab', 'keluar_fullscreen', 'copy', 'paste', 'menu_klik_kanan', 'lain']),
+});
+
+export const skemaBodyNilaiEsaiUjian = z.object({
+  ujianId: z.uuid(),
+  siswaId: z.uuid(),
+  soalId: z.uuid(),
+  benar: z.boolean(),
+});
+
+export const skemaBodyBukaBlokirUjian = z.object({
+  ujianId: z.uuid(),
+  siswaId: z.uuid(),
+});
+
+export const skemaQueryUjian = z.object({
+  ujian: z.uuid(),
+});
+
 // GET /api/guru/sesi?kelas= dan GET /api/guru/pendampingan?kelas=
 export const skemaQueryKelasOpsional = z.object({
   kelas: z.uuid().optional(),
@@ -567,11 +650,21 @@ export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
 export type BodyLupaSandi = z.infer<typeof skemaBodyLupaSandi>;
 export type BodyAturSandi = z.infer<typeof skemaBodyAturSandi>;
+export type BodySekolahBaru = z.infer<typeof skemaBodySekolahBaru>;
+export type BodyAdminSekolah = z.infer<typeof skemaBodyAdminSekolah>;
+export type BodyAkunGuru = z.infer<typeof skemaBodyAkunGuru>;
+export type BodyAkunSiswa = z.infer<typeof skemaBodyAkunSiswa>;
 export type BodyBuatKelas = z.infer<typeof skemaBodyBuatKelas>;
 export type BodyUbahKelas = z.infer<typeof skemaBodyUbahKelas>;
 export type BodyHapusSiswa = z.infer<typeof skemaBodyHapusSiswa>;
 export type BodyBukaSesiBanyak = z.infer<typeof skemaBodyBukaSesiBanyak>;
 export type BodyJadwalSesi = z.infer<typeof skemaBodyJadwalSesi>;
+export type BodyUjianBaru = z.infer<typeof skemaBodyUjianBaru>;
+export type BodyMulaiUjian = z.infer<typeof skemaBodyMulaiUjian>;
+export type BodyJawabanUjian = z.infer<typeof skemaBodyJawabanUjian>;
+export type BodyPelanggaranUjian = z.infer<typeof skemaBodyPelanggaranUjian>;
+export type BodyNilaiEsaiUjian = z.infer<typeof skemaBodyNilaiEsaiUjian>;
+export type BodyBukaBlokirUjian = z.infer<typeof skemaBodyBukaBlokirUjian>;
 /** Nilai form sebelum validasi (kunci belum dipilih = string kosong). */
 export type IsianTopikBaru = z.input<typeof skemaBodyTopikBaru>;
 export type SoalTervalidasi = BodyTopikBaru['soal'][number];

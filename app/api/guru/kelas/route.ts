@@ -1,6 +1,6 @@
 import { adalahBentrokKode, cobaDenganKodeBaru, type HasilPercobaan } from '@/lib/kode-kelas';
 import { skemaBodyBuatKelas, skemaBodyUbahKelas, skemaQueryKelasSiswa } from '@/lib/skema-api';
-import { kelasMilikGuru, kolomArsipBelumAda, wajibPeranApi } from '@/lib/server/auth';
+import { kelasMilikGuru, kolomArsipBelumAda, wajibPeranApi, wajibSekolah } from '@/lib/server/auth';
 import { ambilKelasGuru } from '@/lib/server/kelas';
 import { ambilSupabase } from '@/lib/server/supabase';
 import { bacaBodyJson, petakanErrorDb, PESAN_INPUT_TIDAK_VALID, responsError, responsOk } from '@/lib/server/respons';
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
 
     const isian: Record<string, unknown> = {
       guru_id: auth.profil.id,
+      sekolah_id: wajibSekolah(auth.profil),
       nama: input.data.nama,
       mapel: input.data.mapel,
       kode_undangan: '',
