@@ -10,6 +10,7 @@ import type {
   BodyAturSandi,
   BodyDaftarGuru,
   BodyDaftarSiswa,
+  BodyDaftarSuperAdmin,
   BodyHapusSiswa,
   BodyLupaSandi,
   BodySekolahBaru,
@@ -130,6 +131,12 @@ export function daftarSiswa(body: BodyDaftarSiswa): Promise<HasilDaftar> {
 
 export function daftarGuru(body: BodyDaftarGuru): Promise<HasilDaftar> {
   return minta('/api/auth/daftar-guru', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function daftarSuperAdmin(
+  body: BodyDaftarSuperAdmin,
+): Promise<{ peran: 'super_admin'; perluMasuk?: boolean }> {
+  return minta('/api/auth/daftar-super-admin', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function kirimKodeResetSandi(body: BodyLupaSandi): Promise<{ ok: true }> {

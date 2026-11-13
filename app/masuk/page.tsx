@@ -335,6 +335,12 @@ function FormMasuk() {
               <p className="text-center font-body text-[12px] leading-[18px] text-aura-muted">
                 Akun guru dan siswa dibuat oleh admin sekolah. Hubungi admin sekolah jika belum punya akun.
               </p>
+              <p className="text-center font-body text-[11px] leading-[16px] text-aura-muted">
+                Pengelola platform?{' '}
+                <Link href="/daftar/super-admin" className="font-semibold text-aura-primary hover:underline">
+                  Daftar super-admin
+                </Link>
+              </p>
             </div>
           </div>
         </section>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  skemaBodyDaftarSuperAdmin,
   skemaBodyMulaiUjian,
   skemaBodySekolahBaru,
   skemaBodyUjianBaru,
@@ -48,6 +49,30 @@ describe('skemaBodyMulaiUjian', () => {
 
   it('menolak token pendek', () => {
     expect(skemaBodyMulaiUjian.safeParse({ ujianId: KELAS, token: 'ABC' }).success).toBe(false);
+  });
+});
+
+describe('skemaBodyDaftarSuperAdmin', () => {
+  it('menerima akun super-admin dengan kode undangan', () => {
+    expect(
+      skemaBodyDaftarSuperAdmin.safeParse({
+        nama: 'Pengelola Platform',
+        email: 'owner@example.com',
+        password: 'rahasia123',
+        kodeUndangan: 'UNDANGAN-RAHASIA',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('menolak kata sandi pendek', () => {
+    expect(
+      skemaBodyDaftarSuperAdmin.safeParse({
+        nama: 'Pengelola Platform',
+        email: 'owner@example.com',
+        password: 'pendek',
+        kodeUndangan: 'UNDANGAN-RAHASIA',
+      }).success,
+    ).toBe(false);
   });
 });
 

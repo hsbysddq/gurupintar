@@ -9,16 +9,20 @@ Jalankan **setelah** database awal sudah ada. Jangan menjalankan ulang
 1. Buka Supabase SQL Editor.
 2. Jalankan `supabase/migrasi-sekolah.sql`.
 3. Jalankan `supabase/migrasi-ujian.sql`.
-4. Isi env bootstrap di `.env.local`:
-   ```env
-   SUPER_ADMIN_NAMA=Nama Super Admin
-   SUPER_ADMIN_EMAIL=superadmin@example.com
-   SUPER_ADMIN_PASSWORD=minimal-8-karakter
-   ```
-5. Buat akun super-admin:
-   ```bash
-   node --env-file=.env.local scripts/buat-super-admin.mjs
-   ```
+4. Buat akun super-admin dengan salah satu cara:
+   - **Lewat UI**: isi `KODE_UNDANGAN_SUPER_ADMIN` di `.env.local`, lalu buka
+     `/daftar/super-admin` dan masukkan kode tersebut.
+   - **Lewat script bootstrap** (cadangan):
+     ```env
+     SUPER_ADMIN_NAMA=Nama Super Admin
+     SUPER_ADMIN_EMAIL=superadmin@example.com
+     SUPER_ADMIN_PASSWORD=minimal-8-karakter
+     ```
+     ```bash
+     node --env-file=.env.local scripts/buat-super-admin.mjs
+     ```
+5. Setelah akun super-admin dibuat, kosongkan/rotasi
+   `KODE_UNDANGAN_SUPER_ADMIN` agar pendaftaran tertutup.
 6. Masuk sebagai super-admin, buat sekolah dan admin pertama.
 7. Admin sekolah membuat akun guru dan siswa.
 

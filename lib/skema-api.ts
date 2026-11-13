@@ -66,6 +66,14 @@ export const skemaBodyDaftarGuru = z.object({
   mapel: z.string().trim().min(3).max(40).optional(),
 });
 
+// POST /api/auth/daftar-super-admin; hanya terbuka dengan kode undangan server.
+export const skemaBodyDaftarSuperAdmin = z.object({
+  nama: z.string().trim().min(2).max(80),
+  email: skemaEmail,
+  password: skemaSandi,
+  kodeUndangan: z.string().trim().min(1).max(200),
+});
+
 // POST /api/auth/lupa-sandi; respons selalu generik agar tidak membocorkan status email.
 export const skemaBodyLupaSandi = z.object({
   email: skemaEmail,
@@ -648,6 +656,7 @@ export type BodyUbahTopik = z.infer<typeof skemaBodyUbahTopik>;
 export type BodyMasuk = z.infer<typeof skemaBodyMasuk>;
 export type BodyDaftarSiswa = z.infer<typeof skemaBodyDaftarSiswa>;
 export type BodyDaftarGuru = z.infer<typeof skemaBodyDaftarGuru>;
+export type BodyDaftarSuperAdmin = z.infer<typeof skemaBodyDaftarSuperAdmin>;
 export type BodyLupaSandi = z.infer<typeof skemaBodyLupaSandi>;
 export type BodyAturSandi = z.infer<typeof skemaBodyAturSandi>;
 export type BodySekolahBaru = z.infer<typeof skemaBodySekolahBaru>;
