@@ -26,7 +26,8 @@ alter table pengguna drop constraint if exists pengguna_peran_check;
 
 update pengguna
 set sekolah_id = '00000000-0000-4000-8000-000000000001'
-where sekolah_id is null;
+where sekolah_id is null
+  and peran <> 'super_admin';
 
 alter table pengguna
   add constraint pengguna_peran_check
